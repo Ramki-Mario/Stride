@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using STRIDE.Modules.Identity.Application.Abstractions;
 using STRIDE.Modules.Identity.Infrastructure.Persistence;
+using STRIDE.Modules.Identity.Infrastructure.Persistence.Repositories;
 using STRIDE.Modules.Identity.Infrastructure.TenantResolution;
 
 namespace STRIDE.Modules.Identity.Infrastructure;
@@ -19,6 +20,10 @@ public static class IdentityInfrastructureExtensions
                 sql => sql.MigrationsAssembly(typeof(IdentityDbContext).Assembly.FullName)));
 
         services.AddScoped<ITenantResolver, TenantResolver>();
+
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<ITenantRepository, TenantRepository>();
 
         return services;
     }
