@@ -213,7 +213,7 @@
 **Sprint Goal:** Implement secure, tenant-aware authentication and authorization foundation. After this sprint, a user can log in, be resolved to a tenant, receive an HttpOnly session cookie backed by Redis, and be authorized via claims-based RBAC — all without any token ever reaching the browser.
 
 **Phase:** Phase 2
-**Status:** PENDING
+**Status:** IN PROGRESS (US-018 through US-022 complete)
 
 ---
 
@@ -278,7 +278,7 @@
 
 | ID | Story | Tasks | Complexity | Status |
 |---|---|---|---|---|
-| US-022 | As a developer, I can run EF migrations to create the identity schema | T-068 Write EF configurations for all 8 entities<br>T-069 Generate initial migration<br>T-070 Seed default roles (Admin, Member, Viewer) | M | [ ] |
+| US-022 | As a developer, I can run EF migrations to create the identity schema | T-068 Write EF configurations for all 8 entities<br>T-069 Generate initial migration<br>T-070 Seed default roles (Admin, Member, Viewer) | M | [x] |
 | US-023 | As a developer, all identity queries are tenant-scoped automatically | T-071 Implement UserRepository : TenantAwareRepository\<User, IdentityDbContext\><br>T-072 Implement RoleRepository<br>T-073 Implement TenantRepository | S | [ ] |
 
 **Dependencies:** EP-009

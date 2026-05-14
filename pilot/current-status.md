@@ -2,7 +2,7 @@
 
 ## Current Stage
 Phase 1 (Monorepo & Foundation) — **Complete**.
-Phase 2 (Identity & Tenant Foundation) — **Next**.
+Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 
 ---
 
@@ -95,8 +95,6 @@ Phase 2 (Identity & Tenant Foundation) — **Next**.
 - [x] US-019: Password value object + IPasswordHasher abstraction (delivered in PR #32)
 - [x] US-020: Tenant, TenantDomainMapping, UserTenantMapping entities (PR #33)
 - [x] US-021: ITenantResolver + TenantResolver (Dapper-based, corporate domain + fallback) (PR #34)
-
-### Completed (continued)
 - [x] US-022: EF Core configurations + InitialCreate migration + DefaultRoles seed constants (PR #35)
 
 ### Pending
