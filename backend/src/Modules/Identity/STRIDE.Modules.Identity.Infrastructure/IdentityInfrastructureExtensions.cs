@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using STRIDE.Modules.Identity.Application.Abstractions;
 using STRIDE.Modules.Identity.Infrastructure.Persistence;
+using STRIDE.Modules.Identity.Infrastructure.Tenant;
 
 namespace STRIDE.Modules.Identity.Infrastructure;
 
@@ -15,6 +17,8 @@ public static class IdentityInfrastructureExtensions
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"),
                 sql => sql.MigrationsAssembly(typeof(IdentityDbContext).Assembly.FullName)));
+
+        services.AddScoped<ITenantResolver, TenantResolver>();
 
         return services;
     }
