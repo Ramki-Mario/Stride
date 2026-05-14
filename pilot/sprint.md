@@ -460,6 +460,55 @@ EP-008 (Identity Domain)
 
 ---
 
+## Cross-Sprint Backlog Items
+
+These stories are not phase-specific — they run alongside regular sprints at defined checkpoints.
+
+---
+
+### US-033 — Architecture Diagrams (GitHub #36)
+
+**Type:** Documentation / Architecture
+**When:** Produced at the end of each respective phase/sprint. Diagram set grows incrementally.
+**Tooling:** TBD — evaluating free AI-assisted diagramming tools (Mermaid Live, Eraser.io, Lucidchart AI). Goal: generate from a detailed text prompt, export as PNG + source.
+
+| Diagram | Trigger | Status |
+|---|---|---|
+| System Context Diagram (C4 L1) | End of Phase 1 (retroactive) | [ ] |
+| Container Diagram (C4 L2) | End of Phase 2 | [ ] |
+| Module Interaction Diagram | End of Phase 2 | [ ] |
+| Auth Flow Diagram | End of Phase 2 | [ ] |
+| Tenant Resolution Flow | End of Phase 2 | [ ] |
+| Deployment Diagram (Azure) | End of Phase 7 | [ ] |
+
+**Output:** All diagrams committed to `/docs/diagrams/` as PNG + source file.
+
+---
+
+### US-034 — UI/UX Design (GitHub #37)
+
+**Type:** Design prerequisite
+**When:** Must be completed **before US-030 (login page)** and **before any Phase 3+ Angular UI stories**.
+**Status:** [ ] Backlog
+
+**Scope:**
+- Color palette, typography, spacing system
+- Component library selection confirmed (PrimeNG — already decided; this defines which components map to which screens)
+- Wireframes for: Login, Dashboard, Workflow List, Workflow Detail, Scheduling, Reporting, Admin
+- Responsive breakpoints defined (desktop-first — internal ops tool)
+- Loading/empty/error states per screen
+
+**Tooling:** Figma free tier (recommended) or AI-assisted wireframe tool (e.g. Uizard, Visily free tier).
+
+**Acceptance Criteria:**
+- [ ] Figma file (or equivalent) shared/committed with all screen wireframes
+- [ ] Color tokens defined (primary, secondary, surface, text, error, success)
+- [ ] All PrimeNG components mapped to each screen
+- [ ] Mobile-responsive breakpoints noted (tablet + desktop minimum)
+- [ ] Design reviewed and approved before any frontend Angular story begins
+
+---
+
 ## Sprint 3 — Core Workflow Engine (PLANNED)
 
 **Phase:** Phase 3

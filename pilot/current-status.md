@@ -105,9 +105,11 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 - [ ] US-027: FluentValidation validators for commands
 - [ ] US-028: Identity API controllers (UsersController, AuthController)
 - [ ] US-029: RBAC claims-based authorization policies
-- [ ] US-030: Angular login page (PrimeNG reactive form)
+- [ ] **US-034: UI/UX Design ← prerequisite before any Angular UI story (GitHub #37)**
+- [ ] US-030: Angular login page (PrimeNG reactive form) ← blocked on US-034
 - [ ] US-031: Auth guard + APP_INITIALIZER session check
 - [ ] US-032: appsettings.Development.json for local dev
+- [ ] **US-033: Architecture diagrams — due end of Phase 2 (GitHub #36)**
 
 ## Phase 3 — Core Workflow Engine (Pending)
 ## Phase 4 — Dashboard & Reporting (Pending)
