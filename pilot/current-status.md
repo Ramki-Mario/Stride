@@ -87,17 +87,26 @@ Phase 2 (Identity & Tenant Foundation) — **Next**.
 
 # Pending
 
-## Phase 2 — Identity & Tenant Foundation
-- Identity module full implementation (User, Role, Permission entities)
-- Tenant entity + TenantDomainMapping + UserTenantMapping
-- RBAC setup (claims-based authorization)
-- BFF auth orchestration (login/logout endpoints)
-- HttpOnly cookie issuance + Redis session storage
-- JWT strategy (internal auth — future IdP abstraction layer)
-- Tenant resolution logic (corporate domain + generic domain fallback)
-- Angular login UI (reactive form, PrimeNG components)
-- Angular auth guards fully wired to AuthService signals
-- appsettings.Development.json with local dev values
+## Phase 2 — Identity & Tenant Foundation — **In Progress**
+
+### Completed
+- [x] US-018: User, Role, Permission, UserRole, RolePermission entities (PR #32)
+- [x] US-019: Password value object + IPasswordHasher abstraction (delivered in PR #32)
+- [x] US-020: Tenant, TenantDomainMapping, UserTenantMapping entities (PR #33)
+- [x] US-021: ITenantResolver + TenantResolver (Dapper-based, corporate domain + fallback) (PR #34)
+
+### Pending
+- [ ] US-022: EF Core configurations + initial migration + role seeds
+- [ ] US-023: IUserRepository, IRoleRepository, ITenantRepository implementations
+- [ ] US-024: JWT strategy + BFF auth endpoints (login, logout, me) + Redis session store
+- [ ] US-025: JWT configuration via appsettings
+- [ ] US-026: MediatR command and query handlers (Login, Register, AssignRole, GetUser)
+- [ ] US-027: FluentValidation validators for commands
+- [ ] US-028: Identity API controllers (UsersController, AuthController)
+- [ ] US-029: RBAC claims-based authorization policies
+- [ ] US-030: Angular login page (PrimeNG reactive form)
+- [ ] US-031: Auth guard + APP_INITIALIZER session check
+- [ ] US-032: appsettings.Development.json for local dev
 
 ## Phase 3 — Core Workflow Engine (Pending)
 ## Phase 4 — Dashboard & Reporting (Pending)

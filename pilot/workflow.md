@@ -67,10 +67,10 @@ When the user says **"Work on US-XXX"**:
 | #14 | EP-014 | RBAC and Claims Authorization | Backlog |
 | #15 | EP-015 | Angular Login UI | Backlog |
 | #16 | EP-016 | appsettings.Development.json | Backlog |
-| #17 | US-018 | User, Role, Permission entities | Backlog |
-| #18 | US-019 | Password value object | Backlog |
-| #19 | US-020 | Tenant, TenantDomainMapping, UserTenantMapping | Backlog |
-| #31 | US-021 | Tenant resolver | Backlog |
+| #17 | US-018 | User, Role, Permission entities | Done ✅ PR #32 |
+| #18 | US-019 | Password value object | Done ✅ PR #32 |
+| #19 | US-020 | Tenant, TenantDomainMapping, UserTenantMapping | Done ✅ PR #33 |
+| #31 | US-021 | Tenant resolver | Done ✅ PR #34 |
 | #20 | US-022 | EF Core configurations and initial migration | Backlog |
 | #21 | US-023 | Repository implementations | Backlog |
 | #22 | US-024 | BFF auth endpoints — login, logout, me | Backlog |

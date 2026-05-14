@@ -233,8 +233,8 @@
 
 | ID | Story | Tasks | Complexity | Status |
 |---|---|---|---|---|
-| US-018 | As a tenant admin, I can manage users with roles and permissions | T-058 Implement User entity + domain events<br>T-059 Implement Role entity<br>T-060 Implement Permission entity<br>T-061 Implement UserRole join entity<br>T-062 Implement RolePermission join entity | M | [ ] |
-| US-019 | As an engineer, domain logic for password hashing lives in the domain, not infrastructure | T-063 Implement Password value object (hashing abstraction) | S | [ ] |
+| US-018 | As a tenant admin, I can manage users with roles and permissions | T-058 Implement User entity + domain events<br>T-059 Implement Role entity<br>T-060 Implement Permission entity<br>T-061 Implement UserRole join entity<br>T-062 Implement RolePermission join entity | M | [x] |
+| US-019 | As an engineer, domain logic for password hashing lives in the domain, not infrastructure | T-063 Implement Password value object (hashing abstraction) | S | [x] |
 
 **Dependencies:** BuildingBlocks.Domain (EP-003 — complete)
 **Risks:** Password hashing — use `IPasswordHasher<T>` abstraction in Application; inject BCrypt/ASP.NET Core Identity hasher in Infrastructure
@@ -257,8 +257,8 @@
 
 | ID | Story | Tasks | Complexity | Status |
 |---|---|---|---|---|
-| US-020 | As a SaaS operator, each tenant maps to a corporate email domain | T-064 Implement Tenant entity<br>T-065 Implement TenantDomainMapping entity<br>T-066 Implement UserTenantMapping entity | S | [ ] |
-| US-021 | As a user with a generic email (e.g. gmail), I am resolved to a tenant via explicit assignment | T-067 Implement TenantResolver (corporate domain → UserTenantMapping fallback) | M | [ ] |
+| US-020 | As a SaaS operator, each tenant maps to a corporate email domain | T-064 Implement Tenant entity<br>T-065 Implement TenantDomainMapping entity<br>T-066 Implement UserTenantMapping entity | S | [x] |
+| US-021 | As a user with a generic email (e.g. gmail), I am resolved to a tenant via explicit assignment | T-067 Implement TenantResolver (corporate domain → UserTenantMapping fallback) | M | [x] |
 
 **Dependencies:** EP-008
 **Risks:** Tenant resolver must be called before `TenantMiddleware` sets TenantId on the context — ordering matters in BFF login flow
