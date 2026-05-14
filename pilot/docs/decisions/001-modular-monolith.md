@@ -1,0 +1,1 @@
+Use modular monolith architecture initially.

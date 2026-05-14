@@ -1,0 +1,43 @@
+import { Injectable, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { tap } from 'rxjs/operators';
+
+export interface AuthUser {
+  userId: string;
+  email: string;
+  tenantId: string;
+  roles: string[];
+}
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private readonly _user = signal<AuthUser | null>(null);
+
+  readonly user = this._user.asReadonly();
+  readonly isAuthenticated = computed(() => this._user() !== null);
+
+  constructor(private http: HttpClient, private router: Router) {}
+
+  /** Called on app init — checks session cookie validity via BFF. */
+  checkSession() {
+    return this.http.get<AuthUser>('/bff/auth/me').pipe(
+      tap((user) => this._user.set(user))
+    );
+  }
+
+  login(email: string, password: string) {
+    return this.http
+      .post<void>('/bff/auth/login', { email, password })
+      .pipe(tap(() => this.checkSession().subscribe()));
+  }
+
+  logout() {
+    return this.http.post<void>('/bff/auth/logout', {}).pipe(
+      tap(() => {
+        this._user.set(null);
+        this.router.navigate(['/login']);
+      })
+    );
+  }
+}

@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Modules\Identity\STRIDE.Modules.Identity.API\STRIDE.Modules.Identity.API.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\STRIDE.Modules.Identity.Infrastructure\STRIDE.Modules.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Workflows\STRIDE.Modules.Workflows.API\STRIDE.Modules.Workflows.API.csproj" />
+    <ProjectReference Include="..\..\Modules\Workflows\STRIDE.Modules.Workflows.Infrastructure\STRIDE.Modules.Workflows.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Scheduling\STRIDE.Modules.Scheduling.API\STRIDE.Modules.Scheduling.API.csproj" />
+    <ProjectReference Include="..\..\Modules\Scheduling\STRIDE.Modules.Scheduling.Infrastructure\STRIDE.Modules.Scheduling.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Reporting\STRIDE.Modules.Reporting.API\STRIDE.Modules.Reporting.API.csproj" />
+    <ProjectReference Include="..\..\Modules\Reporting\STRIDE.Modules.Reporting.Infrastructure\STRIDE.Modules.Reporting.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Notifications\STRIDE.Modules.Notifications.API\STRIDE.Modules.Notifications.API.csproj" />
+    <ProjectReference Include="..\..\Modules\Notifications\STRIDE.Modules.Notifications.Infrastructure\STRIDE.Modules.Notifications.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Invoicing\STRIDE.Modules.Invoicing.API\STRIDE.Modules.Invoicing.API.csproj" />
+    <ProjectReference Include="..\..\Modules\Invoicing\STRIDE.Modules.Invoicing.Infrastructure\STRIDE.Modules.Invoicing.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Administration\STRIDE.Modules.Administration.API\STRIDE.Modules.Administration.API.csproj" />
+    <ProjectReference Include="..\..\Modules\Administration\STRIDE.Modules.Administration.Infrastructure\STRIDE.Modules.Administration.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\STRIDE.BuildingBlocks.Infrastructure\STRIDE.BuildingBlocks.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" Version="2.2.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

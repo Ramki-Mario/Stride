@@ -1,0 +1,1 @@
+Future-ready external identity provider integration guide.
