@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using STRIDE.Modules.Identity.Application.Abstractions;
 using STRIDE.Modules.Identity.Infrastructure.Persistence;
-using STRIDE.Modules.Identity.Infrastructure.Tenant;
+using STRIDE.Modules.Identity.Infrastructure.TenantResolution;
 
 namespace STRIDE.Modules.Identity.Infrastructure;
 
