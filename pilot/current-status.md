@@ -46,6 +46,7 @@ Phase 2 (Identity & Tenant Foundation) — **Next**.
 ### Infrastructure
 - Monorepo folder structure: /backend, /frontend, /infrastructure, /docker, /docs, /scripts
 - Docker Compose: stride-host, stride-bff, sqlserver (2022), redis (7-alpine), seq (with health checks)
+- NOTE: Docker Desktop uninstalled (2026-05-15) — 8GB RAM insufficient. Local dev uses local SQL Server + Redis Cloud + console logging (no Seq)
 - Dockerfiles: docker/stride-host/Dockerfile, docker/stride-bff/Dockerfile (targeting .NET 10 runtime)
 - .env.example created (all required environment variables documented)
 - .gitignore created (secrets, bin/obj, node_modules, dist excluded)

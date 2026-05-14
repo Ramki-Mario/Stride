@@ -5,6 +5,17 @@
 
 ---
 
+## Local Dev Infrastructure
+
+| Service | How | Notes |
+|---|---|---|
+| SQL Server | Local install | Port 1433, SA login |
+| Redis | Redis Cloud (free tier) | Connection string in .env |
+| Seq | Skipped | Console logging only until Phase 5 |
+| Docker | Uninstalled | 8GB RAM insufficient for Docker Desktop |
+
+---
+
 ## GitHub Setup (Already Complete)
 
 | Resource | URL |

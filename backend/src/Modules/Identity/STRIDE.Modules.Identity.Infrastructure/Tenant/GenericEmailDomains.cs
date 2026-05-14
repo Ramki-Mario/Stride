@@ -1,4 +1,4 @@
-namespace STRIDE.Modules.Identity.Infrastructure.Tenant;
+namespace STRIDE.Modules.Identity.Infrastructure.TenantResolution;
 
 internal static class GenericEmailDomains
 {

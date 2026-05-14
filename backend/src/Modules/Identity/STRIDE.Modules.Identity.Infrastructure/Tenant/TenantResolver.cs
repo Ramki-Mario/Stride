@@ -3,7 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using STRIDE.Modules.Identity.Application.Abstractions;
 
-namespace STRIDE.Modules.Identity.Infrastructure.Tenant;
+namespace STRIDE.Modules.Identity.Infrastructure.TenantResolution;
 
 internal sealed class TenantResolver : ITenantResolver
 {
