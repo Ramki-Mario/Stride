@@ -5,7 +5,8 @@
    Docs  : pilot/docs/ui-mockups/ for visual reference
    ═══════════════════════════════════════════════════════════════════════════ */
 
-@import "tailwindcss";
+/* tailwindcss @import moved to src/tailwind.css (plain CSS) to avoid the   */
+/* Dart Sass "@import is deprecated" warning. Angular processes both files.  */
 @import "primeicons/primeicons.css";
 
 /* ─────────────────────────────────────────────────────────────────────────

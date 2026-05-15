@@ -1,0 +1,8 @@
+/*
+ * Tailwind CSS 4 entry point.
+ * Kept in a plain .css file so Sass never processes this @import and
+ * the Dart Sass 3.x "@import is deprecated" warning is suppressed.
+ * Angular's build pipeline runs Tailwind's PostCSS plugin over all
+ * style files, so @theme inline in styles.scss still works correctly.
+ */
+@import "tailwindcss";
