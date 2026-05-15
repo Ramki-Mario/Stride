@@ -1,497 +1,465 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" data-theme="light" class="h-full">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>STRIDE — Login [Prototype]</title>
 
-  <!-- Tailwind CDN with custom STRIDE tokens -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary:  { DEFAULT: '#1B2A4A', light: '#243660', dark: '#111d33' },
-            accent:   { DEFAULT: '#0EA5E9', hover: '#0284C7', light: '#E0F2FE' },
-            surface:  { DEFAULT: '#F8FAFC', card: '#FFFFFF', border: '#E2E8F0' },
-            text:     { main: '#1E293B', muted: '#64748B', inverse: '#FFFFFF' },
-            success:  '#22C55E',
-            warning:  '#F59E0B',
-            danger:   '#EF4444',
-          }
-        }
-      }
-    }
-  </script>
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" />
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    /* ── Base ── */
-    *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; }
+    /* ── STRIDE design tokens ── */
+    :root, [data-theme="light"] {
+      --stride-primary:         #6366F1;
+      --stride-primary-hover:   #4F46E5;
+      --stride-primary-active:  #4338CA;
+      --stride-primary-subtle:  #EEF2FF;
+      --stride-primary-ring:    rgba(99,102,241,0.22);
+      --stride-accent:          #8B5CF6;
+      --stride-nav-bg:          #1E1B4B;
+      --stride-surface:         #FFFFFF;
+      --stride-surface-hover:   #F1F5F9;
+      --stride-bg:              #F8FAFC;
+      --stride-text-primary:    #111827;
+      --stride-text-secondary:  #6B7280;
+      --stride-text-muted:      #9CA3AF;
+      --stride-border:          #E5E7EB;
+      --stride-border-soft:     #EEF2F7;
+      --stride-error:           #EF4444;
+      --stride-error-bg:        #FEF2F2;
+      --stride-error-border:    #FECACA;
+      --stride-success:         #10B981;
+      --stride-success-bg:      #ECFDF5;
+      --stride-success-border:  #A7F3D0;
+    }
+    [data-theme="dark"] {
+      --stride-primary:         #818CF8;
+      --stride-primary-hover:   #6366F1;
+      --stride-primary-active:  #4F46E5;
+      --stride-primary-subtle:  rgba(129,140,248,0.12);
+      --stride-primary-ring:    rgba(129,140,248,0.25);
+      --stride-accent:          #A78BFA;
+      --stride-nav-bg:          #0F172A;
+      --stride-surface:         #111827;
+      --stride-surface-hover:   #1F2937;
+      --stride-bg:              #0B1120;
+      --stride-text-primary:    #F9FAFB;
+      --stride-text-secondary:  #CBD5E1;
+      --stride-text-muted:      #94A3B8;
+      --stride-border:          #1E293B;
+      --stride-border-soft:     #334155;
+      --stride-error:           #F87171;
+      --stride-error-bg:        rgba(248,113,113,0.1);
+      --stride-error-border:    rgba(248,113,113,0.25);
+      --stride-success:         #34D399;
+      --stride-success-bg:      rgba(52,211,153,0.1);
+      --stride-success-border:  rgba(52,211,153,0.25);
+    }
 
-    /* ── Animated gradient background ── */
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    html, body { height:100%; }
+    body { font-family: 'Inter','Segoe UI',system-ui,sans-serif; -webkit-font-smoothing: antialiased; }
+
+    /* ── Auth background — deep navy gradient, no cyan ── */
     .auth-bg {
-      background: linear-gradient(135deg, #1B2A4A 0%, #243660 40%, #0c1d38 70%, #0EA5E9 100%);
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0F0E2A 0%, #1E1B4B 40%, #312E81 70%, #1E1B4B 100%);
       background-size: 300% 300%;
-      animation: gradientShift 12s ease infinite;
+      animation: gradientDrift 18s ease infinite;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 2.5rem 1rem;
     }
-    @keyframes gradientShift {
-      0%   { background-position: 0% 50%; }
-      50%  { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    [data-theme="dark"] .auth-bg {
+      background: linear-gradient(135deg, #020817 0%, #0F0E2A 40%, #1E1B4B 70%, #0F172A 100%);
+    }
+    @keyframes gradientDrift {
+      0%,100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
     }
 
-    /* ── Card glass effect ── */
+    /* Subtle dot grid pattern */
+    .auth-bg::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: radial-gradient(circle, rgba(99,102,241,0.15) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    /* ── Login card ── */
     .login-card {
+      position: relative; z-index: 1;
       background: rgba(255,255,255,0.97);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.3);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 1.25rem;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.35), 0 8px 16px rgba(0,0,0,0.2);
+      width: 100%; max-width: 26rem;
+      padding: 2.5rem;
+      backdrop-filter: blur(16px);
+    }
+    [data-theme="dark"] .login-card {
+      background: rgba(17,24,39,0.97);
+      border-color: rgba(255,255,255,0.08);
     }
 
-    /* ── Input styling ── */
+    /* ── Logo mark ── */
+    .stride-logo {
+      width: 2.5rem; height: 2.5rem;
+      background: var(--stride-primary);
+      border-radius: 0.75rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Field ── */
+    .field-group { display: flex; flex-direction: column; gap: 0.375rem; }
+    label { font-size: 0.875rem; font-weight: 500; color: var(--stride-text-primary); }
+
     .field-input {
       width: 100%;
       padding: 0.625rem 0.875rem;
-      border: 1.5px solid #E2E8F0;
-      border-radius: 0.5rem;
-      font-size: 0.9375rem;
-      color: #1E293B;
-      background: #F8FAFC;
-      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+      border: 1.5px solid var(--stride-border);
+      border-radius: 0.75rem;
+      font-family: inherit; font-size: 0.9375rem;
+      color: var(--stride-text-primary);
+      background: var(--stride-bg);
+      transition: border-color 150ms, box-shadow 150ms, background 150ms;
       outline: none;
     }
+    [data-theme="dark"] .field-input { background: var(--stride-surface); }
     .field-input:focus {
-      border-color: #0EA5E9;
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
+      border-color: var(--stride-primary);
+      background: var(--stride-surface);
+      box-shadow: 0 0 0 3px var(--stride-primary-ring);
     }
-    .field-input.error {
-      border-color: #EF4444;
-      background: #FFF5F5;
-    }
-    .field-input.error:focus {
-      box-shadow: 0 0 0 3px rgba(239,68,68,0.15);
-    }
+    .field-input::placeholder { color: var(--stride-text-muted); }
+    .field-input.error { border-color: var(--stride-error); }
+    .field-input.error:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
+    [data-theme="dark"] .field-input.error { border-color: var(--stride-error); }
 
-    /* ── Password toggle ── */
+    /* Pass wrapper */
     .pass-wrapper { position: relative; }
+    .pass-wrapper .field-input { padding-right: 2.75rem; }
     .pass-toggle {
-      position: absolute; right: 0.75rem; top: 50%;
-      transform: translateY(-50%);
+      position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
       background: none; border: none; cursor: pointer;
-      color: #64748B; padding: 0.25rem;
+      color: var(--stride-text-muted); padding: 0.25rem;
       display: flex; align-items: center;
+      transition: color 150ms;
     }
-    .pass-toggle:hover { color: #0EA5E9; }
+    .pass-toggle:hover { color: var(--stride-primary); }
+
+    /* Field error message */
+    .field-err { display: none; font-size: 0.8125rem; color: var(--stride-error); align-items: center; gap: 0.25rem; margin-top: 0.125rem; }
+    .field-err.visible { display: flex; }
+
+    /* ── Alerts ── */
+    .alert-error, .alert-success {
+      display: none; padding: 0.75rem 1rem; border-radius: 0.75rem;
+      font-size: 0.875rem; align-items: flex-start; gap: 0.625rem;
+      border-left: 4px solid transparent;
+    }
+    .alert-error  { background: var(--stride-error-bg); border-color: var(--stride-error); color: var(--stride-error); border: 1px solid var(--stride-error-border); border-left: 4px solid var(--stride-error); }
+    .alert-success{ background: var(--stride-success-bg); border-color: var(--stride-success); color: var(--stride-success); border: 1px solid var(--stride-success-border); border-left: 4px solid var(--stride-success); }
+    .alert-error.visible, .alert-success.visible { display: flex; }
 
     /* ── Primary button ── */
     .btn-primary {
-      width: 100%;
-      padding: 0.75rem 1.5rem;
-      background: #0EA5E9;
-      color: #fff;
-      border: none;
-      border-radius: 0.5rem;
-      font-size: 0.9375rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
-      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      width: 100%; padding: 0.75rem 1.5rem;
+      background: var(--stride-primary); border: none; border-radius: 0.75rem;
+      color: #fff; font-family: inherit; font-size: 0.9375rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      transition: background 150ms, box-shadow 150ms, transform 80ms;
+      letter-spacing: 0.01em;
     }
     .btn-primary:hover:not(:disabled) {
-      background: #0284C7;
-      box-shadow: 0 4px 12px rgba(14,165,233,0.35);
+      background: var(--stride-primary-hover);
+      box-shadow: 0 4px 14px var(--stride-primary-ring);
     }
     .btn-primary:active:not(:disabled) { transform: scale(0.985); }
-    .btn-primary:disabled {
-      background: #7DD3FC;
-      cursor: not-allowed;
-    }
+    .btn-primary:disabled { background: color-mix(in srgb, var(--stride-primary) 60%, white 40%); cursor: not-allowed; }
+    [data-theme="dark"] .btn-primary:disabled { background: color-mix(in srgb, var(--stride-primary) 45%, #0B1120 55%); }
 
-    /* ── Spinner ── */
+    /* Spinner */
     .spinner {
       width: 18px; height: 18px;
-      border: 2.5px solid rgba(255,255,255,0.4);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      display: none;
+      border: 2.5px solid rgba(255,255,255,0.35);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.65s linear infinite; display: none;
     }
     .spinner.visible { display: block; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Error alert ── */
-    .alert-error {
-      display: none;
-      padding: 0.75rem 1rem;
-      background: #FEF2F2;
-      border: 1px solid #FECACA;
-      border-left: 4px solid #EF4444;
-      border-radius: 0.5rem;
-      color: #DC2626;
-      font-size: 0.875rem;
-      align-items: flex-start;
-      gap: 0.625rem;
-    }
-    .alert-error.visible { display: flex; }
-
-    /* ── Success alert ── */
-    .alert-success {
-      display: none;
-      padding: 0.75rem 1rem;
-      background: #F0FDF4;
-      border: 1px solid #BBF7D0;
-      border-left: 4px solid #22C55E;
-      border-radius: 0.5rem;
-      color: #15803D;
-      font-size: 0.875rem;
-      align-items: center;
-      gap: 0.625rem;
-    }
-    .alert-success.visible { display: flex; }
-
-    /* ── Field error message ── */
-    .field-error { display: none; font-size: 0.8125rem; color: #EF4444; margin-top: 0.3rem; }
-    .field-error.visible { display: flex; align-items: center; gap: 0.25rem; }
-
-    /* ── Remember / forgot row ── */
-    .check-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; color: #64748B; }
-    .check-label input[type="checkbox"] {
-      width: 1rem; height: 1rem; accent-color: #0EA5E9; cursor: pointer;
-    }
-
     /* ── Divider ── */
     .divider { display: flex; align-items: center; gap: 0.75rem; margin: 1.25rem 0; }
-    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #E2E8F0; }
-    .divider span { font-size: 0.8125rem; color: #94A3B8; white-space: nowrap; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--stride-border); }
+    .divider span { font-size: 0.8125rem; color: var(--stride-text-muted); white-space: nowrap; }
 
     /* ── SSO button ── */
     .btn-sso {
-      width: 100%;
-      padding: 0.625rem 1rem;
-      border: 1.5px solid #E2E8F0;
-      border-radius: 0.5rem;
-      background: #fff;
-      color: #1E293B;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
-      display: flex; align-items: center; justify-content: center; gap: 0.625rem;
+      width: 100%; padding: 0.625rem 1rem;
+      border: 1.5px solid var(--stride-border); border-radius: 0.75rem;
+      background: var(--stride-surface); color: var(--stride-text-primary);
+      font-family: inherit; font-size: 0.875rem; font-weight: 500;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.625rem;
+      transition: border-color 150ms, background 150ms;
     }
     .btn-sso:hover {
-      border-color: #0EA5E9;
-      background: #F0F9FF;
-      box-shadow: 0 2px 8px rgba(14,165,233,0.12);
+      border-color: var(--stride-primary);
+      background: var(--stride-primary-subtle);
+    }
+    [data-theme="dark"] .btn-sso:hover { background: var(--stride-primary-subtle); }
+    .sso-badge {
+      margin-left: auto; font-size: 0.6875rem; padding: 0.125rem 0.375rem;
+      background: var(--stride-surface-hover); color: var(--stride-text-muted);
+      border: 1px solid var(--stride-border-soft); border-radius: 9999px;
     }
 
-    /* ── Annotation bar ── */
+    /* ── Remember / forgot row ── */
+    .check-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; color: var(--stride-text-secondary); }
+    .check-label input[type="checkbox"] { width: 1rem; height: 1rem; accent-color: var(--stride-primary); cursor: pointer; }
+    .link-btn { background: none; border: none; font-family: inherit; font-size: 0.875rem; font-weight: 500; color: var(--stride-primary); cursor: pointer; padding: 0; }
+    .link-btn:hover { text-decoration: underline; color: var(--stride-primary-hover); }
+
+    /* ── Brand above card ── */
+    .card-brand { position: relative; z-index: 1; text-align: center; margin-bottom: 2rem; }
+    .card-brand-row { display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
+    .brand-text { font-size: 1.5rem; font-weight: 700; color: #fff; letter-spacing: 0.05em; }
+    .brand-sub { font-size: 0.8125rem; color: rgba(196,205,255,0.7); margin-top: 0.25rem; }
+
+    /* Footer */
+    .auth-footer { position: relative; z-index: 1; text-align: center; font-size: 0.75rem; color: rgba(196,205,255,0.45); margin-top: 1.5rem; }
+    .auth-footer a { color: inherit; text-decoration: underline; }
+
+    /* ── Annotation ── */
     .annotation-bar {
       background: #FEFCE8; border-bottom: 2px solid #FDE047;
       padding: 0.5rem 1rem; font-size: 0.8125rem; color: #854D0E;
-      text-align: center;
+      text-align: center; position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+    }
+    .state-btn {
+      margin: 0 0.125rem; padding: 0.15rem 0.5rem;
+      border: 1px solid #D97706; border-radius: 0.25rem;
+      font-size: 0.75rem; color: #92400E; background: rgba(133,77,14,0.1);
+      cursor: pointer;
+    }
+    .state-btn:hover { background: rgba(133,77,14,0.2); }
+    .theme-btn {
+      margin-left: 0.5rem; padding: 0.15rem 0.5rem;
+      border: 1px solid #6366F1; border-radius: 0.25rem;
+      font-size: 0.75rem; color: #4338CA; background: rgba(99,102,241,0.1);
+      cursor: pointer;
     }
   </style>
 </head>
-<body class="h-full">
+<body>
 
-  <!-- ══ Prototype Annotation ══ -->
-  <div class="annotation-bar">
-    <strong>PROTOTYPE — US-034.2 Login Page</strong>
-    &nbsp;|&nbsp; Angular component: <code>AuthLoginPageComponent</code>
-    &nbsp;|&nbsp; Route: <code>/login</code>
-    &nbsp;|&nbsp; No sidebar/shell — standalone auth layout
-    &nbsp;|&nbsp; Buttons below simulate states: &nbsp;
-    <button onclick="showState('default')" style="margin:0 2px;padding:2px 8px;border:1px solid #d97706;border-radius:4px;cursor:pointer;font-size:0.75rem;">Default</button>
-    <button onclick="showState('loading')" style="margin:0 2px;padding:2px 8px;border:1px solid #d97706;border-radius:4px;cursor:pointer;font-size:0.75rem;">Loading</button>
-    <button onclick="showState('error')" style="margin:0 2px;padding:2px 8px;border:1px solid #d97706;border-radius:4px;cursor:pointer;font-size:0.75rem;">Error</button>
-    <button onclick="showState('validation')" style="margin:0 2px;padding:2px 8px;border:1px solid #d97706;border-radius:4px;cursor:pointer;font-size:0.75rem;">Validation</button>
-    <button onclick="showState('success')" style="margin:0 2px;padding:2px 8px;border:1px solid #d97706;border-radius:4px;cursor:pointer;font-size:0.75rem;">Success</button>
+<!-- ══ Prototype Annotation ══ -->
+<div class="annotation-bar">
+  <strong>PROTOTYPE — US-034.2 Login Page</strong>
+  &nbsp;|&nbsp; Angular: <code>AuthLoginPageComponent</code> · Route: <code>/login</code>
+  &nbsp;|&nbsp; States:
+  <button class="state-btn" onclick="showState('default')">Default</button>
+  <button class="state-btn" onclick="showState('loading')">Loading</button>
+  <button class="state-btn" onclick="showState('error')">Error</button>
+  <button class="state-btn" onclick="showState('validation')">Validation</button>
+  <button class="state-btn" onclick="showState('success')">Success</button>
+  <button class="theme-btn" onclick="toggleTheme()" id="themeToggle">☀️ Light</button>
+</div>
+
+<!-- ══ Auth page ══ -->
+<div class="auth-bg" style="padding-top:5rem;">
+
+  <!-- Brand mark -->
+  <div class="card-brand">
+    <div class="card-brand-row">
+      <div class="stride-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="brand-text">STRIDE</span>
+    </div>
+    <div class="brand-sub">Smart Task Routing &amp; Distributed Execution</div>
   </div>
 
-  <!-- ══ Auth Background ══ -->
-  <div class="auth-bg min-h-screen flex flex-col items-center justify-center px-4 py-10">
+  <!-- ══ Card ══ -->
+  <div class="login-card">
 
-    <!-- Brand mark above card (large screens) -->
-    <div class="mb-8 text-center hidden sm:block">
-      <div class="flex items-center justify-center gap-3">
-        <!-- Logo mark -->
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#0EA5E9;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <span class="text-2xl font-bold text-white tracking-wide">STRIDE</span>
-      </div>
-      <p class="text-blue-200 text-sm mt-1 opacity-80">Smart Task Routing &amp; Distributed Execution</p>
+    <!-- Card header -->
+    <div style="margin-bottom:1.75rem;">
+      <h1 style="font-size:1.375rem; font-weight:700; color:var(--stride-text-primary); line-height:1.3;">Welcome back</h1>
+      <p style="font-size:0.875rem; color:var(--stride-text-secondary); margin-top:0.25rem;">Sign in to your workspace to continue.</p>
     </div>
 
-    <!-- ══ Login Card ══ -->
-    <div class="login-card w-full max-w-md rounded-2xl shadow-2xl p-8 sm:p-10">
+    <!-- Error alert -->
+    <div id="alertError" class="alert-error" style="margin-bottom:1.25rem;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 7v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span id="alertErrorText">Invalid email or password. Please try again.</span>
+    </div>
 
-      <!-- Card header (mobile shows logo here) -->
-      <div class="mb-7">
-        <!-- Mobile logo -->
-        <div class="flex items-center gap-2 mb-5 sm:hidden">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#0EA5E9;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <span class="text-xl font-bold tracking-wide" style="color:#1B2A4A;">STRIDE</span>
+    <!-- Success alert -->
+    <div id="alertSuccess" class="alert-success" style="margin-bottom:1.25rem;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 12l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Login successful! Redirecting to dashboard…</span>
+    </div>
+
+    <!-- Form -->
+    <form id="loginForm" onsubmit="handleSubmit(event)" novalidate style="display:flex; flex-direction:column; gap:1.25rem;">
+
+      <!-- Email -->
+      <div class="field-group">
+        <label for="email">Work email</label>
+        <input id="email" type="email" class="field-input" placeholder="you@company.com" autocomplete="email" oninput="clearErr('email')" />
+        <div id="emailErr" class="field-err">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 7v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span id="emailErrText">Please enter a valid email address.</span>
         </div>
-
-        <h1 class="text-2xl font-bold" style="color:#1B2A4A;">Welcome back</h1>
-        <p class="text-sm mt-1" style="color:#64748B;">Sign in to your workspace to continue.</p>
       </div>
 
-      <!-- ══ Alert: Credentials error ══ -->
-      <div id="alertError" class="alert-error mb-5">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px">
-          <circle cx="12" cy="12" r="10" stroke="#EF4444" stroke-width="2"/>
-          <path d="M12 7v5M12 16h.01" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span id="alertErrorText">Invalid email or password. Please try again.</span>
-      </div>
-
-      <!-- ══ Alert: Success ══ -->
-      <div id="alertSuccess" class="alert-success mb-5">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
-          <circle cx="12" cy="12" r="10" stroke="#22C55E" stroke-width="2"/>
-          <path d="M8 12l3 3 5-5" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>Login successful! Redirecting to dashboard…</span>
-      </div>
-
-      <!-- ══ Form ══ -->
-      <form id="loginForm" onsubmit="handleSubmit(event)" novalidate>
-
-        <!-- Email field -->
-        <div class="mb-4">
-          <label for="email" class="block text-sm font-medium mb-1.5" style="color:#1E293B;">
-            Work email
-          </label>
-          <input
-            id="email"
-            type="email"
-            class="field-input"
-            placeholder="you@company.com"
-            autocomplete="email"
-            oninput="clearFieldError('email')"
-          />
-          <div id="emailError" class="field-error">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="#EF4444" stroke-width="2"/>
-              <path d="M12 7v5M12 16h.01" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/>
+      <!-- Password -->
+      <div class="field-group">
+        <label for="password">Password</label>
+        <div class="pass-wrapper">
+          <input id="password" type="password" class="field-input" placeholder="••••••••" autocomplete="current-password" oninput="clearErr('password')" />
+          <button type="button" class="pass-toggle" onclick="togglePassword()" id="passToggle" aria-label="Show password">
+            <svg id="eyeOn" width="17" height="17" viewBox="0 0 24 24" fill="none">
+              <path d="M1 12C1 12 5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
             </svg>
-            <span id="emailErrorText">Please enter a valid email address.</span>
-          </div>
-        </div>
-
-        <!-- Password field -->
-        <div class="mb-2">
-          <label for="password" class="block text-sm font-medium mb-1.5" style="color:#1E293B;">
-            Password
-          </label>
-          <div class="pass-wrapper">
-            <input
-              id="password"
-              type="password"
-              class="field-input pr-10"
-              placeholder="••••••••"
-              autocomplete="current-password"
-              oninput="clearFieldError('password')"
-            />
-            <button type="button" class="pass-toggle" onclick="togglePassword()" title="Toggle password visibility" id="passToggle" aria-label="Show password">
-              <!-- Eye icon -->
-              <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M1 12C1 12 5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
-              </svg>
-              <!-- Eye-off icon (hidden by default) -->
-              <svg id="eyeOffIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:none">
-                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19M1 1l22 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-              </svg>
-            </button>
-          </div>
-          <div id="passwordError" class="field-error">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="#EF4444" stroke-width="2"/>
-              <path d="M12 7v5M12 16h.01" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/>
+            <svg id="eyeOff" width="17" height="17" viewBox="0 0 24 24" fill="none" style="display:none">
+              <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19M1 1l22 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
             </svg>
-            <span id="passwordErrorText">Password is required.</span>
-          </div>
-        </div>
-
-        <!-- Remember me / Forgot password -->
-        <div class="flex items-center justify-between mb-6 mt-3">
-          <label class="check-label">
-            <input type="checkbox" id="remember" />
-            Remember me
-          </label>
-          <button type="button" class="text-sm font-medium hover:underline" style="color:#0EA5E9;" onclick="handleForgotPassword()">
-            Forgot password?
           </button>
         </div>
+        <div id="passwordErr" class="field-err">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 7v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span id="passwordErrText">Password is required.</span>
+        </div>
+      </div>
 
-        <!-- Submit button -->
-        <button id="submitBtn" type="submit" class="btn-primary">
-          <div id="btnSpinner" class="spinner"></div>
-          <span id="btnText">Sign in</span>
-        </button>
+      <!-- Remember / Forgot -->
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <label class="check-label">
+          <input type="checkbox" id="remember" />
+          Remember me
+        </label>
+        <button type="button" class="link-btn" onclick="handleForgot()">Forgot password?</button>
+      </div>
 
-      </form>
-
-      <!-- SSO divider -->
-      <div class="divider"><span>or continue with</span></div>
-
-      <!-- SSO option — Azure AD (Phase 6+) -->
-      <button class="btn-sso" onclick="handleSSO()" title="Azure AD SSO — available Phase 6+">
-        <!-- Microsoft icon -->
-        <svg width="18" height="18" viewBox="0 0 21 21" fill="none">
-          <rect x="1" y="1" width="9" height="9" fill="#F25022"/>
-          <rect x="11" y="1" width="9" height="9" fill="#7FBA00"/>
-          <rect x="1" y="11" width="9" height="9" fill="#00A4EF"/>
-          <rect x="11" y="11" width="9" height="9" fill="#FFB900"/>
-        </svg>
-        Sign in with Microsoft (Azure AD)
-        <span class="ml-auto text-xs px-1.5 py-0.5 rounded" style="background:#F1F5F9;color:#64748B;font-size:0.7rem;">Phase 6+</span>
+      <!-- Submit -->
+      <button id="submitBtn" type="submit" class="btn-primary">
+        <div id="btnSpinner" class="spinner"></div>
+        <span id="btnText">Sign in</span>
       </button>
 
-      <!-- Footer note -->
-      <p class="text-center text-xs mt-6" style="color:#94A3B8;">
-        Don't have an account?
-        <button type="button" class="font-medium hover:underline" style="color:#0EA5E9;" onclick="handleRegister()">Contact your administrator</button>
-      </p>
+    </form>
 
-    </div>
+    <!-- SSO -->
+    <div class="divider"><span>or continue with</span></div>
+    <button class="btn-sso" onclick="handleSSO()">
+      <!-- Microsoft mark -->
+      <svg width="16" height="16" viewBox="0 0 21 21" fill="none">
+        <rect x="1" y="1" width="9" height="9" fill="#F25022"/>
+        <rect x="11" y="1" width="9" height="9" fill="#7FBA00"/>
+        <rect x="1" y="11" width="9" height="9" fill="#00A4EF"/>
+        <rect x="11" y="11" width="9" height="9" fill="#FFB900"/>
+      </svg>
+      Sign in with Microsoft (Azure AD)
+      <span class="sso-badge">Phase 6+</span>
+    </button>
 
-    <!-- Footer -->
-    <p class="text-center text-xs mt-6 opacity-50" style="color:#E0F2FE;">
-      © 2026 STRIDE Platform &nbsp;·&nbsp; <a href="#" style="color:inherit;text-decoration:underline;">Privacy</a> &nbsp;·&nbsp; <a href="#" style="color:inherit;text-decoration:underline;">Terms</a>
+    <!-- Footer note -->
+    <p style="text-align:center; font-size:0.8125rem; color:var(--stride-text-muted); margin-top:1.5rem;">
+      Don't have an account?
+      <button type="button" class="link-btn" onclick="handleRegister()">Contact your administrator</button>
     </p>
 
   </div>
 
-  <!-- ══ JavaScript ══ -->
-  <script>
-    /* ── State simulation ── */
-    function showState(state) {
-      resetUI();
-      if (state === 'loading') {
-        setLoading(true);
-      } else if (state === 'error') {
-        showError('Invalid email or password. Please try again.');
-      } else if (state === 'validation') {
-        showFieldError('email', 'Please enter a valid email address.');
-        showFieldError('password', 'Password must be at least 8 characters.');
-      } else if (state === 'success') {
-        showSuccess();
-      }
-      // 'default' just resets
-    }
+  <div class="auth-footer">
+    © 2026 STRIDE Platform &nbsp;·&nbsp;
+    <a href="#">Privacy</a> &nbsp;·&nbsp;
+    <a href="#">Terms</a>
+  </div>
+</div>
 
-    function resetUI() {
-      setLoading(false);
-      hideError();
-      clearFieldError('email');
-      clearFieldError('password');
-      document.getElementById('alertSuccess').classList.remove('visible');
-    }
+<script>
+  function resetUI() {
+    setLoading(false);
+    document.getElementById('alertError').classList.remove('visible');
+    document.getElementById('alertSuccess').classList.remove('visible');
+    clearErr('email');
+    clearErr('password');
+  }
 
-    function setLoading(on) {
-      const btn   = document.getElementById('submitBtn');
-      const spinner = document.getElementById('btnSpinner');
-      const text  = document.getElementById('btnText');
-      btn.disabled  = on;
-      spinner.classList.toggle('visible', on);
-      text.textContent = on ? 'Signing in…' : 'Sign in';
-    }
+  function showState(state) {
+    resetUI();
+    if (state === 'loading')    { setLoading(true); }
+    else if (state === 'error') { showAlert('error', 'Invalid email or password. Please try again.'); }
+    else if (state === 'validation') { showFieldErr('email', 'Please enter a valid work email address.'); showFieldErr('password', 'Password must be at least 8 characters.'); }
+    else if (state === 'success') { document.getElementById('alertSuccess').classList.add('visible'); }
+  }
 
-    function showError(msg) {
-      const el = document.getElementById('alertError');
-      document.getElementById('alertErrorText').textContent = msg;
-      el.classList.add('visible');
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
+  function setLoading(on) {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = on;
+    document.getElementById('btnSpinner').classList.toggle('visible', on);
+    document.getElementById('btnText').textContent = on ? 'Signing in…' : 'Sign in';
+  }
 
-    function hideError() {
-      document.getElementById('alertError').classList.remove('visible');
-    }
+  function showAlert(type, msg) {
+    const el = document.getElementById('alert' + (type === 'error' ? 'Error' : 'Success'));
+    if (type === 'error') document.getElementById('alertErrorText').textContent = msg;
+    el.classList.add('visible');
+  }
 
-    function showSuccess() {
-      document.getElementById('alertSuccess').classList.add('visible');
-    }
+  function showFieldErr(field, msg) {
+    document.getElementById(field).classList.add('error');
+    document.getElementById(field + 'ErrText').textContent = msg;
+    document.getElementById(field + 'Err').classList.add('visible');
+  }
 
-    function showFieldError(field, msg) {
-      const input = document.getElementById(field);
-      const errEl = document.getElementById(field + 'Error');
-      const msgEl = document.getElementById(field + 'ErrorText');
-      input.classList.add('error');
-      msgEl.textContent = msg;
-      errEl.classList.add('visible');
-    }
+  function clearErr(field) {
+    document.getElementById(field).classList.remove('error');
+    document.getElementById(field + 'Err').classList.remove('visible');
+    document.getElementById('alertError').classList.remove('visible');
+  }
 
-    function clearFieldError(field) {
-      document.getElementById(field).classList.remove('error');
-      document.getElementById(field + 'Error').classList.remove('visible');
-    }
+  function togglePassword() {
+    const input = document.getElementById('password');
+    const show  = input.type === 'password';
+    input.type  = show ? 'text' : 'password';
+    document.getElementById('eyeOn').style.display  = show ? 'none' : 'block';
+    document.getElementById('eyeOff').style.display = show ? 'block' : 'none';
+    document.getElementById('passToggle').setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  }
 
-    /* ── Password toggle ── */
-    function togglePassword() {
-      const input = document.getElementById('password');
-      const eyeOn  = document.getElementById('eyeIcon');
-      const eyeOff = document.getElementById('eyeOffIcon');
-      const isHidden = input.type === 'password';
-      input.type = isHidden ? 'text' : 'password';
-      eyeOn.style.display  = isHidden ? 'none'  : 'block';
-      eyeOff.style.display = isHidden ? 'block' : 'none';
-      document.getElementById('passToggle').setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
-    }
+  function handleSubmit(e) {
+    e.preventDefault();
+    resetUI();
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    let valid = true;
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldErr('email', 'Please enter a valid work email address.'); valid = false; }
+    if (!password) { showFieldErr('password', 'Password is required.'); valid = false; }
+    if (!valid) return;
+    setLoading(true);
+    setTimeout(() => { setLoading(false); showAlert('error', 'Invalid email or password. Please try again.'); }, 1800);
+  }
 
-    /* ── Form submit (prototype simulation) ── */
-    function handleSubmit(e) {
-      e.preventDefault();
-      hideError();
-      clearFieldError('email');
-      clearFieldError('password');
+  function handleForgot()   { alert('[Prototype] Forgot password — route: /auth/forgot-password (not implemented)'); }
+  function handleSSO()      { alert('[Prototype] Azure AD SSO — Phase 6+ OIDC integration'); }
+  function handleRegister() { alert('[Prototype] Self-registration disabled — admins invite users via Admin panel'); }
 
-      const email    = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      let valid = true;
-
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showFieldError('email', 'Please enter a valid work email address.');
-        valid = false;
-      }
-      if (!password || password.length < 1) {
-        showFieldError('password', 'Password is required.');
-        valid = false;
-      }
-      if (!valid) return;
-
-      // Simulate loading → error (prototype shows the flow)
-      setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-        // Prototype: treat any login as "wrong credentials" to show error state
-        // In real app: BFF /auth/login → 200 (redirect) or 401 (show error)
-        showError('Invalid email or password. Please try again.');
-      }, 1800);
-    }
-
-    /* ── Stubs ── */
-    function handleForgotPassword() {
-      alert('[Prototype] "Forgot password" — not implemented yet.\nAngular route: /auth/forgot-password');
-    }
-    function handleSSO() {
-      alert('[Prototype] Azure AD SSO — Phase 6+ feature.\nWill redirect to Microsoft login via OIDC.');
-    }
-    function handleRegister() {
-      alert('[Prototype] Self-registration is disabled.\nAdministrator must invite users via the Admin panel.');
-    }
-  </script>
-
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀️ Light' : '🌙 Dark';
+  }
+</script>
 </body>
 </html>

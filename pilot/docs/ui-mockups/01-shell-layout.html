@@ -1,378 +1,641 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light" class="h-full">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>STRIDE — Shell & Layout Prototype</title>
+  <title>STRIDE — Shell & Layout [Prototype]</title>
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary:   { DEFAULT: '#1B2A4A', light: '#2A3F6F', lighter: '#3A5490' },
-            accent:    { DEFAULT: '#0EA5E9', hover: '#0284C7' },
-            surface:   { DEFAULT: '#F8FAFC', card: '#FFFFFF' },
-            border:    { DEFAULT: '#E2E8F0' },
-            textprimary:   '#1E293B',
-            textsecondary: '#64748B',
-            success:   '#22C55E',
-            warning:   '#F59E0B',
-            danger:    '#EF4444',
-          }
-        }
-      }
-    }
-  </script>
+
   <style>
-    /* Smooth sidebar transitions */
-    #sidebar { transition: transform 0.25s ease, width 0.25s ease; }
-    #overlay  { transition: opacity 0.25s ease; }
-    .nav-item { transition: background 0.15s ease, color 0.15s ease; }
-    .nav-item.active { background: rgba(14,165,233,0.15); color: #0EA5E9; border-left: 3px solid #0EA5E9; }
-    .nav-item:not(.active):hover { background: rgba(255,255,255,0.07); }
-    /* Hide scrollbar but allow scroll */
-    #sidebar::-webkit-scrollbar { width: 4px; }
-    #sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-    /* Tooltip for collapsed sidebar */
-    .sidebar-collapsed .nav-label { display: none; }
-    .sidebar-collapsed .nav-section-label { display: none; }
-    .sidebar-collapsed .brand-name { display: none; }
-    .sidebar-collapsed { width: 64px !important; }
+    /* ── STRIDE design tokens (mirrors styles.scss) ── */
+    :root, [data-theme="light"] {
+      --stride-primary:         #6366F1;
+      --stride-primary-hover:   #4F46E5;
+      --stride-primary-subtle:  #EEF2FF;
+      --stride-primary-ring:    rgba(99,102,241,0.2);
+      --stride-accent:          #8B5CF6;
+      --stride-nav-bg:          #1E1B4B;
+      --stride-nav-active:      rgba(99,102,241,0.18);
+      --stride-nav-hover:       rgba(99,102,241,0.10);
+      --stride-nav-text:        #E5E7EB;
+      --stride-nav-icon:        #C7D2FE;
+      --stride-nav-muted:       #A5B4FC;
+      --stride-nav-border:      rgba(255,255,255,0.08);
+      --stride-bg:              #F8FAFC;
+      --stride-surface:         #FFFFFF;
+      --stride-surface-hover:   #F1F5F9;
+      --stride-text-primary:    #111827;
+      --stride-text-secondary:  #6B7280;
+      --stride-text-muted:      #9CA3AF;
+      --stride-border:          #E5E7EB;
+      --stride-border-soft:     #EEF2F7;
+      --stride-topbar-bg:       #FFFFFF;
+      --stride-topbar-border:   #E5E7EB;
+      --stride-shadow-sm:       0 1px 3px rgba(0,0,0,0.08),0 1px 2px -1px rgba(0,0,0,0.06);
+      --stride-shadow-md:       0 4px 6px -1px rgba(0,0,0,0.07),0 2px 4px -2px rgba(0,0,0,0.05);
+      --stride-success:         #10B981;
+      --stride-warning:         #F59E0B;
+      --stride-error:           #EF4444;
+    }
+    [data-theme="dark"] {
+      --stride-primary:         #818CF8;
+      --stride-primary-hover:   #6366F1;
+      --stride-primary-subtle:  rgba(129,140,248,0.12);
+      --stride-primary-ring:    rgba(129,140,248,0.25);
+      --stride-accent:          #A78BFA;
+      --stride-nav-bg:          #0F172A;
+      --stride-nav-active:      rgba(129,140,248,0.16);
+      --stride-nav-hover:       rgba(129,140,248,0.10);
+      --stride-nav-text:        #E2E8F0;
+      --stride-nav-icon:        #C7D2FE;
+      --stride-nav-muted:       #94A3B8;
+      --stride-nav-border:      rgba(255,255,255,0.06);
+      --stride-bg:              #0B1120;
+      --stride-surface:         #111827;
+      --stride-surface-hover:   #1F2937;
+      --stride-text-primary:    #F9FAFB;
+      --stride-text-secondary:  #CBD5E1;
+      --stride-text-muted:      #94A3B8;
+      --stride-border:          #1E293B;
+      --stride-border-soft:     #334155;
+      --stride-topbar-bg:       #111827;
+      --stride-topbar-border:   #1E293B;
+      --stride-shadow-sm:       0 1px 3px rgba(0,0,0,0.4),0 1px 2px -1px rgba(0,0,0,0.3);
+      --stride-shadow-md:       0 4px 6px -1px rgba(0,0,0,0.4),0 2px 4px -2px rgba(0,0,0,0.3);
+      --stride-success:         #34D399;
+      --stride-warning:         #FBBF24;
+      --stride-error:           #F87171;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    html, body { height: 100%; }
+    body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(--stride-bg); color: var(--stride-text-primary); -webkit-font-smoothing: antialiased; }
+
+    /* ── Sidebar ── */
+    .stride-sidebar {
+      width: 15rem;
+      background: var(--stride-nav-bg);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: width 200ms cubic-bezier(0.4,0,0.2,1);
+      overflow: hidden;
+    }
+    .stride-sidebar.collapsed { width: 3.75rem; }
+
+    .sidebar-brand {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 1.125rem 1rem;
+      border-bottom: 1px solid var(--stride-nav-border);
+      flex-shrink: 0;
+    }
+    .stride-logo {
+      width: 2rem; height: 2rem;
+      background: var(--stride-primary);
+      border-radius: 0.5rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .brand-name {
+      font-size: 1.0625rem; font-weight: 700; color: #fff;
+      letter-spacing: 0.03em; white-space: nowrap; overflow: hidden;
+      transition: opacity 200ms, max-width 200ms; max-width: 8rem;
+    }
+    .collapsed .brand-name { opacity: 0; max-width: 0; }
+
+    .tenant-badge {
+      margin: 0.625rem 0.75rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--stride-nav-border);
+      border-radius: 0.625rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      flex-shrink: 0; overflow: hidden;
+    }
+    .tenant-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--stride-accent); flex-shrink: 0; }
+    .tenant-name {
+      font-size: 0.75rem; font-weight: 500; color: var(--stride-nav-text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: opacity 200ms;
+    }
+    .collapsed .tenant-name { opacity: 0; }
+
+    .sidebar-nav {
+      flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0;
+      scrollbar-width: thin; scrollbar-color: var(--stride-nav-border) transparent;
+    }
+    .nav-group-label {
+      font-size: 0.625rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--stride-nav-muted);
+      padding: 0.75rem 1rem 0.25rem;
+      white-space: nowrap; overflow: hidden;
+      transition: opacity 200ms;
+    }
+    .collapsed .nav-group-label { opacity: 0; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.5625rem 0.875rem; margin: 0.1rem 0.375rem;
+      border-radius: 0.5rem; cursor: pointer;
+      color: var(--stride-nav-text);
+      font-size: 0.875rem; font-weight: 450;
+      white-space: nowrap; position: relative;
+      text-decoration: none;
+      transition: background 150ms, color 150ms;
+    }
+    .nav-item:hover { background: var(--stride-nav-hover); color: #fff; }
+    .nav-item.active {
+      background: var(--stride-nav-active);
+      color: var(--stride-primary);
+      font-weight: 550;
+    }
+    .nav-item.active::before {
+      content: ''; position: absolute; left: -0.375rem; top: 50%;
+      transform: translateY(-50%);
+      width: 3px; height: 65%; background: var(--stride-primary); border-radius: 2px;
+    }
+    .nav-icon {
+      font-size: 0.9375rem; width: 1.125rem; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--stride-nav-icon);
+    }
+    .nav-item.active .nav-icon { color: var(--stride-primary); }
+    .nav-label { flex: 1; transition: opacity 200ms, max-width 200ms; max-width: 10rem; overflow: hidden; }
+    .collapsed .nav-label { opacity: 0; max-width: 0; }
+    .nav-badge {
+      font-size: 0.6875rem; font-weight: 600;
+      min-width: 1.125rem; height: 1.125rem; padding: 0 0.3rem;
+      background: var(--stride-primary); color: #fff;
+      border-radius: 999px;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 200ms; flex-shrink: 0;
+    }
+    .collapsed .nav-badge { opacity: 0; }
+
+    .sidebar-user {
+      border-top: 1px solid var(--stride-nav-border);
+      padding: 0.75rem;
+      flex-shrink: 0;
+      display: flex; align-items: center; gap: 0.625rem;
+      cursor: pointer;
+      transition: background 150ms;
+    }
+    .sidebar-user:hover { background: var(--stride-nav-hover); }
+    .user-avatar {
+      width: 1.875rem; height: 1.875rem; border-radius: 50%;
+      background: var(--stride-primary);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 600; font-size: 0.75rem; flex-shrink: 0;
+    }
+    .user-info { overflow: hidden; transition: opacity 200ms, max-width 200ms; max-width: 8rem; }
+    .collapsed .user-info { opacity: 0; max-width: 0; }
+    .user-name { font-size: 0.8125rem; font-weight: 550; color: var(--stride-nav-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 0.6875rem; color: var(--stride-nav-muted); }
+
+    .collapse-btn {
+      position: absolute; top: 50%; right: -0.875rem; transform: translateY(-50%);
+      z-index: 50; width: 1.75rem; height: 1.75rem;
+      background: var(--stride-surface); border: 1px solid var(--stride-border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: var(--stride-shadow-sm);
+      color: var(--stride-text-secondary);
+      transition: background 150ms, color 150ms;
+    }
+    .collapse-btn:hover { background: var(--stride-surface-hover); color: var(--stride-primary); }
+
+    /* ── Topbar ── */
+    .stride-topbar {
+      height: 3.75rem;
+      background: var(--stride-topbar-bg);
+      border-bottom: 1px solid var(--stride-topbar-border);
+      display: flex; align-items: center;
+      padding: 0 1.25rem; gap: 0.75rem; flex-shrink: 0;
+    }
+    .breadcrumb { display: flex; align-items: center; gap: 0.375rem; font-size: 0.875rem; }
+    .breadcrumb-root  { color: var(--stride-text-muted); }
+    .breadcrumb-sep   { color: var(--stride-border); }
+    .breadcrumb-current { color: var(--stride-text-primary); font-weight: 500; }
+
+    .topbar-search {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: var(--stride-bg); border: 1px solid var(--stride-border);
+      border-radius: 0.625rem; padding: 0.375rem 0.75rem;
+      font-size: 0.8125rem; color: var(--stride-text-muted);
+      cursor: text; min-width: 13rem;
+      transition: border-color 150ms;
+    }
+    .topbar-search:hover { border-color: var(--stride-text-muted); }
+    .kbd {
+      background: var(--stride-surface-hover); border: 1px solid var(--stride-border);
+      border-radius: 0.25rem; font-size: 0.625rem; padding: 0 0.25rem;
+      color: var(--stride-text-muted);
+    }
+    .topbar-action {
+      width: 2.25rem; height: 2.25rem; border-radius: 0.5rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--stride-text-secondary);
+      background: transparent; border: none; position: relative;
+      transition: background 150ms, color 150ms;
+    }
+    .topbar-action:hover { background: var(--stride-surface-hover); color: var(--stride-text-primary); }
+    .notif-dot {
+      position: absolute; top: 0.375rem; right: 0.375rem;
+      width: 0.5rem; height: 0.5rem;
+      background: var(--stride-error); border-radius: 50%;
+      border: 2px solid var(--stride-topbar-bg);
+    }
+    .user-menu-trigger {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.25rem 0.5rem 0.25rem 0.25rem; border-radius: 0.625rem;
+      cursor: pointer; transition: background 150ms;
+    }
+    .user-menu-trigger:hover { background: var(--stride-surface-hover); }
+    .topbar-avatar {
+      width: 2rem; height: 2rem; border-radius: 50%;
+      background: var(--stride-primary);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 600; font-size: 0.75rem;
+    }
+    .user-menu-dropdown {
+      position: absolute; top: calc(100% + 0.5rem); right: 0;
+      background: var(--stride-surface); border: 1px solid var(--stride-border);
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+      min-width: 12rem; padding: 0.375rem;
+      display: none; z-index: 200;
+    }
+    .user-menu-dropdown.open { display: block; }
+    .dropdown-header { padding: 0.625rem 0.75rem 0.5rem; border-bottom: 1px solid var(--stride-border-soft); margin-bottom: 0.25rem; }
+    .dropdown-email  { font-size: 0.75rem; color: var(--stride-text-muted); }
+    .dropdown-item {
+      display: flex; align-items: center; gap: 0.625rem;
+      padding: 0.5rem 0.75rem; border-radius: 0.5rem;
+      font-size: 0.875rem; color: var(--stride-text-primary);
+      cursor: pointer; transition: background 150ms;
+    }
+    .dropdown-item:hover { background: var(--stride-surface-hover); }
+    .dropdown-item.danger { color: var(--stride-error); }
+    .dropdown-divider { height: 1px; background: var(--stride-border-soft); margin: 0.25rem 0; }
+
+    /* ── Content ── */
+    .stride-content { flex: 1; overflow: auto; padding: 1.5rem; background: var(--stride-bg); }
+
+    /* KPI Grid */
+    .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    @media(max-width:1024px){ .stat-grid { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width:640px) { .stat-grid { grid-template-columns: 1fr; } }
+
+    .stat-card {
+      background: var(--stride-surface); border: 1px solid var(--stride-border-soft);
+      border-radius: 1rem; padding: 1.25rem;
+      box-shadow: var(--stride-shadow-sm);
+      transition: box-shadow 150ms, transform 150ms;
+    }
+    .stat-card:hover { box-shadow: var(--stride-shadow-md); transform: translateY(-1px); }
+    .stat-card-row { display: flex; justify-content: space-between; align-items: flex-start; }
+    .stat-icon {
+      width: 2.5rem; height: 2.5rem; border-radius: 0.75rem;
+      display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+    }
+    .stat-icon.indigo { background: #EEF2FF; color: #6366F1; }
+    .stat-icon.purple { background: #F5F3FF; color: #8B5CF6; }
+    .stat-icon.green  { background: #ECFDF5; color: #10B981; }
+    .stat-icon.amber  { background: #FFFBEB; color: #F59E0B; }
+    [data-theme="dark"] .stat-icon.indigo { background: rgba(99,102,241,0.15);  color: #818CF8; }
+    [data-theme="dark"] .stat-icon.purple { background: rgba(139,92,246,0.15);  color: #A78BFA; }
+    [data-theme="dark"] .stat-icon.green  { background: rgba(52,211,153,0.12);  color: #34D399; }
+    [data-theme="dark"] .stat-icon.amber  { background: rgba(251,191,36,0.12);  color: #FBBF24; }
+    .stat-label { font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--stride-text-muted); margin-bottom: 0.25rem; }
+    .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--stride-text-primary); line-height: 1.2; }
+    .stat-trend { font-size: 0.8125rem; font-weight: 500; margin-top: 0.375rem; }
+    .trend-up   { color: var(--stride-success); }
+    .trend-down { color: var(--stride-error); }
+
+    /* Activity widget */
+    .widget { background: var(--stride-surface); border: 1px solid var(--stride-border-soft); border-radius: 1rem; box-shadow: var(--stride-shadow-sm); }
+    .widget-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--stride-border-soft); display: flex; justify-content: space-between; align-items: center; }
+    .widget-title  { font-size: 0.9375rem; font-weight: 600; color: var(--stride-text-primary); }
+    .activity-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--stride-border-soft); }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot  { width: 0.5rem; height: 0.5rem; border-radius: 50%; flex-shrink: 0; margin-top: 0.375rem; }
+    .activity-text { font-size: 0.875rem; color: var(--stride-text-primary); }
+    .activity-time { font-size: 0.75rem;  color: var(--stride-text-muted); margin-top: 0.125rem; }
+
+    /* Mobile overlay */
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; backdrop-filter: blur(2px); }
+    .sidebar-overlay.open { display: block; }
+    .mobile-sidebar { position: fixed; left: 0; top: 0; height: 100%; width: 15rem; z-index: 100; transform: translateX(-100%); transition: transform 250ms cubic-bezier(0.4,0,0.2,1); }
+    .mobile-sidebar.open { transform: translateX(0); }
+
+    /* Bottom nav */
+    .bottom-nav { display: none; }
+    @media(max-width:767px){
+      .bottom-nav {
+        display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+        background: var(--stride-nav-bg); border-top: 1px solid var(--stride-nav-border);
+        z-index: 50; height: 3.5rem;
+      }
+      .stride-content { padding-bottom: 4.5rem; }
+    }
+    .bottom-nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.2rem; color: var(--stride-nav-muted); font-size: 0.625rem; font-weight: 500;
+      cursor: pointer; transition: color 150ms; padding-bottom: 0.25rem;
+    }
+    .bottom-nav-item.active { color: var(--stride-primary); }
+    .bottom-nav-item svg { width: 1.25rem; height: 1.25rem; }
+
+    /* Hamburger */
+    .hamburger { display: none; }
+    @media(max-width:1023px){ .hamburger { display: flex !important; } .desktop-sidebar { display: none !important; } }
+
+    /* Annotation */
+    .annotation-bar {
+      background: #FEFCE8; border-bottom: 2px solid #FDE047;
+      padding: 0.5rem 1rem; font-size: 0.8125rem; color: #854D0E;
+      text-align: center; position: sticky; top: 0; z-index: 999;
+    }
+    .theme-btn {
+      display: inline-flex; align-items: center; gap: 0.375rem;
+      background: rgba(133,77,14,0.12); border: 1px solid #D97706;
+      border-radius: 9999px; padding: 0.2rem 0.625rem;
+      font-size: 0.75rem; color: #92400E; cursor: pointer;
+    }
+    .theme-btn:hover { background: rgba(133,77,14,0.18); }
   </style>
 </head>
-<body class="bg-surface text-textprimary font-sans antialiased">
+<body>
 
-<!-- ═══════════════════════════════════════════════════════════
-     ANNOTATION BAR (prototype helper — remove in production)
-══════════════════════════════════════════════════════════════ -->
-<div class="bg-yellow-100 border-b border-yellow-300 text-yellow-800 text-xs px-4 py-2 flex gap-6 flex-wrap">
-  <span class="font-semibold">📐 STRIDE Prototype — Shell & Layout (US-034.1)</span>
-  <span>· Resize window to see responsive behaviour</span>
-  <span>· Click <kbd class="bg-yellow-200 px-1 rounded">☰</kbd> to toggle sidebar collapse</span>
-  <span>· Click <kbd class="bg-yellow-200 px-1 rounded">avatar</kbd> for user menu</span>
-  <span>· PrimeNG components: <code>p-sidebar · p-menubar · p-avatar · p-menu · p-ripple</code></span>
+<!-- ══ Prototype Annotation ══ -->
+<div class="annotation-bar">
+  <strong>PROTOTYPE — US-034.1 Shell &amp; Layout</strong>
+  &nbsp;|&nbsp; Angular: <code>ShellComponent + SidebarComponent + TopbarComponent</code>
+  &nbsp;|&nbsp;
+  <button onclick="toggleTheme()" class="theme-btn" id="themeToggle">☀️ Light theme</button>
+  &nbsp;|&nbsp; Resize window to test responsive breakpoints
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     MOBILE OVERLAY (tablet/mobile only, shows when drawer open)
-══════════════════════════════════════════════════════════════ -->
-<div id="overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden opacity-0"
-     onclick="closeMobileSidebar()"></div>
+<!-- ══ App shell ══ -->
+<div style="display:flex; height:calc(100vh - 2.25rem); overflow:hidden;">
 
-<!-- ═══════════════════════════════════════════════════════════
-     SIDEBAR
-══════════════════════════════════════════════════════════════ -->
-<aside id="sidebar"
-  class="fixed top-0 left-0 h-full z-40 bg-primary text-white flex flex-col
-         w-64 overflow-y-auto
-         -translate-x-full lg:translate-x-0">
-
-  <!-- Brand -->
-  <div class="flex items-center gap-3 px-4 py-5 border-b border-primary-light">
-    <!-- Logo mark -->
-    <div class="w-9 h-9 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
-      <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z"/>
-      </svg>
-    </div>
-    <span class="brand-name text-lg font-bold tracking-wide">STRIDE</span>
-    <!-- Collapse button (desktop) -->
-    <button onclick="toggleCollapse()" class="ml-auto text-white/50 hover:text-white lg:block hidden">
-      <svg id="collapseIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-      </svg>
-    </button>
-  </div>
-
-  <!-- Tenant badge -->
-  <div class="px-4 py-3 border-b border-primary-light">
-    <div class="flex items-center gap-2 bg-primary-light rounded-lg px-3 py-2">
-      <div class="w-2 h-2 rounded-full bg-success flex-shrink-0"></div>
-      <div class="min-w-0">
-        <p class="nav-label text-xs text-white/60 leading-none">Tenant</p>
-        <p class="nav-label text-sm font-medium truncate leading-tight">Acme Corporation</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Navigation -->
-  <nav class="flex-1 px-2 py-4 space-y-1">
-
-    <!-- Main section -->
-    <p class="nav-section-label px-3 py-1 text-xs font-semibold text-white/40 uppercase tracking-widest">Main</p>
-
-    <a href="#" class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium">
-      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-      </svg>
-      <span class="nav-label">Dashboard</span>
-    </a>
-
-    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/75">
-      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-      </svg>
-      <span class="nav-label">Workflows</span>
-      <!-- Badge -->
-      <span class="nav-label ml-auto bg-accent text-white text-xs font-bold px-2 py-0.5 rounded-full">12</span>
-    </a>
-
-    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/75">
-      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-      </svg>
-      <span class="nav-label">Scheduling</span>
-    </a>
-
-    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/75">
-      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-      </svg>
-      <span class="nav-label">Notifications</span>
-      <span class="nav-label ml-auto bg-danger text-white text-xs font-bold px-2 py-0.5 rounded-full">3</span>
-    </a>
-
-    <!-- Reporting section -->
-    <p class="nav-section-label pt-4 px-3 py-1 text-xs font-semibold text-white/40 uppercase tracking-widest">Reporting</p>
-
-    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/75">
-      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-      </svg>
-      <span class="nav-label">Reports</span>
-    </a>
-
-    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/75">
-      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-      </svg>
-      <span class="nav-label">Invoicing</span>
-    </a>
-
-    <!-- Admin section -->
-    <p class="nav-section-label pt-4 px-3 py-1 text-xs font-semibold text-white/40 uppercase tracking-widest">Administration</p>
-
-    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/75">
-      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-      </svg>
-      <span class="nav-label">Users</span>
-    </a>
-
-    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/75">
-      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-      </svg>
-      <span class="nav-label">Settings</span>
-    </a>
-
-  </nav>
-
-  <!-- User profile strip (bottom of sidebar) -->
-  <div class="border-t border-primary-light px-3 py-3">
-    <button class="flex items-center gap-3 w-full rounded-lg px-2 py-2 hover:bg-primary-light transition-colors text-left">
-      <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-sm font-bold flex-shrink-0">RA</div>
-      <div class="nav-label min-w-0">
-        <p class="text-sm font-medium text-white truncate">Ramki Admin</p>
-        <p class="text-xs text-white/50 truncate">ramki@acme.com</p>
-      </div>
-      <svg class="nav-label w-4 h-4 text-white/40 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
-      </svg>
-    </button>
-  </div>
-</aside>
-
-<!-- ═══════════════════════════════════════════════════════════
-     MAIN AREA (shifts right on desktop to accommodate sidebar)
-══════════════════════════════════════════════════════════════ -->
-<div id="mainWrap" class="lg:pl-64 flex flex-col min-h-screen transition-all duration-250">
-
-  <!-- ── TOPBAR ─────────────────────────────────────────────── -->
-  <header class="sticky top-0 z-20 bg-white border-b border-border h-14 flex items-center px-4 gap-3 shadow-sm">
-
-    <!-- Mobile: hamburger to open drawer -->
-    <button onclick="openMobileSidebar()"
-            class="lg:hidden p-2 rounded-md hover:bg-surface text-textsecondary">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+  <!-- ── Desktop sidebar ── -->
+  <div class="stride-sidebar desktop-sidebar" id="desktopSidebar" style="position:relative;">
+    <!-- Collapse toggle -->
+    <button class="collapse-btn" onclick="toggleCollapse()" aria-label="Toggle sidebar">
+      <svg id="collapseIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" style="transition:transform 200ms">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
 
-    <!-- Breadcrumb / page title -->
-    <div class="flex items-center gap-2 text-sm">
-      <span class="text-textsecondary">STRIDE</span>
-      <span class="text-border">/</span>
-      <span class="font-semibold text-textprimary">Dashboard</span>
-    </div>
-
-    <!-- Spacer -->
-    <div class="flex-1"></div>
-
-    <!-- Global search (desktop) -->
-    <div class="hidden md:flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-1.5 text-sm text-textsecondary w-56">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
-      <span>Search...</span>
-      <kbd class="ml-auto text-xs bg-border text-textsecondary px-1.5 py-0.5 rounded">⌘K</kbd>
-    </div>
-
-    <!-- Notification bell -->
-    <button class="relative p-2 rounded-md hover:bg-surface text-textsecondary">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-      </svg>
-      <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-danger rounded-full"></span>
-    </button>
-
-    <!-- User avatar + dropdown -->
-    <div class="relative" id="avatarWrap">
-      <button onclick="toggleUserMenu()"
-              class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-surface transition-colors">
-        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold">RA</div>
-        <div class="hidden sm:block text-left">
-          <p class="text-sm font-medium text-textprimary leading-none">Ramki Admin</p>
-          <p class="text-xs text-textsecondary leading-none mt-0.5">Tenant Admin</p>
-        </div>
-        <svg class="w-4 h-4 text-textsecondary hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+    <!-- Brand -->
+    <div class="sidebar-brand">
+      <div class="stride-logo">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/>
         </svg>
+      </div>
+      <span class="brand-name">STRIDE</span>
+    </div>
+
+    <!-- Tenant badge -->
+    <div class="tenant-badge">
+      <div class="tenant-dot"></div>
+      <span class="tenant-name">Acme Corporation</span>
+    </div>
+
+    <!-- Nav -->
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">Main</div>
+      <a class="nav-item active" href="#" onclick="setActive(this,'Dashboard'); return false">
+        <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg></span>
+        <span class="nav-label">Dashboard</span>
+      </a>
+      <a class="nav-item" href="#" onclick="setActive(this,'Workflows'); return false">
+        <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="nav-label">Workflows</span>
+        <span class="nav-badge">12</span>
+      </a>
+      <a class="nav-item" href="#" onclick="setActive(this,'Scheduling'); return false">
+        <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+        <span class="nav-label">Scheduling</span>
+      </a>
+      <a class="nav-item" href="#" onclick="setActive(this,'Notifications'); return false">
+        <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="nav-label">Notifications</span>
+        <span class="nav-badge">3</span>
+      </a>
+
+      <div class="nav-group-label" style="margin-top:0.5rem;">Reporting</div>
+      <a class="nav-item" href="#" onclick="setActive(this,'Reports'); return false">
+        <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <span class="nav-label">Reports</span>
+      </a>
+      <a class="nav-item" href="#" onclick="setActive(this,'Invoicing'); return false">
+        <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+        <span class="nav-label">Invoicing</span>
+      </a>
+
+      <div class="nav-group-label" style="margin-top:0.5rem;">Administration</div>
+      <a class="nav-item" href="#" onclick="setActive(this,'Users'); return false">
+        <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="nav-label">Users</span>
+      </a>
+      <a class="nav-item" href="#" onclick="setActive(this,'Settings'); return false">
+        <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.8"/></svg></span>
+        <span class="nav-label">Settings</span>
+      </a>
+    </nav>
+
+    <!-- User strip -->
+    <div class="sidebar-user">
+      <div class="user-avatar">RA</div>
+      <div class="user-info">
+        <div class="user-name">Ramki Admin</div>
+        <div class="user-role">Tenant Admin</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main area ── -->
+  <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+
+    <!-- Topbar -->
+    <div class="stride-topbar">
+      <button class="topbar-action hamburger" onclick="openMobileSidebar()" aria-label="Open menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
 
-      <!-- Dropdown menu -->
-      <div id="userMenu"
-           class="hidden absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-border py-2 z-50">
-        <div class="px-4 py-2 border-b border-border mb-1">
-          <p class="text-sm font-semibold text-textprimary">Ramki Admin</p>
-          <p class="text-xs text-textsecondary">ramki@acme.com</p>
+      <nav class="breadcrumb" style="flex:1;">
+        <span class="breadcrumb-root">STRIDE</span>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current" id="breadcrumbCurrent">Dashboard</span>
+      </nav>
+
+      <div class="topbar-search">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span style="flex:1;">Search…</span>
+        <span class="kbd">⌘K</span>
+      </div>
+
+      <button class="topbar-action" title="Notifications">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="notif-dot"></span>
+      </button>
+
+      <div style="position:relative;">
+        <div class="user-menu-trigger" onclick="toggleUserMenu()">
+          <div class="topbar-avatar">RA</div>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="color:var(--stride-text-muted)"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-textprimary hover:bg-surface">
-          <svg class="w-4 h-4 text-textsecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-          My Profile
-        </a>
-        <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-textprimary hover:bg-surface">
-          <svg class="w-4 h-4 text-textsecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          Settings
-        </a>
-        <div class="border-t border-border my-1"></div>
-        <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-danger hover:bg-red-50">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-          Sign Out
-        </a>
-      </div>
-    </div>
-  </header>
-
-  <!-- ── PAGE CONTENT SLOT ──────────────────────────────────── -->
-  <main class="flex-1 p-4 md:p-6 lg:p-8">
-
-    <!-- Demo content to illustrate layout -->
-    <div class="mb-6">
-      <h1 class="text-2xl font-bold text-textprimary">Dashboard</h1>
-      <p class="text-textsecondary mt-1 text-sm">Welcome back, Ramki. Here's what's happening across your workspace.</p>
-    </div>
-
-    <!-- Placeholder cards to show content slot -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <div class="bg-white rounded-xl border border-border p-5 shadow-sm">
-        <p class="text-xs font-semibold text-textsecondary uppercase tracking-wide">Active Workflows</p>
-        <p class="text-3xl font-bold text-textprimary mt-2">24</p>
-        <p class="text-xs text-success mt-1">↑ 3 this week</p>
-      </div>
-      <div class="bg-white rounded-xl border border-border p-5 shadow-sm">
-        <p class="text-xs font-semibold text-textsecondary uppercase tracking-wide">Pending Tasks</p>
-        <p class="text-3xl font-bold text-textprimary mt-2">138</p>
-        <p class="text-xs text-warning mt-1">↑ 12 unassigned</p>
-      </div>
-      <div class="bg-white rounded-xl border border-border p-5 shadow-sm">
-        <p class="text-xs font-semibold text-textsecondary uppercase tracking-wide">Team Members</p>
-        <p class="text-3xl font-bold text-textprimary mt-2">47</p>
-        <p class="text-xs text-textsecondary mt-1">Across 5 roles</p>
-      </div>
-      <div class="bg-white rounded-xl border border-border p-5 shadow-sm">
-        <p class="text-xs font-semibold text-textsecondary uppercase tracking-wide">Open Invoices</p>
-        <p class="text-3xl font-bold text-textprimary mt-2">$84k</p>
-        <p class="text-xs text-danger mt-1">↑ 2 overdue</p>
+        <div class="user-menu-dropdown" id="userMenuDropdown">
+          <div class="dropdown-header">
+            <div style="font-size:0.875rem; font-weight:600; color:var(--stride-text-primary)">Ramki Admin</div>
+            <div class="dropdown-email">ramki@acmecorp.com</div>
+          </div>
+          <div class="dropdown-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Profile
+          </div>
+          <div class="dropdown-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.8"/></svg>
+            Settings
+          </div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item danger">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Sign out
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-border p-6 shadow-sm">
-      <p class="text-textsecondary text-sm text-center py-12">
-        ↖ This is the content slot.<br>Each module renders its page here inside the persistent shell.
-      </p>
-    </div>
+    <!-- Content area -->
+    <main class="stride-content">
+      <div style="margin-bottom:1.5rem;">
+        <h1 style="font-size:1.25rem; font-weight:600; color:var(--stride-text-primary)">Dashboard</h1>
+        <p style="font-size:0.875rem; color:var(--stride-text-secondary); margin-top:0.25rem;">Good morning, Ramki. Here's what's happening across your operations.</p>
+      </div>
 
-  </main>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-card-row" style="margin-bottom:0.875rem;">
+            <div>
+              <div class="stat-label">Active Workflows</div>
+              <div class="stat-value">48</div>
+            </div>
+            <div class="stat-icon indigo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          </div>
+          <div class="stat-trend trend-up">↑ 12% vs last week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-row" style="margin-bottom:0.875rem;">
+            <div>
+              <div class="stat-label">Tasks Completed</div>
+              <div class="stat-value">284</div>
+            </div>
+            <div class="stat-icon green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="stat-trend trend-up">↑ 8% vs last week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-row" style="margin-bottom:0.875rem;">
+            <div>
+              <div class="stat-label">Pending Approvals</div>
+              <div class="stat-value">7</div>
+            </div>
+            <div class="stat-icon amber"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          </div>
+          <div class="stat-trend trend-down">↓ 3 since yesterday</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-row" style="margin-bottom:0.875rem;">
+            <div>
+              <div class="stat-label">Active Users</div>
+              <div class="stat-value">23</div>
+            </div>
+            <div class="stat-icon purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="stat-trend" style="color:var(--stride-text-muted)">→ Same as yesterday</div>
+        </div>
+      </div>
 
-  <!-- ── MOBILE BOTTOM NAV ──────────────────────────────────── -->
-  <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border flex z-20 shadow-lg">
-    <a href="#" class="flex-1 flex flex-col items-center py-2.5 text-accent">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-      <span class="text-xs mt-0.5 font-medium">Home</span>
-    </a>
-    <a href="#" class="flex-1 flex flex-col items-center py-2.5 text-textsecondary">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-      <span class="text-xs mt-0.5">Workflows</span>
-    </a>
-    <a href="#" class="flex-1 flex flex-col items-center py-2.5 text-textsecondary relative">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-      <span class="absolute top-2 right-8 w-2 h-2 bg-danger rounded-full"></span>
-      <span class="text-xs mt-0.5">Alerts</span>
-    </a>
-    <button onclick="openMobileSidebar()" class="flex-1 flex flex-col items-center py-2.5 text-textsecondary">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
-      <span class="text-xs mt-0.5">More</span>
-    </button>
-  </nav>
-  <!-- Bottom padding so content isn't hidden behind mobile nav -->
-  <div class="lg:hidden h-16"></div>
-
+      <div class="widget">
+        <div class="widget-header">
+          <span class="widget-title">Recent Activity</span>
+          <span style="font-size:0.8125rem; color:var(--stride-primary); cursor:pointer; font-weight:500;">View all</span>
+        </div>
+        <div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--stride-success)"></div><div><div class="activity-text">Workflow <strong>Site Inspection #47</strong> completed by Field Team A</div><div class="activity-time">2 minutes ago</div></div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--stride-primary)"></div><div><div class="activity-text">New workflow <strong>Equipment Maintenance Q2</strong> created</div><div class="activity-time">18 minutes ago</div></div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--stride-warning)"></div><div><div class="activity-text">Approval pending for <strong>Contractor Invoice #1032</strong></div><div class="activity-time">1 hour ago</div></div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--stride-accent)"></div><div><div class="activity-text">User <strong>Sarah Chen</strong> joined as Operations Manager</div><div class="activity-time">3 hours ago</div></div></div>
+        </div>
+      </div>
+    </main>
+  </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     JAVASCRIPT — Sidebar toggle, mobile drawer, user menu
-══════════════════════════════════════════════════════════════ -->
+<!-- Mobile sidebar -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+<div class="mobile-sidebar stride-sidebar" id="mobileSidebar">
+  <div class="sidebar-brand">
+    <div class="stride-logo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/></svg></div>
+    <span class="brand-name">STRIDE</span>
+  </div>
+  <div class="tenant-badge"><div class="tenant-dot"></div><span class="tenant-name">Acme Corporation</span></div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Main</div>
+    <a class="nav-item active" href="#" onclick="closeMobileSidebar(); return false"><span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg></span><span class="nav-label">Dashboard</span></a>
+    <a class="nav-item" href="#" onclick="closeMobileSidebar(); return false"><span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="nav-label">Workflows</span><span class="nav-badge">12</span></a>
+    <a class="nav-item" href="#" onclick="closeMobileSidebar(); return false"><span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="nav-label">Notifications</span><span class="nav-badge">3</span></a>
+  </nav>
+  <div class="sidebar-user"><div class="user-avatar">RA</div><div class="user-info"><div class="user-name">Ramki Admin</div><div class="user-role">Tenant Admin</div></div></div>
+</div>
+
+<!-- Bottom nav (mobile) -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-item active"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>Home</div>
+  <div class="bottom-nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Workflows</div>
+  <div class="bottom-nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Alerts</div>
+  <div class="bottom-nav-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M6 20v-1a6 6 0 0112 0v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>More</div>
+</nav>
+
 <script>
-  const sidebar   = document.getElementById('sidebar');
-  const overlay   = document.getElementById('overlay');
-  const mainWrap  = document.getElementById('mainWrap');
-  let collapsed   = false;
+  let isCollapsed = false;
 
-  // Desktop: collapse sidebar to icon-only mode
   function toggleCollapse() {
-    collapsed = !collapsed;
-    sidebar.classList.toggle('sidebar-collapsed', collapsed);
-    mainWrap.style.paddingLeft = collapsed ? '64px' : '256px';
+    isCollapsed = !isCollapsed;
+    document.getElementById('desktopSidebar').classList.toggle('collapsed', isCollapsed);
+    document.getElementById('collapseIcon').style.transform = isCollapsed ? 'rotate(180deg)' : '';
   }
 
-  // Mobile/tablet: open sidebar as drawer
-  function openMobileSidebar() {
-    sidebar.classList.remove('-translate-x-full');
-    overlay.classList.remove('hidden');
-    setTimeout(() => overlay.classList.replace('opacity-0','opacity-100'), 10);
-  }
+  function openMobileSidebar()  { document.getElementById('mobileSidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('open'); }
+  function closeMobileSidebar() { document.getElementById('mobileSidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
 
-  function closeMobileSidebar() {
-    sidebar.classList.add('-translate-x-full');
-    overlay.classList.replace('opacity-100','opacity-0');
-    setTimeout(() => overlay.classList.add('hidden'), 250);
-  }
-
-  // User avatar dropdown
-  function toggleUserMenu() {
-    document.getElementById('userMenu').classList.toggle('hidden');
-  }
-
-  // Close user menu when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!document.getElementById('avatarWrap').contains(e.target)) {
-      document.getElementById('userMenu').classList.add('hidden');
-    }
+  function toggleUserMenu() { document.getElementById('userMenuDropdown').classList.toggle('open'); }
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.user-menu-trigger') && !e.target.closest('#userMenuDropdown'))
+      document.getElementById('userMenuDropdown').classList.remove('open');
   });
-</script>
 
+  function setActive(el, label) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('breadcrumbCurrent').textContent = label;
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀️ Light theme' : '🌙 Dark theme';
+  }
+</script>
 </body>
 </html>
