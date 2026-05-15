@@ -103,12 +103,13 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 - [x] US-027: FluentValidation validators + LoggingBehaviour/ValidationBehaviour wired into MediatR pipeline (PR #43)
 - [x] US-028: Identity API controllers (AuthController, UsersController) + CurrentUser + GlobalExceptionHandler (PR #44)
 - [x] US-029: RBAC claims-based authorization policies (PR #45)
+- [x] US-032: appsettings.Development.json for local dev (PR #54)
 
 ### Pending
 - [ ] **US-034: UI/UX Design ← prerequisite before any Angular UI story (GitHub #37, EP-015)**
 - [ ] US-030: Angular login page (PrimeNG reactive form) ← blocked on US-034 (GitHub #28, EP-015)
 - [ ] US-031: Auth guard + APP_INITIALIZER session check (GitHub #29, EP-015)
-- [ ] US-032: appsettings.Development.json for local dev (GitHub #30, EP-016)
+- [x] US-032: appsettings.Development.json — EP-016 closed ✅ (PR #54)
 - [x] **US-035: System Context Diagram — EP-017 (#47, PR #53, Done)**
 - [ ] **US-036: Container Diagram (C4 L2) — EP-017 (#48, trigger: end of Phase 2)**
 - [ ] **US-037: Module Interaction Diagram — EP-017 (#49, trigger: end of Phase 2)**
