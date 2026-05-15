@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STRIDE — Workflow List [Prototype]</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* ── STRIDE design tokens ── */
+    :root, [data-theme="light"] {
+      --stride-primary:        #6366F1;
+      --stride-primary-hover:  #4F46E5;
+      --stride-primary-subtle: #EEF2FF;
+      --stride-primary-ring:   rgba(99,102,241,0.2);
+      --stride-accent:         #8B5CF6;
+      --stride-accent-subtle:  #F5F3FF;
+      --stride-nav-bg:         #1E1B4B;
+      --stride-nav-border:     rgba(255,255,255,0.08);
+      --stride-nav-text:       #E5E7EB;
+      --stride-nav-icon:       #C7D2FE;
+      --stride-nav-muted:      #A5B4FC;
+      --stride-nav-active:     rgba(99,102,241,0.18);
+      --stride-nav-hover:      rgba(99,102,241,0.10);
+      --stride-bg:             #F8FAFC;
+      --stride-surface:        #FFFFFF;
+      --stride-surface-hover:  #F1F5F9;
+      --stride-surface-raised: #FFFFFF;
+      --stride-text-primary:   #111827;
+      --stride-text-secondary: #6B7280;
+      --stride-text-muted:     #9CA3AF;
+      --stride-border:         #E5E7EB;
+      --stride-border-soft:    #EEF2F7;
+      --stride-topbar-bg:      #FFFFFF;
+      --stride-topbar-border:  #E5E7EB;
+      --stride-shadow-xs:      0 1px 2px rgba(0,0,0,0.05);
+      --stride-shadow-sm:      0 1px 3px rgba(0,0,0,0.08),0 1px 2px -1px rgba(0,0,0,0.06);
+      --stride-shadow-md:      0 4px 6px -1px rgba(0,0,0,0.07),0 2px 4px -2px rgba(0,0,0,0.05);
+      --stride-shadow-lg:      0 10px 15px -3px rgba(0,0,0,0.07),0 4px 6px -4px rgba(0,0,0,0.05);
+      --stride-success:        #10B981;
+      --stride-success-bg:     #ECFDF5;
+      --stride-warning:        #F59E0B;
+      --stride-warning-bg:     #FFFBEB;
+      --stride-error:          #EF4444;
+      --stride-error-bg:       #FEF2F2;
+      --stride-info:           #3B82F6;
+      --stride-info-bg:        #EFF6FF;
+      --stride-radius-sm:      0.375rem;
+      --stride-radius-md:      0.5rem;
+      --stride-radius-lg:      0.75rem;
+      --stride-radius-xl:      0.875rem;
+      --stride-radius-2xl:     1rem;
+    }
+    [data-theme="dark"] {
+      --stride-primary:        #818CF8;
+      --stride-primary-hover:  #6366F1;
+      --stride-primary-subtle: rgba(129,140,248,0.12);
+      --stride-primary-ring:   rgba(129,140,248,0.25);
+      --stride-accent:         #A78BFA;
+      --stride-accent-subtle:  rgba(167,139,250,0.12);
+      --stride-nav-bg:         #0F172A;
+      --stride-nav-border:     rgba(255,255,255,0.06);
+      --stride-nav-text:       #E2E8F0;
+      --stride-nav-icon:       #C7D2FE;
+      --stride-nav-muted:      #94A3B8;
+      --stride-nav-active:     rgba(129,140,248,0.16);
+      --stride-nav-hover:      rgba(129,140,248,0.10);
+      --stride-bg:             #0B1120;
+      --stride-surface:        #111827;
+      --stride-surface-hover:  #1F2937;
+      --stride-surface-raised: #1E293B;
+      --stride-text-primary:   #F9FAFB;
+      --stride-text-secondary: #CBD5E1;
+      --stride-text-muted:     #94A3B8;
+      --stride-border:         #1E293B;
+      --stride-border-soft:    #334155;
+      --stride-topbar-bg:      #111827;
+      --stride-topbar-border:  #1E293B;
+      --stride-shadow-xs:      0 1px 2px rgba(0,0,0,0.3);
+      --stride-shadow-sm:      0 1px 3px rgba(0,0,0,0.4),0 1px 2px -1px rgba(0,0,0,0.3);
+      --stride-shadow-md:      0 4px 6px -1px rgba(0,0,0,0.4),0 2px 4px -2px rgba(0,0,0,0.3);
+      --stride-shadow-lg:      0 10px 15px -3px rgba(0,0,0,0.4),0 4px 6px -4px rgba(0,0,0,0.3);
+      --stride-success:        #34D399;
+      --stride-success-bg:     rgba(52,211,153,0.12);
+      --stride-warning:        #FCD34D;
+      --stride-warning-bg:     rgba(252,211,77,0.12);
+      --stride-error:          #F87171;
+      --stride-error-bg:       rgba(248,113,113,0.12);
+      --stride-info:           #60A5FA;
+      --stride-info-bg:        rgba(96,165,250,0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(--stride-bg); color: var(--stride-text-primary); }
+
+    /* ── Shell ── */
+    .shell { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 240px; flex-shrink: 0;
+      background: var(--stride-nav-bg);
+      border-right: 1px solid var(--stride-nav-border);
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+      transition: width 0.2s ease;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--stride-nav-border);
+    }
+    .logo-mark {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .logo-text { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+    .logo-badge {
+      font-size: 9px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase;
+      color: var(--stride-nav-muted); background: rgba(255,255,255,0.06);
+      padding: 2px 6px; border-radius: 4px; margin-left: auto;
+    }
+    .nav-section { padding: 12px 12px 4px; }
+    .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--stride-nav-muted); padding: 0 8px 6px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 8px; cursor: pointer;
+      color: var(--stride-nav-text); font-size: 13.5px; font-weight: 500;
+      transition: background 0.15s; text-decoration: none;
+      position: relative;
+    }
+    .nav-item:hover { background: var(--stride-nav-hover); }
+    .nav-item.active {
+      background: var(--stride-nav-active);
+      color: #fff;
+      border-left: 3px solid var(--stride-primary);
+      padding-left: 7px;
+    }
+    .nav-icon { width: 16px; text-align: center; flex-shrink: 0; font-size: 14px; color: var(--stride-nav-icon); }
+    .nav-item.active .nav-icon { color: var(--stride-primary); }
+    .nav-badge {
+      margin-left: auto; font-size: 10px; font-weight: 600;
+      background: var(--stride-primary); color: #fff;
+      padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center;
+    }
+    .nav-badge.warning { background: var(--stride-warning); color: #000; }
+    .sidebar-footer {
+      margin-top: auto; padding: 12px;
+      border-top: 1px solid var(--stride-nav-border);
+    }
+    .user-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 8px; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .user-card:hover { background: var(--stride-nav-hover); }
+    .user-avatar {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #6366F1, #8B5CF6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: #fff;
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 12.5px; font-weight: 600; color: var(--stride-nav-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--stride-nav-muted); }
+
+    /* ── Main area ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+    /* ── Topbar ── */
+    .topbar {
+      height: 56px; flex-shrink: 0;
+      background: var(--stride-topbar-bg);
+      border-bottom: 1px solid var(--stride-topbar-border);
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 24px;
+      box-shadow: var(--stride-shadow-xs);
+    }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+    .breadcrumb-item { color: var(--stride-text-muted); }
+    .breadcrumb-sep { color: var(--stride-text-muted); font-size: 11px; }
+    .breadcrumb-current { color: var(--stride-text-primary); font-weight: 600; }
+    .topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .icon-btn {
+      width: 34px; height: 34px; border-radius: 8px; border: none; cursor: pointer;
+      background: transparent; color: var(--stride-text-secondary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; transition: background 0.15s, color 0.15s;
+    }
+    .icon-btn:hover { background: var(--stride-surface-hover); color: var(--stride-text-primary); }
+    .topbar-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, #6366F1, #8B5CF6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff; cursor: pointer;
+    }
+
+    /* ── Page content ── */
+    .page-content { flex: 1; overflow-y: auto; padding: 24px; }
+
+    /* ── Page header ── */
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .page-title { font-size: 22px; font-weight: 700; color: var(--stride-text-primary); letter-spacing: -0.4px; }
+    .page-subtitle { font-size: 13px; color: var(--stride-text-secondary); margin-top: 2px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 8px 16px; border-radius: var(--stride-radius-xl);
+      font-size: 13.5px; font-weight: 600; cursor: pointer;
+      border: none; transition: background 0.15s, box-shadow 0.15s;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--stride-primary); color: #fff;
+    }
+    .btn-primary:hover { background: var(--stride-primary-hover); box-shadow: 0 4px 12px var(--stride-primary-ring); }
+    .btn-ghost {
+      background: transparent; color: var(--stride-text-secondary);
+      border: 1px solid var(--stride-border);
+    }
+    .btn-ghost:hover { background: var(--stride-surface-hover); color: var(--stride-text-primary); }
+    .btn-danger {
+      background: var(--stride-error-bg); color: var(--stride-error);
+      border: 1px solid var(--stride-error);
+    }
+    .btn-danger:hover { background: var(--stride-error); color: #fff; }
+
+    /* ── Summary strip ── */
+    .summary-strip {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+      margin-bottom: 20px;
+    }
+    .summary-card {
+      background: var(--stride-surface);
+      border: 1px solid var(--stride-border);
+      border-radius: var(--stride-radius-xl);
+      padding: 14px 16px;
+      box-shadow: var(--stride-shadow-xs);
+      cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .summary-card:hover { box-shadow: var(--stride-shadow-sm); border-color: var(--stride-primary); }
+    .summary-card.active { border-color: var(--stride-primary); background: var(--stride-primary-subtle); }
+    .summary-label { font-size: 11px; font-weight: 500; color: var(--stride-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .summary-count { font-size: 24px; font-weight: 700; color: var(--stride-text-primary); line-height: 1; }
+    .summary-count.completed { color: var(--stride-success); }
+    .summary-count.running   { color: var(--stride-primary); }
+    .summary-count.paused    { color: var(--stride-warning); }
+    .summary-count.failed    { color: var(--stride-error); }
+    .summary-count.draft     { color: var(--stride-text-muted); }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      background: var(--stride-surface);
+      border: 1px solid var(--stride-border);
+      border-radius: var(--stride-radius-xl) var(--stride-radius-xl) 0 0;
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .search-wrap {
+      position: relative; flex: 1; min-width: 180px; max-width: 320px;
+    }
+    .search-icon {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--stride-text-muted); font-size: 13px; pointer-events: none;
+    }
+    .search-input {
+      width: 100%; height: 34px;
+      padding: 0 10px 0 32px;
+      border: 1.5px solid var(--stride-border);
+      border-radius: var(--stride-radius-lg);
+      background: var(--stride-bg);
+      color: var(--stride-text-primary);
+      font-size: 13px; font-family: inherit;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--stride-primary); box-shadow: 0 0 0 3px var(--stride-primary-ring); }
+    .search-input::placeholder { color: var(--stride-text-muted); }
+    .filter-select {
+      height: 34px; padding: 0 28px 0 10px;
+      border: 1.5px solid var(--stride-border);
+      border-radius: var(--stride-radius-lg);
+      background: var(--stride-bg);
+      color: var(--stride-text-primary);
+      font-size: 13px; font-family: inherit;
+      cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 8px center;
+      transition: border-color 0.15s; outline: none;
+    }
+    .filter-select:focus { border-color: var(--stride-primary); box-shadow: 0 0 0 3px var(--stride-primary-ring); }
+    .toolbar-divider { width: 1px; height: 24px; background: var(--stride-border); flex-shrink: 0; }
+    .view-toggle { display: flex; gap: 2px; }
+    .view-btn {
+      width: 32px; height: 32px; border-radius: 6px; border: none; cursor: pointer;
+      background: transparent; color: var(--stride-text-muted);
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .view-btn.active { background: var(--stride-primary-subtle); color: var(--stride-primary); }
+    .view-btn:hover:not(.active) { background: var(--stride-surface-hover); color: var(--stride-text-primary); }
+    .bulk-actions {
+      display: none; align-items: center; gap: 8px;
+      padding: 4px 10px; background: var(--stride-primary-subtle);
+      border-radius: var(--stride-radius-lg);
+      border: 1px solid rgba(99,102,241,0.2);
+    }
+    .bulk-actions.visible { display: flex; }
+    .bulk-label { font-size: 12.5px; font-weight: 600; color: var(--stride-primary); }
+
+    /* ── Table ── */
+    .table-wrap {
+      background: var(--stride-surface);
+      border: 1px solid var(--stride-border);
+      border-top: none;
+      border-radius: 0 0 var(--stride-radius-xl) var(--stride-radius-xl);
+      overflow: hidden;
+    }
+    .wf-table { width: 100%; border-collapse: collapse; }
+    .wf-table thead th {
+      background: var(--stride-bg);
+      border-bottom: 1px solid var(--stride-border);
+      padding: 10px 14px;
+      text-align: left; font-size: 11.5px; font-weight: 600;
+      color: var(--stride-text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+      white-space: nowrap; cursor: pointer; user-select: none;
+    }
+    .wf-table thead th:hover { color: var(--stride-text-primary); }
+    .sort-icon { display: inline-block; margin-left: 4px; font-size: 10px; opacity: 0.5; }
+    .sort-icon.asc::after  { content: '↑'; }
+    .sort-icon.desc::after { content: '↓'; }
+    .sort-icon.none::after { content: '↕'; }
+    .col-check { width: 40px; }
+    .col-name  { min-width: 200px; }
+    .col-status{ width: 120px; }
+    .col-type  { width: 130px; }
+    .col-assignee { width: 150px; }
+    .col-due   { width: 120px; }
+    .col-priority { width: 100px; }
+    .col-progress { width: 120px; }
+    .col-actions  { width: 80px; }
+
+    .wf-table tbody tr {
+      border-bottom: 1px solid var(--stride-border-soft);
+      transition: background 0.12s;
+      cursor: pointer;
+    }
+    .wf-table tbody tr:last-child { border-bottom: none; }
+    .wf-table tbody tr:hover { background: var(--stride-surface-hover); }
+    .wf-table tbody tr.selected { background: var(--stride-primary-subtle); }
+    .wf-table td { padding: 12px 14px; font-size: 13.5px; color: var(--stride-text-primary); vertical-align: middle; }
+
+    /* Checkbox */
+    .cb {
+      width: 16px; height: 16px; border-radius: 4px;
+      border: 1.5px solid var(--stride-border); cursor: pointer;
+      background: var(--stride-surface); appearance: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .cb:checked { background: var(--stride-primary); border-color: var(--stride-primary); }
+    .cb:checked::after { content: '✓'; display: block; color: #fff; font-size: 10px; text-align: center; line-height: 13px; }
+    .cb:hover { border-color: var(--stride-primary); }
+
+    /* Workflow name cell */
+    .wf-name { font-weight: 600; color: var(--stride-text-primary); font-size: 13.5px; }
+    .wf-id { font-size: 11px; color: var(--stride-text-muted); margin-top: 1px; font-family: 'SF Mono', 'Fira Code', monospace; }
+    .wf-tags { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+    .tag {
+      font-size: 10.5px; font-weight: 500; padding: 1px 7px; border-radius: 99px;
+      background: var(--stride-surface-hover); color: var(--stride-text-secondary);
+      border: 1px solid var(--stride-border);
+    }
+
+    /* Status pill */
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px; border-radius: 99px; font-size: 11.5px; font-weight: 600;
+      white-space: nowrap;
+    }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .pill-running    { background: var(--stride-primary-subtle); color: var(--stride-primary); }
+    .pill-running .status-dot { background: var(--stride-primary); }
+    .pill-completed  { background: var(--stride-success-bg); color: var(--stride-success); }
+    .pill-completed .status-dot { background: var(--stride-success); }
+    .pill-paused     { background: var(--stride-warning-bg); color: var(--stride-warning); }
+    .pill-paused .status-dot   { background: var(--stride-warning); }
+    .pill-failed     { background: var(--stride-error-bg); color: var(--stride-error); }
+    .pill-failed .status-dot   { background: var(--stride-error); }
+    .pill-draft      { background: var(--stride-surface-hover); color: var(--stride-text-muted); border: 1px solid var(--stride-border); }
+    .pill-draft .status-dot    { background: var(--stride-text-muted); }
+    .pill-scheduled  { background: var(--stride-info-bg); color: var(--stride-info); }
+    .pill-scheduled .status-dot { background: var(--stride-info); }
+
+    /* Priority badge */
+    .priority-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 6px;
+    }
+    .priority-critical { background: var(--stride-error-bg);   color: var(--stride-error); }
+    .priority-high     { background: var(--stride-warning-bg); color: var(--stride-warning); }
+    .priority-medium   { background: var(--stride-info-bg);    color: var(--stride-info); }
+    .priority-low      { background: var(--stride-surface-hover); color: var(--stride-text-muted); border: 1px solid var(--stride-border); }
+
+    /* Type badge */
+    .type-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11.5px; font-weight: 500; padding: 2px 8px; border-radius: 6px;
+      background: var(--stride-accent-subtle); color: var(--stride-accent);
+    }
+
+    /* Assignee cell */
+    .assignee-cell { display: flex; align-items: center; gap: 7px; }
+    .assignee-avatar {
+      width: 24px; height: 24px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 600; color: #fff; flex-shrink: 0;
+    }
+    .assignee-name { font-size: 13px; color: var(--stride-text-secondary); }
+
+    /* Progress bar */
+    .progress-wrap { display: flex; align-items: center; gap: 8px; }
+    .progress-bar {
+      flex: 1; height: 5px; background: var(--stride-border);
+      border-radius: 99px; overflow: hidden; min-width: 60px;
+    }
+    .progress-fill {
+      height: 100%; background: var(--stride-primary); border-radius: 99px;
+      transition: width 0.3s ease;
+    }
+    .progress-fill.complete { background: var(--stride-success); }
+    .progress-fill.warning  { background: var(--stride-warning); }
+    .progress-fill.danger   { background: var(--stride-error); }
+    .progress-pct { font-size: 11.5px; font-weight: 600; color: var(--stride-text-muted); white-space: nowrap; }
+
+    /* Due date */
+    .due-date { font-size: 13px; }
+    .due-overdue { color: var(--stride-error); font-weight: 600; }
+    .due-soon    { color: var(--stride-warning); font-weight: 500; }
+    .due-ok      { color: var(--stride-text-secondary); }
+
+    /* Row actions */
+    .row-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
+    .wf-table tbody tr:hover .row-actions { opacity: 1; }
+    .row-btn {
+      width: 28px; height: 28px; border-radius: 6px; border: none; cursor: pointer;
+      background: transparent; color: var(--stride-text-muted);
+      display: flex; align-items: center; justify-content: center; font-size: 13px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .row-btn:hover { background: var(--stride-surface-hover); color: var(--stride-text-primary); }
+    .row-btn.danger:hover { background: var(--stride-error-bg); color: var(--stride-error); }
+
+    /* ── Card view ── */
+    .card-grid {
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 14px;
+    }
+    .card-grid.visible { display: grid; }
+    .table-wrap.hidden { display: none; }
+    .wf-card {
+      background: var(--stride-surface);
+      border: 1px solid var(--stride-border);
+      border-radius: var(--stride-radius-2xl);
+      padding: 16px;
+      box-shadow: var(--stride-shadow-xs);
+      cursor: pointer;
+      transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s;
+    }
+    .wf-card:hover { box-shadow: var(--stride-shadow-md); border-color: var(--stride-primary); transform: translateY(-1px); }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--stride-text-primary); }
+    .card-id { font-size: 11px; color: var(--stride-text-muted); font-family: monospace; margin-top: 2px; }
+    .card-meta { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .card-progress { margin-bottom: 12px; }
+    .card-progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--stride-text-muted); margin-bottom: 5px; }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--stride-border-soft); }
+    .card-assignees { display: flex; gap: -4px; }
+    .card-avatar-stack { display: flex; }
+    .card-avatar-stack .assignee-avatar { margin-left: -6px; border: 2px solid var(--stride-surface); }
+    .card-avatar-stack .assignee-avatar:first-child { margin-left: 0; }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--stride-surface);
+      border: 1px solid var(--stride-border);
+      border-top: none;
+      border-radius: 0 0 var(--stride-radius-xl) var(--stride-radius-xl);
+      margin-top: -1px;
+    }
+    .pagination-info { font-size: 12.5px; color: var(--stride-text-muted); }
+    .pagination-controls { display: flex; gap: 4px; align-items: center; }
+    .page-btn {
+      min-width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--stride-border);
+      background: var(--stride-surface); color: var(--stride-text-secondary);
+      font-size: 12.5px; font-weight: 500; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .page-btn:hover { border-color: var(--stride-primary); color: var(--stride-primary); }
+    .page-btn.active { background: var(--stride-primary); border-color: var(--stride-primary); color: #fff; }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      background: var(--stride-surface);
+      border: 1px solid var(--stride-border);
+      border-radius: var(--stride-radius-xl);
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+    .empty-title { font-size: 16px; font-weight: 600; color: var(--stride-text-primary); margin-bottom: 6px; }
+    .empty-desc { font-size: 13px; color: var(--stride-text-muted); margin-bottom: 20px; }
+
+    /* ── Annotation bar ── */
+    .annotation-bar {
+      background: #1E1B4B; color: #e5e7eb;
+      padding: 6px 16px; font-size: 11.5px;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      border-bottom: 2px solid #6366F1; flex-shrink: 0;
+    }
+    .ann-label { color: #a5b4fc; font-weight: 600; letter-spacing: 0.3px; }
+    .ann-chip {
+      padding: 3px 10px; border-radius: 99px; cursor: pointer; font-weight: 500;
+      border: 1px solid rgba(255,255,255,0.12); transition: all 0.15s;
+      background: rgba(255,255,255,0.05);
+    }
+    .ann-chip:hover { background: rgba(99,102,241,0.25); border-color: #818CF8; }
+    .ann-chip.active { background: #6366F1; border-color: #6366F1; color: #fff; }
+    .ann-sep { color: rgba(255,255,255,0.2); }
+    .ann-note { color: #94a3b8; font-style: italic; margin-left: auto; }
+
+    /* ── Mobile ── */
+    .mobile-hamburger { display: none; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
+
+    @media (max-width: 1024px) {
+      .summary-strip { grid-template-columns: repeat(3, 1fr); }
+      .col-type, .col-assignee, .col-priority { display: none; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { position: fixed; left: -240px; top: 0; bottom: 0; z-index: 50; transition: left 0.25s ease; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .mobile-hamburger { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: none; background: transparent; cursor: pointer; color: var(--stride-text-secondary); font-size: 18px; }
+      .summary-strip { grid-template-columns: repeat(2, 1fr); }
+      .col-due, .col-progress { display: none; }
+      .page-content { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Annotation bar ── -->
+<div class="annotation-bar">
+  <span class="ann-label">🖼 US-034.4</span>
+  <span class="ann-sep">|</span>
+  <span class="ann-label">State:</span>
+  <span class="ann-chip active" onclick="setState('list')">Table View</span>
+  <span class="ann-chip" onclick="setState('cards')">Card View</span>
+  <span class="ann-chip" onclick="setState('empty')">Empty State</span>
+  <span class="ann-chip" onclick="setState('filtered')">Filtered (0 results)</span>
+  <span class="ann-sep">|</span>
+  <span class="ann-label">Theme:</span>
+  <span class="ann-chip" id="theme-toggle" onclick="toggleTheme()">☀️ Light</span>
+  <span class="ann-note">Workflow List — filter, sort, bulk-select, table &amp; card views</span>
+</div>
+
+<!-- ── App shell ── -->
+<div class="shell" id="shell">
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- ── Sidebar ── -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">S</div>
+      <span class="logo-text">STRIDE</span>
+      <span class="logo-badge">Beta</span>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Main</div>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">⊞</span> Dashboard
+      </a>
+      <a href="#" class="nav-item active">
+        <span class="nav-icon">⬡</span> Workflows
+        <span class="nav-badge">12</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">☰</span> Tasks
+        <span class="nav-badge warning">3</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">📅</span> Scheduling
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Operations</div>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">👥</span> Team
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🔔</span> Notifications
+        <span class="nav-badge">5</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">📊</span> Reports
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">💳</span> Invoicing
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">System</div>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">⚙️</span> Settings
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🛡️</span> Admin
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar">RM</div>
+        <div class="user-info">
+          <div class="user-name">Ramki Mario</div>
+          <div class="user-role">System Admin</div>
+        </div>
+        <span style="color:var(--stride-nav-muted);font-size:12px;">⋮</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="mobile-hamburger" onclick="openSidebar()">☰</button>
+      <div class="breadcrumb">
+        <span class="breadcrumb-item">STRIDE</span>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">Workflows</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" title="Notifications">🔔</button>
+        <button class="icon-btn" title="Help">❓</button>
+        <div class="topbar-avatar" title="Profile">RM</div>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <div class="page-content">
+
+      <!-- Page header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Workflows</h1>
+          <p class="page-subtitle">Manage and monitor all operational workflows across your organisation.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-ghost" onclick="alert('Import wizard — Phase 3')">
+            ↑ Import
+          </button>
+          <button class="btn btn-primary" onclick="alert('Create Workflow — Phase 3')">
+            + New Workflow
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Summary strip ── -->
+      <div class="summary-strip">
+        <div class="summary-card active" onclick="filterStatus('all')">
+          <div class="summary-label">All Workflows</div>
+          <div class="summary-count" style="color:var(--stride-primary)">48</div>
+        </div>
+        <div class="summary-card" onclick="filterStatus('running')">
+          <div class="summary-label">Running</div>
+          <div class="summary-count running">12</div>
+        </div>
+        <div class="summary-card" onclick="filterStatus('completed')">
+          <div class="summary-label">Completed</div>
+          <div class="summary-count completed">21</div>
+        </div>
+        <div class="summary-card" onclick="filterStatus('paused')">
+          <div class="summary-label">Paused</div>
+          <div class="summary-count paused">7</div>
+        </div>
+        <div class="summary-card" onclick="filterStatus('failed')">
+          <div class="summary-label">Failed</div>
+          <div class="summary-count failed">3</div>
+        </div>
+      </div>
+
+      <!-- ── Toolbar ── -->
+      <div class="toolbar" id="toolbar">
+        <!-- Bulk actions (shown when rows selected) -->
+        <div class="bulk-actions" id="bulk-actions">
+          <span class="bulk-label" id="bulk-label">2 selected</span>
+          <button class="btn btn-ghost" style="padding:4px 10px;font-size:12px;" onclick="alert('Assign — Phase 3')">Assign</button>
+          <button class="btn btn-ghost" style="padding:4px 10px;font-size:12px;" onclick="alert('Export selected')">Export</button>
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;" onclick="clearSelection()">✕ Clear</button>
+        </div>
+
+        <!-- Search -->
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" placeholder="Search workflows…" id="search-input" oninput="applyFilters()" />
+        </div>
+
+        <!-- Filters -->
+        <select class="filter-select" id="filter-status" onchange="applyFilters()">
+          <option value="">All Statuses</option>
+          <option value="running">Running</option>
+          <option value="completed">Completed</option>
+          <option value="paused">Paused</option>
+          <option value="failed">Failed</option>
+          <option value="draft">Draft</option>
+          <option value="scheduled">Scheduled</option>
+        </select>
+
+        <select class="filter-select" id="filter-type" onchange="applyFilters()">
+          <option value="">All Types</option>
+          <option value="Onboarding">Onboarding</option>
+          <option value="Maintenance">Maintenance</option>
+          <option value="Compliance">Compliance</option>
+          <option value="Dispatch">Dispatch</option>
+          <option value="Inspection">Inspection</option>
+          <option value="Finance">Finance</option>
+        </select>
+
+        <select class="filter-select" id="filter-priority" onchange="applyFilters()">
+          <option value="">All Priorities</option>
+          <option value="critical">Critical</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+
+        <!-- Divider -->
+        <div class="toolbar-divider"></div>
+
+        <!-- View toggle -->
+        <div class="view-toggle">
+          <button class="view-btn active" id="view-table" onclick="setView('table')" title="Table view">☰</button>
+          <button class="view-btn" id="view-cards" onclick="setView('cards')" title="Card view">⊞</button>
+        </div>
+
+        <!-- Sort (right) -->
+        <select class="filter-select" id="sort-by" style="margin-left:auto;" onchange="applyFilters()">
+          <option value="name">Sort: Name A–Z</option>
+          <option value="due">Sort: Due Date</option>
+          <option value="status">Sort: Status</option>
+          <option value="priority">Sort: Priority</option>
+          <option value="progress">Sort: Progress</option>
+        </select>
+      </div>
+
+      <!-- ── Table view ── -->
+      <div class="table-wrap" id="table-view">
+        <table class="wf-table" id="wf-table">
+          <thead>
+            <tr>
+              <th class="col-check"><input type="checkbox" class="cb" id="check-all" onchange="toggleAllRows(this)" /></th>
+              <th class="col-name">Workflow <span class="sort-icon asc"></span></th>
+              <th class="col-status">Status</th>
+              <th class="col-type">Type</th>
+              <th class="col-assignee">Assignee</th>
+              <th class="col-due">Due Date <span class="sort-icon none"></span></th>
+              <th class="col-priority">Priority</th>
+              <th class="col-progress">Progress</th>
+              <th class="col-actions"></th>
+            </tr>
+          </thead>
+          <tbody id="wf-tbody">
+            <!-- Rows injected by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Card view ── -->
+      <div class="card-grid" id="card-view">
+        <!-- Cards injected by JS -->
+      </div>
+
+      <!-- ── Empty state ── -->
+      <div class="empty-state" id="empty-state" style="display:none;">
+        <div class="empty-icon">⬡</div>
+        <div class="empty-title" id="empty-title">No workflows found</div>
+        <div class="empty-desc" id="empty-desc">Try adjusting your filters or create your first workflow.</div>
+        <button class="btn btn-primary" onclick="alert('Create Workflow — Phase 3')">+ New Workflow</button>
+      </div>
+
+      <!-- ── Pagination ── -->
+      <div class="pagination" id="pagination">
+        <span class="pagination-info" id="pagination-info">Showing 1–10 of 48 workflows</span>
+        <div class="pagination-controls">
+          <button class="page-btn" disabled>‹</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <span style="color:var(--stride-text-muted);font-size:12px;padding:0 4px;">…</span>
+          <button class="page-btn">5</button>
+          <button class="page-btn">›</button>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+  /* ── Data ── */
+  const WORKFLOWS = [
+    { id:'WF-0041', name:'Staff Onboarding — Engineering Cohort Q2', status:'running',   type:'Onboarding',  assignee:{name:'Sarah K.', initials:'SK', color:'#6366F1'}, due:'2026-05-22', priority:'high',     progress:62,  tags:['HR','Engineering'] },
+    { id:'WF-0039', name:'Monthly Fire Safety Inspection',            status:'running',   type:'Inspection',  assignee:{name:'James O.', initials:'JO', color:'#10B981'}, due:'2026-05-18', priority:'critical', progress:40,  tags:['Safety','Compliance'] },
+    { id:'WF-0038', name:'Q1 Compliance Audit — Finance',             status:'completed', type:'Compliance',  assignee:{name:'Priya M.', initials:'PM', color:'#8B5CF6'}, due:'2026-04-30', priority:'high',     progress:100, tags:['Finance','Audit'] },
+    { id:'WF-0037', name:'Emergency Generator Maintenance',           status:'paused',    type:'Maintenance', assignee:{name:'Carlos D.', initials:'CD', color:'#F59E0B'}, due:'2026-05-25', priority:'medium',  progress:28,  tags:['Facilities'] },
+    { id:'WF-0036', name:'New Vendor Onboarding — Acme Corp',         status:'running',   type:'Onboarding',  assignee:{name:'Lisa T.', initials:'LT', color:'#3B82F6'},  due:'2026-05-20', priority:'medium',   progress:55,  tags:['Procurement'] },
+    { id:'WF-0035', name:'Payroll Processing — May 2026',             status:'scheduled', type:'Finance',     assignee:{name:'Priya M.', initials:'PM', color:'#8B5CF6'}, due:'2026-05-31', priority:'critical', progress:0,   tags:['Finance','Payroll'] },
+    { id:'WF-0034', name:'Field Technician Dispatch — Zone 3',        status:'running',   type:'Dispatch',    assignee:{name:'James O.', initials:'JO', color:'#10B981'}, due:'2026-05-16', priority:'critical', progress:75,  tags:['Field Ops'] },
+    { id:'WF-0033', name:'Annual GDPR Compliance Review',             status:'paused',    type:'Compliance',  assignee:{name:'Sarah K.', initials:'SK', color:'#6366F1'}, due:'2026-06-15', priority:'high',     progress:15,  tags:['Legal','Compliance'] },
+    { id:'WF-0032', name:'Office Renovation Sign-off Process',        status:'draft',     type:'Maintenance', assignee:{name:'Marcus L.', initials:'ML', color:'#EF4444'}, due:'2026-06-01', priority:'low',    progress:0,   tags:['Facilities'] },
+    { id:'WF-0031', name:'IT Asset Refresh — Laptops Q2',             status:'failed',    type:'Maintenance', assignee:{name:'Carlos D.', initials:'CD', color:'#F59E0B'}, due:'2026-05-10', priority:'high',   progress:45,  tags:['IT'] },
+    { id:'WF-0030', name:'Client Onboarding — TechVentures Ltd',      status:'completed', type:'Onboarding',  assignee:{name:'Lisa T.', initials:'LT', color:'#3B82F6'},  due:'2026-05-05', priority:'medium',  progress:100, tags:['Sales'] },
+    { id:'WF-0029', name:'Emergency HVAC Repair — Building B',        status:'failed',    type:'Maintenance', assignee:{name:'James O.', initials:'JO', color:'#10B981'}, due:'2026-05-12', priority:'critical', progress:60, tags:['Facilities','Urgent'] },
+  ];
+
+  /* ── State ── */
+  let selectedRows = new Set();
+  let currentView = 'table';
+  let currentState = 'list';
+
+  /* ── Render table rows ── */
+  function renderTable(data) {
+    const tbody = document.getElementById('wf-tbody');
+    if (!data.length) { tbody.innerHTML = ''; return; }
+    tbody.innerHTML = data.map(wf => {
+      const dueCls = getDueCls(wf.due, wf.status);
+      const dueLabel = wf.status === 'completed' ? formatDate(wf.due) : getDueLabel(wf.due);
+      const sel = selectedRows.has(wf.id) ? 'selected' : '';
+      return `
+      <tr class="${sel}" onclick="rowClick('${wf.id}',event)">
+        <td class="col-check"><input type="checkbox" class="cb row-cb" data-id="${wf.id}" ${sel?'checked':''} onchange="toggleRow('${wf.id}',this)" onclick="event.stopPropagation()" /></td>
+        <td class="col-name">
+          <div class="wf-name">${wf.name}</div>
+          <div class="wf-id">${wf.id}</div>
+          <div class="wf-tags">${wf.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        </td>
+        <td class="col-status">${statusPill(wf.status)}</td>
+        <td class="col-type"><span class="type-badge">${typeIcon(wf.type)} ${wf.type}</span></td>
+        <td class="col-assignee">
+          <div class="assignee-cell">
+            <div class="assignee-avatar" style="background:${wf.assignee.color}">${wf.assignee.initials}</div>
+            <span class="assignee-name">${wf.assignee.name}</span>
+          </div>
+        </td>
+        <td class="col-due"><span class="due-date ${dueCls}">${dueLabel}</span></td>
+        <td class="col-priority">${priorityBadge(wf.priority)}</td>
+        <td class="col-progress">
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill ${progressCls(wf.progress, wf.status)}" style="width:${wf.progress}%"></div></div>
+            <span class="progress-pct">${wf.progress}%</span>
+          </div>
+        </td>
+        <td class="col-actions">
+          <div class="row-actions">
+            <button class="row-btn" title="View" onclick="event.stopPropagation();alert('View ${wf.id} — links to Workflow Detail')">👁</button>
+            <button class="row-btn" title="Edit" onclick="event.stopPropagation();alert('Edit ${wf.id}')">✏️</button>
+            <button class="row-btn danger" title="Delete" onclick="event.stopPropagation();alert('Delete ${wf.id}')">🗑</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  /* ── Render cards ── */
+  function renderCards(data) {
+    const grid = document.getElementById('card-view');
+    if (!data.length) { grid.innerHTML = ''; return; }
+    grid.innerHTML = data.map(wf => `
+      <div class="wf-card" onclick="alert('Open ${wf.id} — links to Workflow Detail')">
+        <div class="card-header">
+          <div>
+            <div class="card-title">${wf.name}</div>
+            <div class="card-id">${wf.id}</div>
+          </div>
+          ${statusPill(wf.status)}
+        </div>
+        <div class="card-meta">
+          <span class="type-badge">${typeIcon(wf.type)} ${wf.type}</span>
+          ${priorityBadge(wf.priority)}
+        </div>
+        <div class="card-progress">
+          <div class="card-progress-label">
+            <span>Progress</span>
+            <span>${wf.progress}%</span>
+          </div>
+          <div class="progress-bar" style="height:6px">
+            <div class="progress-fill ${progressCls(wf.progress,wf.status)}" style="width:${wf.progress}%"></div>
+          </div>
+        </div>
+        <div class="wf-tags" style="margin-bottom:10px">${wf.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <div class="card-footer">
+          <div class="assignee-cell">
+            <div class="assignee-avatar" style="background:${wf.assignee.color};width:22px;height:22px;font-size:9px">${wf.assignee.initials}</div>
+            <span class="assignee-name" style="font-size:12px">${wf.assignee.name}</span>
+          </div>
+          <span class="due-date ${getDueCls(wf.due,wf.status)}" style="font-size:12px">${getDueLabel(wf.due)}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /* ── Helpers ── */
+  function statusPill(s) {
+    const map = {
+      running:   ['pill-running',   '● Running'],
+      completed: ['pill-completed', '● Completed'],
+      paused:    ['pill-paused',    '● Paused'],
+      failed:    ['pill-failed',    '● Failed'],
+      draft:     ['pill-draft',     '● Draft'],
+      scheduled: ['pill-scheduled', '● Scheduled'],
+    };
+    const [cls, label] = map[s] || ['pill-draft', s];
+    return `<span class="status-pill ${cls}"><span class="status-dot"></span>${label.slice(2)}</span>`;
+  }
+  function priorityBadge(p) {
+    const map = { critical:['priority-critical','⚠ Critical'], high:['priority-high','↑ High'], medium:['priority-medium','→ Medium'], low:['priority-low','↓ Low'] };
+    const [cls, label] = map[p] || ['priority-low', p];
+    return `<span class="priority-badge ${cls}">${label}</span>`;
+  }
+  function typeIcon(t) {
+    const icons = { Onboarding:'👤', Maintenance:'🔧', Compliance:'📋', Dispatch:'📍', Inspection:'🔍', Finance:'💰' };
+    return icons[t] || '⬡';
+  }
+  function progressCls(pct, status) {
+    if (status === 'completed') return 'complete';
+    if (status === 'failed') return 'danger';
+    if (pct < 30 && status === 'paused') return 'warning';
+    return '';
+  }
+  function getDueCls(due, status) {
+    if (status === 'completed') return 'due-ok';
+    const d = new Date(due), now = new Date();
+    const diff = (d - now) / 86400000;
+    if (diff < 0) return 'due-overdue';
+    if (diff <= 3) return 'due-soon';
+    return 'due-ok';
+  }
+  function getDueLabel(due) {
+    const d = new Date(due), now = new Date();
+    const diff = Math.round((d - now) / 86400000);
+    if (diff < 0) return `${Math.abs(diff)}d overdue`;
+    if (diff === 0) return 'Due today';
+    if (diff === 1) return 'Due tomorrow';
+    if (diff <= 7) return `Due in ${diff}d`;
+    return formatDate(due);
+  }
+  function formatDate(s) {
+    return new Date(s).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  }
+
+  /* ── Selection ── */
+  function toggleRow(id, cb) {
+    if (cb.checked) selectedRows.add(id); else selectedRows.delete(id);
+    updateBulkActions();
+    document.getElementById('check-all').checked = selectedRows.size === WORKFLOWS.length;
+  }
+  function toggleAllRows(masterCb) {
+    WORKFLOWS.forEach(w => masterCb.checked ? selectedRows.add(w.id) : selectedRows.delete(w.id));
+    document.querySelectorAll('.row-cb').forEach(cb => cb.checked = masterCb.checked);
+    document.querySelectorAll('#wf-tbody tr').forEach(tr => masterCb.checked ? tr.classList.add('selected') : tr.classList.remove('selected'));
+    updateBulkActions();
+  }
+  function rowClick(id, e) {
+    if (e.target.type === 'checkbox') return;
+    alert(`Open workflow ${id} → links to Workflow Detail page (US-034.5)`);
+  }
+  function updateBulkActions() {
+    const bulk = document.getElementById('bulk-actions');
+    const lbl = document.getElementById('bulk-label');
+    if (selectedRows.size > 0) {
+      bulk.classList.add('visible');
+      lbl.textContent = `${selectedRows.size} selected`;
+    } else {
+      bulk.classList.remove('visible');
+    }
+  }
+  function clearSelection() {
+    selectedRows.clear();
+    document.querySelectorAll('.row-cb, #check-all').forEach(cb => cb.checked = false);
+    document.querySelectorAll('#wf-tbody tr').forEach(tr => tr.classList.remove('selected'));
+    updateBulkActions();
+  }
+
+  /* ── Filters ── */
+  function applyFilters() {
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const status = document.getElementById('filter-status').value;
+    const type   = document.getElementById('filter-type').value;
+    const pri    = document.getElementById('filter-priority').value;
+    const sort   = document.getElementById('sort-by').value;
+
+    let data = WORKFLOWS.filter(w => {
+      if (search && !w.name.toLowerCase().includes(search) && !w.id.toLowerCase().includes(search)) return false;
+      if (status && w.status !== status) return false;
+      if (type && w.type !== type) return false;
+      if (pri && w.priority !== pri) return false;
+      return true;
+    });
+
+    const sortFns = {
+      name:     (a,b) => a.name.localeCompare(b.name),
+      due:      (a,b) => new Date(a.due) - new Date(b.due),
+      status:   (a,b) => a.status.localeCompare(b.status),
+      priority: (a,b) => ['critical','high','medium','low'].indexOf(a.priority) - ['critical','high','medium','low'].indexOf(b.priority),
+      progress: (a,b) => b.progress - a.progress,
+    };
+    data.sort(sortFns[sort] || sortFns.name);
+
+    const info = document.getElementById('pagination-info');
+    const empty = document.getElementById('empty-state');
+    const tableWrap = document.getElementById('table-view');
+    const cardGrid  = document.getElementById('card-view');
+    const pagination = document.getElementById('pagination');
+
+    if (data.length === 0) {
+      empty.style.display = 'block';
+      document.getElementById('empty-title').textContent = 'No workflows match your filters';
+      document.getElementById('empty-desc').textContent = 'Try clearing a filter or create a new workflow.';
+      tableWrap.style.display = 'none';
+      cardGrid.classList.remove('visible');
+      pagination.style.display = 'none';
+    } else {
+      empty.style.display = 'none';
+      pagination.style.display = 'flex';
+      info.textContent = `Showing 1–${Math.min(data.length,10)} of ${data.length} workflow${data.length!==1?'s':''}`;
+      if (currentView === 'table') { tableWrap.style.display='block'; renderTable(data); }
+      else { cardGrid.classList.add('visible'); renderCards(data); }
+    }
+  }
+
+  function filterStatus(status) {
+    document.getElementById('filter-status').value = status === 'all' ? '' : status;
+    // update summary card active state
+    document.querySelectorAll('.summary-card').forEach(c => c.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    applyFilters();
+  }
+
+  /* ── View toggle ── */
+  function setView(v) {
+    currentView = v;
+    const tableWrap = document.getElementById('table-view');
+    const cardGrid  = document.getElementById('card-view');
+    document.getElementById('view-table').classList.toggle('active', v==='table');
+    document.getElementById('view-cards').classList.toggle('active', v==='cards');
+    if (v === 'table') {
+      tableWrap.style.display = 'block';
+      cardGrid.classList.remove('visible');
+      document.getElementById('pagination').style.display = 'flex';
+    } else {
+      tableWrap.style.display = 'none';
+      cardGrid.classList.add('visible');
+      document.getElementById('pagination').style.display = 'none';
+    }
+    applyFilters();
+  }
+
+  /* ── Annotation state switcher ── */
+  function setState(state) {
+    currentState = state;
+    document.querySelectorAll('.ann-chip').forEach(c => {
+      if (['Table View','Card View','Empty State','Filtered (0 results)'].some(l => c.textContent.includes(l.split(' ')[0]) && c.textContent.includes(l.split(' ').at(-1)))) {
+        c.classList.remove('active');
+      }
+    });
+    event.target.classList.add('active');
+
+    // reset
+    document.getElementById('search-input').value = '';
+    document.getElementById('filter-status').value = '';
+    document.getElementById('filter-type').value = '';
+    document.getElementById('filter-priority').value = '';
+
+    if (state === 'list') {
+      setView('table');
+    } else if (state === 'cards') {
+      setView('cards');
+    } else if (state === 'empty') {
+      // force empty state
+      document.getElementById('search-input').value = 'xxxxxxxxxxx';
+      applyFilters();
+    } else if (state === 'filtered') {
+      document.getElementById('filter-status').value = 'failed';
+      document.getElementById('filter-type').value = 'Onboarding';
+      applyFilters();
+    }
+  }
+
+  /* ── Theme toggle ── */
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('theme-toggle').textContent = isDark ? '☀️ Light' : '🌙 Dark';
+  }
+
+  /* ── Mobile sidebar ── */
+  function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+  }
+
+  /* ── Init ── */
+  applyFilters();
+</script>
+</body>
+</html>
