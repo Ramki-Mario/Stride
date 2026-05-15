@@ -475,7 +475,7 @@ These stories are not phase-specific — they run alongside regular sprints at d
 
 | Story | GitHub # | Diagram | Trigger | Status |
 |---|---|---|---|---|
-| US-035 | #47 | System Context Diagram (C4 L1) | End of Phase 1 (retroactive) | [ ] |
+| US-035 | #47 | System Context Diagram (C4 L1) | End of Phase 1 (retroactive) | [x] PR #53 |
 | US-036 | #48 | Container Diagram (C4 L2) | End of Phase 2 | [ ] |
 | US-037 | #49 | Module Interaction Diagram | End of Phase 2 | [ ] |
 | US-038 | #50 | Auth Flow Diagram | End of Phase 2 | [ ] |

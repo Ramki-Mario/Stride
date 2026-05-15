@@ -109,7 +109,7 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 - [ ] US-030: Angular login page (PrimeNG reactive form) ← blocked on US-034 (GitHub #28, EP-015)
 - [ ] US-031: Auth guard + APP_INITIALIZER session check (GitHub #29, EP-015)
 - [ ] US-032: appsettings.Development.json for local dev (GitHub #30, EP-016)
-- [ ] **US-035: System Context Diagram — EP-017 (#47, Docs and Diagrams milestone)**
+- [x] **US-035: System Context Diagram — EP-017 (#47, PR #53, Done)**
 - [ ] **US-036: Container Diagram (C4 L2) — EP-017 (#48, trigger: end of Phase 2)**
 - [ ] **US-037: Module Interaction Diagram — EP-017 (#49, trigger: end of Phase 2)**
 - [ ] **US-038: Auth Flow Diagram — EP-017 (#50, trigger: end of Phase 2)**
