@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BuildingBlocks.Application.Abstractions;
+using STRIDE.Modules.Identity.API.Authorization;
 using STRIDE.Modules.Identity.API.Dtos;
 using STRIDE.Modules.Identity.Application.Commands.AssignRole;
 using STRIDE.Modules.Identity.Application.Queries.GetUser;
@@ -46,9 +47,11 @@ public sealed class UsersController : ControllerBase
 
     /// <summary>
     /// Assigns a role to a user within the current tenant.
+    /// Requires the <c>Admin</c> role — only admins may grant roles.
     /// POST /api/identity/users/{userId}/roles
     /// </summary>
     [HttpPost("{userId:guid}/roles")]
+    [Authorize(Policy = Policies.RequireAdmin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
