@@ -99,6 +99,7 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 - [x] US-023: IUserRepository, IRoleRepository, ITenantRepository implementations (PR #38)
 - [x] US-024: IJwtTokenService + BFF auth endpoints (login/logout/me) + Redis ITicketStore (PR #39)
 - [x] US-025: JWT bearer validation on Host + appsettings hygiene (PR #41)
+- [x] US-026: MediatR handlers (Login, Register, AssignRole, GetUser) + PBKDF2 PasswordHasher + ITenantContextSetter (PR #42)
 
 ### Pending
 - [ ] US-026: MediatR command and query handlers (Login, Register, AssignRole, GetUser)

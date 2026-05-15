@@ -324,7 +324,7 @@
 
 | ID | Story | Tasks | Complexity | Status |
 |---|---|---|---|---|
-| US-026 | As a developer, all identity operations flow through MediatR handlers | T-080 Implement LoginCommand + handler<br>T-081 Implement RegisterUserCommand + handler<br>T-082 Implement AssignRoleCommand + handler<br>T-083 Implement GetUserByIdQuery + handler<br>T-084 Implement GetUserByEmailQuery + handler | L | [ ] |
+| US-026 | As a developer, all identity operations flow through MediatR handlers | T-080 LoginCommand + handler<br>T-081 RegisterCommand + handler<br>T-082 AssignRoleCommand + handler<br>T-083 GetUserQuery + handler<br>T-084 PBKDF2 PasswordHasher<br>T-085 ITenantContextSetter + TenantMiddleware fix | L | [x] |
 | US-027 | As an operator, invalid login attempts return structured errors, not exceptions | T-085 Add FluentValidation validators for LoginCommand + RegisterUserCommand | S | [ ] |
 
 **Dependencies:** EP-010, EP-011
