@@ -106,16 +106,16 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 - [x] US-032: appsettings.Development.json for local dev (PR #54)
 
 ### Pending
-- [-] **US-034: UI/UX Design — 5 of 7 sub-issues Done (GitHub #37, EP-015)**
+- [x] **US-034: UI/UX Design — ALL 7 sub-issues Done ✅ (GitHub #37 closed, EP-015)**
   - [x] US-034.1 Shell & Layout — `01-shell-layout.html` PR #62 ✅
   - [x] US-034.2 Login Page — `02-login.html` PR #63 ✅
   - [x] US-034.3 Dashboard — `03-dashboard.html` PR #65 ✅
   - [x] US-034.4 Workflow List — `04-workflow-list.html` PR #66 ✅
   - [x] US-034.5 Workflow Detail — `05-workflow-detail.html` PR #67 ✅
-  - [ ] **US-034.6 User Management — `06-user-management.html` (Next)**
-  - [ ] **US-034.7 Reporting — `07-reporting.html` (Pending)**
-- [ ] US-030: Angular login page (PrimeNG reactive form) ← blocked on US-034 (GitHub #28, EP-015)
-- [ ] US-031: Auth guard + APP_INITIALIZER session check (GitHub #29, EP-015)
+  - [x] US-034.6 User Management — `06-user-management.html` PR #68 ✅
+  - [x] US-034.7 Reporting — `07-reporting.html` PR #69 ✅
+- [ ] **US-030: Angular login page (PrimeNG reactive form) ← UNBLOCKED, next story (GitHub #28, EP-015)**
+- [ ] US-031: Auth guard + APP_INITIALIZER session check ← blocked on US-030 (GitHub #29, EP-015)
 - [x] US-032: appsettings.Development.json — EP-016 closed ✅ (PR #54)
 - [x] **US-035: System Context Diagram — EP-017 (#47, PR #53, Done)**
 - [ ] **US-036: Container Diagram (C4 L2) — EP-017 (#48, trigger: end of Phase 2)**
@@ -138,7 +138,9 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 - EP-016 (appsettings.Development, #16): ✅ Done
 - EP-017 (Architecture Diagrams, #46): 🔵 Open — US-035 done (1/6)
 - Issues #55 (US-034.1), #56 (US-034.2), #57 (US-034.3), #58 (US-034.4), #59 (US-034.5): ✅ Closed/Done
-- Issues #60 (US-034.6), #61 (US-034.7): ⬜ Next
+- Issues #60 (US-034.6) PR #68, #61 (US-034.7) PR #69: ✅ Done
+- Issue #37 (US-034 parent): ✅ Closed
+- **US-030 Angular login page (#28): ⬜ Next — UNBLOCKED**
 
 ## Phase 3 — Core Workflow Engine (Pending)
 ## Phase 4 — Dashboard & Reporting (Pending)

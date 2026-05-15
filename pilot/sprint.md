@@ -508,8 +508,8 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | US-034.3 Dashboard (#57) | `03-dashboard.html` | #65 | [x] Done |
 | US-034.4 Workflow List (#58) | `04-workflow-list.html` | #66 | [x] Done |
 | US-034.5 Workflow Detail (#59) | `05-workflow-detail.html` | #67 | [x] Done |
-| US-034.6 User Management (#60) | `06-user-management.html` | — | [ ] **Next** |
-| US-034.7 Reporting (#61) | `07-reporting.html` | — | [ ] Pending |
+| US-034.6 User Management (#60) | `06-user-management.html` | #68 | [x] Done |
+| US-034.7 Reporting (#61) | `07-reporting.html` | #69 | [x] Done |
 
 **Acceptance Criteria:**
 - [x] Color tokens defined — `--stride-*` CSS custom properties, light + dark
@@ -518,7 +518,7 @@ These stories are not phase-specific — they run alongside regular sprints at d
 - [x] Shell, Login, Dashboard, Workflow List, Workflow Detail prototypes committed
 - [ ] User Management prototype (#60)
 - [ ] Reporting prototype (#61)
-- [ ] US-034 parent issue closed (after US-034.6 + US-034.7 done)
+- [x] US-034 parent issue #37 closed ✅ — all 7 sub-issues done
 
 ---
 
