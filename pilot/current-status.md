@@ -157,7 +157,9 @@ Phase 3 (Core Workflow Engine) — **In Progress**.
   - WorkflowsController: 12 endpoints (definition CRUD + instance lifecycle)
   - StepsController: 4 step operation endpoints (assign/complete/fail/skip)
   - Request DTOs, ITenantContext injection fix, api.readme.md KT doc
-- EP-022 #76 (Angular UI): US-054 #90, US-055 #91, US-056 #92, US-057 #93
+- EP-022 #76 (Angular UI):
+  - US-054 #90 ✅ — **Done** (PR #108, 2026-05-16) — Workflow list page: table/card view, filters, status badges, bulk-select, pagination, skeleton, empty state, WorkflowService
+  - US-055 #91, US-056 #92, US-057 #93 — Pending
 
 ## Phase 4 — Dashboard & Reporting (Pending — board populated 2026-05-16)
 - EP-023 #94 (Reporting Read Models): US-058 #98

@@ -1,0 +1,337 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     STRIDE — Workflow Detail Page   (US-055 · EP-022)
+     Design reference: pilot/docs/ui-mockups/05-workflow-detail.html
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- ── Loading skeleton ─────────────────────────────────────────────────── -->
+@if (isLoading()) {
+  <div class="wfd-page" aria-busy="true">
+    <div class="wfd-hero wfd-skeleton-block" style="height: 9rem;"></div>
+    <div class="wfd-cols">
+      <div class="wfd-skeleton-block" style="height: 22rem;"></div>
+      <div class="wfd-skeleton-block" style="height: 14rem;"></div>
+    </div>
+  </div>
+}
+
+<!-- ── Error state ──────────────────────────────────────────────────────── -->
+@else if (errorMessage() && !workflow()) {
+  <div class="wfd-page">
+    <div class="wfd-error-banner" role="alert">
+      <span class="pi pi-exclamation-triangle"></span>
+      {{ errorMessage() }}
+      <button class="wfd-retry-link" (click)="loadWorkflow()">Retry</button>
+    </div>
+    <a routerLink="/workflows" class="wfd-btn wfd-btn-ghost">
+      <span class="pi pi-arrow-left"></span> Back to Workflows
+    </a>
+  </div>
+}
+
+<!-- ── Main content ─────────────────────────────────────────────────────── -->
+@else if (workflow(); as wf) {
+  <div class="wfd-page">
+
+    <!-- Breadcrumb -->
+    <nav class="wfd-breadcrumb" aria-label="Breadcrumb">
+      <a routerLink="/workflows" class="wfd-bc-link">Workflows</a>
+      <span class="pi pi-chevron-right wfd-bc-sep" aria-hidden="true"></span>
+      <span class="wfd-bc-current">{{ wf.name }}</span>
+    </nav>
+
+    <!-- Action feedback banner -->
+    @if (actionError()) {
+      <div class="wfd-error-banner" role="alert">
+        <span class="pi pi-exclamation-triangle"></span>
+        {{ actionError() }}
+      </div>
+    }
+
+    <!-- ── Hero card ──────────────────────────────────────────────────── -->
+    <div class="wfd-hero">
+      <div class="wfd-hero-top">
+
+        <!-- Icon -->
+        <div class="wfd-hero-icon" aria-hidden="true">
+          <span class="pi pi-sitemap"></span>
+        </div>
+
+        <!-- Title + description -->
+        <div class="wfd-hero-meta">
+          <div class="wfd-hero-id">{{ shortId() }}</div>
+          <h1 class="wfd-hero-title">{{ wf.name }}</h1>
+          @if (wf.description) {
+            <p class="wfd-hero-desc">{{ wf.description }}</p>
+          }
+          <div class="wfd-hero-badges">
+            <span class="wfd-badge" [ngClass]="statusCssClass()">
+              <span class="wfd-badge-dot" [class.pulse]="wf.status === 'Active'"></span>
+              {{ statusLabel() }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="wfd-hero-actions">
+          @if (actionPending()) {
+            <span class="wfd-action-spinner">
+              <span class="pi pi-spin pi-spinner"></span>
+              {{ actionPending() }}
+            </span>
+          } @else {
+            @if (canActivate()) {
+              <button
+                class="wfd-btn wfd-btn-primary"
+                (click)="activate()"
+                aria-label="Activate this workflow definition"
+              >
+                <span class="pi pi-check-circle"></span> Activate
+              </button>
+            }
+            @if (canStart()) {
+              <button
+                class="wfd-btn wfd-btn-success"
+                (click)="startInstance()"
+                aria-label="Start a new workflow instance"
+              >
+                <span class="pi pi-play"></span> Start Instance
+              </button>
+            }
+            <a
+              routerLink="/workflows/{{ wf.id }}/edit"
+              class="wfd-btn wfd-btn-ghost"
+              aria-label="Edit workflow definition"
+            >
+              <span class="pi pi-pencil"></span> Edit
+            </a>
+            @if (canDelete()) {
+              <button
+                class="wfd-btn wfd-btn-danger"
+                (click)="deleteWorkflow()"
+                aria-label="Delete workflow definition"
+              >
+                <span class="pi pi-trash"></span>
+              </button>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="wfd-stats-row">
+        <div class="wfd-stat">
+          <div class="wfd-stat-label">Steps</div>
+          <div class="wfd-stat-value">{{ wf.steps.length }}</div>
+        </div>
+        <div class="wfd-stat">
+          <div class="wfd-stat-label">Required Steps</div>
+          <div class="wfd-stat-value">{{ requiredStepCount(wf.steps) }}</div>
+        </div>
+        <div class="wfd-stat">
+          <div class="wfd-stat-label">Created</div>
+          <div class="wfd-stat-value">{{ formatDate(wf.createdAt) }}</div>
+        </div>
+        <div class="wfd-stat">
+          <div class="wfd-stat-label">Last Updated</div>
+          <div class="wfd-stat-value">{{ formatDate(wf.updatedAt) }}</div>
+        </div>
+        <div class="wfd-stat">
+          <div class="wfd-stat-label">Status</div>
+          <div class="wfd-stat-value">{{ statusLabel() }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Two-column layout ───────────────────────────────────────────── -->
+    <div class="wfd-cols">
+
+      <!-- ── Left column: Steps + Activity ── -->
+      <div class="wfd-col-main">
+
+        <!-- Tab bar -->
+        <div class="wfd-tabs-card">
+          <div class="wfd-tab-bar" role="tablist">
+            <button
+              class="wfd-tab"
+              [class.active]="activeTab() === 'steps'"
+              (click)="setTab('steps')"
+              role="tab"
+              [attr.aria-selected]="activeTab() === 'steps'"
+            >
+              <span class="pi pi-list-check"></span> Steps ({{ wf.steps.length }})
+            </button>
+            <button
+              class="wfd-tab"
+              [class.active]="activeTab() === 'activity'"
+              (click)="setTab('activity')"
+              role="tab"
+              [attr.aria-selected]="activeTab() === 'activity'"
+            >
+              <span class="pi pi-comments"></span> Activity
+            </button>
+            <button
+              class="wfd-tab"
+              [class.active]="activeTab() === 'history'"
+              (click)="setTab('history')"
+              role="tab"
+              [attr.aria-selected]="activeTab() === 'history'"
+            >
+              <span class="pi pi-history"></span> History
+            </button>
+          </div>
+
+          <!-- Steps tab ────────────────────────────────────────────────── -->
+          @if (activeTab() === 'steps') {
+            <div class="wfd-tab-panel" role="tabpanel">
+              @if (sortedSteps().length === 0) {
+                <div class="wfd-no-steps">
+                  <span class="pi pi-inbox" style="font-size: 2rem; opacity: 0.3;"></span>
+                  <p>No steps defined yet.</p>
+                  <a routerLink="/workflows/{{ wf.id }}/edit" class="wfd-btn wfd-btn-ghost wfd-btn-sm">
+                    <span class="pi pi-plus"></span> Add Steps
+                  </a>
+                </div>
+              } @else {
+                <div class="wfd-step-track" role="list">
+                  @for (step of sortedSteps(); track step.id; let last = $last; let idx = $index) {
+                    <div class="wfd-step-item" role="listitem">
+
+                      <!-- Connector column -->
+                      <div class="wfd-step-connector" aria-hidden="true">
+                        <div class="wfd-step-dot step-dot-pending">
+                          {{ step.order }}
+                        </div>
+                        @if (!last) {
+                          <div class="wfd-step-line"></div>
+                        }
+                      </div>
+
+                      <!-- Step content -->
+                      <div class="wfd-step-body">
+                        <div class="wfd-step-header">
+                          <span class="wfd-step-name">{{ step.name }}</span>
+                          @if (step.isRequired) {
+                            <span class="wfd-required-badge" title="This step is required">Required</span>
+                          } @else {
+                            <span class="wfd-optional-badge">Optional</span>
+                          }
+                        </div>
+                        @if (step.description) {
+                          <p class="wfd-step-desc">{{ step.description }}</p>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Activity tab ─────────────────────────────────────────────── -->
+          @if (activeTab() === 'activity') {
+            <div class="wfd-tab-panel" role="tabpanel">
+              <div class="wfd-activity-placeholder">
+                <span class="pi pi-clock" style="font-size: 2rem; opacity: 0.3;"></span>
+                <p class="wfd-ph-title">Activity feed coming in Phase 4</p>
+                <p class="wfd-ph-desc">
+                  Step completions, comments, and status changes will appear here
+                  once workflow instances are in use.
+                </p>
+              </div>
+            </div>
+          }
+
+          <!-- History tab ──────────────────────────────────────────────── -->
+          @if (activeTab() === 'history') {
+            <div class="wfd-tab-panel" role="tabpanel">
+              <div class="wfd-activity-placeholder">
+                <span class="pi pi-history" style="font-size: 2rem; opacity: 0.3;"></span>
+                <p class="wfd-ph-title">Instance history coming in Phase 4</p>
+                <p class="wfd-ph-desc">
+                  A log of all workflow instances started from this definition
+                  will appear here.
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ── Right column: Metadata ── -->
+      <div class="wfd-col-side">
+
+        <!-- Metadata card -->
+        <div class="wfd-info-card">
+          <div class="wfd-info-header">
+            <span class="pi pi-info-circle"></span> Details
+          </div>
+          <div class="wfd-info-body">
+            <div class="wfd-info-row">
+              <span class="wfd-info-label">ID</span>
+              <code class="wfd-info-code">{{ shortId() }}</code>
+            </div>
+            <div class="wfd-info-row">
+              <span class="wfd-info-label">Status</span>
+              <span class="wfd-badge wfd-badge-sm" [ngClass]="statusCssClass()">
+                <span class="wfd-badge-dot"></span>
+                {{ statusLabel() }}
+              </span>
+            </div>
+            <div class="wfd-info-row">
+              <span class="wfd-info-label">Total Steps</span>
+              <span class="wfd-info-value">{{ wf.steps.length }}</span>
+            </div>
+            <div class="wfd-info-row">
+              <span class="wfd-info-label">Created</span>
+              <span class="wfd-info-value">{{ formatDateTime(wf.createdAt) }}</span>
+            </div>
+            <div class="wfd-info-row">
+              <span class="wfd-info-label">Updated</span>
+              <span class="wfd-info-value">{{ formatDateTime(wf.updatedAt) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions card -->
+        <div class="wfd-info-card">
+          <div class="wfd-info-header">
+            <span class="pi pi-bolt"></span> Quick Actions
+          </div>
+          <div class="wfd-info-body wfd-actions-list">
+            @if (canActivate()) {
+              <button class="wfd-action-item" (click)="activate()" [disabled]="!!actionPending()">
+                <span class="pi pi-check-circle wfd-action-icon success"></span>
+                <span>Activate Definition</span>
+                <span class="pi pi-chevron-right wfd-action-arrow"></span>
+              </button>
+            }
+            @if (canStart()) {
+              <button class="wfd-action-item" (click)="startInstance()" [disabled]="!!actionPending()">
+                <span class="pi pi-play wfd-action-icon primary"></span>
+                <span>Start New Instance</span>
+                <span class="pi pi-chevron-right wfd-action-arrow"></span>
+              </button>
+            }
+            <a routerLink="/workflows/{{ wf.id }}/edit" class="wfd-action-item">
+              <span class="pi pi-pencil wfd-action-icon"></span>
+              <span>Edit Definition</span>
+              <span class="pi pi-chevron-right wfd-action-arrow"></span>
+            </a>
+            @if (canDelete()) {
+              <button
+                class="wfd-action-item danger"
+                (click)="deleteWorkflow()"
+                [disabled]="!!actionPending()"
+              >
+                <span class="pi pi-trash wfd-action-icon error"></span>
+                <span>Delete</span>
+                <span class="pi pi-chevron-right wfd-action-arrow"></span>
+              </button>
+            }
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+}

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { WorkflowDefinitionSummary, WorkflowInstanceSummary } from '../models/workflow.models';
+import { WorkflowDefinitionSummary, WorkflowDefinitionDetail, WorkflowInstanceSummary } from '../models/workflow.models';
 
 /**
  * Calls the BFF endpoints for workflow data.
@@ -26,6 +26,23 @@ export class WorkflowService {
   /** List all workflow definitions for the current tenant. */
   getDefinitions(): Observable<WorkflowDefinitionSummary[]> {
     return this.http.get<WorkflowDefinitionSummary[]>(`${this.base}/definitions`);
+  }
+
+  /** Get a single workflow definition with all step definitions. */
+  getDefinition(id: string): Observable<WorkflowDefinitionDetail> {
+    return this.http.get<WorkflowDefinitionDetail>(`${this.base}/definitions/${id}`);
+  }
+
+  /** Activate a Draft workflow definition (Draft → Active). */
+  activateDefinition(id: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/definitions/${id}/activate`, {});
+  }
+
+  /** Start a new workflow instance from an Active definition. */
+  startInstance(definitionId: string): Observable<{ workflowInstanceId: string; workflowName: string }> {
+    return this.http.post<{ workflowInstanceId: string; workflowName: string }>(
+      `${this.base}/definitions/${definitionId}/start`, {},
+    );
   }
 
   /** List all workflow instances, optionally filtered by definition. */
