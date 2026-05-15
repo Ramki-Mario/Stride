@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using FluentValidation;
 using MediatR;
-using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
+using STRIDE.BuildingBlocks.Application.Behaviours;
 using System.Reflection;
 
 namespace STRIDE.Modules.Identity.Application;
@@ -9,8 +10,18 @@ public static class IdentityApplicationExtensions
 {
     public static IServiceCollection AddIdentityApplication(this IServiceCollection services)
     {
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+
+            // Pipeline: Logging → Validation → Handler
+            cfg.AddOpenBehavior(typeof(LoggingBehaviour<,>));
+            cfg.AddOpenBehavior(typeof(ValidationBehaviour<,>));
+        });
+
+        // Scan this assembly for all IValidator<T> implementations.
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
         return services;
     }
 }
