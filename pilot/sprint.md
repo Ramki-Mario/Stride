@@ -213,7 +213,7 @@
 **Sprint Goal:** Implement secure, tenant-aware authentication and authorization foundation. After this sprint, a user can log in, be resolved to a tenant, receive an HttpOnly session cookie backed by Redis, and be authorized via claims-based RBAC — all without any token ever reaching the browser.
 
 **Phase:** Phase 2
-**Status:** IN PROGRESS — Backend 100% complete (US-018–US-029 Done). US-030 ✅ Done (PR #70). Pending: US-031. US-032 ✅ Done. US-034 ✅ Done (all 7 sub-issues).
+**Status:** ✅ COMPLETE — All stories done. EP-015 closed. Architecture diagrams (US-036–039) unblocked.
 
 ---
 
@@ -390,7 +390,7 @@
 | ID | Story | Tasks | Complexity | Status |
 |---|---|---|---|---|
 | US-030 | As a user, I can log in with my email and password | T-092 Implement login-page reactive form<br>T-093 Wire AuthService.login() to form submit<br>T-094 Add error display block<br>T-095 Add loading spinner (CSS-only) | M | [x] Done — PR #70 (2026-05-15) |
-| US-031 | As a user, I am redirected to login if my session expires | T-096 Update authGuard to call checkSession() on activation<br>T-097 Add APP_INITIALIZER to call checkSession on boot | S | [ ] Next — UNBLOCKED |
+| US-031 | As a user, I am redirected to login if my session expires | T-096 Update authGuard to call checkSession() on activation<br>T-097 Add APP_INITIALIZER to call checkSession on boot | S | [x] Done — PR #71 (2026-05-15) |
 
 **Dependencies:** EP-011 (BFF auth endpoints must exist)
 **Risks:** APP_INITIALIZER with Observable must complete before app renders — use `firstValueFrom` pattern
