@@ -105,15 +105,24 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 - [x] US-029: RBAC claims-based authorization policies (PR #45)
 
 ### Pending
-- [ ] US-026: MediatR command and query handlers (Login, Register, AssignRole, GetUser)
-- [ ] US-027: FluentValidation validators for commands
-- [ ] US-028: Identity API controllers (UsersController, AuthController)
-- [ ] US-029: RBAC claims-based authorization policies
-- [ ] **US-034: UI/UX Design ← prerequisite before any Angular UI story (GitHub #37)**
-- [ ] US-030: Angular login page (PrimeNG reactive form) ← blocked on US-034
-- [ ] US-031: Auth guard + APP_INITIALIZER session check
-- [ ] US-032: appsettings.Development.json for local dev
-- [ ] **US-033: Architecture diagrams — due end of Phase 2 (GitHub #36)**
+- [ ] **US-034: UI/UX Design ← prerequisite before any Angular UI story (GitHub #37, EP-015)**
+- [ ] US-030: Angular login page (PrimeNG reactive form) ← blocked on US-034 (GitHub #28, EP-015)
+- [ ] US-031: Auth guard + APP_INITIALIZER session check (GitHub #29, EP-015)
+- [ ] US-032: appsettings.Development.json for local dev (GitHub #30, EP-016)
+- [ ] **US-035: System Context Diagram — EP-017 (#47, Docs and Diagrams milestone)**
+- [ ] **US-036: Container Diagram (C4 L2) — EP-017 (#48, trigger: end of Phase 2)**
+- [ ] **US-037: Module Interaction Diagram — EP-017 (#49, trigger: end of Phase 2)**
+- [ ] **US-038: Auth Flow Diagram — EP-017 (#50, trigger: end of Phase 2)**
+- [ ] **US-039: Tenant Resolution Flow Diagram — EP-017 (#51, trigger: end of Phase 2)**
+- [ ] **US-040: Deployment Diagram (Azure) — EP-017 (#52, trigger: end of Phase 7)**
+- *(Old US-033 #36 closed — superseded by individual stories above)*
+
+### GitHub Board State (as of 2026-05-15)
+- EP-001 through EP-014: ✅ Done (closed) — all stories complete
+- EP-015 (Angular Login UI, #15): 🔵 Open — US-030, US-031, US-034 pending
+- EP-016 (appsettings.Development, #16): 🔵 Open — US-032 pending
+- Sub-issue hierarchy: all Epic→Story parent-child links established (EP-008 through EP-017)
+- Milestone "Docs and Diagrams" (#8) created for EP-017 and future doc/diagram stories
 
 ## Phase 3 — Core Workflow Engine (Pending)
 ## Phase 4 — Dashboard & Reporting (Pending)
