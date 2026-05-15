@@ -213,7 +213,7 @@
 **Sprint Goal:** Implement secure, tenant-aware authentication and authorization foundation. After this sprint, a user can log in, be resolved to a tenant, receive an HttpOnly session cookie backed by Redis, and be authorized via claims-based RBAC — all without any token ever reaching the browser.
 
 **Phase:** Phase 2
-**Status:** IN PROGRESS (US-018 through US-022 complete)
+**Status:** IN PROGRESS — Backend 100% complete (US-018–US-029 Done). Pending: US-030, US-031, US-032, US-033, US-034
 
 ---
 
@@ -466,22 +466,23 @@ These stories are not phase-specific — they run alongside regular sprints at d
 
 ---
 
-### US-033 — Architecture Diagrams (GitHub #36)
+### EP-017 — Architecture Diagrams (GitHub #46, Milestone: Docs and Diagrams)
 
 **Type:** Documentation / Architecture
-**When:** Produced at the end of each respective phase/sprint. Diagram set grows incrementally.
-**Tooling:** TBD — evaluating free AI-assisted diagramming tools (Mermaid Live, Eraser.io, Lucidchart AI). Goal: generate from a detailed text prompt, export as PNG + source.
+**Milestone:** "Docs and Diagrams" (GitHub Milestone #8) — home for all future doc/diagram stories.
+**Tooling:** Mermaid Live / Eraser.io / Lucidchart AI. Output: PNG + source in `/docs/diagrams/`.
+**Old US-033 (#36) closed** — superseded by individual per-diagram stories below.
 
-| Diagram | Trigger | Status |
-|---|---|---|
-| System Context Diagram (C4 L1) | End of Phase 1 (retroactive) | [ ] |
-| Container Diagram (C4 L2) | End of Phase 2 | [ ] |
-| Module Interaction Diagram | End of Phase 2 | [ ] |
-| Auth Flow Diagram | End of Phase 2 | [ ] |
-| Tenant Resolution Flow | End of Phase 2 | [ ] |
-| Deployment Diagram (Azure) | End of Phase 7 | [ ] |
+| Story | GitHub # | Diagram | Trigger | Status |
+|---|---|---|---|---|
+| US-035 | #47 | System Context Diagram (C4 L1) | End of Phase 1 (retroactive) | [ ] |
+| US-036 | #48 | Container Diagram (C4 L2) | End of Phase 2 | [ ] |
+| US-037 | #49 | Module Interaction Diagram | End of Phase 2 | [ ] |
+| US-038 | #50 | Auth Flow Diagram | End of Phase 2 | [ ] |
+| US-039 | #51 | Tenant Resolution Flow Diagram | End of Phase 2 | [ ] |
+| US-040 | #52 | Deployment Diagram (Azure) | End of Phase 7 | [ ] |
 
-**Output:** All diagrams committed to `/docs/diagrams/` as PNG + source file.
+**Output:** Each diagram committed to `/docs/diagrams/{name}.png` + source file.
 
 ---
 
@@ -556,9 +557,9 @@ High-level epics (to be expanded before sprint start):
 | Monorepo builds on .NET 10 | S1 | [x] Done |
 | Frontend builds with Angular 21 + Tailwind 4 | S1 | [x] Done |
 | Phase 1 committed to GitHub | S1 | [x] Done |
-| Tenant-scoped login with Redis session | S2 | [ ] |
-| RBAC claims authorization wired | S2 | [ ] |
-| Angular auth guard + BFF session check | S2 | [ ] |
+| Tenant-scoped login with Redis session | S2 | [x] Done (US-024) |
+| RBAC claims authorization wired | S2 | [x] Done (US-029) |
+| Angular auth guard + BFF session check | S2 | [ ] Pending (US-030/031) |
 | Workflow domain model + state machine | S3 | [ ] |
 | EF Core + Dapper split strategy proven | S4 | [ ] |
 | All modules observable (Serilog + Seq + OTEL) | S5 | [ ] |
@@ -579,9 +580,11 @@ High-level epics (to be expanded before sprint start):
 | `ICurrentUser` | BuildingBlocks.Application | 1 | [x] Implemented |
 | `Result<T>` | BuildingBlocks.Application | 1 | [x] Implemented |
 | `TenantAwareRepository<T, TContext>` | BuildingBlocks.Infrastructure | 1 | [x] Implemented |
-| `IJwtTokenService` | Identity.Application | 2 | [ ] Pending |
-| `ISessionStore` | BuildingBlocks.Infrastructure or Identity.Infrastructure | 2 | [ ] Pending |
-| `ITenantResolver` | BuildingBlocks.Infrastructure | 1 (interface), 2 (impl) | [ ] Implementation pending |
-| `IPasswordHasher` | Identity.Application | 2 | [ ] Pending |
-| `IUserRepository` | Identity.Application | 2 | [ ] Pending |
-| `ITenantRepository` | Identity.Application | 2 | [ ] Pending |
+| `IJwtTokenService` | Identity.Application | 2 | [x] Done (US-024) |
+| `ISessionStore` (RedisTicketStore) | Identity.Infrastructure / STRIDE.BFF | 2 | [x] Done (US-024) |
+| `ITenantResolver` | BuildingBlocks.Infrastructure | 1 (interface), 2 (impl) | [x] Done (US-021) |
+| `IPasswordHasher` | Identity.Application | 2 | [x] Done (US-026, PBKDF2-SHA256) |
+| `IUserRepository` | Identity.Application | 2 | [x] Done (US-023) |
+| `ITenantRepository` | Identity.Application | 2 | [x] Done (US-023) |
+| `ITenantContextSetter` | BuildingBlocks.Application | 2 | [x] Done (US-026) |
+| `ICurrentUser` (CurrentUser impl) | BuildingBlocks.Infrastructure | 2 | [x] Done (US-028) |

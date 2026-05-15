@@ -1,0 +1,53 @@
+flowchart LR
+    classDef person       fill:#08427B,stroke:#052E56,color:#fff,font-size:13px
+    classDef system       fill:#1168BD,stroke:#0B4884,color:#fff,font-size:13px
+    classDef extSystem    fill:#999999,stroke:#6b6b6b,color:#fff,font-size:13px
+    classDef extDb        fill:#999999,stroke:#6b6b6b,color:#fff,font-size:13px
+    classDef boundary     fill:none,stroke:#444,stroke-dasharray:6 4,color:#333,font-size:14px
+
+    %% ── People (left column) ────────────────────────────────────────────────
+    subgraph USERS["👤  Users"]
+        direction TB
+        TA("**Tenant Admin**\n─────────────\nManages users, roles,\nand tenant config.")
+        OM("**Operations Manager**\n─────────────\nCreates workflows\nand schedules.")
+        FW("**Field Worker**\n─────────────\nExecutes tasks\nand logs progress.")
+        FU("**Finance User**\n─────────────\nReviews invoices\nand reports.")
+    end
+
+    %% ── STRIDE Platform (centre) ────────────────────────────────────────────
+    subgraph STRIDE["🔷  STRIDE Platform"]
+        direction TB
+        SPA("**Angular SPA**\n─────────────\nRuns in the browser.\nNo bearer tokens ever\nreached the client.")
+        BFF("**STRIDE BFF**\n─────────────\nBackend-for-Frontend.\nIssues HttpOnly cookies.\nProxies SPA → Host.")
+        HOST("**STRIDE Host**\n─────────────\nModular monolith API.\nIdentity · Workflows\nScheduling · Reporting\nNotifications · Invoicing\nAdministration")
+    end
+
+    %% ── External Systems (right column) ─────────────────────────────────────
+    subgraph EXT["☁️  External Systems & Data Stores"]
+        direction TB
+        SQL[("**Azure SQL**\n─────────────\nPersistent storage.\nSchema-separated:\nidentity.* · workflows.*\netc.")]
+        REDIS[("**Redis**\n─────────────\nSession store + cache.\nKey pattern:\ntenant:{id}:session:{id}")]
+        MAIL("**Email Service**\n─────────────\nTransactional email.\n(Phase 5 — Notifications)")
+        IDP("**External IdP**\n─────────────\nAzure AD / Auth0 / OIDC.\nFuture SSO federation.\n(Phase 6+)")
+    end
+
+    %% ── Relationships ────────────────────────────────────────────────────────
+    TA -- "HTTPS / Browser" --> SPA
+    OM -- "HTTPS / Browser" --> SPA
+    FW -- "HTTPS / Browser" --> SPA
+    FU -- "HTTPS / Browser" --> SPA
+
+    SPA -- "HTTPS +\nHttpOnly Cookie" --> BFF
+    BFF -- "HTTPS /\nTyped HttpClient" --> HOST
+
+    BFF -- "Session store\nRedis / TLS" --> REDIS
+    HOST -- "EF Core + Dapper\n/ TLS" --> SQL
+    HOST -- "Cache & revoke\nRedis / TLS" --> REDIS
+    HOST -. "SMTP / HTTP\n(Phase 5)" .-> MAIL
+    HOST -. "OIDC / SAML\n(Phase 6+)" .-> IDP
+
+    %% ── Styles ───────────────────────────────────────────────────────────────
+    class TA,OM,FW,FU person
+    class SPA,BFF,HOST system
+    class MAIL,IDP extSystem
+    class SQL,REDIS extDb

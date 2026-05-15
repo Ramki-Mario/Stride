@@ -27,3 +27,6 @@ desktop.ini
 # ── Editors ───────────────────────────────────────────────────────────────────
 .idea/
 *.swp
+
+# Mermaid CLI local tooling
+docs/diagrams/.puppeteer.json
