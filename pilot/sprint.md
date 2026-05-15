@@ -366,7 +366,7 @@
 
 | ID | Story | Tasks | Complexity | Status |
 |---|---|---|---|---|
-| US-029 | As a developer, I can protect any endpoint with a permission policy in one attribute | T-089 Define permission constants<br>T-090 Register authorization policies in Host<br>T-091 Implement PermissionAuthorizationHandler | M | [ ] |
+| US-029 | As a developer, I can protect any endpoint with a permission policy in one attribute | T-089 Policies.cs constants (6 named policies)<br>T-090 AuthorizationPoliciesExtensions (module self-registers)<br>T-091 IdentityModuleExtensions calls AddIdentityAuthorizationPolicies<br>T-092 UsersController.AssignRole -> RequireAdmin | S | [x] |
 
 **Dependencies:** EP-012
 **Risks:** Policy registration must be done in Host, not per-module — policies are a cross-cutting concern
