@@ -411,7 +411,7 @@
 
 | ID | Story | Tasks | Complexity | Status |
 |---|---|---|---|---|
-| US-032 | As a developer, I can run the backend locally without Docker using appsettings.Development.json | T-098 Write STRIDE.Host/appsettings.Development.json<br>T-099 Write STRIDE.BFF/appsettings.Development.json | XS | [ ] |
+| US-032 | As a developer, I can run the backend locally without Docker using appsettings.Development.json | T-098 Write STRIDE.Host/appsettings.Development.json<br>T-099 Write STRIDE.BFF/appsettings.Development.json | XS | [x] PR #54 |
 
 **Dependencies:** EP-011
 **Risks:** Ensure `appsettings.Development.json` is gitignored if it contains real secrets (use .env.local pattern)
