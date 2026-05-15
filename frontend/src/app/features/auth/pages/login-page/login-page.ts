@@ -16,6 +16,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
 import { AuthService } from '../../../../core/auth/auth.service';
+import { ThemeService } from '../../../../core/theme/theme.service';
 
 @Component({
   selector: 'app-login-page',
@@ -29,6 +30,7 @@ export class LoginPageComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  readonly theme = inject(ThemeService);
 
   /** True while the BFF login + checkSession round-trip is in-flight. */
   readonly isLoading = signal(false);
