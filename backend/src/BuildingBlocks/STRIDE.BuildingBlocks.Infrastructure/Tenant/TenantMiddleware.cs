@@ -16,18 +16,16 @@ public sealed class TenantMiddleware
 
     public async Task InvokeAsync(HttpContext context, TenantContextProvider tenantProvider)
     {
-        // Tenant is resolved from the validated session claim injected by the BFF.
-        // The "tid" claim is set by the BFF after validating the session cookie in Redis.
+        // Tenant is resolved from the "tid" claim carried by the validated JWT.
+        // For authenticated requests the claim is always present; for anonymous
+        // endpoints (e.g. login, registration) there is no JWT yet — the handler
+        // initialises the tenant context itself via ITenantContextSetter.
+        // [Authorize] on protected endpoints guarantees the claim is present there.
         var tidClaim = context.User.FindFirst("tid")?.Value;
 
-        if (!Guid.TryParse(tidClaim, out var tenantId))
-        {
-            _logger.LogWarning("Request rejected: missing or invalid tenant claim.");
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            return;
-        }
+        if (Guid.TryParse(tidClaim, out var tenantId))
+            tenantProvider.Set(tenantId);
 
-        tenantProvider.Set(tenantId);
         await _next(context);
     }
 }

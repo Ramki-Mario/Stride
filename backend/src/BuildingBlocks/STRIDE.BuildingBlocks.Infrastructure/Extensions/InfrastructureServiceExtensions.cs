@@ -15,6 +15,7 @@ public static class InfrastructureServiceExtensions
     {
         services.AddScoped<TenantContextProvider>();
         services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<TenantContextProvider>());
+        services.AddScoped<ITenantContextSetter>(sp => sp.GetRequiredService<TenantContextProvider>());
 
         services.AddScoped<IEventBus, MediatREventBus>();
 
