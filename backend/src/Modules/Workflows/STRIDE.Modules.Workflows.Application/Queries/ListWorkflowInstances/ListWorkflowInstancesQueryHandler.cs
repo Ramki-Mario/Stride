@@ -1,0 +1,46 @@
+using MediatR;
+using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Workflows.Application.Abstractions;
+using STRIDE.Modules.Workflows.Domain.Enums;
+
+namespace STRIDE.Modules.Workflows.Application.Queries.ListWorkflowInstances;
+
+internal sealed class ListWorkflowInstancesQueryHandler
+    : IRequestHandler<ListWorkflowInstancesQuery, Result<IReadOnlyList<WorkflowInstanceSummaryDto>>>
+{
+    private readonly IWorkflowInstanceRepository _instances;
+
+    public ListWorkflowInstancesQueryHandler(IWorkflowInstanceRepository instances)
+        => _instances = instances;
+
+    public async Task<Result<IReadOnlyList<WorkflowInstanceSummaryDto>>> Handle(
+        ListWorkflowInstancesQuery request,
+        CancellationToken ct)
+    {
+        var instances = request.WorkflowDefinitionId.HasValue
+            ? await _instances.GetByDefinitionIdAsync(request.WorkflowDefinitionId.Value, ct)
+            : await _instances.GetAllAsync(ct);
+
+        var summaries = instances
+            .OrderByDescending(i => i.UpdatedAt)
+            .Select(i =>
+            {
+                var completedSteps = i.Steps.Count(s =>
+                    s.Status is StepStatus.Completed or StepStatus.Skipped);
+
+                return new WorkflowInstanceSummaryDto(
+                    i.Id,
+                    i.WorkflowDefinitionId,
+                    i.WorkflowName,
+                    i.Status,
+                    i.Steps.Count,
+                    completedSteps,
+                    i.CreatedAt,
+                    i.CompletedAt);
+            })
+            .ToList()
+            .AsReadOnly();
+
+        return Result.Success<IReadOnlyList<WorkflowInstanceSummaryDto>>(summaries);
+    }
+}
