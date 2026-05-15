@@ -147,6 +147,12 @@ Phase 3 (Core Workflow Engine) — **In Progress**.
   - 2 repository abstractions (IWorkflowDefinitionRepository, IWorkflowInstanceRepository)
   - 12 commands + handlers + validators, 4 queries + handlers + DTOs + validators
   - LoggingBehaviour + ValidationBehaviour pipeline, application.readme.md KT doc
+- EP-020 #74 (Infrastructure): US-049 #85 ✅, US-050 #86 ✅, US-051 #87 ✅ — **Done** (PR #106, 2026-05-16)
+  - EF Core configs (4 tables, workflows schema, enum-as-string, indexes)
+  - DomainEventNotification<T> + SaveChangesAsync domain event dispatch
+  - WorkflowDefinitionRepository + WorkflowInstanceRepository (TenantAwareRepository)
+  - IWorkflowReadService + WorkflowReadService (Dapper — list views + dashboard KPIs)
+  - InitialCreate migration applied to local SQL Express
 - EP-019 #73 (Application Layer): US-044 #80, US-045 #81, US-046 #82, US-047 #83, US-048 #84
 - EP-020 #74 (Infrastructure): US-049 #85, US-050 #86, US-051 #87
 - EP-021 #75 (API Layer): US-052 #88, US-053 #89
