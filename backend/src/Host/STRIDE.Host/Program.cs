@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using STRIDE.Host.ErrorHandling;
 using STRIDE.BuildingBlocks.Infrastructure.Correlation;
 using STRIDE.BuildingBlocks.Infrastructure.Extensions;
 using STRIDE.BuildingBlocks.Infrastructure.Tenant;
@@ -45,6 +46,11 @@ builder.Services
 // SQL Server health check added in Phase 2 when Identity DB is initialized.
 builder.Services.AddHealthChecks();
 
+// ── Global Exception Handler ───────────────────────────────────────────────
+// Converts ValidationException → 400 (RFC 7807) and unhandled → 500.
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 // ── Auth — JWT Bearer ─────────────────────────────────────────────────────
 // Host validates Bearer tokens issued by JwtTokenService (HS256).
 // Secret is supplied via environment variable Jwt__Secret (see .env.example).
@@ -84,6 +90,7 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // ── Middleware Pipeline ────────────────────────────────────────────────────
+app.UseExceptionHandler();   // Must be first so it wraps all downstream middleware.
 app.UseSerilogRequestLogging();
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<TenantMiddleware>();
