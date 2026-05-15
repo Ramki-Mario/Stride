@@ -11,7 +11,8 @@ import {
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { appRoutes } from './app.routes';
 import { correlationInterceptor } from './core/http/correlation.interceptor';
@@ -25,13 +26,16 @@ import { AuthService } from './core/auth/auth.service';
  * any routes, so authGuard's isAuthenticated() short-circuit will fire on the
  * very first navigation — no flicker or redirect to /login for logged-in users.
  *
- * firstValueFrom with { defaultValue: null } swallows 401s silently:
- * an unauthenticated user is a normal state, not an application error.
+ * catchError(() => of(null)) swallows ALL errors silently — both 401
+ * (unauthenticated, normal) and network errors (BFF not running, offline).
  * The AuthService._user signal stays null; authGuard redirects to /login.
  */
 function initSession() {
   const auth = inject(AuthService);
-  return () => firstValueFrom(auth.checkSession(), { defaultValue: null });
+  return () => firstValueFrom(
+    auth.checkSession().pipe(catchError(() => of(null))),
+    { defaultValue: null },
+  );
 }
 
 export const appConfig: ApplicationConfig = {
