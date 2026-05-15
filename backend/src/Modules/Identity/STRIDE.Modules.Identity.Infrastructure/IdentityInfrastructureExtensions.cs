@@ -21,6 +21,7 @@ public static class IdentityInfrastructureExtensions
                 sql => sql.MigrationsAssembly(typeof(IdentityDbContext).Assembly.FullName)));
 
         services.AddScoped<ITenantResolver, TenantResolver>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
