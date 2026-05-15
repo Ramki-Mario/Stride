@@ -143,6 +143,10 @@ Phase 3 (Core Workflow Engine) — **In Progress**.
 - EP-018 #72 (Domain Model): US-041 #77 ✅, US-042 #78 ✅, US-043 #79 ✅ — **Done** (PR #104, 2026-05-16)
   - 4 entity files: WorkflowDefinition, StepDefinition, WorkflowInstance, StepInstance
   - 12 domain events, 2 enums, WorkflowDomainException, domain.readme.md KT doc
+- EP-019 #73 (Application Layer): US-044 #80 ✅, US-045 #81 ✅, US-046 #82 ✅, US-047 #83 ✅, US-048 #84 ✅ — **Done** (PR #105, 2026-05-16)
+  - 2 repository abstractions (IWorkflowDefinitionRepository, IWorkflowInstanceRepository)
+  - 12 commands + handlers + validators, 4 queries + handlers + DTOs + validators
+  - LoggingBehaviour + ValidationBehaviour pipeline, application.readme.md KT doc
 - EP-019 #73 (Application Layer): US-044 #80, US-045 #81, US-046 #82, US-047 #83, US-048 #84
 - EP-020 #74 (Infrastructure): US-049 #85, US-050 #86, US-051 #87
 - EP-021 #75 (API Layer): US-052 #88, US-053 #89

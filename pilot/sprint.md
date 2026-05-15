@@ -530,7 +530,7 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | Epic | GitHub # | Stories | Status |
 |---|---|---|---|
 | EP-018 Workflow Domain Model | #72 | US-041 #77 ✅, US-042 #78 ✅, US-043 #79 ✅ | ✅ Done — PR #104 |
-| EP-019 Workflow Application Layer | #73 | US-044 #80, US-045 #81, US-046 #82, US-047 #83, US-048 #84 | ⬜ Backlog |
+| EP-019 Workflow Application Layer | #73 | US-044 #80 ✅, US-045 #81 ✅, US-046 #82 ✅, US-047 #83 ✅, US-048 #84 ✅ | ✅ Done — PR #105 |
 | EP-020 Workflow Infrastructure | #74 | US-049 #85, US-050 #86, US-051 #87 | ⬜ Backlog |
 | EP-021 Workflow API Layer | #75 | US-052 #88, US-053 #89 | ⬜ Backlog |
 | EP-022 Angular Workflow UI | #76 | US-054 #90, US-055 #91, US-056 #92, US-057 #93 | ⬜ Backlog |
