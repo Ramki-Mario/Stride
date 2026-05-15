@@ -8,13 +8,16 @@
 // ── Shell ────────────────────────────────────────────────────────────────────
 
 .auth-shell {
-  position: relative;
-  min-height: 100vh;
+  // position:fixed + inset:0 takes the shell out of document flow entirely —
+  // the body can never scroll regardless of any ancestor's height constraint.
+  position: fixed;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem 1rem;
+  overflow-y: auto; // allows internal scroll only on very small screens
+  padding: 1.5rem 1rem;
 
   // Deep navy indigo gradient — same as prototype
   background: linear-gradient(135deg, #0f0e2a 0%, #1e1b4b 40%, #312e81 70%, #1e1b4b 100%);
