@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STRIDE — Dashboard [Prototype]</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* ── STRIDE design tokens ── */
+    :root, [data-theme="light"] {
+      --stride-primary:        #6366F1;
+      --stride-primary-hover:  #4F46E5;
+      --stride-primary-subtle: #EEF2FF;
+      --stride-primary-ring:   rgba(99,102,241,0.2);
+      --stride-accent:         #8B5CF6;
+      --stride-accent-subtle:  #F5F3FF;
+      --stride-nav-bg:         #1E1B4B;
+      --stride-nav-border:     rgba(255,255,255,0.08);
+      --stride-nav-text:       #E5E7EB;
+      --stride-nav-icon:       #C7D2FE;
+      --stride-nav-muted:      #A5B4FC;
+      --stride-nav-active:     rgba(99,102,241,0.18);
+      --stride-nav-hover:      rgba(99,102,241,0.10);
+      --stride-bg:             #F8FAFC;
+      --stride-surface:        #FFFFFF;
+      --stride-surface-hover:  #F1F5F9;
+      --stride-surface-raised: #FFFFFF;
+      --stride-text-primary:   #111827;
+      --stride-text-secondary: #6B7280;
+      --stride-text-muted:     #9CA3AF;
+      --stride-border:         #E5E7EB;
+      --stride-border-soft:    #EEF2F7;
+      --stride-topbar-bg:      #FFFFFF;
+      --stride-topbar-border:  #E5E7EB;
+      --stride-shadow-xs:      0 1px 2px rgba(0,0,0,0.05);
+      --stride-shadow-sm:      0 1px 3px rgba(0,0,0,0.08),0 1px 2px -1px rgba(0,0,0,0.06);
+      --stride-shadow-md:      0 4px 6px -1px rgba(0,0,0,0.07),0 2px 4px -2px rgba(0,0,0,0.05);
+      --stride-shadow-lg:      0 10px 15px -3px rgba(0,0,0,0.07),0 4px 6px -4px rgba(0,0,0,0.05);
+      --stride-success:        #10B981;
+      --stride-success-bg:     #ECFDF5;
+      --stride-warning:        #F59E0B;
+      --stride-warning-bg:     #FFFBEB;
+      --stride-error:          #EF4444;
+      --stride-error-bg:       #FEF2F2;
+      --stride-info:           #3B82F6;
+      --stride-info-bg:        #EFF6FF;
+    }
+    [data-theme="dark"] {
+      --stride-primary:        #818CF8;
+      --stride-primary-hover:  #6366F1;
+      --stride-primary-subtle: rgba(129,140,248,0.12);
+      --stride-primary-ring:   rgba(129,140,248,0.25);
+      --stride-accent:         #A78BFA;
+      --stride-accent-subtle:  rgba(167,139,250,0.12);
+      --stride-nav-bg:         #0F172A;
+      --stride-nav-border:     rgba(255,255,255,0.06);
+      --stride-nav-text:       #E2E8F0;
+      --stride-nav-icon:       #C7D2FE;
+      --stride-nav-muted:      #94A3B8;
+      --stride-nav-active:     rgba(129,140,248,0.16);
+      --stride-nav-hover:      rgba(129,140,248,0.10);
+      --stride-bg:             #0B1120;
+      --stride-surface:        #111827;
+      --stride-surface-hover:  #1F2937;
+      --stride-surface-raised: #1E293B;
+      --stride-text-primary:   #F9FAFB;
+      --stride-text-secondary: #CBD5E1;
+      --stride-text-muted:     #94A3B8;
+      --stride-border:         #1E293B;
+      --stride-border-soft:    #334155;
+      --stride-topbar-bg:      #111827;
+      --stride-topbar-border:  #1E293B;
+      --stride-shadow-xs:      0 1px 2px rgba(0,0,0,0.3);
+      --stride-shadow-sm:      0 1px 3px rgba(0,0,0,0.4),0 1px 2px -1px rgba(0,0,0,0.3);
+      --stride-shadow-md:      0 4px 6px -1px rgba(0,0,0,0.4),0 2px 4px -2px rgba(0,0,0,0.3);
+      --stride-shadow-lg:      0 10px 15px -3px rgba(0,0,0,0.45),0 4px 6px -4px rgba(0,0,0,0.3);
+      --stride-success:        #34D399;
+      --stride-success-bg:     rgba(52,211,153,0.1);
+      --stride-warning:        #FBBF24;
+      --stride-warning-bg:     rgba(251,191,36,0.1);
+      --stride-error:          #F87171;
+      --stride-error-bg:       rgba(248,113,113,0.1);
+      --stride-info:           #60A5FA;
+      --stride-info-bg:        rgba(96,165,250,0.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    html, body { height:100%; }
+    body { font-family:'Inter','Segoe UI',system-ui,sans-serif; background:var(--stride-bg); color:var(--stride-text-primary); -webkit-font-smoothing:antialiased; }
+
+    /* ── Layout ── */
+    .app-shell    { display:flex; height:100vh; overflow:hidden; }
+    .sidebar      { width:15rem; background:var(--stride-nav-bg); display:flex; flex-direction:column; flex-shrink:0; transition:width 200ms cubic-bezier(.4,0,.2,1); overflow:hidden; }
+    .main-area    { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .topbar       { height:3.75rem; background:var(--stride-topbar-bg); border-bottom:1px solid var(--stride-topbar-border); display:flex; align-items:center; padding:0 1.5rem; gap:0.75rem; flex-shrink:0; }
+    .page-content { flex:1; overflow-y:auto; padding:1.75rem 1.5rem; background:var(--stride-bg); }
+
+    /* ── Sidebar pieces ── */
+    .sb-brand     { display:flex; align-items:center; gap:0.75rem; padding:1.125rem 1rem; border-bottom:1px solid var(--stride-nav-border); flex-shrink:0; }
+    .sb-logo      { width:2rem; height:2rem; background:var(--stride-primary); border-radius:0.5rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .sb-name      { font-size:1.0625rem; font-weight:700; color:#fff; letter-spacing:.03em; }
+    .sb-tenant    { margin:0.625rem 0.75rem; padding:0.5rem 0.75rem; background:rgba(255,255,255,.06); border:1px solid var(--stride-nav-border); border-radius:0.625rem; display:flex; align-items:center; gap:0.5rem; flex-shrink:0; }
+    .sb-tenant-dot{ width:.5rem; height:.5rem; border-radius:50%; background:var(--stride-accent); flex-shrink:0; }
+    .sb-tenant-nm { font-size:.75rem; font-weight:500; color:var(--stride-nav-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .sb-nav       { flex:1; overflow-y:auto; padding:0.5rem 0; scrollbar-width:thin; scrollbar-color:var(--stride-nav-border) transparent; }
+    .sb-group     { font-size:.625rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--stride-nav-muted); padding:.75rem 1rem .25rem; }
+    .sb-item      { display:flex; align-items:center; gap:.75rem; padding:.5625rem .875rem; margin:.1rem .375rem; border-radius:.5rem; cursor:pointer; color:var(--stride-nav-text); font-size:.875rem; font-weight:450; text-decoration:none; transition:background 150ms,color 150ms; position:relative; white-space:nowrap; }
+    .sb-item:hover{ background:var(--stride-nav-hover); color:#fff; }
+    .sb-item.active{ background:var(--stride-nav-active); color:var(--stride-primary); font-weight:550; }
+    .sb-item.active::before{ content:''; position:absolute; left:-.375rem; top:50%; transform:translateY(-50%); width:3px; height:65%; background:var(--stride-primary); border-radius:2px; }
+    .sb-icon      { width:1.125rem; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--stride-nav-icon); }
+    .sb-item.active .sb-icon { color:var(--stride-primary); }
+    .sb-badge     { font-size:.6875rem; font-weight:600; min-width:1.125rem; height:1.125rem; padding:0 .3rem; background:var(--stride-primary); color:#fff; border-radius:999px; display:flex; align-items:center; justify-content:center; }
+    .sb-user      { border-top:1px solid var(--stride-nav-border); padding:.75rem; display:flex; align-items:center; gap:.625rem; cursor:pointer; transition:background 150ms; flex-shrink:0; }
+    .sb-user:hover{ background:var(--stride-nav-hover); }
+    .sb-avatar    { width:1.875rem; height:1.875rem; border-radius:50%; background:var(--stride-primary); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:.75rem; flex-shrink:0; }
+    .sb-uname     { font-size:.8125rem; font-weight:550; color:var(--stride-nav-text); white-space:nowrap; }
+    .sb-urole     { font-size:.6875rem; color:var(--stride-nav-muted); }
+
+    /* ── Topbar pieces ── */
+    .tb-breadcrumb{ display:flex; align-items:center; gap:.375rem; font-size:.875rem; flex:1; }
+    .tb-root      { color:var(--stride-text-muted); }
+    .tb-sep       { color:var(--stride-border); }
+    .tb-cur       { color:var(--stride-text-primary); font-weight:500; }
+    .tb-search    { display:flex; align-items:center; gap:.5rem; background:var(--stride-bg); border:1px solid var(--stride-border); border-radius:.625rem; padding:.375rem .75rem; font-size:.8125rem; color:var(--stride-text-muted); cursor:text; min-width:12rem; transition:border-color 150ms; }
+    .tb-search:hover{ border-color:var(--stride-text-muted); }
+    .tb-kbd       { background:var(--stride-surface-hover); border:1px solid var(--stride-border); border-radius:.25rem; font-size:.625rem; padding:0 .25rem; }
+    .tb-action    { width:2.25rem; height:2.25rem; border-radius:.5rem; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--stride-text-secondary); background:transparent; border:none; position:relative; transition:background 150ms,color 150ms; }
+    .tb-action:hover{ background:var(--stride-surface-hover); color:var(--stride-text-primary); }
+    .notif-dot    { position:absolute; top:.375rem; right:.375rem; width:.5rem; height:.5rem; background:var(--stride-error); border-radius:50%; border:2px solid var(--stride-topbar-bg); }
+    .tb-urow      { display:flex; align-items:center; gap:.5rem; padding:.25rem .5rem .25rem .25rem; border-radius:.625rem; cursor:pointer; transition:background 150ms; }
+    .tb-urow:hover{ background:var(--stride-surface-hover); }
+    .tb-avt       { width:2rem; height:2rem; border-radius:50%; background:var(--stride-primary); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:.75rem; }
+
+    /* ── Page header ── */
+    .page-header  { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:1.75rem; }
+    .page-title   { font-size:1.375rem; font-weight:700; color:var(--stride-text-primary); }
+    .page-sub     { font-size:.875rem; color:var(--stride-text-secondary); margin-top:.25rem; }
+    .quick-actions{ display:flex; gap:.625rem; align-items:center; flex-wrap:wrap; }
+
+    /* ── Buttons ── */
+    .btn          { display:inline-flex; align-items:center; gap:.4rem; padding:.5rem 1rem; border-radius:.625rem; font-size:.875rem; font-weight:500; cursor:pointer; border:none; transition:background 150ms,box-shadow 150ms,transform 80ms; white-space:nowrap; font-family:inherit; }
+    .btn:active   { transform:scale(.985); }
+    .btn-primary  { background:var(--stride-primary); color:#fff; }
+    .btn-primary:hover{ background:var(--stride-primary-hover); box-shadow:0 4px 12px var(--stride-primary-ring); }
+    .btn-outline  { background:transparent; color:var(--stride-text-primary); border:1.5px solid var(--stride-border); }
+    .btn-outline:hover{ border-color:var(--stride-primary); color:var(--stride-primary); background:var(--stride-primary-subtle); }
+    .btn-ghost    { background:transparent; color:var(--stride-text-secondary); }
+    .btn-ghost:hover{ background:var(--stride-surface-hover); color:var(--stride-text-primary); }
+
+    /* ── KPI Grid ── */
+    .kpi-grid     { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem; }
+    @media(max-width:1100px){ .kpi-grid{ grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:580px) { .kpi-grid{ grid-template-columns:1fr; } }
+
+    .kpi-card     { background:var(--stride-surface); border:1px solid var(--stride-border-soft); border-radius:1rem; padding:1.25rem 1.375rem; box-shadow:var(--stride-shadow-sm); transition:box-shadow 150ms,transform 150ms; display:flex; flex-direction:column; gap:.875rem; }
+    .kpi-card:hover{ box-shadow:var(--stride-shadow-md); transform:translateY(-1px); }
+    .kpi-top      { display:flex; justify-content:space-between; align-items:flex-start; }
+    .kpi-icon     { width:2.5rem; height:2.5rem; border-radius:.75rem; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+    .kpi-icon.indigo{ background:#EEF2FF; color:#6366F1; }
+    .kpi-icon.purple{ background:#F5F3FF; color:#8B5CF6; }
+    .kpi-icon.green { background:#ECFDF5; color:#10B981; }
+    .kpi-icon.amber { background:#FFFBEB; color:#F59E0B; }
+    .kpi-icon.blue  { background:#EFF6FF; color:#3B82F6; }
+    [data-theme="dark"] .kpi-icon.indigo{ background:rgba(99,102,241,.15); color:#818CF8; }
+    [data-theme="dark"] .kpi-icon.purple{ background:rgba(139,92,246,.15); color:#A78BFA; }
+    [data-theme="dark"] .kpi-icon.green { background:rgba(52,211,153,.12); color:#34D399; }
+    [data-theme="dark"] .kpi-icon.amber { background:rgba(251,191,36,.12); color:#FBBF24; }
+    [data-theme="dark"] .kpi-icon.blue  { background:rgba(96,165,250,.12); color:#60A5FA; }
+    .kpi-delta    { font-size:.75rem; font-weight:600; display:inline-flex; align-items:center; gap:.2rem; padding:.2rem .5rem; border-radius:9999px; }
+    .kpi-delta.up  { background:var(--stride-success-bg); color:var(--stride-success); }
+    .kpi-delta.down{ background:var(--stride-error-bg);   color:var(--stride-error); }
+    .kpi-delta.flat{ background:var(--stride-surface-hover); color:var(--stride-text-muted); }
+    .kpi-label    { font-size:.6875rem; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--stride-text-muted); }
+    .kpi-value    { font-size:2rem; font-weight:700; color:var(--stride-text-primary); line-height:1.1; }
+    .kpi-sub      { font-size:.8125rem; color:var(--stride-text-muted); }
+
+    /* Sparkline (pure CSS bar chart) */
+    .sparkline    { display:flex; align-items:flex-end; gap:2px; height:2rem; }
+    .spark-bar    { flex:1; border-radius:2px 2px 0 0; background:var(--stride-border); transition:background 150ms; }
+    .spark-bar.hi { background:var(--stride-primary); opacity:.7; }
+    .spark-bar.active{ background:var(--stride-primary); opacity:1; }
+
+    /* ── Two-column layout ── */
+    .dash-cols    { display:grid; grid-template-columns:1fr 22rem; gap:1.25rem; margin-bottom:1.25rem; }
+    @media(max-width:1024px){ .dash-cols{ grid-template-columns:1fr; } }
+
+    /* ── Widget base ── */
+    .widget       { background:var(--stride-surface); border:1px solid var(--stride-border-soft); border-radius:1rem; box-shadow:var(--stride-shadow-sm); }
+    .widget-hd    { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.25rem; border-bottom:1px solid var(--stride-border-soft); }
+    .widget-title { font-size:.9375rem; font-weight:600; color:var(--stride-text-primary); }
+    .widget-link  { font-size:.8125rem; font-weight:500; color:var(--stride-primary); cursor:pointer; background:none; border:none; font-family:inherit; }
+    .widget-link:hover{ text-decoration:underline; }
+
+    /* ── Activity timeline ── */
+    .activity-list{ padding:.25rem 0; }
+    .activity-item{ display:flex; align-items:flex-start; gap:.875rem; padding:.875rem 1.25rem; border-bottom:1px solid var(--stride-border-soft); transition:background 100ms; }
+    .activity-item:last-child{ border-bottom:none; }
+    .activity-item:hover{ background:var(--stride-surface-hover); }
+    .act-avatar   { width:2rem; height:2rem; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:.75rem; color:#fff; flex-shrink:0; }
+    .act-body     { flex:1; min-width:0; }
+    .act-text     { font-size:.875rem; color:var(--stride-text-primary); line-height:1.4; }
+    .act-text strong{ font-weight:600; }
+    .act-meta     { display:flex; align-items:center; gap:.5rem; margin-top:.25rem; }
+    .act-time     { font-size:.75rem; color:var(--stride-text-muted); }
+    .act-tag      { font-size:.6875rem; font-weight:600; padding:.15rem .5rem; border-radius:9999px; }
+    .act-tag.workflow { background:var(--stride-primary-subtle); color:var(--stride-primary); }
+    .act-tag.task     { background:var(--stride-success-bg);     color:var(--stride-success); }
+    .act-tag.invoice  { background:var(--stride-warning-bg);     color:var(--stride-warning); }
+    .act-tag.user     { background:var(--stride-accent-subtle);  color:var(--stride-accent); }
+
+    /* ── Workflow status widget ── */
+    .status-list  { padding:.5rem 0; }
+    .status-item  { display:flex; align-items:center; gap:.75rem; padding:.625rem 1.25rem; border-bottom:1px solid var(--stride-border-soft); transition:background 100ms; cursor:pointer; }
+    .status-item:last-child{ border-bottom:none; }
+    .status-item:hover{ background:var(--stride-surface-hover); }
+    .status-dot   { width:.625rem; height:.625rem; border-radius:50%; flex-shrink:0; }
+    .status-name  { flex:1; font-size:.875rem; color:var(--stride-text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .status-count { font-size:.8125rem; font-weight:600; color:var(--stride-text-secondary); }
+    .status-bar-wrap{ width:4rem; background:var(--stride-border); border-radius:9999px; height:.375rem; overflow:hidden; }
+    .status-bar   { height:100%; border-radius:9999px; }
+
+    /* ── Pending approvals table ── */
+    .approvals-table{ width:100%; border-collapse:collapse; font-size:.875rem; }
+    .approvals-table thead th{ background:var(--stride-surface); color:var(--stride-text-secondary); font-size:.6875rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; padding:.75rem 1rem; text-align:left; border-bottom:2px solid var(--stride-border); white-space:nowrap; }
+    .approvals-table tbody tr{ border-bottom:1px solid var(--stride-border-soft); transition:background 100ms; }
+    .approvals-table tbody tr:last-child{ border-bottom:none; }
+    .approvals-table tbody tr:hover{ background:var(--stride-surface-hover); }
+    .approvals-table tbody td{ padding:.8125rem 1rem; color:var(--stride-text-primary); }
+    .tbl-pill     { display:inline-flex; align-items:center; gap:.3rem; font-size:.75rem; font-weight:600; padding:.2rem .625rem; border-radius:9999px; }
+    .tbl-pill.pending { background:var(--stride-warning-bg); color:var(--stride-warning); }
+    .tbl-pill.urgent  { background:var(--stride-error-bg);   color:var(--stride-error); }
+    .tbl-pill.review  { background:var(--stride-info-bg);    color:var(--stride-info); }
+    .tbl-pill.dot::before{ content:''; width:.375rem; height:.375rem; border-radius:50%; background:currentColor; }
+    .tbl-action   { background:none; border:none; font-size:.8125rem; font-weight:500; color:var(--stride-primary); cursor:pointer; font-family:inherit; padding:0; }
+    .tbl-action:hover{ text-decoration:underline; }
+
+    /* ── Role selector (prototype) ── */
+    .role-switcher{ display:flex; gap:.375rem; align-items:center; }
+    .role-btn     { padding:.3rem .75rem; border-radius:9999px; font-size:.8125rem; font-weight:500; cursor:pointer; border:1.5px solid var(--stride-border); color:var(--stride-text-secondary); background:transparent; font-family:inherit; transition:all 150ms; }
+    .role-btn.active{ background:var(--stride-primary); border-color:var(--stride-primary); color:#fff; }
+    .role-btn:not(.active):hover{ border-color:var(--stride-primary); color:var(--stride-primary); }
+
+    /* ── Empty state ── */
+    .empty-state  { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem 2rem; text-align:center; }
+    .empty-icon   { width:3rem; height:3rem; background:var(--stride-primary-subtle); color:var(--stride-primary); border-radius:1rem; display:flex; align-items:center; justify-content:center; font-size:1.25rem; margin-bottom:.875rem; }
+    .empty-title  { font-size:.9375rem; font-weight:600; color:var(--stride-text-primary); margin-bottom:.25rem; }
+    .empty-sub    { font-size:.8125rem; color:var(--stride-text-muted); max-width:20rem; }
+
+    /* Mobile sidebar */
+    .mob-overlay  { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:99; backdrop-filter:blur(2px); }
+    .mob-overlay.open{ display:block; }
+    .mob-sidebar  { position:fixed; left:0; top:0; height:100%; width:15rem; z-index:100; transform:translateX(-100%); transition:transform 250ms cubic-bezier(.4,0,.2,1); }
+    .mob-sidebar.open{ transform:translateX(0); }
+
+    /* Bottom nav */
+    .bottom-nav   { display:none; }
+    @media(max-width:767px){
+      .bottom-nav { display:flex; position:fixed; bottom:0; left:0; right:0; background:var(--stride-nav-bg); border-top:1px solid var(--stride-nav-border); z-index:50; height:3.5rem; }
+      .page-content{ padding-bottom:4.5rem; }
+    }
+    .bn-item      { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.2rem; color:var(--stride-nav-muted); font-size:.625rem; font-weight:500; cursor:pointer; padding-bottom:.25rem; }
+    .bn-item.active{ color:var(--stride-primary); }
+    .bn-item svg  { width:1.25rem; height:1.25rem; }
+    .hamburger    { display:none; }
+    @media(max-width:1023px){ .hamburger{ display:flex !important; } .desktop-sb{ display:none !important; } }
+
+    /* Annotation */
+    .ann-bar      { background:#FEFCE8; border-bottom:2px solid #FDE047; padding:.5rem 1rem; font-size:.8125rem; color:#854D0E; text-align:center; position:sticky; top:0; z-index:999; white-space:nowrap; overflow-x:auto; }
+    .ann-btn      { margin:0 .15rem; padding:.15rem .5rem; border:1px solid #D97706; border-radius:.25rem; font-size:.75rem; color:#92400E; background:rgba(133,77,14,.1); cursor:pointer; font-family:inherit; }
+    .ann-btn:hover{ background:rgba(133,77,14,.2); }
+    .ann-btn.theme{ border-color:#6366F1; color:#4338CA; background:rgba(99,102,241,.1); }
+  </style>
+</head>
+<body>
+
+<!-- ══ Annotation bar ══ -->
+<div class="ann-bar">
+  <strong>PROTOTYPE — US-034.3 Dashboard</strong>
+  &nbsp;|&nbsp; Angular: <code>DashboardPageComponent</code>
+  &nbsp;|&nbsp; Role:
+  <button class="ann-btn role-btn active" id="roleAdmin"   onclick="setRole('admin')">Admin</button>
+  <button class="ann-btn role-btn"        id="roleOps"     onclick="setRole('ops')">Ops Manager</button>
+  <button class="ann-btn role-btn"        id="roleField"   onclick="setRole('field')">Field Worker</button>
+  <button class="ann-btn role-btn"        id="roleFinance" onclick="setRole('finance')">Finance</button>
+  &nbsp;|&nbsp;
+  <button class="ann-btn theme" id="themeToggle" onclick="toggleTheme()">☀️ Light</button>
+  &nbsp;|&nbsp; Resize window to test responsive breakpoints
+</div>
+
+<!-- ══ App shell ══ -->
+<div class="app-shell" style="height:calc(100vh - 2.25rem);">
+
+  <!-- ── Desktop sidebar ── -->
+  <div class="sidebar desktop-sb">
+    <div class="sb-brand">
+      <div class="sb-logo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/></svg></div>
+      <span class="sb-name">STRIDE</span>
+    </div>
+    <div class="sb-tenant"><div class="sb-tenant-dot"></div><span class="sb-tenant-nm">Acme Corporation</span></div>
+    <nav class="sb-nav">
+      <div class="sb-group">Main</div>
+      <a class="sb-item active" href="#"><span class="sb-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg></span>Dashboard</a>
+      <a class="sb-item" href="#"><span class="sb-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Workflows<span class="sb-badge">12</span></a>
+      <a class="sb-item" href="#"><span class="sb-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>Scheduling</a>
+      <a class="sb-item" href="#"><span class="sb-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Notifications<span class="sb-badge">3</span></a>
+      <div class="sb-group" style="margin-top:.5rem;">Reporting</div>
+      <a class="sb-item" href="#"><span class="sb-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Reports</a>
+      <a class="sb-item" href="#"><span class="sb-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>Invoicing</a>
+      <div class="sb-group" style="margin-top:.5rem;">Administration</div>
+      <a class="sb-item" href="#"><span class="sb-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Users</a>
+      <a class="sb-item" href="#"><span class="sb-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.8"/></svg></span>Settings</a>
+    </nav>
+    <div class="sb-user">
+      <div class="sb-avatar" id="sbAvatar">RA</div>
+      <div><div class="sb-uname" id="sbUname">Ramki Admin</div><div class="sb-urole" id="sbUrole">Tenant Admin</div></div>
+    </div>
+  </div>
+
+  <!-- ── Main ── -->
+  <div class="main-area">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <button class="tb-action hamburger" onclick="openMob()" aria-label="Menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <nav class="tb-breadcrumb">
+        <span class="tb-root">STRIDE</span><span class="tb-sep">/</span><span class="tb-cur">Dashboard</span>
+      </nav>
+      <div class="tb-search">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span style="flex:1;">Search…</span><span class="tb-kbd">⌘K</span>
+      </div>
+      <button class="tb-action"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="notif-dot"></span></button>
+      <div class="tb-urow"><div class="tb-avt" id="tbAvt">RA</div><svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="color:var(--stride-text-muted)"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+
+    <!-- Page content -->
+    <div class="page-content">
+
+      <!-- Page header + quick actions -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title" id="pageTitle">Good morning, Ramki 👋</h1>
+          <p class="page-sub" id="pageSub">Here's an overview of your operations today.</p>
+        </div>
+        <div class="quick-actions" id="quickActions">
+          <button class="btn btn-outline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            View Reports
+          </button>
+          <button class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            New Workflow
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="kpi-grid" id="kpiGrid">
+        <!-- Cards injected by JS based on role -->
+      </div>
+
+      <!-- Main two-column area -->
+      <div class="dash-cols">
+
+        <!-- Left: Activity feed -->
+        <div>
+          <div class="widget" style="margin-bottom:1.25rem;">
+            <div class="widget-hd">
+              <span class="widget-title">Recent Activity</span>
+              <button class="widget-link">View all</button>
+            </div>
+            <div class="activity-list" id="activityList">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+
+          <!-- Pending approvals table (Admin / Ops only) -->
+          <div class="widget" id="approvalsWidget">
+            <div class="widget-hd">
+              <span class="widget-title">Pending Approvals</span>
+              <span style="display:flex;align-items:center;gap:.5rem;">
+                <span style="font-size:.75rem;font-weight:600;padding:.2rem .625rem;border-radius:9999px;background:var(--stride-warning-bg);color:var(--stride-warning);" id="approvalCount">7 pending</span>
+                <button class="widget-link">View all</button>
+              </span>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="approvals-table">
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Requested by</th>
+                    <th>Due</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="approvalRows">
+                  <!-- Injected by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Workflow status + team overview -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <!-- Workflow status -->
+          <div class="widget">
+            <div class="widget-hd">
+              <span class="widget-title">Workflow Status</span>
+              <button class="widget-link">Details</button>
+            </div>
+            <div class="status-list">
+              <div class="status-item">
+                <div class="status-dot" style="background:#10B981;"></div>
+                <span class="status-name">Completed</span>
+                <span class="status-count">284</span>
+                <div class="status-bar-wrap"><div class="status-bar" style="width:75%;background:#10B981;"></div></div>
+              </div>
+              <div class="status-item">
+                <div class="status-dot" style="background:var(--stride-primary);"></div>
+                <span class="status-name">In Progress</span>
+                <span class="status-count">48</span>
+                <div class="status-bar-wrap"><div class="status-bar" style="width:40%;background:var(--stride-primary);"></div></div>
+              </div>
+              <div class="status-item">
+                <div class="status-dot" style="background:#F59E0B;"></div>
+                <span class="status-name">Awaiting Approval</span>
+                <span class="status-count">7</span>
+                <div class="status-bar-wrap"><div class="status-bar" style="width:8%;background:#F59E0B;"></div></div>
+              </div>
+              <div class="status-item">
+                <div class="status-dot" style="background:#9CA3AF;"></div>
+                <span class="status-name">Scheduled</span>
+                <span class="status-count">19</span>
+                <div class="status-bar-wrap"><div class="status-bar" style="width:16%;background:#9CA3AF;"></div></div>
+              </div>
+              <div class="status-item">
+                <div class="status-dot" style="background:#EF4444;"></div>
+                <span class="status-name">Overdue</span>
+                <span class="status-count">3</span>
+                <div class="status-bar-wrap"><div class="status-bar" style="width:4%;background:#EF4444;"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Team overview (Admin / Ops) -->
+          <div class="widget" id="teamWidget">
+            <div class="widget-hd">
+              <span class="widget-title">Team Activity</span>
+              <button class="widget-link">Manage</button>
+            </div>
+            <div style="padding:.375rem 0;">
+              <div class="status-item">
+                <div class="act-avatar" style="width:2rem;height:2rem;background:#6366F1;font-size:.75rem;">SC</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:.875rem;color:var(--stride-text-primary);font-weight:500;">Sarah Chen</div>
+                  <div style="font-size:.75rem;color:var(--stride-text-muted);">3 tasks active</div>
+                </div>
+                <span class="act-tag task" style="font-size:.6875rem;font-weight:600;padding:.15rem .5rem;border-radius:9999px;">Online</span>
+              </div>
+              <div class="status-item">
+                <div class="act-avatar" style="width:2rem;height:2rem;background:#8B5CF6;font-size:.75rem;">MK</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:.875rem;color:var(--stride-text-primary);font-weight:500;">Mike Kumar</div>
+                  <div style="font-size:.75rem;color:var(--stride-text-muted);">1 task active</div>
+                </div>
+                <span class="act-tag task" style="font-size:.6875rem;font-weight:600;padding:.15rem .5rem;border-radius:9999px;">Online</span>
+              </div>
+              <div class="status-item">
+                <div class="act-avatar" style="width:2rem;height:2rem;background:#10B981;font-size:.75rem;">JL</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:.875rem;color:var(--stride-text-primary);font-weight:500;">Jade Li</div>
+                  <div style="font-size:.75rem;color:var(--stride-text-muted);">5 tasks active</div>
+                </div>
+                <span style="font-size:.6875rem;font-weight:600;padding:.15rem .5rem;border-radius:9999px;background:var(--stride-surface-hover);color:var(--stride-text-muted);">Away</span>
+              </div>
+              <div class="status-item">
+                <div class="act-avatar" style="width:2rem;height:2rem;background:#F59E0B;font-size:.75rem;">AR</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:.875rem;color:var(--stride-text-primary);font-weight:500;">Ali Raza</div>
+                  <div style="font-size:.75rem;color:var(--stride-text-muted);">Offline</div>
+                </div>
+                <span style="font-size:.6875rem;font-weight:600;padding:.15rem .5rem;border-radius:9999px;background:var(--stride-surface-hover);color:var(--stride-text-muted);">Offline</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main-area -->
+</div><!-- /app-shell -->
+
+<!-- Mobile sidebar -->
+<div class="mob-overlay" id="mobOverlay" onclick="closeMob()"></div>
+<div class="mob-sidebar sidebar" id="mobSidebar">
+  <div class="sb-brand"><div class="sb-logo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/></svg></div><span class="sb-name">STRIDE</span></div>
+  <div class="sb-tenant"><div class="sb-tenant-dot"></div><span class="sb-tenant-nm">Acme Corporation</span></div>
+  <nav class="sb-nav">
+    <a class="sb-item active" href="#" onclick="closeMob();return false"><span class="sb-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg></span>Dashboard</a>
+    <a class="sb-item" href="#" onclick="closeMob();return false"><span class="sb-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Workflows<span class="sb-badge">12</span></a>
+    <a class="sb-item" href="#" onclick="closeMob();return false"><span class="sb-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Notifications<span class="sb-badge">3</span></a>
+  </nav>
+  <div class="sb-user"><div class="sb-avatar" id="mobAvatar">RA</div><div><div class="sb-uname" id="mobUname">Ramki Admin</div><div class="sb-urole">Tenant Admin</div></div></div>
+</div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <div class="bn-item active"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>Home</div>
+  <div class="bn-item"><svg viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Workflows</div>
+  <div class="bn-item"><svg viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Alerts</div>
+  <div class="bn-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M6 20v-1a6 6 0 0112 0v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>More</div>
+</nav>
+
+<script>
+  /* ════════════════════════════════════════════
+     Role-aware dashboard data
+     ════════════════════════════════════════════ */
+  const ROLES = {
+    admin: {
+      name: 'Ramki Admin', initials: 'RA', roleLabel: 'Tenant Admin',
+      greeting: 'Good morning, Ramki 👋',
+      sub: 'Here\'s a full overview of your operations today.',
+      kpis: [
+        { label:'Active Workflows', value:'48',  delta:'+12%', dir:'up',   icon:'indigo', sparkData:[3,5,4,7,6,8,9,8,10,11,9,12], sparkPeak:12,
+          sub:'vs 43 last week',
+          iconSvg:'<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' },
+        { label:'Tasks Completed', value:'284', delta:'+8%',  dir:'up',   icon:'green',  sparkData:[18,22,20,25,24,28,30,26,32,34,29,36], sparkPeak:36,
+          sub:'this week',
+          iconSvg:'<path d="M22 11.08V12a10 10 0 11-5.93-9.14M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' },
+        { label:'Pending Approvals', value:'7', delta:'-3',   dir:'down', icon:'amber', sparkData:[12,10,9,8,11,9,7,10,9,8,8,7], sparkPeak:12,
+          sub:'3 urgent',
+          iconSvg:'<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' },
+        { label:'Team Members',      value:'23', delta:'',     dir:'flat', icon:'purple', sparkData:[20,21,20,22,21,22,22,22,23,23,23,23], sparkPeak:23,
+          sub:'4 online now',
+          iconSvg:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' },
+      ],
+      showApprovals: true, showTeam: true,
+      quickActions: `
+        <button class="btn btn-outline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Reports</button>
+        <button class="btn btn-outline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Invite User</button>
+        <button class="btn btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>New Workflow</button>`,
+    },
+    ops: {
+      name: 'Ops Manager', initials: 'OM', roleLabel: 'Operations Manager',
+      greeting: 'Good morning, Ops Manager 👋',
+      sub: 'Your workflow pipeline and team tasks for today.',
+      kpis: [
+        { label:'Active Workflows', value:'48', delta:'+12%', dir:'up',   icon:'indigo', sparkData:[3,5,4,7,6,8,9,8,10,11,9,12], sparkPeak:12,
+          sub:'vs 43 last week',
+          iconSvg:'<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' },
+        { label:'Tasks Completed', value:'284', delta:'+8%',  dir:'up',   icon:'green', sparkData:[18,22,20,25,24,28,30,26,32,34,29,36], sparkPeak:36,
+          sub:'this week',
+          iconSvg:'<path d="M22 11.08V12a10 10 0 11-5.93-9.14M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' },
+        { label:'Overdue Tasks',   value:'3',  delta:'+1',   dir:'down', icon:'amber', sparkData:[1,2,1,3,2,2,3,4,3,3,4,3], sparkPeak:4,
+          sub:'needs attention',
+          iconSvg:'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' },
+        { label:'Field Workers',   value:'8',  delta:'',     dir:'flat', icon:'blue',  sparkData:[7,7,8,8,8,8,8,8,8,8,8,8], sparkPeak:8,
+          sub:'3 online',
+          iconSvg:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' },
+      ],
+      showApprovals: true, showTeam: true,
+      quickActions: `
+        <button class="btn btn-outline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Schedule</button>
+        <button class="btn btn-outline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Assign Task</button>
+        <button class="btn btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>New Workflow</button>`,
+    },
+    field: {
+      name: 'Alex Field', initials: 'AF', roleLabel: 'Field Worker',
+      greeting: 'Good morning, Alex 👋',
+      sub: 'Your assigned tasks for today.',
+      kpis: [
+        { label:'My Active Tasks',  value:'5',  delta:'+2',   dir:'up',   icon:'indigo', sparkData:[2,3,3,4,3,5,4,5,5,5,5,5], sparkPeak:5,
+          sub:'2 due today',
+          iconSvg:'<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' },
+        { label:'Completed Today',  value:'3',  delta:'+1',   dir:'up',   icon:'green', sparkData:[0,1,1,2,1,2,3,2,3,3,3,3], sparkPeak:3,
+          sub:'great progress',
+          iconSvg:'<path d="M22 11.08V12a10 10 0 11-5.93-9.14M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' },
+        { label:'Overdue',          value:'1',  delta:'',     dir:'down', icon:'amber', sparkData:[0,0,0,1,0,0,0,1,0,0,1,1], sparkPeak:1,
+          sub:'action needed',
+          iconSvg:'<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' },
+        { label:'Scheduled (Week)', value:'12', delta:'',     dir:'flat', icon:'blue', sparkData:[10,11,11,12,11,12,12,12,12,12,12,12], sparkPeak:12,
+          sub:'next 7 days',
+          iconSvg:'<rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' },
+      ],
+      showApprovals: false, showTeam: false,
+      quickActions: `
+        <button class="btn btn-outline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>My Schedule</button>
+        <button class="btn btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Mark Complete</button>`,
+    },
+    finance: {
+      name: 'Finance User', initials: 'FU', roleLabel: 'Finance User',
+      greeting: 'Good morning 👋',
+      sub: 'Invoicing and financial overview.',
+      kpis: [
+        { label:'Open Invoices',    value:'14', delta:'+3',   dir:'up',   icon:'indigo', sparkData:[8,9,10,11,10,12,11,13,12,14,13,14], sparkPeak:14,
+          sub:'$42,800 total',
+          iconSvg:'<rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' },
+        { label:'Paid This Month',  value:'$128K', delta:'+22%', dir:'up', icon:'green', sparkData:[80,85,90,95,100,105,108,112,116,120,124,128], sparkPeak:128,
+          sub:'vs $105K last month',
+          iconSvg:'<path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' },
+        { label:'Overdue Invoices', value:'2',  delta:'',     dir:'down', icon:'amber', sparkData:[3,3,2,3,2,2,2,2,2,2,2,2], sparkPeak:3,
+          sub:'$6,200 outstanding',
+          iconSvg:'<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' },
+        { label:'Avg Processing',   value:'2.4d', delta:'-0.3d', dir:'up', icon:'blue', sparkData:[3.2,3.1,3.0,2.9,2.8,2.8,2.7,2.7,2.6,2.5,2.5,2.4], sparkPeak:3.2,
+          sub:'days to approve',
+          iconSvg:'<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' },
+      ],
+      showApprovals: false, showTeam: false,
+      quickActions: `
+        <button class="btn btn-outline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Export Report</button>
+        <button class="btn btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>New Invoice</button>`,
+    },
+  };
+
+  const ACTIVITY_DATA = {
+    admin: [
+      { initials:'SC', bg:'#6366F1', text:'<strong>Sarah Chen</strong> completed task <strong>Site Inspection #47</strong>', time:'2 min ago',   tag:'task',     tagLabel:'Task' },
+      { initials:'RA', bg:'#4338CA', text:'You created workflow <strong>Equipment Maintenance Q2</strong>',                 time:'18 min ago',  tag:'workflow', tagLabel:'Workflow' },
+      { initials:'MK', bg:'#8B5CF6', text:'<strong>Mike Kumar</strong> submitted invoice <strong>#1032</strong> for approval', time:'1 hr ago',  tag:'invoice',  tagLabel:'Invoice' },
+      { initials:'RA', bg:'#4338CA', text:'You approved user <strong>Jade Li</strong> as Operations Manager',              time:'2 hrs ago',   tag:'user',     tagLabel:'Admin' },
+      { initials:'JL', bg:'#10B981', text:'<strong>Jade Li</strong> started workflow <strong>HVAC Inspection – Block B</strong>', time:'3 hrs ago', tag:'workflow', tagLabel:'Workflow' },
+      { initials:'AR', bg:'#F59E0B', text:'<strong>Ali Raza</strong> logged 6 hours on <strong>Plumbing Repair #08</strong>', time:'4 hrs ago', tag:'task',     tagLabel:'Task' },
+    ],
+    ops: [
+      { initials:'SC', bg:'#6366F1', text:'<strong>Sarah Chen</strong> completed <strong>Site Inspection #47</strong>',    time:'2 min ago',   tag:'task',     tagLabel:'Task' },
+      { initials:'JL', bg:'#10B981', text:'<strong>Jade Li</strong> started <strong>HVAC Inspection – Block B</strong>',   time:'18 min ago',  tag:'workflow', tagLabel:'Workflow' },
+      { initials:'MK', bg:'#8B5CF6', text:'<strong>Mike Kumar</strong> is overdue on <strong>Generator Check #12</strong>',time:'1 hr ago',    tag:'task',     tagLabel:'Task' },
+      { initials:'AR', bg:'#F59E0B', text:'<strong>Ali Raza</strong> logged 6 hrs on <strong>Plumbing Repair #08</strong>', time:'4 hrs ago',  tag:'task',     tagLabel:'Task' },
+    ],
+    field: [
+      { initials:'AF', bg:'#6366F1', text:'You completed <strong>Equipment Check – Unit 3</strong>',                        time:'30 min ago',  tag:'task',    tagLabel:'Done ✓' },
+      { initials:'AF', bg:'#4338CA', text:'Task <strong>Site Survey – East Wing</strong> assigned to you',                  time:'1 hr ago',    tag:'workflow',tagLabel:'Assigned' },
+      { initials:'AF', bg:'#6366F1', text:'You started <strong>Safety Inspection #22</strong>',                             time:'2 hrs ago',   tag:'task',    tagLabel:'In Progress' },
+    ],
+    finance: [
+      { initials:'MK', bg:'#8B5CF6', text:'<strong>Mike Kumar</strong> submitted invoice <strong>#1032 — $4,800</strong>',  time:'1 hr ago',    tag:'invoice', tagLabel:'Invoice' },
+      { initials:'RA', bg:'#4338CA', text:'Invoice <strong>#1028 — $12,500</strong> approved and sent',                     time:'3 hrs ago',   tag:'invoice', tagLabel:'Paid' },
+      { initials:'JL', bg:'#10B981', text:'<strong>Jade Li</strong> submitted expenses for <strong>Q2 Site Visits</strong>',time:'5 hrs ago',   tag:'invoice', tagLabel:'Invoice' },
+      { initials:'RA', bg:'#4338CA', text:'<strong>Invoice #1024 — $1,400</strong> is overdue (12 days)',                   time:'Yesterday',   tag:'invoice', tagLabel:'Overdue' },
+    ],
+  };
+
+  const APPROVAL_DATA = [
+    { desc:'Invoice #1032 — Contractor Payment',   type:'Invoice',  by:'Mike Kumar',  due:'Today',    status:'urgent' },
+    { desc:'Workflow: Emergency HVAC Repair',       type:'Workflow', by:'Sarah Chen',  due:'Today',    status:'urgent' },
+    { desc:'PO #487 — Materials Procurement',       type:'Purchase', by:'Jade Li',     due:'Tomorrow', status:'pending' },
+    { desc:'User Role: Ali Raza → Ops Manager',    type:'HR',       by:'Ramki Admin', due:'This week',status:'review' },
+    { desc:'Invoice #1028 — Monthly Maintenance',  type:'Invoice',  by:'Ali Raza',    due:'This week',status:'pending' },
+  ];
+
+  let currentRole = 'admin';
+
+  function setRole(role) {
+    currentRole = role;
+    const data = ROLES[role];
+
+    /* Update annotation role buttons */
+    ['admin','ops','field','finance'].forEach(r => {
+      document.getElementById('role' + r.charAt(0).toUpperCase() + r.slice(1))
+        .classList.toggle('active', r === role);
+    });
+
+    /* Sidebar + topbar identity */
+    document.getElementById('sbAvatar').textContent   = data.initials;
+    document.getElementById('sbUname').textContent    = data.name;
+    document.getElementById('sbUrole').textContent    = data.roleLabel;
+    document.getElementById('tbAvt').textContent      = data.initials;
+    if (document.getElementById('mobAvatar')) document.getElementById('mobAvatar').textContent = data.initials;
+    if (document.getElementById('mobUname'))  document.getElementById('mobUname').textContent  = data.name;
+
+    /* Page header */
+    document.getElementById('pageTitle').textContent = data.greeting;
+    document.getElementById('pageSub').textContent   = data.sub;
+    document.getElementById('quickActions').innerHTML = data.quickActions;
+
+    /* KPI grid */
+    renderKPIs(data.kpis);
+
+    /* Activity */
+    renderActivity(ACTIVITY_DATA[role] || []);
+
+    /* Conditional sections */
+    document.getElementById('approvalsWidget').style.display = data.showApprovals ? '' : 'none';
+    document.getElementById('teamWidget').style.display      = data.showTeam      ? '' : 'none';
+    if (data.showApprovals) renderApprovals(role === 'finance' ? [] : APPROVAL_DATA);
+  }
+
+  function renderKPIs(kpis) {
+    const grid = document.getElementById('kpiGrid');
+    grid.innerHTML = kpis.map(k => {
+      const maxBar = k.sparkPeak || Math.max(...k.sparkData);
+      const bars = k.sparkData.map((v, i) => {
+        const h = Math.round((v / maxBar) * 100);
+        const isLast = i === k.sparkData.length - 1;
+        const cls = isLast ? 'active' : (h >= 80 ? 'hi' : '');
+        return `<div class="spark-bar ${cls}" style="height:${h}%"></div>`;
+      }).join('');
+      const deltaHtml = k.delta
+        ? `<span class="kpi-delta ${k.dir}">${k.dir === 'up' ? '↑' : k.dir === 'down' ? '↓' : '→'} ${k.delta}</span>`
+        : `<span class="kpi-delta flat">→</span>`;
+      return `
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon ${k.icon}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none">${k.iconSvg}</svg></div>
+            ${deltaHtml}
+          </div>
+          <div>
+            <div class="kpi-label">${k.label}</div>
+            <div class="kpi-value">${k.value}</div>
+            <div class="kpi-sub">${k.sub}</div>
+          </div>
+          <div class="sparkline">${bars}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderActivity(items) {
+    const list = document.getElementById('activityList');
+    if (!items.length) {
+      list.innerHTML = `<div class="empty-state">
+        <div class="empty-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 8v4l3 3M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="empty-title">No recent activity</div>
+        <div class="empty-sub">Actions you and your team take will appear here.</div>
+      </div>`;
+      return;
+    }
+    list.innerHTML = items.map(a => `
+      <div class="activity-item">
+        <div class="act-avatar" style="background:${a.bg}">${a.initials}</div>
+        <div class="act-body">
+          <div class="act-text">${a.text}</div>
+          <div class="act-meta">
+            <span class="act-time">${a.time}</span>
+            <span class="act-tag ${a.tag}">${a.tagLabel}</span>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderApprovals(rows) {
+    document.getElementById('approvalCount').textContent = rows.length + ' pending';
+    const tbody = document.getElementById('approvalRows');
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state" style="padding:2rem;">
+        <div class="empty-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="empty-title">No pending approvals</div>
+        <div class="empty-sub">All caught up!</div>
+      </div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td style="font-weight:500">${r.desc}</td>
+        <td style="color:var(--stride-text-secondary)">${r.type}</td>
+        <td style="color:var(--stride-text-secondary)">${r.by}</td>
+        <td style="color:var(--stride-text-${r.due==='Today'?'primary':'secondary'}); font-weight:${r.due==='Today'?'500':'400'}">${r.due}</td>
+        <td><span class="tbl-pill dot ${r.status}">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span></td>
+        <td><button class="tbl-action">Review →</button></td>
+      </tr>`).join('');
+  }
+
+  /* ── Helpers ── */
+  function openMob()  { document.getElementById('mobSidebar').classList.add('open'); document.getElementById('mobOverlay').classList.add('open'); }
+  function closeMob() { document.getElementById('mobSidebar').classList.remove('open'); document.getElementById('mobOverlay').classList.remove('open'); }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀️ Light' : '🌙 Dark';
+  }
+
+  /* Init */
+  setRole('admin');
+</script>
+</body>
+</html>
