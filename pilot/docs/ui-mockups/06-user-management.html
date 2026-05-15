@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STRIDE — User Management [Prototype]</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root, [data-theme="light"] {
+      --stride-primary:        #6366F1;
+      --stride-primary-hover:  #4F46E5;
+      --stride-primary-subtle: #EEF2FF;
+      --stride-primary-ring:   rgba(99,102,241,0.2);
+      --stride-accent:         #8B5CF6;
+      --stride-accent-subtle:  #F5F3FF;
+      --stride-nav-bg:         #1E1B4B;
+      --stride-nav-border:     rgba(255,255,255,0.08);
+      --stride-nav-text:       #E5E7EB;
+      --stride-nav-icon:       #C7D2FE;
+      --stride-nav-muted:      #A5B4FC;
+      --stride-nav-active:     rgba(99,102,241,0.18);
+      --stride-nav-hover:      rgba(99,102,241,0.10);
+      --stride-bg:             #F8FAFC;
+      --stride-surface:        #FFFFFF;
+      --stride-surface-hover:  #F1F5F9;
+      --stride-text-primary:   #111827;
+      --stride-text-secondary: #6B7280;
+      --stride-text-muted:     #9CA3AF;
+      --stride-border:         #E5E7EB;
+      --stride-border-soft:    #EEF2F7;
+      --stride-topbar-bg:      #FFFFFF;
+      --stride-topbar-border:  #E5E7EB;
+      --stride-shadow-xs:      0 1px 2px rgba(0,0,0,0.05);
+      --stride-shadow-sm:      0 1px 3px rgba(0,0,0,0.08),0 1px 2px -1px rgba(0,0,0,0.06);
+      --stride-shadow-md:      0 4px 6px -1px rgba(0,0,0,0.07),0 2px 4px -2px rgba(0,0,0,0.05);
+      --stride-shadow-lg:      0 10px 15px -3px rgba(0,0,0,0.08),0 4px 6px -4px rgba(0,0,0,0.05);
+      --stride-success:        #10B981; --stride-success-bg: #ECFDF5;
+      --stride-warning:        #F59E0B; --stride-warning-bg: #FFFBEB;
+      --stride-error:          #EF4444; --stride-error-bg:   #FEF2F2;
+      --stride-info:           #3B82F6; --stride-info-bg:    #EFF6FF;
+      --stride-radius-lg:      0.75rem; --stride-radius-xl: 0.875rem; --stride-radius-2xl: 1rem;
+    }
+    [data-theme="dark"] {
+      --stride-primary:        #818CF8; --stride-primary-hover:  #6366F1;
+      --stride-primary-subtle: rgba(129,140,248,0.12);
+      --stride-primary-ring:   rgba(129,140,248,0.25);
+      --stride-accent:         #A78BFA; --stride-accent-subtle: rgba(167,139,250,0.12);
+      --stride-nav-bg:         #0F172A; --stride-nav-border: rgba(255,255,255,0.06);
+      --stride-nav-text:       #E2E8F0; --stride-nav-icon: #C7D2FE;
+      --stride-nav-muted:      #94A3B8; --stride-nav-active: rgba(129,140,248,0.16);
+      --stride-nav-hover:      rgba(129,140,248,0.10);
+      --stride-bg:             #0B1120; --stride-surface: #111827;
+      --stride-surface-hover:  #1F2937; --stride-text-primary: #F9FAFB;
+      --stride-text-secondary: #CBD5E1; --stride-text-muted: #94A3B8;
+      --stride-border:         #1E293B; --stride-border-soft: #334155;
+      --stride-topbar-bg:      #111827; --stride-topbar-border: #1E293B;
+      --stride-shadow-xs:      0 1px 2px rgba(0,0,0,0.3);
+      --stride-shadow-sm:      0 1px 3px rgba(0,0,0,0.4),0 1px 2px -1px rgba(0,0,0,0.3);
+      --stride-shadow-md:      0 4px 6px -1px rgba(0,0,0,0.4),0 2px 4px -2px rgba(0,0,0,0.3);
+      --stride-shadow-lg:      0 10px 15px -3px rgba(0,0,0,0.4),0 4px 6px -4px rgba(0,0,0,0.3);
+      --stride-success:        #34D399; --stride-success-bg: rgba(52,211,153,0.12);
+      --stride-warning:        #FCD34D; --stride-warning-bg: rgba(252,211,77,0.12);
+      --stride-error:          #F87171; --stride-error-bg:   rgba(248,113,113,0.12);
+      --stride-info:           #60A5FA; --stride-info-bg:    rgba(96,165,250,0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Inter', system-ui, sans-serif; background: var(--stride-bg); color: var(--stride-text-primary); }
+
+    /* Shell */
+    .shell { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar {
+      width: 240px; flex-shrink: 0; background: var(--stride-nav-bg);
+      border-right: 1px solid var(--stride-nav-border);
+      display: flex; flex-direction: column; overflow-y: auto;
+    }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 20px 20px 16px; border-bottom: 1px solid var(--stride-nav-border); }
+    .logo-mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg,#6366F1,#8B5CF6); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .logo-text { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+    .logo-badge { font-size: 9px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: var(--stride-nav-muted); background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; margin-left: auto; }
+    .nav-section { padding: 12px 12px 4px; }
+    .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--stride-nav-muted); padding: 0 8px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; color: var(--stride-nav-text); font-size: 13.5px; font-weight: 500; transition: background 0.15s; text-decoration: none; }
+    .nav-item:hover { background: var(--stride-nav-hover); }
+    .nav-item.active { background: var(--stride-nav-active); color: #fff; border-left: 3px solid var(--stride-primary); padding-left: 7px; }
+    .nav-icon { width: 16px; text-align: center; flex-shrink: 0; font-size: 14px; color: var(--stride-nav-icon); }
+    .nav-item.active .nav-icon { color: var(--stride-primary); }
+    .nav-badge { margin-left: auto; font-size: 10px; font-weight: 600; background: var(--stride-primary); color: #fff; padding: 1px 6px; border-radius: 10px; }
+    .sidebar-footer { margin-top: auto; padding: 12px; border-top: 1px solid var(--stride-nav-border); }
+    .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+    .user-card:hover { background: var(--stride-nav-hover); }
+    .user-avatar-sm { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg,#6366F1,#8B5CF6); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; }
+    .user-name-sm { font-size: 12.5px; font-weight: 600; color: var(--stride-nav-text); }
+    .user-role-sm { font-size: 11px; color: var(--stride-nav-muted); }
+
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    .topbar { height: 56px; flex-shrink: 0; background: var(--stride-topbar-bg); border-bottom: 1px solid var(--stride-topbar-border); display: flex; align-items: center; gap: 12px; padding: 0 24px; box-shadow: var(--stride-shadow-xs); }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+    .bc-item { color: var(--stride-text-muted); }
+    .bc-sep { color: var(--stride-text-muted); font-size: 11px; }
+    .bc-current { color: var(--stride-text-primary); font-weight: 600; }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .icon-btn { width: 34px; height: 34px; border-radius: 8px; border: none; cursor: pointer; background: transparent; color: var(--stride-text-secondary); display: flex; align-items: center; justify-content: center; font-size: 15px; transition: background 0.15s; }
+    .icon-btn:hover { background: var(--stride-surface-hover); }
+    .topbar-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg,#6366F1,#8B5CF6); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; cursor: pointer; }
+
+    .page-content { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: var(--stride-radius-xl); font-size: 13.5px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap; font-family: inherit; }
+    .btn-primary { background: var(--stride-primary); color: #fff; }
+    .btn-primary:hover { background: var(--stride-primary-hover); box-shadow: 0 4px 12px var(--stride-primary-ring); }
+    .btn-ghost { background: transparent; color: var(--stride-text-secondary); border: 1px solid var(--stride-border); }
+    .btn-ghost:hover { background: var(--stride-surface-hover); color: var(--stride-text-primary); }
+    .btn-danger { background: var(--stride-error-bg); color: var(--stride-error); border: 1px solid var(--stride-error); }
+    .btn-danger:hover { background: var(--stride-error); color: #fff; }
+    .btn-sm { padding: 5px 12px; font-size: 12.5px; }
+
+    /* Page header */
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; }
+    .page-subtitle { font-size: 13px; color: var(--stride-text-secondary); margin-top: 2px; }
+
+    /* Summary strip */
+    .summary-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .sum-card { background: var(--stride-surface); border: 1px solid var(--stride-border); border-radius: var(--stride-radius-xl); padding: 14px 16px; box-shadow: var(--stride-shadow-xs); cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+    .sum-card:hover { border-color: var(--stride-primary); box-shadow: var(--stride-shadow-sm); }
+    .sum-card.active { border-color: var(--stride-primary); background: var(--stride-primary-subtle); }
+    .sum-label { font-size: 11px; font-weight: 500; color: var(--stride-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .sum-count { font-size: 24px; font-weight: 700; line-height: 1; }
+    .sum-count.total  { color: var(--stride-primary); }
+    .sum-count.active-c { color: var(--stride-success); }
+    .sum-count.invited  { color: var(--stride-info); }
+    .sum-count.suspended{ color: var(--stride-warning); }
+    .sum-count.admin    { color: var(--stride-accent); }
+
+    /* Toolbar */
+    .toolbar { background: var(--stride-surface); border: 1px solid var(--stride-border); border-bottom: none; border-radius: var(--stride-radius-xl) var(--stride-radius-xl) 0 0; padding: 12px 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 280px; }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--stride-text-muted); font-size: 13px; pointer-events: none; }
+    .search-input { width: 100%; height: 34px; padding: 0 10px 0 32px; border: 1.5px solid var(--stride-border); border-radius: var(--stride-radius-lg); background: var(--stride-bg); color: var(--stride-text-primary); font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+    .search-input:focus { border-color: var(--stride-primary); box-shadow: 0 0 0 3px var(--stride-primary-ring); }
+    .search-input::placeholder { color: var(--stride-text-muted); }
+    .filter-select { height: 34px; padding: 0 28px 0 10px; border: 1.5px solid var(--stride-border); border-radius: var(--stride-radius-lg); background: var(--stride-bg); color: var(--stride-text-primary); font-size: 13px; font-family: inherit; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; outline: none; transition: border-color 0.15s; }
+    .filter-select:focus { border-color: var(--stride-primary); box-shadow: 0 0 0 3px var(--stride-primary-ring); }
+    .toolbar-sep { width: 1px; height: 24px; background: var(--stride-border); flex-shrink: 0; }
+    .bulk-bar { display: none; align-items: center; gap: 8px; padding: 4px 10px; background: var(--stride-primary-subtle); border: 1px solid rgba(99,102,241,0.2); border-radius: var(--stride-radius-lg); }
+    .bulk-bar.visible { display: flex; }
+    .bulk-label { font-size: 12.5px; font-weight: 600; color: var(--stride-primary); }
+
+    /* Table */
+    .table-wrap { background: var(--stride-surface); border: 1px solid var(--stride-border); border-radius: 0 0 var(--stride-radius-xl) var(--stride-radius-xl); overflow: hidden; }
+    .um-table { width: 100%; border-collapse: collapse; }
+    .um-table thead th { background: var(--stride-bg); border-bottom: 1px solid var(--stride-border); padding: 10px 14px; text-align: left; font-size: 11.5px; font-weight: 600; color: var(--stride-text-muted); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .um-table tbody tr { border-bottom: 1px solid var(--stride-border-soft); transition: background 0.12s; cursor: pointer; }
+    .um-table tbody tr:last-child { border-bottom: none; }
+    .um-table tbody tr:hover { background: var(--stride-surface-hover); }
+    .um-table tbody tr.selected { background: var(--stride-primary-subtle); }
+    .um-table td { padding: 12px 14px; font-size: 13.5px; vertical-align: middle; }
+
+    /* Checkbox */
+    .cb { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--stride-border); cursor: pointer; background: var(--stride-surface); appearance: none; transition: all 0.15s; flex-shrink: 0; }
+    .cb:checked { background: var(--stride-primary); border-color: var(--stride-primary); }
+    .cb:checked::after { content: '✓'; display: block; color: #fff; font-size: 10px; text-align: center; line-height: 13px; }
+    .cb:hover { border-color: var(--stride-primary); }
+
+    /* User cell */
+    .user-cell { display: flex; align-items: center; gap: 10px; }
+    .u-avatar { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
+    .u-name { font-size: 13.5px; font-weight: 600; color: var(--stride-text-primary); }
+    .u-email { font-size: 11.5px; color: var(--stride-text-muted); }
+
+    /* Role badge */
+    .role-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 6px; white-space: nowrap; }
+    .role-admin   { background: rgba(139,92,246,0.12); color: var(--stride-accent); }
+    .role-ops     { background: var(--stride-primary-subtle); color: var(--stride-primary); }
+    .role-finance { background: var(--stride-success-bg); color: var(--stride-success); }
+    .role-field   { background: var(--stride-info-bg); color: var(--stride-info); }
+    .role-viewer  { background: var(--stride-surface-hover); color: var(--stride-text-muted); border: 1px solid var(--stride-border); }
+
+    /* Status pill */
+    .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 99px; font-size: 11.5px; font-weight: 600; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .pill-active    { background: var(--stride-success-bg); color: var(--stride-success); }
+    .pill-active .status-dot { background: var(--stride-success); animation: blink 2s ease infinite; }
+    .pill-invited   { background: var(--stride-info-bg); color: var(--stride-info); }
+    .pill-invited .status-dot { background: var(--stride-info); }
+    .pill-suspended { background: var(--stride-warning-bg); color: var(--stride-warning); }
+    .pill-suspended .status-dot { background: var(--stride-warning); }
+    @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.4} }
+
+    /* Inline role editor */
+    .role-select-inline { font-size: 12px; font-family: inherit; background: var(--stride-bg); border: 1.5px solid var(--stride-primary); border-radius: 6px; padding: 2px 6px; color: var(--stride-primary); font-weight: 600; cursor: pointer; outline: none; display: none; }
+    .role-select-inline.visible { display: inline-block; }
+
+    /* Row actions */
+    .row-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
+    .um-table tbody tr:hover .row-actions { opacity: 1; }
+    .row-btn { width: 28px; height: 28px; border-radius: 6px; border: none; cursor: pointer; background: transparent; color: var(--stride-text-muted); display: flex; align-items: center; justify-content: center; font-size: 13px; transition: background 0.15s, color 0.15s; }
+    .row-btn:hover { background: var(--stride-surface-hover); color: var(--stride-text-primary); }
+    .row-btn.danger:hover { background: var(--stride-error-bg); color: var(--stride-error); }
+
+    /* Pagination */
+    .pagination { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--stride-surface); border: 1px solid var(--stride-border); border-top: none; border-radius: 0 0 var(--stride-radius-xl) var(--stride-radius-xl); margin-top: -1px; }
+    .pg-info { font-size: 12.5px; color: var(--stride-text-muted); }
+    .pg-controls { display: flex; gap: 4px; }
+    .pg-btn { min-width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--stride-border); background: var(--stride-surface); color: var(--stride-text-secondary); font-size: 12.5px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .pg-btn:hover { border-color: var(--stride-primary); color: var(--stride-primary); }
+    .pg-btn.active { background: var(--stride-primary); border-color: var(--stride-primary); color: #fff; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 60px 20px; background: var(--stride-surface); border: 1px solid var(--stride-border); border-top: none; border-radius: 0 0 var(--stride-radius-xl) var(--stride-radius-xl); }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+    .empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .empty-desc { font-size: 13px; color: var(--stride-text-muted); margin-bottom: 20px; }
+
+    /* Access denied */
+    .access-denied { display: none; text-align: center; padding: 80px 24px; }
+    .access-denied.visible { display: block; }
+    .access-denied-icon { font-size: 48px; margin-bottom: 16px; }
+    .access-denied-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .access-denied-desc { font-size: 14px; color: var(--stride-text-secondary); }
+
+    /* ── Invite Modal ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--stride-surface); border-radius: var(--stride-radius-2xl); box-shadow: var(--stride-shadow-lg); padding: 28px; width: 100%; max-width: 480px; border: 1px solid var(--stride-border); animation: modalIn 0.18s ease; }
+    @keyframes modalIn { from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none} }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .modal-title { font-size: 17px; font-weight: 700; }
+    .modal-close { width: 30px; height: 30px; border-radius: 6px; border: none; background: transparent; cursor: pointer; color: var(--stride-text-muted); font-size: 18px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+    .modal-close:hover { background: var(--stride-surface-hover); color: var(--stride-text-primary); }
+    .form-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+    .form-label { font-size: 12.5px; font-weight: 600; color: var(--stride-text-secondary); }
+    .form-input { height: 38px; padding: 0 12px; border: 1.5px solid var(--stride-border); border-radius: var(--stride-radius-xl); background: var(--stride-bg); color: var(--stride-text-primary); font-size: 13.5px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+    .form-input:focus { border-color: var(--stride-primary); box-shadow: 0 0 0 3px var(--stride-primary-ring); }
+    .form-select { height: 38px; padding: 0 32px 0 12px; border: 1.5px solid var(--stride-border); border-radius: var(--stride-radius-xl); background: var(--stride-bg); color: var(--stride-text-primary); font-size: 13.5px; font-family: inherit; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; outline: none; }
+    .form-select:focus { border-color: var(--stride-primary); box-shadow: 0 0 0 3px var(--stride-primary-ring); }
+    .form-hint { font-size: 11.5px; color: var(--stride-text-muted); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--stride-border-soft); }
+
+    /* User detail drawer */
+    .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 80; }
+    .drawer-overlay.open { display: block; }
+    .drawer { position: fixed; top: 0; right: -400px; width: 400px; height: 100%; background: var(--stride-surface); border-left: 1px solid var(--stride-border); box-shadow: var(--stride-shadow-lg); z-index: 90; transition: right 0.25s ease; display: flex; flex-direction: column; }
+    .drawer.open { right: 0; }
+    .drawer-header { padding: 18px 20px; border-bottom: 1px solid var(--stride-border); display: flex; align-items: center; justify-content: space-between; }
+    .drawer-title { font-size: 15px; font-weight: 700; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .drawer-user-hero { text-align: center; padding: 16px 0 8px; }
+    .drawer-avatar { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff; margin: 0 auto 10px; }
+    .drawer-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .drawer-email { font-size: 13px; color: var(--stride-text-muted); }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .info-item { background: var(--stride-bg); border: 1px solid var(--stride-border); border-radius: var(--stride-radius-lg); padding: 10px 12px; }
+    .info-item-label { font-size: 10.5px; font-weight: 500; color: var(--stride-text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px; }
+    .info-item-val { font-size: 13px; font-weight: 600; }
+    .section-title { font-size: 12px; font-weight: 700; color: var(--stride-text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+    .perm-list { display: flex; flex-direction: column; gap: 6px; }
+    .perm-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--stride-bg); border: 1px solid var(--stride-border); border-radius: var(--stride-radius-lg); }
+    .perm-name { font-size: 12.5px; font-weight: 500; }
+    .perm-check { font-size: 14px; }
+    .activity-mini { display: flex; flex-direction: column; gap: 8px; }
+    .act-mini-item { display: flex; gap: 8px; font-size: 12px; color: var(--stride-text-secondary); }
+    .act-mini-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--stride-border); margin-top: 4px; flex-shrink: 0; }
+    .drawer-footer { padding: 14px 20px; border-top: 1px solid var(--stride-border); display: flex; gap: 8px; }
+
+    /* Roles tab */
+    .tab-bar { display: flex; border-bottom: 1px solid var(--stride-border); }
+    .tab-item { padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--stride-text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+    .tab-item:hover { color: var(--stride-text-primary); }
+    .tab-item.active { color: var(--stride-primary); border-bottom-color: var(--stride-primary); font-weight: 600; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Roles table */
+    .roles-card { background: var(--stride-surface); border: 1px solid var(--stride-border); border-radius: var(--stride-radius-2xl); box-shadow: var(--stride-shadow-xs); overflow: hidden; }
+    .roles-table { width: 100%; border-collapse: collapse; }
+    .roles-table th { background: var(--stride-bg); border-bottom: 1px solid var(--stride-border); padding: 10px 16px; text-align: left; font-size: 11.5px; font-weight: 600; color: var(--stride-text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .roles-table td { padding: 12px 16px; border-bottom: 1px solid var(--stride-border-soft); font-size: 13px; vertical-align: middle; }
+    .roles-table tr:last-child td { border-bottom: none; }
+    .perm-grid { display: flex; gap: 6px; flex-wrap: wrap; }
+    .perm-chip { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 99px; background: var(--stride-surface-hover); color: var(--stride-text-secondary); border: 1px solid var(--stride-border); }
+    .perm-chip.granted { background: var(--stride-success-bg); color: var(--stride-success); border-color: transparent; }
+    .user-count-badge { font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--stride-primary-subtle); color: var(--stride-primary); }
+
+    /* Annotation bar */
+    .annotation-bar { background: #1E1B4B; color: #e5e7eb; padding: 6px 16px; font-size: 11.5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border-bottom: 2px solid #6366F1; flex-shrink: 0; }
+    .ann-label { color: #a5b4fc; font-weight: 600; }
+    .ann-chip { padding: 3px 10px; border-radius: 99px; cursor: pointer; font-weight: 500; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); transition: all 0.15s; }
+    .ann-chip:hover { background: rgba(99,102,241,0.25); border-color: #818CF8; }
+    .ann-chip.active { background: #6366F1; border-color: #6366F1; color: #fff; }
+    .ann-sep { color: rgba(255,255,255,0.2); }
+    .ann-note { color: #94a3b8; font-style: italic; margin-left: auto; }
+
+    /* Responsive */
+    .mobile-hamburger { display: none; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
+    @media (max-width: 1100px) { .summary-strip { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width: 900px)  { .col-last, .col-joined { display: none; } }
+    @media (max-width: 768px)  {
+      .sidebar { position: fixed; left: -240px; top: 0; bottom: 0; z-index: 50; transition: left 0.25s ease; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .mobile-hamburger { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: none; background: transparent; cursor: pointer; color: var(--stride-text-secondary); font-size: 18px; }
+      .page-content { padding: 14px; }
+      .summary-strip { grid-template-columns: repeat(2,1fr); }
+      .drawer { width: 100%; right: -100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Annotation bar -->
+<div class="annotation-bar">
+  <span class="ann-label">🖼 US-034.6</span>
+  <span class="ann-sep">|</span>
+  <span class="ann-label">View as:</span>
+  <span class="ann-chip active" onclick="setRole('admin',this)">Admin</span>
+  <span class="ann-chip" onclick="setRole('ops',this)">Ops Manager</span>
+  <span class="ann-chip" onclick="setRole('field',this)">Field Worker</span>
+  <span class="ann-sep">|</span>
+  <span class="ann-label">State:</span>
+  <span class="ann-chip active2" id="ann-users" onclick="setTab('users',this)" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);padding:3px 10px;border-radius:99px;cursor:pointer;font-weight:500;">Users</span>
+  <span class="ann-chip" id="ann-roles" onclick="setTab('roles',this)">Roles & Permissions</span>
+  <span class="ann-chip" onclick="openInviteModal()">Invite Modal</span>
+  <span class="ann-chip" onclick="openDrawer(USERS[0])">User Drawer</span>
+  <span class="ann-sep">|</span>
+  <span class="ann-label">Theme:</span>
+  <span class="ann-chip" id="theme-toggle" onclick="toggleTheme()">☀️ Light</span>
+  <span class="ann-note">User Management — table, invite modal, role editor, user drawer</span>
+</div>
+
+<div class="shell">
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">S</div>
+      <span class="logo-text">STRIDE</span>
+      <span class="logo-badge">Beta</span>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Main</div>
+      <a href="#" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a href="#" class="nav-item"><span class="nav-icon">⬡</span> Workflows <span class="nav-badge">12</span></a>
+      <a href="#" class="nav-item"><span class="nav-icon">☰</span> Tasks</a>
+      <a href="#" class="nav-item"><span class="nav-icon">📅</span> Scheduling</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Operations</div>
+      <a href="#" class="nav-item active"><span class="nav-icon">👥</span> User Management</a>
+      <a href="#" class="nav-item"><span class="nav-icon">🔔</span> Notifications</a>
+      <a href="#" class="nav-item"><span class="nav-icon">📊</span> Reports</a>
+      <a href="#" class="nav-item"><span class="nav-icon">💳</span> Invoicing</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">System</div>
+      <a href="#" class="nav-item"><span class="nav-icon">⚙️</span> Settings</a>
+      <a href="#" class="nav-item"><span class="nav-icon">🛡️</span> Admin</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar-sm">RM</div>
+        <div>
+          <div class="user-name-sm">Ramki Mario</div>
+          <div class="user-role-sm" id="sidebar-role-label">System Admin</div>
+        </div>
+        <span style="color:var(--stride-nav-muted);font-size:12px;margin-left:auto;">⋮</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <button class="mobile-hamburger" onclick="openSidebar()">☰</button>
+      <div class="breadcrumb">
+        <span class="bc-item">STRIDE</span>
+        <span class="bc-sep">›</span>
+        <span class="bc-current" id="bc-label">User Management</span>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn">🔔</button>
+        <button class="icon-btn">❓</button>
+        <div class="topbar-avatar">RM</div>
+      </div>
+    </header>
+
+    <div class="page-content" id="page-content">
+
+      <!-- Access denied (non-admin) -->
+      <div class="access-denied" id="access-denied">
+        <div class="access-denied-icon">🔒</div>
+        <div class="access-denied-title">Access Restricted</div>
+        <div class="access-denied-desc">User Management requires Admin or Ops Manager access.<br>Contact your system administrator to request permission.</div>
+      </div>
+
+      <!-- Main content (admin/ops) -->
+      <div id="main-content">
+
+        <!-- Page header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">User Management</h1>
+            <p class="page-subtitle" id="page-subtitle">Manage users, roles, and permissions across your organisation.</p>
+          </div>
+          <div style="display:flex;gap:8px;" id="header-actions">
+            <button class="btn btn-ghost" onclick="alert('Export users CSV — Phase 3')">↓ Export</button>
+            <button class="btn btn-primary" onclick="openInviteModal()">+ Invite User</button>
+          </div>
+        </div>
+
+        <!-- Tab bar -->
+        <div style="background:var(--stride-surface);border:1px solid var(--stride-border);border-radius:var(--stride-radius-xl) var(--stride-radius-xl) 0 0;border-bottom:none;">
+          <div class="tab-bar" style="padding:0 16px;">
+            <div class="tab-item active" id="tab-users-btn" onclick="setTab('users',this)">👥 Users</div>
+            <div class="tab-item" id="tab-roles-btn" onclick="setTab('roles',this)" style="display:none" id="tab-roles-li">🛡 Roles &amp; Permissions</div>
+          </div>
+        </div>
+
+        <!-- Users tab -->
+        <div id="tab-users" class="tab-panel active">
+
+          <!-- Summary strip -->
+          <div class="summary-strip" style="margin-bottom:0;border-radius:0;">
+            <div class="sum-card active" onclick="filterStatus('all',this)">
+              <div class="sum-label">Total Users</div>
+              <div class="sum-count total">24</div>
+            </div>
+            <div class="sum-card" onclick="filterStatus('active',this)">
+              <div class="sum-label">Active</div>
+              <div class="sum-count active-c">17</div>
+            </div>
+            <div class="sum-card" onclick="filterStatus('invited',this)">
+              <div class="sum-label">Invited</div>
+              <div class="sum-count invited">4</div>
+            </div>
+            <div class="sum-card" onclick="filterStatus('suspended',this)">
+              <div class="sum-label">Suspended</div>
+              <div class="sum-count suspended">3</div>
+            </div>
+            <div class="sum-card" onclick="filterStatus('admin',this)">
+              <div class="sum-label">Admins</div>
+              <div class="sum-count admin">3</div>
+            </div>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="toolbar" style="border-radius:0;margin-top:0;">
+            <div class="bulk-bar" id="bulk-bar">
+              <span class="bulk-label" id="bulk-label">2 selected</span>
+              <button class="btn btn-ghost btn-sm" onclick="alert('Assign role — Phase 3')">🛡 Assign Role</button>
+              <button class="btn btn-ghost btn-sm" onclick="alert('Resend invites — Phase 3')">✉ Resend Invite</button>
+              <button class="btn btn-danger btn-sm" onclick="clearSel()">✕ Clear</button>
+            </div>
+            <div class="search-wrap">
+              <span class="search-icon">🔍</span>
+              <input class="search-input" placeholder="Search users…" id="search" oninput="renderTable()" />
+            </div>
+            <select class="filter-select" id="f-role" onchange="renderTable()">
+              <option value="">All Roles</option>
+              <option value="Admin">Admin</option>
+              <option value="Ops Manager">Ops Manager</option>
+              <option value="Finance">Finance</option>
+              <option value="Field Worker">Field Worker</option>
+              <option value="Viewer">Viewer</option>
+            </select>
+            <select class="filter-select" id="f-status" onchange="renderTable()">
+              <option value="">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="invited">Invited</option>
+              <option value="suspended">Suspended</option>
+            </select>
+            <div class="toolbar-sep"></div>
+            <select class="filter-select" id="f-sort" onchange="renderTable()" style="margin-left:auto;">
+              <option value="name">Sort: Name A–Z</option>
+              <option value="role">Sort: Role</option>
+              <option value="status">Sort: Status</option>
+              <option value="joined">Sort: Joined</option>
+            </select>
+          </div>
+
+          <!-- Table -->
+          <div class="table-wrap">
+            <table class="um-table">
+              <thead>
+                <tr>
+                  <th style="width:40px"><input type="checkbox" class="cb" id="cb-all" onchange="toggleAll(this)" /></th>
+                  <th>User</th>
+                  <th style="width:140px">Role</th>
+                  <th style="width:120px">Status</th>
+                  <th class="col-last" style="width:130px">Last Active</th>
+                  <th class="col-joined" style="width:110px">Joined</th>
+                  <th style="width:80px"></th>
+                </tr>
+              </thead>
+              <tbody id="um-tbody"></tbody>
+            </table>
+            <div class="empty-state" id="empty-state" style="display:none">
+              <div class="empty-icon">👥</div>
+              <div class="empty-title">No users found</div>
+              <div class="empty-desc">Try adjusting filters or invite a new user.</div>
+              <button class="btn btn-primary" onclick="openInviteModal()">+ Invite User</button>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination">
+            <span class="pg-info" id="pg-info">Showing 1–10 of 24 users</span>
+            <div class="pg-controls">
+              <button class="pg-btn" disabled>‹</button>
+              <button class="pg-btn active">1</button>
+              <button class="pg-btn">2</button>
+              <button class="pg-btn">3</button>
+              <button class="pg-btn">›</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Roles tab -->
+        <div id="tab-roles" class="tab-panel">
+          <div class="roles-card" style="border-radius:0 0 var(--stride-radius-xl) var(--stride-radius-xl);">
+            <table class="roles-table">
+              <thead>
+                <tr>
+                  <th>Role</th>
+                  <th>Description</th>
+                  <th>Permissions</th>
+                  <th style="width:100px">Users</th>
+                  <th style="width:80px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="role-badge role-admin">🛡 Admin</span></td>
+                  <td style="color:var(--stride-text-secondary);font-size:12.5px;">Full platform access. Can manage users, roles, workflows, and system settings.</td>
+                  <td>
+                    <div class="perm-grid">
+                      <span class="perm-chip granted">users.manage</span>
+                      <span class="perm-chip granted">workflows.manage</span>
+                      <span class="perm-chip granted">reports.view</span>
+                      <span class="perm-chip granted">system.config</span>
+                      <span class="perm-chip granted">billing.manage</span>
+                    </div>
+                  </td>
+                  <td><span class="user-count-badge">3 users</span></td>
+                  <td><button class="btn btn-ghost btn-sm" onclick="alert('Edit role — Phase 3')">Edit</button></td>
+                </tr>
+                <tr>
+                  <td><span class="role-badge role-ops">⬡ Ops Manager</span></td>
+                  <td style="color:var(--stride-text-secondary);font-size:12.5px;">Manages workflows, tasks, scheduling, and team dispatch. Cannot modify users or billing.</td>
+                  <td>
+                    <div class="perm-grid">
+                      <span class="perm-chip granted">workflows.manage</span>
+                      <span class="perm-chip granted">tasks.manage</span>
+                      <span class="perm-chip granted">scheduling.manage</span>
+                      <span class="perm-chip granted">reports.view</span>
+                      <span class="perm-chip">users.manage</span>
+                    </div>
+                  </td>
+                  <td><span class="user-count-badge">6 users</span></td>
+                  <td><button class="btn btn-ghost btn-sm" onclick="alert('Edit role — Phase 3')">Edit</button></td>
+                </tr>
+                <tr>
+                  <td><span class="role-badge role-finance">💰 Finance</span></td>
+                  <td style="color:var(--stride-text-secondary);font-size:12.5px;">View-only access to reporting and invoicing. Cannot create or modify workflows.</td>
+                  <td>
+                    <div class="perm-grid">
+                      <span class="perm-chip granted">reports.view</span>
+                      <span class="perm-chip granted">invoicing.view</span>
+                      <span class="perm-chip">workflows.manage</span>
+                      <span class="perm-chip">users.manage</span>
+                    </div>
+                  </td>
+                  <td><span class="user-count-badge">4 users</span></td>
+                  <td><button class="btn btn-ghost btn-sm" onclick="alert('Edit role — Phase 3')">Edit</button></td>
+                </tr>
+                <tr>
+                  <td><span class="role-badge role-field">📍 Field Worker</span></td>
+                  <td style="color:var(--stride-text-secondary);font-size:12.5px;">Can view and complete assigned tasks. No management or reporting access.</td>
+                  <td>
+                    <div class="perm-grid">
+                      <span class="perm-chip granted">tasks.view</span>
+                      <span class="perm-chip granted">tasks.complete</span>
+                      <span class="perm-chip">workflows.manage</span>
+                      <span class="perm-chip">reports.view</span>
+                    </div>
+                  </td>
+                  <td><span class="user-count-badge">8 users</span></td>
+                  <td><button class="btn btn-ghost btn-sm" onclick="alert('Edit role — Phase 3')">Edit</button></td>
+                </tr>
+                <tr>
+                  <td><span class="role-badge role-viewer">👁 Viewer</span></td>
+                  <td style="color:var(--stride-text-secondary);font-size:12.5px;">Read-only access to dashboards and workflow status. Cannot take any action.</td>
+                  <td>
+                    <div class="perm-grid">
+                      <span class="perm-chip granted">dashboard.view</span>
+                      <span class="perm-chip granted">workflows.view</span>
+                      <span class="perm-chip">tasks.manage</span>
+                      <span class="perm-chip">reports.view</span>
+                    </div>
+                  </td>
+                  <td><span class="user-count-badge">3 users</span></td>
+                  <td><button class="btn btn-ghost btn-sm" onclick="alert('Edit role — Phase 3')">Edit</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+            <button class="btn btn-primary" onclick="alert('Create custom role — Phase 3')">+ Create Role</button>
+          </div>
+        </div>
+
+      </div><!-- /main-content -->
+    </div><!-- /page-content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ── Invite Modal ── -->
+<div class="modal-overlay" id="invite-modal" onclick="e => e.target===this&&closeInviteModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">✉ Invite User</div>
+      <button class="modal-close" onclick="closeInviteModal()">✕</button>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Full Name <span style="color:var(--stride-error)">*</span></label>
+      <input class="form-input" type="text" placeholder="e.g. Jane Smith" id="inv-name" />
+    </div>
+    <div class="form-field">
+      <label class="form-label">Email Address <span style="color:var(--stride-error)">*</span></label>
+      <input class="form-input" type="email" placeholder="jane@acmecorp.com" id="inv-email" />
+      <span class="form-hint">An invitation email will be sent to this address.</span>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Role <span style="color:var(--stride-error)">*</span></label>
+      <select class="form-select" id="inv-role">
+        <option value="">Select a role…</option>
+        <option value="Admin">Admin</option>
+        <option value="Ops Manager">Ops Manager</option>
+        <option value="Finance">Finance</option>
+        <option value="Field Worker">Field Worker</option>
+        <option value="Viewer">Viewer</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Department (optional)</label>
+      <input class="form-input" type="text" placeholder="e.g. Engineering" />
+    </div>
+    <div style="background:var(--stride-primary-subtle);border:1px solid rgba(99,102,241,0.2);border-radius:var(--stride-radius-lg);padding:10px 12px;font-size:12.5px;color:var(--stride-primary);">
+      ℹ The user will receive a secure link valid for 72 hours to set their password and activate their account.
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeInviteModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="sendInvite()">Send Invitation</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── User Drawer ── -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title">User Details</div>
+    <button class="modal-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"><!-- injected --></div>
+  <div class="drawer-footer" id="drawer-footer"><!-- injected --></div>
+</div>
+
+<script>
+/* ── Data ── */
+const USERS = [
+  { id:1, name:'Ramki Mario',   email:'ramki@acmecorp.com',   role:'Admin',       status:'active',    color:'#6366F1', joined:'1 Jan 2026',  last:'Just now' },
+  { id:2, name:'Sarah K.',      email:'sarah.k@acmecorp.com', role:'Admin',       status:'active',    color:'#8B5CF6', joined:'5 Jan 2026',  last:'2h ago' },
+  { id:3, name:'James O.',      email:'james.o@acmecorp.com', role:'Ops Manager', status:'active',    color:'#10B981', joined:'10 Jan 2026', last:'1h ago' },
+  { id:4, name:'Priya M.',      email:'priya.m@acmecorp.com', role:'Finance',     status:'active',    color:'#3B82F6', joined:'12 Jan 2026', last:'3h ago' },
+  { id:5, name:'Carlos D.',     email:'carlos.d@acmecorp.com',role:'Field Worker',status:'active',    color:'#F59E0B', joined:'15 Jan 2026', last:'Yesterday' },
+  { id:6, name:'Lisa T.',       email:'lisa.t@acmecorp.com',  role:'Ops Manager', status:'active',    color:'#EF4444', joined:'20 Jan 2026', last:'Today, 9am' },
+  { id:7, name:'Marcus L.',     email:'marcus.l@acmecorp.com',role:'Field Worker',status:'active',    color:'#6366F1', joined:'1 Feb 2026',  last:'2 days ago' },
+  { id:8, name:'Nina R.',       email:'nina.r@acmecorp.com',  role:'Finance',     status:'active',    color:'#10B981', joined:'5 Feb 2026',  last:'Today, 11am' },
+  { id:9, name:'Tom A.',        email:'tom.a@acmecorp.com',   role:'Field Worker',status:'active',    color:'#8B5CF6', joined:'10 Feb 2026', last:'4 days ago' },
+  { id:10,name:'Diana P.',      email:'diana.p@acmecorp.com', role:'Viewer',      status:'active',    color:'#F59E0B', joined:'14 Feb 2026', last:'1 week ago' },
+  { id:11,name:'Ahmed S.',      email:'ahmed.s@acmecorp.com', role:'Ops Manager', status:'active',    color:'#EF4444', joined:'18 Feb 2026', last:'3h ago' },
+  { id:12,name:'Grace W.',      email:'grace.w@acmecorp.com', role:'Field Worker',status:'active',    color:'#3B82F6', joined:'22 Feb 2026', last:'Today, 8am' },
+  { id:13,name:'Ben F.',        email:'ben.f@acmecorp.com',   role:'Finance',     status:'invited',   color:'#9CA3AF', joined:'—',           last:'Never' },
+  { id:14,name:'Chloe K.',      email:'chloe.k@acmecorp.com', role:'Field Worker',status:'invited',   color:'#9CA3AF', joined:'—',           last:'Never' },
+  { id:15,name:'Derek M.',      email:'derek.m@acmecorp.com', role:'Ops Manager', status:'invited',   color:'#9CA3AF', joined:'—',           last:'Never' },
+  { id:16,name:'Ella J.',       email:'ella.j@acmecorp.com',  role:'Viewer',      status:'invited',   color:'#9CA3AF', joined:'—',           last:'Never' },
+  { id:17,name:'Frank H.',      email:'frank.h@acmecorp.com', role:'Field Worker',status:'suspended', color:'#6B7280', joined:'1 Mar 2026',  last:'10 days ago' },
+  { id:18,name:'Gina O.',       email:'gina.o@acmecorp.com',  role:'Finance',     status:'suspended', color:'#6B7280', joined:'5 Mar 2026',  last:'2 weeks ago' },
+  { id:19,name:'Harry V.',      email:'harry.v@acmecorp.com', role:'Field Worker',status:'suspended', color:'#6B7280', joined:'8 Mar 2026',  last:'12 days ago' },
+  { id:20,name:'Irene C.',      email:'irene.c@acmecorp.com', role:'Viewer',      status:'active',    color:'#6366F1', joined:'10 Mar 2026', last:'Yesterday' },
+  { id:21,name:'Jack N.',       email:'jack.n@acmecorp.com',  role:'Ops Manager', status:'active',    color:'#10B981', joined:'12 Mar 2026', last:'Today, 10am' },
+  { id:22,name:'Karen Y.',      email:'karen.y@acmecorp.com', role:'Field Worker',status:'active',    color:'#8B5CF6', joined:'15 Mar 2026', last:'1 day ago' },
+  { id:23,name:'Leo B.',        email:'leo.b@acmecorp.com',   role:'Admin',       status:'active',    color:'#6366F1', joined:'18 Mar 2026', last:'30 min ago' },
+  { id:24,name:'Maya G.',       email:'maya.g@acmecorp.com',  role:'Finance',     status:'active',    color:'#3B82F6', joined:'20 Mar 2026', last:'Today, 2pm' },
+];
+
+const ROLE_PERMS = {
+  'Admin':       ['users.manage','workflows.manage','reports.view','system.config','billing.manage'],
+  'Ops Manager': ['workflows.manage','tasks.manage','scheduling.manage','reports.view'],
+  'Finance':     ['reports.view','invoicing.view'],
+  'Field Worker':['tasks.view','tasks.complete'],
+  'Viewer':      ['dashboard.view','workflows.view'],
+};
+
+const ROLE_CLASS = {
+  'Admin':'role-admin','Ops Manager':'role-ops','Finance':'role-finance',
+  'Field Worker':'role-field','Viewer':'role-viewer'
+};
+
+let selectedIds = new Set();
+let currentRole = 'admin';
+let currentTab  = 'users';
+let statusFilter = '';
+
+function initials(name){ return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+/* ── Role switcher ── */
+function setRole(r, el) {
+  currentRole = r;
+  document.querySelectorAll('.ann-chip').forEach(c => {
+    if (['Admin','Ops Manager','Field Worker'].includes(c.textContent.trim())) c.classList.remove('active');
+  });
+  el.classList.add('active');
+
+  const denied = document.getElementById('access-denied');
+  const main   = document.getElementById('main-content');
+  const roleTab = document.getElementById('tab-roles-li') || document.getElementById('tab-roles-btn');
+
+  if (r === 'field') {
+    denied.classList.add('visible');
+    main.style.display = 'none';
+    document.getElementById('sidebar-role-label').textContent = 'Field Worker';
+  } else {
+    denied.classList.remove('visible');
+    main.style.display = 'block';
+    document.getElementById('sidebar-role-label').textContent = r === 'admin' ? 'System Admin' : 'Ops Manager';
+    // Ops can't see Roles tab
+    const rolesBtn = document.getElementById('tab-roles-btn');
+    rolesBtn.style.display = r === 'admin' ? '' : 'none';
+    if (r === 'ops' && currentTab === 'roles') setTab('users', document.getElementById('tab-users-btn'));
+    // Ops can't invite
+    document.getElementById('header-actions').innerHTML = r === 'admin'
+      ? '<button class="btn btn-ghost" onclick="alert(\'Export CSV\')">↓ Export</button><button class="btn btn-primary" onclick="openInviteModal()">+ Invite User</button>'
+      : '<button class="btn btn-ghost" onclick="alert(\'Export CSV\')">↓ Export</button>';
+  }
+}
+
+function setTab(t, el) {
+  currentTab = t;
+  ['tab-users-btn','tab-roles-btn'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.classList.remove('active');
+  });
+  el.classList.add('active');
+  document.getElementById('tab-users').classList.toggle('active', t==='users');
+  document.getElementById('tab-roles').classList.toggle('active', t==='roles');
+  // also sync annotation chips
+  ['ann-users','ann-roles'].forEach(id => {
+    const c = document.getElementById(id);
+    if (c) c.style.background = 'rgba(255,255,255,0.05)';
+  });
+  const ac = document.getElementById('ann-' + t.replace('roles','roles'));
+  if (ac) ac.style.background = '#6366F1';
+}
+
+/* ── Table rendering ── */
+function renderTable() {
+  const q   = document.getElementById('search').value.toLowerCase();
+  const fR  = document.getElementById('f-role').value;
+  const fS  = document.getElementById('f-status').value || statusFilter;
+  const srt = document.getElementById('f-sort').value;
+
+  let data = USERS.filter(u => {
+    if (q && !u.name.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
+    if (fR && u.role !== fR) return false;
+    if (fS === 'admin') return u.role === 'Admin';
+    if (fS && u.status !== fS) return false;
+    return true;
+  });
+
+  const sortFns = {
+    name:   (a,b) => a.name.localeCompare(b.name),
+    role:   (a,b) => a.role.localeCompare(b.role),
+    status: (a,b) => a.status.localeCompare(b.status),
+    joined: (a,b) => a.id - b.id,
+  };
+  data.sort(sortFns[srt] || sortFns.name);
+
+  const tbody = document.getElementById('um-tbody');
+  const empty = document.getElementById('empty-state');
+  const pg    = document.getElementById('pg-info');
+
+  if (!data.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    pg.textContent = '0 users';
+    return;
+  }
+
+  empty.style.display = 'none';
+  pg.textContent = `Showing 1–${Math.min(data.length,10)} of ${data.length} user${data.length!==1?'s':''}`;
+
+  tbody.innerHTML = data.map(u => {
+    const sel = selectedIds.has(u.id);
+    const pillCls = {active:'pill-active',invited:'pill-invited',suspended:'pill-suspended'}[u.status];
+    const pillLbl = {active:'Active',invited:'Invited',suspended:'Suspended'}[u.status];
+    return `
+    <tr class="${sel?'selected':''}" onclick="openDrawer(USERS[${u.id-1}])">
+      <td style="width:40px"><input type="checkbox" class="cb row-cb" ${sel?'checked':''} data-id="${u.id}" onchange="toggleRow(${u.id},this)" onclick="event.stopPropagation()" /></td>
+      <td>
+        <div class="user-cell">
+          <div class="u-avatar" style="background:${u.color}">${initials(u.name)}</div>
+          <div>
+            <div class="u-name">${u.name}</div>
+            <div class="u-email">${u.email}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <span class="role-badge ${ROLE_CLASS[u.role] || 'role-viewer'}">${u.role}</span>
+      </td>
+      <td><span class="status-pill ${pillCls}"><span class="status-dot"></span>${pillLbl}</span></td>
+      <td class="col-last" style="color:var(--stride-text-secondary);font-size:13px;">${u.last}</td>
+      <td class="col-joined" style="color:var(--stride-text-muted);font-size:12.5px;">${u.joined}</td>
+      <td>
+        <div class="row-actions">
+          <button class="row-btn" title="View" onclick="event.stopPropagation();openDrawer(USERS[${u.id-1}])">👁</button>
+          <button class="row-btn" title="Edit role" onclick="event.stopPropagation();alert('Edit role — Phase 3')">🛡</button>
+          ${u.status==='suspended'
+            ? `<button class="row-btn" title="Activate" onclick="event.stopPropagation();alert('Activate user — Phase 3')">✅</button>`
+            : `<button class="row-btn danger" title="Suspend" onclick="event.stopPropagation();alert('Suspend user — Phase 3')">⏸</button>`}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterStatus(f, el) {
+  statusFilter = f === 'all' ? '' : f;
+  document.getElementById('f-status').value = '';
+  document.querySelectorAll('.sum-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+/* ── Selection ── */
+function toggleRow(id, cb) {
+  if (cb.checked) selectedIds.add(id); else selectedIds.delete(id);
+  updateBulk();
+  document.getElementById('cb-all').checked = selectedIds.size === USERS.length;
+  document.querySelectorAll('#um-tbody tr').forEach(tr => {
+    const c = tr.querySelector('.row-cb');
+    if (c) tr.classList.toggle('selected', c.checked);
+  });
+}
+function toggleAll(cb) {
+  USERS.forEach(u => cb.checked ? selectedIds.add(u.id) : selectedIds.delete(u.id));
+  document.querySelectorAll('.row-cb').forEach(c => c.checked = cb.checked);
+  document.querySelectorAll('#um-tbody tr').forEach(tr => tr.classList.toggle('selected', cb.checked));
+  updateBulk();
+}
+function updateBulk() {
+  const bar = document.getElementById('bulk-bar');
+  document.getElementById('bulk-label').textContent = `${selectedIds.size} selected`;
+  bar.classList.toggle('visible', selectedIds.size > 0);
+}
+function clearSel() {
+  selectedIds.clear();
+  document.querySelectorAll('.row-cb, #cb-all').forEach(c => c.checked = false);
+  document.querySelectorAll('#um-tbody tr').forEach(tr => tr.classList.remove('selected'));
+  updateBulk();
+}
+
+/* ── Invite modal ── */
+function openInviteModal()  { document.getElementById('invite-modal').classList.add('open'); }
+function closeInviteModal() { document.getElementById('invite-modal').classList.remove('open'); }
+function sendInvite() {
+  const name  = document.getElementById('inv-name').value.trim();
+  const email = document.getElementById('inv-email').value.trim();
+  const role  = document.getElementById('inv-role').value;
+  if (!name || !email || !role) { alert('Please fill in all required fields.'); return; }
+  closeInviteModal();
+  alert(`✉ Invitation sent to ${email} as ${role}!\n\n(Phase 3: real email via notification service)`);
+}
+
+/* ── User drawer ── */
+function openDrawer(u) {
+  const perms = ROLE_PERMS[u.role] || [];
+  const allPerms = ['users.manage','workflows.manage','tasks.manage','scheduling.manage','reports.view','invoicing.view','system.config','billing.manage','tasks.view','tasks.complete','dashboard.view','workflows.view'];
+  document.getElementById('drawer-body').innerHTML = `
+    <div class="drawer-user-hero">
+      <div class="drawer-avatar" style="background:${u.color}">${initials(u.name)}</div>
+      <div class="drawer-name">${u.name}</div>
+      <div class="drawer-email">${u.email}</div>
+      <div style="display:flex;gap:6px;justify-content:center;margin-top:10px;">
+        <span class="role-badge ${ROLE_CLASS[u.role]||'role-viewer'}">${u.role}</span>
+        <span class="status-pill ${{active:'pill-active',invited:'pill-invited',suspended:'pill-suspended'}[u.status]}"><span class="status-dot"></span>${{active:'Active',invited:'Invited',suspended:'Suspended'}[u.status]}</span>
+      </div>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="info-item-label">Joined</div><div class="info-item-val">${u.joined}</div></div>
+      <div class="info-item"><div class="info-item-label">Last Active</div><div class="info-item-val">${u.last}</div></div>
+      <div class="info-item"><div class="info-item-label">Tenant</div><div class="info-item-val">Acme Corp</div></div>
+      <div class="info-item"><div class="info-item-label">Department</div><div class="info-item-val">Operations</div></div>
+    </div>
+    <div>
+      <div class="section-title">Permissions via ${u.role}</div>
+      <div class="perm-list">
+        ${allPerms.slice(0,6).map(p => `
+          <div class="perm-item">
+            <span class="perm-name">${p}</span>
+            <span class="perm-check">${perms.includes(p) ? '✅' : '⬜'}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div class="section-title">Recent Activity</div>
+      <div class="activity-mini">
+        <div class="act-mini-item"><div class="act-mini-dot"></div><span>Completed workflow <strong>WF-0039</strong></span></div>
+        <div class="act-mini-item"><div class="act-mini-dot"></div><span>Logged in from Chrome / Windows</span></div>
+        <div class="act-mini-item"><div class="act-mini-dot"></div><span>Updated task <strong>Equipment Order</strong></span></div>
+      </div>
+    </div>`;
+  document.getElementById('drawer-footer').innerHTML = `
+    <button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center;" onclick="alert('Edit user — Phase 3')">✏️ Edit</button>
+    ${u.status==='suspended'
+      ? `<button class="btn btn-primary btn-sm" style="flex:1;justify-content:center;" onclick="alert('Activate user — Phase 3')">✅ Activate</button>`
+      : `<button class="btn btn-danger btn-sm" style="flex:1;justify-content:center;" onclick="alert('Suspend user — Phase 3')">⏸ Suspend</button>`}`;
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+function closeDrawer() {
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+
+/* ── Theme ── */
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('theme-toggle').textContent = isDark ? '☀️ Light' : '🌙 Dark';
+}
+
+/* ── Mobile sidebar ── */
+function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+/* ── Init ── */
+renderTable();
+</script>
+</body>
+</html>
