@@ -1,0 +1,24 @@
+<Project>
+
+  <!--
+    Shared test-project configuration. MSBuild automatically imports this file
+    into every *.csproj at this directory or below.
+
+    Applies to: all STRIDE.*.Tests projects under backend/tests/.
+
+    ────────────────────────────────────────────────────────────────────────
+    Newtonsoft.Json override:
+    Older versions of Microsoft.NET.Test.Sdk transitively pull
+    Newtonsoft.Json 9.0.1 which carries GHSA-5crp-9r3c-p9vr (high severity,
+    arbitrary code execution via untrusted deserialization). Pinning to
+    13.0.3 here suppresses NU1903 across all test projects.
+
+    This is a transitive override only — production projects are unaffected
+    and continue to use System.Text.Json.
+    ────────────────────────────────────────────────────────────────────────
+  -->
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>
