@@ -490,23 +490,35 @@ These stories are not phase-specific — they run alongside regular sprints at d
 
 **Type:** Design prerequisite
 **When:** Must be completed **before US-030 (login page)** and **before any Phase 3+ Angular UI stories**.
-**Status:** [ ] Backlog
+**Status:** [-] IN PROGRESS — 5 of 7 sub-issues Done
 
-**Scope:**
-- Color palette, typography, spacing system
-- Component library selection confirmed (PrimeNG — already decided; this defines which components map to which screens)
-- Wireframes for: Login, Dashboard, Workflow List, Workflow Detail, Scheduling, Reporting, Admin
-- Responsive breakpoints defined (desktop-first — internal ops tool)
-- Loading/empty/error states per screen
+**Design System established (PR #64, 2026-05-15):**
+- Official palette: Indigo `#6366F1` / Purple `#8B5CF6` (Premium SaaS, Linear-inspired)
+- `frontend/src/styles.scss` — STRIDE CSS tokens, Tailwind `@theme inline` bridge, PrimeNG `--p-*` overrides
+- `frontend/src/app/core/theme/theme.service.ts` — Signal-based ThemeService
+- Light + dark theme via `data-theme` attribute; flash-prevention inline script in `index.html`
+- `providePrimeNG({ ripple: true, inputVariant: 'outlined' })` in `app.config.ts`
 
-**Tooling:** Figma free tier (recommended) or AI-assisted wireframe tool (e.g. Uizard, Visily free tier).
+**HTML Prototype Sub-Issues:**
+
+| Story | File | PR | Status |
+|---|---|---|---|
+| US-034.1 Shell & Layout (#55) | `01-shell-layout.html` | #62 | [x] Done |
+| US-034.2 Login Page (#56) | `02-login.html` | #63 | [x] Done |
+| US-034.3 Dashboard (#57) | `03-dashboard.html` | #65 | [x] Done |
+| US-034.4 Workflow List (#58) | `04-workflow-list.html` | #66 | [x] Done |
+| US-034.5 Workflow Detail (#59) | `05-workflow-detail.html` | #67 | [x] Done |
+| US-034.6 User Management (#60) | `06-user-management.html` | — | [ ] **Next** |
+| US-034.7 Reporting (#61) | `07-reporting.html` | — | [ ] Pending |
 
 **Acceptance Criteria:**
-- [ ] Figma file (or equivalent) shared/committed with all screen wireframes
-- [ ] Color tokens defined (primary, secondary, surface, text, error, success)
-- [ ] All PrimeNG components mapped to each screen
-- [ ] Mobile-responsive breakpoints noted (tablet + desktop minimum)
-- [ ] Design reviewed and approved before any frontend Angular story begins
+- [x] Color tokens defined — `--stride-*` CSS custom properties, light + dark
+- [x] Responsive breakpoints: desktop-first, collapses at 1024px (tablet) and 768px (mobile)
+- [x] Loading/error/empty states per screen
+- [x] Shell, Login, Dashboard, Workflow List, Workflow Detail prototypes committed
+- [ ] User Management prototype (#60)
+- [ ] Reporting prototype (#61)
+- [ ] US-034 parent issue closed (after US-034.6 + US-034.7 done)
 
 ---
 

@@ -106,7 +106,14 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 - [x] US-032: appsettings.Development.json for local dev (PR #54)
 
 ### Pending
-- [ ] **US-034: UI/UX Design ← prerequisite before any Angular UI story (GitHub #37, EP-015)**
+- [-] **US-034: UI/UX Design — 5 of 7 sub-issues Done (GitHub #37, EP-015)**
+  - [x] US-034.1 Shell & Layout — `01-shell-layout.html` PR #62 ✅
+  - [x] US-034.2 Login Page — `02-login.html` PR #63 ✅
+  - [x] US-034.3 Dashboard — `03-dashboard.html` PR #65 ✅
+  - [x] US-034.4 Workflow List — `04-workflow-list.html` PR #66 ✅
+  - [x] US-034.5 Workflow Detail — `05-workflow-detail.html` PR #67 ✅
+  - [ ] **US-034.6 User Management — `06-user-management.html` (Next)**
+  - [ ] **US-034.7 Reporting — `07-reporting.html` (Pending)**
 - [ ] US-030: Angular login page (PrimeNG reactive form) ← blocked on US-034 (GitHub #28, EP-015)
 - [ ] US-031: Auth guard + APP_INITIALIZER session check (GitHub #29, EP-015)
 - [x] US-032: appsettings.Development.json — EP-016 closed ✅ (PR #54)
@@ -118,12 +125,20 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 - [ ] **US-040: Deployment Diagram (Azure) — EP-017 (#52, trigger: end of Phase 7)**
 - *(Old US-033 #36 closed — superseded by individual stories above)*
 
-### GitHub Board State (as of 2026-05-15)
-- EP-001 through EP-014: ✅ Done (closed) — all stories complete
-- EP-015 (Angular Login UI, #15): 🔵 Open — US-030, US-031, US-034 pending
-- EP-016 (appsettings.Development, #16): 🔵 Open — US-032 pending
-- Sub-issue hierarchy: all Epic→Story parent-child links established (EP-008 through EP-017)
-- Milestone "Docs and Diagrams" (#8) created for EP-017 and future doc/diagram stories
+### Design System (established 2026-05-15, PR #64)
+- Official palette: Indigo `#6366F1` / Purple `#8B5CF6` (Premium SaaS — Linear-inspired)
+- `frontend/src/styles.scss` — full design system (1,161 lines): STRIDE CSS tokens, Tailwind `@theme inline` bridge, PrimeNG `--p-*` overrides, utility classes, animations
+- `frontend/src/app/core/theme/theme.service.ts` — Signal-based ThemeService (light/dark, localStorage persist, OS-preference auto-detect)
+- `frontend/src/index.html` — flash-of-wrong-theme prevention inline script
+- `frontend/src/app/app.config.ts` — `providePrimeNG({ ripple: true, inputVariant: 'outlined' })`
+
+### GitHub Board State (as of 2026-05-15, end of session)
+- EP-001 through EP-014: ✅ Done (closed)
+- EP-015 (Angular Login UI, #15): 🔵 Open — US-034 partially done (5/7), US-030, US-031 pending
+- EP-016 (appsettings.Development, #16): ✅ Done
+- EP-017 (Architecture Diagrams, #46): 🔵 Open — US-035 done (1/6)
+- Issues #55 (US-034.1), #56 (US-034.2), #57 (US-034.3), #58 (US-034.4), #59 (US-034.5): ✅ Closed/Done
+- Issues #60 (US-034.6), #61 (US-034.7): ⬜ Next
 
 ## Phase 3 — Core Workflow Engine (Pending)
 ## Phase 4 — Dashboard & Reporting (Pending)
