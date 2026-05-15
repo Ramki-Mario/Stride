@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using STRIDE.Modules.Identity.Application.Abstractions;
+using STRIDE.Modules.Identity.Infrastructure.Auth;
 using STRIDE.Modules.Identity.Infrastructure.Persistence;
 using STRIDE.Modules.Identity.Infrastructure.Persistence.Repositories;
 using STRIDE.Modules.Identity.Infrastructure.TenantResolution;
@@ -24,6 +25,9 @@ public static class IdentityInfrastructureExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<ITenantRepository, TenantRepository>();
+
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
         return services;
     }
