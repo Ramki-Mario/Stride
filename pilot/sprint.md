@@ -325,7 +325,7 @@
 | ID | Story | Tasks | Complexity | Status |
 |---|---|---|---|---|
 | US-026 | As a developer, all identity operations flow through MediatR handlers | T-080 LoginCommand + handler<br>T-081 RegisterCommand + handler<br>T-082 AssignRoleCommand + handler<br>T-083 GetUserQuery + handler<br>T-084 PBKDF2 PasswordHasher<br>T-085 ITenantContextSetter + TenantMiddleware fix | L | [x] |
-| US-027 | As an operator, invalid login attempts return structured errors, not exceptions | T-085 Add FluentValidation validators for LoginCommand + RegisterUserCommand | S | [ ] |
+| US-027 | As an operator, invalid login attempts return structured errors, not exceptions | T-085 LoginCommandValidator<br>T-086 RegisterCommandValidator<br>T-087 AssignRoleCommandValidator<br>T-088 GetUserQueryValidator<br>T-089 Wire LoggingBehaviour+ValidationBehaviour into Identity MediatR pipeline | S | [x] |
 
 **Dependencies:** EP-010, EP-011
 **Risks:** LoginCommand must not set TenantId on context before resolving it — login is the resolution step
