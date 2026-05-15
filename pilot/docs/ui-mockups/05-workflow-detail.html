@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STRIDE — Workflow Detail [Prototype]</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* ── STRIDE design tokens ── */
+    :root, [data-theme="light"] {
+      --stride-primary:        #6366F1;
+      --stride-primary-hover:  #4F46E5;
+      --stride-primary-subtle: #EEF2FF;
+      --stride-primary-ring:   rgba(99,102,241,0.2);
+      --stride-accent:         #8B5CF6;
+      --stride-accent-subtle:  #F5F3FF;
+      --stride-nav-bg:         #1E1B4B;
+      --stride-nav-border:     rgba(255,255,255,0.08);
+      --stride-nav-text:       #E5E7EB;
+      --stride-nav-icon:       #C7D2FE;
+      --stride-nav-muted:      #A5B4FC;
+      --stride-nav-active:     rgba(99,102,241,0.18);
+      --stride-nav-hover:      rgba(99,102,241,0.10);
+      --stride-bg:             #F8FAFC;
+      --stride-surface:        #FFFFFF;
+      --stride-surface-hover:  #F1F5F9;
+      --stride-surface-raised: #FFFFFF;
+      --stride-text-primary:   #111827;
+      --stride-text-secondary: #6B7280;
+      --stride-text-muted:     #9CA3AF;
+      --stride-border:         #E5E7EB;
+      --stride-border-soft:    #EEF2F7;
+      --stride-topbar-bg:      #FFFFFF;
+      --stride-topbar-border:  #E5E7EB;
+      --stride-shadow-xs:      0 1px 2px rgba(0,0,0,0.05);
+      --stride-shadow-sm:      0 1px 3px rgba(0,0,0,0.08),0 1px 2px -1px rgba(0,0,0,0.06);
+      --stride-shadow-md:      0 4px 6px -1px rgba(0,0,0,0.07),0 2px 4px -2px rgba(0,0,0,0.05);
+      --stride-shadow-lg:      0 10px 15px -3px rgba(0,0,0,0.07),0 4px 6px -4px rgba(0,0,0,0.05);
+      --stride-success:        #10B981;
+      --stride-success-bg:     #ECFDF5;
+      --stride-warning:        #F59E0B;
+      --stride-warning-bg:     #FFFBEB;
+      --stride-error:          #EF4444;
+      --stride-error-bg:       #FEF2F2;
+      --stride-info:           #3B82F6;
+      --stride-info-bg:        #EFF6FF;
+      --stride-radius-sm:      0.375rem;
+      --stride-radius-md:      0.5rem;
+      --stride-radius-lg:      0.75rem;
+      --stride-radius-xl:      0.875rem;
+      --stride-radius-2xl:     1rem;
+    }
+    [data-theme="dark"] {
+      --stride-primary:        #818CF8;
+      --stride-primary-hover:  #6366F1;
+      --stride-primary-subtle: rgba(129,140,248,0.12);
+      --stride-primary-ring:   rgba(129,140,248,0.25);
+      --stride-accent:         #A78BFA;
+      --stride-accent-subtle:  rgba(167,139,250,0.12);
+      --stride-nav-bg:         #0F172A;
+      --stride-nav-border:     rgba(255,255,255,0.06);
+      --stride-nav-text:       #E2E8F0;
+      --stride-nav-icon:       #C7D2FE;
+      --stride-nav-muted:      #94A3B8;
+      --stride-nav-active:     rgba(129,140,248,0.16);
+      --stride-nav-hover:      rgba(129,140,248,0.10);
+      --stride-bg:             #0B1120;
+      --stride-surface:        #111827;
+      --stride-surface-hover:  #1F2937;
+      --stride-surface-raised: #1E293B;
+      --stride-text-primary:   #F9FAFB;
+      --stride-text-secondary: #CBD5E1;
+      --stride-text-muted:     #94A3B8;
+      --stride-border:         #1E293B;
+      --stride-border-soft:    #334155;
+      --stride-topbar-bg:      #111827;
+      --stride-topbar-border:  #1E293B;
+      --stride-shadow-xs:      0 1px 2px rgba(0,0,0,0.3);
+      --stride-shadow-sm:      0 1px 3px rgba(0,0,0,0.4),0 1px 2px -1px rgba(0,0,0,0.3);
+      --stride-shadow-md:      0 4px 6px -1px rgba(0,0,0,0.4),0 2px 4px -2px rgba(0,0,0,0.3);
+      --stride-shadow-lg:      0 10px 15px -3px rgba(0,0,0,0.4),0 4px 6px -4px rgba(0,0,0,0.3);
+      --stride-success:        #34D399;
+      --stride-success-bg:     rgba(52,211,153,0.12);
+      --stride-warning:        #FCD34D;
+      --stride-warning-bg:     rgba(252,211,77,0.12);
+      --stride-error:          #F87171;
+      --stride-error-bg:       rgba(248,113,113,0.12);
+      --stride-info:           #60A5FA;
+      --stride-info-bg:        rgba(96,165,250,0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(--stride-bg); color: var(--stride-text-primary); }
+
+    /* ── Shell ── */
+    .shell { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 240px; flex-shrink: 0;
+      background: var(--stride-nav-bg);
+      border-right: 1px solid var(--stride-nav-border);
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+    }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 20px 20px 16px; border-bottom: 1px solid var(--stride-nav-border); }
+    .logo-mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .logo-text { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+    .logo-badge { font-size: 9px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: var(--stride-nav-muted); background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; margin-left: auto; }
+    .nav-section { padding: 12px 12px 4px; }
+    .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--stride-nav-muted); padding: 0 8px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; color: var(--stride-nav-text); font-size: 13.5px; font-weight: 500; transition: background 0.15s; text-decoration: none; }
+    .nav-item:hover { background: var(--stride-nav-hover); }
+    .nav-item.active { background: var(--stride-nav-active); color: #fff; border-left: 3px solid var(--stride-primary); padding-left: 7px; }
+    .nav-icon { width: 16px; text-align: center; flex-shrink: 0; font-size: 14px; color: var(--stride-nav-icon); }
+    .nav-item.active .nav-icon { color: var(--stride-primary); }
+    .nav-badge { margin-left: auto; font-size: 10px; font-weight: 600; background: var(--stride-primary); color: #fff; padding: 1px 6px; border-radius: 10px; }
+    .nav-badge.warning { background: var(--stride-warning); color: #000; }
+    .sidebar-footer { margin-top: auto; padding: 12px; border-top: 1px solid var(--stride-nav-border); }
+    .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+    .user-card:hover { background: var(--stride-nav-hover); }
+    .user-avatar { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, #6366F1, #8B5CF6); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 12.5px; font-weight: 600; color: var(--stride-nav-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--stride-nav-muted); }
+
+    /* ── Main ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+    /* ── Topbar ── */
+    .topbar { height: 56px; flex-shrink: 0; background: var(--stride-topbar-bg); border-bottom: 1px solid var(--stride-topbar-border); display: flex; align-items: center; gap: 12px; padding: 0 24px; box-shadow: var(--stride-shadow-xs); }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+    .breadcrumb-item { color: var(--stride-text-muted); cursor: pointer; text-decoration: none; }
+    .breadcrumb-item:hover { color: var(--stride-primary); }
+    .breadcrumb-sep { color: var(--stride-text-muted); font-size: 11px; }
+    .breadcrumb-current { color: var(--stride-text-primary); font-weight: 600; }
+    .topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .icon-btn { width: 34px; height: 34px; border-radius: 8px; border: none; cursor: pointer; background: transparent; color: var(--stride-text-secondary); display: flex; align-items: center; justify-content: center; font-size: 15px; transition: background 0.15s; }
+    .icon-btn:hover { background: var(--stride-surface-hover); color: var(--stride-text-primary); }
+    .topbar-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #6366F1, #8B5CF6); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; cursor: pointer; }
+
+    /* ── Page content ── */
+    .page-content { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* ── Hero header ── */
+    .wf-hero {
+      background: var(--stride-surface);
+      border: 1px solid var(--stride-border);
+      border-radius: var(--stride-radius-2xl);
+      padding: 20px 24px;
+      box-shadow: var(--stride-shadow-xs);
+    }
+    .wf-hero-top { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+    .wf-hero-icon {
+      width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+      background: var(--stride-primary-subtle);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .wf-hero-meta { flex: 1; min-width: 0; }
+    .wf-hero-id { font-size: 11.5px; font-weight: 600; color: var(--stride-text-muted); font-family: monospace; margin-bottom: 3px; }
+    .wf-hero-title { font-size: 20px; font-weight: 700; color: var(--stride-text-primary); letter-spacing: -0.3px; margin-bottom: 4px; line-height: 1.2; }
+    .wf-hero-desc { font-size: 13px; color: var(--stride-text-secondary); line-height: 1.5; }
+    .wf-hero-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
+
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: var(--stride-radius-xl); font-size: 13.5px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap; }
+    .btn-primary { background: var(--stride-primary); color: #fff; }
+    .btn-primary:hover { background: var(--stride-primary-hover); box-shadow: 0 4px 12px var(--stride-primary-ring); }
+    .btn-ghost { background: transparent; color: var(--stride-text-secondary); border: 1px solid var(--stride-border); }
+    .btn-ghost:hover { background: var(--stride-surface-hover); color: var(--stride-text-primary); }
+    .btn-warning { background: var(--stride-warning-bg); color: var(--stride-warning); border: 1px solid var(--stride-warning); }
+    .btn-warning:hover { background: var(--stride-warning); color: #fff; }
+    .btn-danger { background: var(--stride-error-bg); color: var(--stride-error); border: 1px solid var(--stride-error); }
+    .btn-danger:hover { background: var(--stride-error); color: #fff; }
+    .btn-sm { padding: 5px 12px; font-size: 12.5px; }
+
+    /* Status pill */
+    .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 99px; font-size: 12.5px; font-weight: 600; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .pill-running   { background: var(--stride-primary-subtle); color: var(--stride-primary); }
+    .pill-running .status-dot { background: var(--stride-primary); animation: pulse 1.4s ease infinite; }
+    .pill-completed { background: var(--stride-success-bg); color: var(--stride-success); }
+    .pill-completed .status-dot { background: var(--stride-success); }
+    .pill-paused    { background: var(--stride-warning-bg); color: var(--stride-warning); }
+    .pill-paused .status-dot { background: var(--stride-warning); }
+    .pill-failed    { background: var(--stride-error-bg); color: var(--stride-error); }
+    .pill-failed .status-dot { background: var(--stride-error); }
+    .pill-draft     { background: var(--stride-surface-hover); color: var(--stride-text-muted); border: 1px solid var(--stride-border); }
+    .pill-draft .status-dot { background: var(--stride-text-muted); }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+
+    /* Priority / type */
+    .priority-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+    .priority-critical { background: var(--stride-error-bg); color: var(--stride-error); }
+    .priority-high     { background: var(--stride-warning-bg); color: var(--stride-warning); }
+    .priority-medium   { background: var(--stride-info-bg); color: var(--stride-info); }
+    .priority-low      { background: var(--stride-surface-hover); color: var(--stride-text-muted); border: 1px solid var(--stride-border); }
+    .type-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 500; padding: 2px 8px; border-radius: 6px; background: var(--stride-accent-subtle); color: var(--stride-accent); }
+    .tag { font-size: 10.5px; font-weight: 500; padding: 1px 7px; border-radius: 99px; background: var(--stride-surface-hover); color: var(--stride-text-secondary); border: 1px solid var(--stride-border); }
+
+    /* Stat pills row */
+    .hero-stats { display: flex; gap: 0; border-top: 1px solid var(--stride-border-soft); padding-top: 14px; flex-wrap: wrap; }
+    .hero-stat { flex: 1; min-width: 100px; padding: 0 16px; border-right: 1px solid var(--stride-border-soft); }
+    .hero-stat:first-child { padding-left: 0; }
+    .hero-stat:last-child  { border-right: none; }
+    .hero-stat-label { font-size: 10.5px; font-weight: 500; color: var(--stride-text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px; }
+    .hero-stat-value { font-size: 14px; font-weight: 600; color: var(--stride-text-primary); }
+    .hero-stat-value.success { color: var(--stride-success); }
+    .hero-stat-value.error   { color: var(--stride-error); }
+    .hero-stat-value.warning { color: var(--stride-warning); }
+
+    /* ── Progress track ── */
+    .progress-section { background: var(--stride-surface); border: 1px solid var(--stride-border); border-radius: var(--stride-radius-2xl); padding: 18px 22px; box-shadow: var(--stride-shadow-xs); }
+    .section-title { font-size: 14px; font-weight: 600; color: var(--stride-text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .section-title .section-icon { font-size: 16px; }
+    .overall-progress { margin-bottom: 16px; }
+    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .progress-title { font-size: 12.5px; font-weight: 500; color: var(--stride-text-secondary); }
+    .progress-pct { font-size: 14px; font-weight: 700; color: var(--stride-primary); }
+    .progress-bar { height: 8px; background: var(--stride-border); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--stride-primary) 0%, var(--stride-accent) 100%); border-radius: 99px; transition: width 0.6s ease; }
+    .progress-fill.complete { background: var(--stride-success); }
+
+    /* Step tracker */
+    .steps-track { display: flex; flex-direction: column; gap: 0; }
+    .step-item { display: flex; gap: 0; align-items: stretch; }
+    .step-connector { display: flex; flex-direction: column; align-items: center; width: 32px; flex-shrink: 0; }
+    .step-dot { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; z-index: 1; }
+    .step-dot.done      { background: var(--stride-success); }
+    .step-dot.running   { background: var(--stride-primary); box-shadow: 0 0 0 4px var(--stride-primary-ring); animation: stepPulse 1.5s ease infinite; }
+    .step-dot.blocked   { background: var(--stride-error); }
+    .step-dot.pending   { background: var(--stride-border); border: 2px solid var(--stride-border-soft); }
+    .step-dot.skipped   { background: var(--stride-text-muted); }
+    @keyframes stepPulse { 0%,100%{box-shadow:0 0 0 4px var(--stride-primary-ring)}50%{box-shadow:0 0 0 8px transparent} }
+    .step-line { width: 2px; flex: 1; background: var(--stride-border); min-height: 12px; }
+    .step-line.done { background: var(--stride-success); }
+    .step-body { flex: 1; padding: 0 0 16px 14px; }
+    .step-item:last-child .step-body { padding-bottom: 0; }
+    .step-header { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; flex-wrap: wrap; }
+    .step-name { font-size: 13.5px; font-weight: 600; color: var(--stride-text-primary); }
+    .step-status-label { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 99px; }
+    .step-status-label.done    { background: var(--stride-success-bg); color: var(--stride-success); }
+    .step-status-label.running { background: var(--stride-primary-subtle); color: var(--stride-primary); }
+    .step-status-label.blocked { background: var(--stride-error-bg); color: var(--stride-error); }
+    .step-status-label.pending { background: var(--stride-surface-hover); color: var(--stride-text-muted); border: 1px solid var(--stride-border); }
+    .step-status-label.skipped { background: var(--stride-surface-hover); color: var(--stride-text-muted); }
+    .step-meta { font-size: 11.5px; color: var(--stride-text-muted); }
+    .step-detail { font-size: 12.5px; color: var(--stride-text-secondary); margin-top: 4px; }
+    .step-error { font-size: 12px; color: var(--stride-error); background: var(--stride-error-bg); padding: 6px 10px; border-radius: 6px; margin-top: 6px; border-left: 3px solid var(--stride-error); }
+
+    /* ── Two-col layout ── */
+    .detail-cols { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+
+    /* ── Card ── */
+    .card { background: var(--stride-surface); border: 1px solid var(--stride-border); border-radius: var(--stride-radius-2xl); box-shadow: var(--stride-shadow-xs); }
+    .card-body { padding: 18px 20px; }
+    .card-body + .card-body { border-top: 1px solid var(--stride-border-soft); }
+
+    /* ── Tabs ── */
+    .tab-bar { display: flex; border-bottom: 1px solid var(--stride-border); padding: 0 20px; }
+    .tab-item { padding: 12px 14px; font-size: 13px; font-weight: 500; color: var(--stride-text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s; white-space: nowrap; }
+    .tab-item:hover { color: var(--stride-text-primary); }
+    .tab-item.active { color: var(--stride-primary); border-bottom-color: var(--stride-primary); font-weight: 600; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Activity feed ── */
+    .activity-list { display: flex; flex-direction: column; gap: 0; }
+    .activity-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--stride-border-soft); }
+    .activity-item:last-child { border-bottom: none; }
+    .act-avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; }
+    .act-body { flex: 1; min-width: 0; }
+    .act-text { font-size: 12.5px; color: var(--stride-text-secondary); line-height: 1.4; }
+    .act-text strong { color: var(--stride-text-primary); font-weight: 600; }
+    .act-time { font-size: 11px; color: var(--stride-text-muted); margin-top: 2px; }
+    .act-tag { display: inline-flex; align-items: center; font-size: 10.5px; font-weight: 500; padding: 1px 6px; border-radius: 4px; }
+    .act-tag.step    { background: var(--stride-primary-subtle); color: var(--stride-primary); }
+    .act-tag.comment { background: var(--stride-accent-subtle); color: var(--stride-accent); }
+    .act-tag.alert   { background: var(--stride-error-bg); color: var(--stride-error); }
+    .act-tag.system  { background: var(--stride-surface-hover); color: var(--stride-text-muted); }
+    .comment-input-wrap { padding: 14px 16px; border-top: 1px solid var(--stride-border-soft); display: flex; gap: 10px; align-items: flex-end; }
+    .comment-area { flex: 1; resize: none; height: 60px; padding: 8px 12px; border: 1.5px solid var(--stride-border); border-radius: var(--stride-radius-lg); background: var(--stride-bg); color: var(--stride-text-primary); font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+    .comment-area:focus { border-color: var(--stride-primary); box-shadow: 0 0 0 3px var(--stride-primary-ring); }
+    .comment-area::placeholder { color: var(--stride-text-muted); }
+
+    /* ── Attachments ── */
+    .attach-list { display: flex; flex-direction: column; gap: 8px; }
+    .attach-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--stride-border); border-radius: var(--stride-radius-lg); background: var(--stride-bg); cursor: pointer; transition: border-color 0.15s; }
+    .attach-item:hover { border-color: var(--stride-primary); }
+    .attach-icon { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .attach-icon.pdf  { background: #FEF2F2; }
+    .attach-icon.xlsx { background: #ECFDF5; }
+    .attach-icon.doc  { background: #EFF6FF; }
+    .attach-icon.img  { background: #F5F3FF; }
+    .attach-name { font-size: 12.5px; font-weight: 500; color: var(--stride-text-primary); }
+    .attach-size { font-size: 11px; color: var(--stride-text-muted); }
+    .attach-actions { margin-left: auto; display: flex; gap: 4px; }
+    .attach-btn { width: 26px; height: 26px; border-radius: 5px; border: none; background: transparent; cursor: pointer; font-size: 12px; color: var(--stride-text-muted); display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; }
+    .attach-btn:hover { background: var(--stride-surface-hover); color: var(--stride-text-primary); }
+
+    /* ── Right-panel cards ── */
+    .info-list { display: flex; flex-direction: column; gap: 10px; }
+    .info-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .info-label { font-size: 11.5px; color: var(--stride-text-muted); font-weight: 500; flex-shrink: 0; }
+    .info-value { font-size: 12.5px; color: var(--stride-text-primary); font-weight: 500; text-align: right; }
+    .assignee-cell { display: flex; align-items: center; gap: 7px; }
+    .aa-avatar { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .aa-name { font-size: 12.5px; color: var(--stride-text-primary); font-weight: 500; }
+
+    /* Related workflows */
+    .related-list { display: flex; flex-direction: column; gap: 6px; }
+    .related-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--stride-border); border-radius: var(--stride-radius-lg); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+    .related-item:hover { border-color: var(--stride-primary); background: var(--stride-primary-subtle); }
+    .related-id   { font-size: 11px; font-family: monospace; color: var(--stride-text-muted); flex-shrink: 0; }
+    .related-name { font-size: 12.5px; font-weight: 500; color: var(--stride-text-primary); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .related-status { flex-shrink: 0; }
+
+    /* ── Annotation bar ── */
+    .annotation-bar { background: #1E1B4B; color: #e5e7eb; padding: 6px 16px; font-size: 11.5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border-bottom: 2px solid #6366F1; flex-shrink: 0; }
+    .ann-label { color: #a5b4fc; font-weight: 600; letter-spacing: 0.3px; }
+    .ann-chip { padding: 3px 10px; border-radius: 99px; cursor: pointer; font-weight: 500; border: 1px solid rgba(255,255,255,0.12); transition: all 0.15s; background: rgba(255,255,255,0.05); }
+    .ann-chip:hover { background: rgba(99,102,241,0.25); border-color: #818CF8; }
+    .ann-chip.active { background: #6366F1; border-color: #6366F1; color: #fff; }
+    .ann-sep { color: rgba(255,255,255,0.2); }
+    .ann-note { color: #94a3b8; font-style: italic; margin-left: auto; }
+
+    /* ── Mobile ── */
+    .mobile-hamburger { display: none; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
+
+    @media (max-width: 1100px) { .detail-cols { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) {
+      .sidebar { position: fixed; left: -240px; top: 0; bottom: 0; z-index: 50; transition: left 0.25s ease; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .mobile-hamburger { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: none; background: transparent; cursor: pointer; color: var(--stride-text-secondary); font-size: 18px; }
+      .page-content { padding: 14px; }
+      .wf-hero-top { flex-direction: column; }
+      .wf-hero-actions { width: 100%; }
+      .hero-stats { gap: 12px; }
+      .hero-stat { min-width: 120px; border-right: none; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Annotation bar ── -->
+<div class="annotation-bar">
+  <span class="ann-label">🖼 US-034.5</span>
+  <span class="ann-sep">|</span>
+  <span class="ann-label">Status:</span>
+  <span class="ann-chip active" onclick="setStatus('running')">Running</span>
+  <span class="ann-chip" onclick="setStatus('completed')">Completed</span>
+  <span class="ann-chip" onclick="setStatus('paused')">Paused</span>
+  <span class="ann-chip" onclick="setStatus('failed')">Failed</span>
+  <span class="ann-sep">|</span>
+  <span class="ann-label">Theme:</span>
+  <span class="ann-chip" id="theme-toggle" onclick="toggleTheme()">☀️ Light</span>
+  <span class="ann-note">Workflow Detail — steps, activity, attachments, metadata panel</span>
+</div>
+
+<!-- ── App shell ── -->
+<div class="shell">
+
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- ── Sidebar ── -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">S</div>
+      <span class="logo-text">STRIDE</span>
+      <span class="logo-badge">Beta</span>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Main</div>
+      <a href="#" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a href="#" class="nav-item active"><span class="nav-icon">⬡</span> Workflows <span class="nav-badge">12</span></a>
+      <a href="#" class="nav-item"><span class="nav-icon">☰</span> Tasks <span class="nav-badge warning">3</span></a>
+      <a href="#" class="nav-item"><span class="nav-icon">📅</span> Scheduling</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Operations</div>
+      <a href="#" class="nav-item"><span class="nav-icon">👥</span> Team</a>
+      <a href="#" class="nav-item"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge">5</span></a>
+      <a href="#" class="nav-item"><span class="nav-icon">📊</span> Reports</a>
+      <a href="#" class="nav-item"><span class="nav-icon">💳</span> Invoicing</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">System</div>
+      <a href="#" class="nav-item"><span class="nav-icon">⚙️</span> Settings</a>
+      <a href="#" class="nav-item"><span class="nav-icon">🛡️</span> Admin</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar">RM</div>
+        <div class="user-info">
+          <div class="user-name">Ramki Mario</div>
+          <div class="user-role">System Admin</div>
+        </div>
+        <span style="color:var(--stride-nav-muted);font-size:12px;">⋮</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="mobile-hamburger" onclick="openSidebar()">☰</button>
+      <div class="breadcrumb">
+        <a href="#" class="breadcrumb-item">STRIDE</a>
+        <span class="breadcrumb-sep">›</span>
+        <a href="#" class="breadcrumb-item">Workflows</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">WF-0041</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" title="Notifications">🔔</button>
+        <button class="icon-btn" title="Help">❓</button>
+        <div class="topbar-avatar">RM</div>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <div class="page-content">
+
+      <!-- ── Hero ── -->
+      <div class="wf-hero">
+        <div class="wf-hero-top">
+          <div class="wf-hero-icon" id="hero-icon">👤</div>
+          <div class="wf-hero-meta">
+            <div class="wf-hero-id">WF-0041 · Onboarding · <span class="priority-badge priority-high" style="display:inline-flex">↑ High</span></div>
+            <div class="wf-hero-title" id="hero-title">Staff Onboarding — Engineering Cohort Q2</div>
+            <div class="wf-hero-desc">Complete onboarding workflow for the Q2 engineering cohort. Covers account provisioning, equipment setup, orientation sessions, and system access grants for 6 new staff members.</div>
+            <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+              <span id="hero-status-pill"></span>
+              <span class="tag">HR</span>
+              <span class="tag">Engineering</span>
+              <span class="tag">Q2-2026</span>
+            </div>
+          </div>
+          <div class="wf-hero-actions" id="hero-actions">
+            <!-- Injected by JS based on status -->
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-label">Progress</div>
+            <div class="hero-stat-value" id="stat-progress">62%</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-label">Steps Done</div>
+            <div class="hero-stat-value success" id="stat-steps">5 / 8</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-label">Due Date</div>
+            <div class="hero-stat-value warning" id="stat-due">22 May 2026</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-label">Assignee</div>
+            <div class="hero-stat-value">Sarah K.</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-label">Created</div>
+            <div class="hero-stat-value">1 May 2026</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-label">Tenant</div>
+            <div class="hero-stat-value">Acme Corp</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Two-column layout ── -->
+      <div class="detail-cols">
+
+        <!-- ── Left column ── -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Progress / Steps card -->
+          <div class="progress-section">
+            <div class="section-title"><span class="section-icon">📋</span> Workflow Steps</div>
+
+            <!-- Overall progress bar -->
+            <div class="overall-progress">
+              <div class="progress-header">
+                <span class="progress-title" id="progress-label">In progress</span>
+                <span class="progress-pct" id="progress-pct">62%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:62%"></div></div>
+            </div>
+
+            <!-- Step tracker -->
+            <div class="steps-track" id="steps-track">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+
+          <!-- Tabs card: Activity / Attachments / History -->
+          <div class="card">
+            <div class="tab-bar">
+              <div class="tab-item active" onclick="switchTab('activity',this)">💬 Activity</div>
+              <div class="tab-item" onclick="switchTab('attachments',this)">📎 Attachments (4)</div>
+              <div class="tab-item" onclick="switchTab('history',this)">📜 History</div>
+            </div>
+
+            <!-- Activity tab -->
+            <div class="tab-panel active card-body" id="tab-activity">
+              <div class="activity-list">
+                <div class="activity-item">
+                  <div class="act-avatar" style="background:#6366F1">SK</div>
+                  <div class="act-body">
+                    <div class="act-text"><strong>Sarah K.</strong> completed step <span class="act-tag step">IT Account Provisioning</span></div>
+                    <div class="act-time">Today, 11:24 AM</div>
+                  </div>
+                </div>
+                <div class="activity-item">
+                  <div class="act-avatar" style="background:#10B981">JO</div>
+                  <div class="act-body">
+                    <div class="act-text"><strong>James O.</strong> added a comment: <span class="act-tag comment">comment</span></div>
+                    <div class="act-text" style="margin-top:4px;padding:8px 10px;background:var(--stride-bg);border-radius:8px;border:1px solid var(--stride-border);">"Equipment order has been placed. Laptops expected by 18 May."</div>
+                    <div class="act-time">Today, 09:50 AM</div>
+                  </div>
+                </div>
+                <div class="activity-item">
+                  <div class="act-avatar" style="background:#EF4444">⚠</div>
+                  <div class="act-body">
+                    <div class="act-text">Step <span class="act-tag alert">alert</span> <strong>Badge Access Setup</strong> is blocked — waiting on Facilities team approval.</div>
+                    <div class="act-time">Yesterday, 4:15 PM</div>
+                  </div>
+                </div>
+                <div class="activity-item">
+                  <div class="act-avatar" style="background:#8B5CF6">PM</div>
+                  <div class="act-body">
+                    <div class="act-text"><strong>Priya M.</strong> completed step <span class="act-tag step">Payroll Setup</span></div>
+                    <div class="act-time">Yesterday, 2:40 PM</div>
+                  </div>
+                </div>
+                <div class="activity-item">
+                  <div class="act-avatar" style="background:#6B7280">SY</div>
+                  <div class="act-body">
+                    <div class="act-text">Workflow automatically advanced to <strong>Equipment Setup</strong> step. <span class="act-tag system">system</span></div>
+                    <div class="act-time">Yesterday, 2:41 PM</div>
+                  </div>
+                </div>
+                <div class="activity-item">
+                  <div class="act-avatar" style="background:#6366F1">SK</div>
+                  <div class="act-body">
+                    <div class="act-text"><strong>Sarah K.</strong> created this workflow and assigned to herself.</div>
+                    <div class="act-time">1 May 2026, 9:00 AM</div>
+                  </div>
+                </div>
+              </div>
+              <div class="comment-input-wrap">
+                <div class="aa-avatar" style="background:#6366F1">RM</div>
+                <textarea class="comment-area" placeholder="Add a comment…"></textarea>
+                <button class="btn btn-primary btn-sm" onclick="alert('Comment posted — Phase 3')">Post</button>
+              </div>
+            </div>
+
+            <!-- Attachments tab -->
+            <div class="tab-panel card-body" id="tab-attachments">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <span style="font-size:12.5px;color:var(--stride-text-muted);">4 files attached</span>
+                <button class="btn btn-ghost btn-sm" onclick="alert('Upload file — Phase 3')">↑ Upload</button>
+              </div>
+              <div class="attach-list">
+                <div class="attach-item">
+                  <div class="attach-icon pdf">📄</div>
+                  <div>
+                    <div class="attach-name">Onboarding_Checklist_Q2.pdf</div>
+                    <div class="attach-size">245 KB · Added by Sarah K. · 1 May</div>
+                  </div>
+                  <div class="attach-actions">
+                    <button class="attach-btn" title="Preview">👁</button>
+                    <button class="attach-btn" title="Download">↓</button>
+                  </div>
+                </div>
+                <div class="attach-item">
+                  <div class="attach-icon xlsx">📊</div>
+                  <div>
+                    <div class="attach-name">Equipment_Order_Form.xlsx</div>
+                    <div class="attach-size">88 KB · Added by James O. · 14 May</div>
+                  </div>
+                  <div class="attach-actions">
+                    <button class="attach-btn" title="Preview">👁</button>
+                    <button class="attach-btn" title="Download">↓</button>
+                  </div>
+                </div>
+                <div class="attach-item">
+                  <div class="attach-icon doc">📝</div>
+                  <div>
+                    <div class="attach-name">IT_Access_Policy_v3.docx</div>
+                    <div class="attach-size">132 KB · Added by Sarah K. · 2 May</div>
+                  </div>
+                  <div class="attach-actions">
+                    <button class="attach-btn" title="Preview">👁</button>
+                    <button class="attach-btn" title="Download">↓</button>
+                  </div>
+                </div>
+                <div class="attach-item">
+                  <div class="attach-icon img">🖼</div>
+                  <div>
+                    <div class="attach-name">Office_Floor_Map_Level2.png</div>
+                    <div class="attach-size">1.2 MB · Added by Ramki M. · 10 May</div>
+                  </div>
+                  <div class="attach-actions">
+                    <button class="attach-btn" title="Preview">👁</button>
+                    <button class="attach-btn" title="Download">↓</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- History tab -->
+            <div class="tab-panel card-body" id="tab-history">
+              <div class="activity-list">
+                <div class="activity-item">
+                  <div class="act-avatar" style="background:#6B7280;font-size:12px;">📜</div>
+                  <div class="act-body">
+                    <div class="act-text">Status changed from <strong>Draft</strong> → <strong>Running</strong></div>
+                    <div class="act-time">1 May 2026, 9:00 AM · by Sarah K.</div>
+                  </div>
+                </div>
+                <div class="activity-item">
+                  <div class="act-avatar" style="background:#6B7280;font-size:12px;">📜</div>
+                  <div class="act-body">
+                    <div class="act-text">Priority changed from <strong>Medium</strong> → <strong>High</strong></div>
+                    <div class="act-time">5 May 2026, 11:30 AM · by Ramki M.</div>
+                  </div>
+                </div>
+                <div class="activity-item">
+                  <div class="act-avatar" style="background:#6B7280;font-size:12px;">📜</div>
+                  <div class="act-body">
+                    <div class="act-text">Due date changed from <strong>30 Apr</strong> → <strong>22 May 2026</strong></div>
+                    <div class="act-time">8 May 2026, 3:15 PM · by Sarah K.</div>
+                  </div>
+                </div>
+                <div class="activity-item">
+                  <div class="act-avatar" style="background:#6B7280;font-size:12px;">📜</div>
+                  <div class="act-body">
+                    <div class="act-text">Assignee changed from <strong>Unassigned</strong> → <strong>Sarah K.</strong></div>
+                    <div class="act-time">1 May 2026, 9:01 AM · by Ramki M.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /left col -->
+
+        <!-- ── Right column ── -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Details card -->
+          <div class="card">
+            <div class="card-body">
+              <div class="section-title" style="margin-bottom:12px;"><span class="section-icon">ℹ️</span> Details</div>
+              <div class="info-list">
+                <div class="info-row">
+                  <span class="info-label">Assignee</span>
+                  <div class="assignee-cell">
+                    <div class="aa-avatar" style="background:#6366F1">SK</div>
+                    <span class="aa-name">Sarah K.</span>
+                  </div>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Reviewer</span>
+                  <div class="assignee-cell">
+                    <div class="aa-avatar" style="background:#1E1B4B">RM</div>
+                    <span class="aa-name">Ramki M.</span>
+                  </div>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Type</span>
+                  <span class="type-badge">👤 Onboarding</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Priority</span>
+                  <span class="priority-badge priority-high">↑ High</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Tenant</span>
+                  <span class="info-value">Acme Corp</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Start Date</span>
+                  <span class="info-value">1 May 2026</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Due Date</span>
+                  <span class="info-value warning" style="color:var(--stride-warning)">22 May 2026</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Created by</span>
+                  <span class="info-value">Sarah K.</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Last updated</span>
+                  <span class="info-value">Today, 11:24 AM</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-body" style="padding-top:14px;">
+              <div class="section-title" style="margin-bottom:10px;font-size:12.5px;"><span class="section-icon">🏷</span> Tags</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <span class="tag">HR</span>
+                <span class="tag">Engineering</span>
+                <span class="tag">Q2-2026</span>
+                <button class="tag" style="cursor:pointer;border-style:dashed;color:var(--stride-primary);" onclick="alert('Add tag — Phase 3')">+ Add tag</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Related workflows -->
+          <div class="card card-body">
+            <div class="section-title" style="margin-bottom:12px;"><span class="section-icon">🔗</span> Related Workflows</div>
+            <div class="related-list">
+              <div class="related-item" onclick="alert('Navigate to WF-0035')">
+                <span class="related-id">WF-0035</span>
+                <span class="related-name">Payroll Processing — May 2026</span>
+                <span class="status-pill pill-scheduled" style="font-size:11px;padding:2px 8px;"><span class="status-dot"></span>Scheduled</span>
+              </div>
+              <div class="related-item" onclick="alert('Navigate to WF-0030')">
+                <span class="related-id">WF-0030</span>
+                <span class="related-name">Client Onboarding — TechVentures</span>
+                <span class="status-pill pill-completed" style="font-size:11px;padding:2px 8px;"><span class="status-dot"></span>Completed</span>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" style="margin-top:10px;width:100%;justify-content:center;" onclick="alert('Link workflow — Phase 3')">+ Link Workflow</button>
+          </div>
+
+          <!-- Danger zone -->
+          <div class="card card-body" style="border-color:var(--stride-error-bg)">
+            <div class="section-title" style="margin-bottom:10px;color:var(--stride-error);font-size:12.5px;"><span class="section-icon">⚠️</span> Actions</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <button class="btn btn-ghost btn-sm" style="justify-content:center;" onclick="alert('Duplicate workflow — Phase 3')">⧉ Duplicate</button>
+              <button class="btn btn-ghost btn-sm" style="justify-content:center;" onclick="alert('Export workflow — Phase 3')">↓ Export as PDF</button>
+              <button class="btn btn-danger btn-sm" style="justify-content:center;" onclick="alert('Delete workflow — Phase 3')">🗑 Delete Workflow</button>
+            </div>
+          </div>
+
+        </div><!-- /right col -->
+
+      </div><!-- /detail-cols -->
+
+    </div><!-- /page-content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+  /* ── Step data per status ── */
+  const STEPS = {
+    running: [
+      { name:'HR Documentation',         status:'done',    meta:'Completed 3 May',    detail:'Employment contracts signed and filed.' },
+      { name:'IT Account Provisioning',  status:'done',    meta:'Completed 10 May',   detail:'AD accounts, email, Slack, GitHub access all provisioned.' },
+      { name:'Payroll Setup',            status:'done',    meta:'Completed 12 May',   detail:'Payroll records created in finance system.' },
+      { name:'Equipment Order',          status:'done',    meta:'Completed 14 May',   detail:'Laptops ordered. ETA: 18 May.' },
+      { name:'Orientation Session',      status:'done',    meta:'Completed 15 May',   detail:'Full-day orientation completed for all 6 new hires.' },
+      { name:'Badge Access Setup',       status:'running', meta:'In progress',         detail:'Physical badge printing underway.', error:'⏳ Waiting on Facilities approval for Zone B access.' },
+      { name:'System Access Grants',     status:'pending', meta:'Waiting',             detail:'Access to JIRA, Confluence, Notion pending badge setup.' },
+      { name:'30-Day Check-in',          status:'pending', meta:'Scheduled: 1 Jun',   detail:'Manager review call to be scheduled.' },
+    ],
+    completed: [
+      { name:'HR Documentation',         status:'done', meta:'Completed 3 May',  detail:'All signed.' },
+      { name:'IT Account Provisioning',  status:'done', meta:'Completed 10 May', detail:'All provisioned.' },
+      { name:'Payroll Setup',            status:'done', meta:'Completed 12 May', detail:'Records created.' },
+      { name:'Equipment Order',          status:'done', meta:'Completed 14 May', detail:'Laptops delivered.' },
+      { name:'Orientation Session',      status:'done', meta:'Completed 15 May', detail:'Completed successfully.' },
+      { name:'Badge Access Setup',       status:'done', meta:'Completed 16 May', detail:'All badges issued.' },
+      { name:'System Access Grants',     status:'done', meta:'Completed 17 May', detail:'All access granted.' },
+      { name:'30-Day Check-in',          status:'done', meta:'Completed 1 Jun',  detail:'Check-in completed.' },
+    ],
+    paused: [
+      { name:'HR Documentation',         status:'done',    meta:'Completed 3 May',  detail:'All signed.' },
+      { name:'IT Account Provisioning',  status:'done',    meta:'Completed 10 May', detail:'All provisioned.' },
+      { name:'Payroll Setup',            status:'done',    meta:'Completed 12 May', detail:'Records created.' },
+      { name:'Equipment Order',          status:'skipped', meta:'Skipped',           detail:'Remote cohort — no equipment needed.' },
+      { name:'Orientation Session',      status:'pending', meta:'Paused',            detail:'Awaiting senior management approval to resume.' },
+      { name:'Badge Access Setup',       status:'pending', meta:'Paused',            detail:'' },
+      { name:'System Access Grants',     status:'pending', meta:'Pending',           detail:'' },
+      { name:'30-Day Check-in',          status:'pending', meta:'Pending',           detail:'' },
+    ],
+    failed: [
+      { name:'HR Documentation',         status:'done',    meta:'Completed 3 May',  detail:'All signed.' },
+      { name:'IT Account Provisioning',  status:'done',    meta:'Completed 10 May', detail:'All provisioned.' },
+      { name:'Payroll Setup',            status:'done',    meta:'Completed 12 May', detail:'Records created.' },
+      { name:'Equipment Order',          status:'done',    meta:'Completed 14 May', detail:'Laptops delivered.' },
+      { name:'Orientation Session',      status:'blocked', meta:'Failed',            detail:'', error:'❌ External calendar API error — 3 failed retries. Manual intervention required.' },
+      { name:'Badge Access Setup',       status:'pending', meta:'Blocked',           detail:'' },
+      { name:'System Access Grants',     status:'pending', meta:'Blocked',           detail:'' },
+      { name:'30-Day Check-in',          status:'pending', meta:'Blocked',           detail:'' },
+    ],
+  };
+
+  const STATUS_META = {
+    running:   { pct:62, label:'In progress', icon:'👤',  actionBtns: `<button class="btn btn-warning" onclick="alert('Pause workflow — Phase 3')">⏸ Pause</button><button class="btn btn-ghost" onclick="alert('Edit — Phase 3')">✏️ Edit</button>` },
+    completed: { pct:100, label:'Completed',  icon:'✅',  actionBtns: `<button class="btn btn-ghost" onclick="alert('Archive — Phase 3')">📦 Archive</button><button class="btn btn-ghost" onclick="alert('Duplicate — Phase 3')">⧉ Duplicate</button>` },
+    paused:    { pct:37, label:'Paused',      icon:'⏸',  actionBtns: `<button class="btn btn-primary" onclick="alert('Resume workflow — Phase 3')">▶ Resume</button><button class="btn btn-ghost" onclick="alert('Edit — Phase 3')">✏️ Edit</button>` },
+    failed:    { pct:50, label:'Failed',      icon:'❌',  actionBtns: `<button class="btn btn-primary" onclick="alert('Retry workflow — Phase 3')">↺ Retry</button><button class="btn btn-ghost" onclick="alert('Edit — Phase 3')">✏️ Edit</button>` },
+  };
+
+  let currentStatus = 'running';
+
+  function setStatus(s) {
+    currentStatus = s;
+    // update annotation chips
+    document.querySelectorAll('.ann-chip').forEach(c => {
+      if (['Running','Completed','Paused','Failed'].includes(c.textContent.trim())) c.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    renderDetail(s);
+  }
+
+  function renderDetail(s) {
+    const meta = STATUS_META[s];
+    const steps = STEPS[s];
+
+    // status pill
+    const pillMap = {
+      running:   ['pill-running',   'Running'],
+      completed: ['pill-completed', 'Completed'],
+      paused:    ['pill-paused',    'Paused'],
+      failed:    ['pill-failed',    'Failed'],
+    };
+    const [cls, label] = pillMap[s];
+    document.getElementById('hero-status-pill').outerHTML = `<span id="hero-status-pill" class="status-pill ${cls}"><span class="status-dot"></span>${label}</span>`;
+
+    // action buttons
+    document.getElementById('hero-actions').innerHTML = meta.actionBtns;
+
+    // icon
+    document.getElementById('hero-icon').textContent = meta.icon;
+
+    // progress
+    const doneCnt = steps.filter(st => st.status === 'done').length;
+    document.getElementById('stat-steps').textContent = `${doneCnt} / ${steps.length}`;
+    document.getElementById('stat-steps').className = 'hero-stat-value ' + (s==='failed'?'error':s==='completed'?'success':'warning');
+    document.getElementById('progress-pct').textContent = meta.pct + '%';
+    document.getElementById('progress-label').textContent = meta.label;
+    const fill = document.getElementById('progress-fill');
+    fill.style.width = meta.pct + '%';
+    fill.className = 'progress-fill' + (s==='completed'?' complete':'');
+
+    // stat-progress
+    document.getElementById('stat-progress').textContent = meta.pct + '%';
+
+    // steps
+    const track = document.getElementById('steps-track');
+    const dotIcon = {done:'✓', running:'▶', blocked:'✕', pending:'', skipped:'–'};
+    track.innerHTML = steps.map((st, i) => {
+      const isLast = i === steps.length - 1;
+      const lineCls = st.status === 'done' ? 'step-line done' : 'step-line';
+      return `
+        <div class="step-item">
+          <div class="step-connector">
+            <div class="step-dot ${st.status}">${dotIcon[st.status]||''}</div>
+            ${!isLast ? `<div class="${lineCls}"></div>` : ''}
+          </div>
+          <div class="step-body">
+            <div class="step-header">
+              <span class="step-name">${st.name}</span>
+              <span class="step-status-label ${st.status}">${st.status.charAt(0).toUpperCase()+st.status.slice(1)}</span>
+            </div>
+            <div class="step-meta">${st.meta}</div>
+            ${st.detail ? `<div class="step-detail">${st.detail}</div>` : ''}
+            ${st.error  ? `<div class="step-error">${st.error}</div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  /* ── Tabs ── */
+  function switchTab(tabId, el) {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + tabId).classList.add('active');
+  }
+
+  /* ── Theme ── */
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('theme-toggle').textContent = isDark ? '☀️ Light' : '🌙 Dark';
+  }
+
+  /* ── Mobile sidebar ── */
+  function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+  function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+  /* ── Init ── */
+  renderDetail('running');
+</script>
+</body>
+</html>
