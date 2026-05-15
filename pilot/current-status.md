@@ -101,6 +101,7 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 - [x] US-025: JWT bearer validation on Host + appsettings hygiene (PR #41)
 - [x] US-026: MediatR handlers (Login, Register, AssignRole, GetUser) + PBKDF2 PasswordHasher + ITenantContextSetter (PR #42)
 - [x] US-027: FluentValidation validators + LoggingBehaviour/ValidationBehaviour wired into MediatR pipeline (PR #43)
+- [x] US-028: Identity API controllers (AuthController, UsersController) + CurrentUser + GlobalExceptionHandler (PR #44)
 
 ### Pending
 - [ ] US-026: MediatR command and query handlers (Login, Register, AssignRole, GetUser)

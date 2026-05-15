@@ -346,7 +346,7 @@
 
 | ID | Story | Tasks | Complexity | Status |
 |---|---|---|---|---|
-| US-028 | As a developer, Identity API endpoints are thin, MediatR-dispatching controllers | T-086 Implement UsersController<br>T-087 Implement AuthController (internal, called by BFF only)<br>T-088 Implement Result → IActionResult mapping helper | M | [ ] |
+| US-028 | As a developer, Identity API endpoints are thin, MediatR-dispatching controllers | T-086 AuthController (login + register)<br>T-087 UsersController (GetById + AssignRole)<br>T-088 Request DTOs (LoginRequest, RegisterRequest, AssignRoleRequest)<br>T-089 CurrentUser (ICurrentUser impl reading JWT claims)<br>T-090 GlobalExceptionHandler (ValidationException->400, unhandled->500) | M | [x] |
 
 **Dependencies:** EP-012
 **Risks:** AuthController should not be publicly routable — internal only (Host binds to internal Docker network port)
