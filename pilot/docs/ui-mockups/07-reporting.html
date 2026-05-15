@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STRIDE — Reporting [Prototype]</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root, [data-theme="light"] {
+      --stride-primary:        #6366F1; --stride-primary-hover:  #4F46E5;
+      --stride-primary-subtle: #EEF2FF; --stride-primary-ring:   rgba(99,102,241,0.2);
+      --stride-accent:         #8B5CF6; --stride-accent-subtle:  #F5F3FF;
+      --stride-nav-bg:         #1E1B4B; --stride-nav-border:     rgba(255,255,255,0.08);
+      --stride-nav-text:       #E5E7EB; --stride-nav-icon:       #C7D2FE;
+      --stride-nav-muted:      #A5B4FC; --stride-nav-active:     rgba(99,102,241,0.18);
+      --stride-nav-hover:      rgba(99,102,241,0.10);
+      --stride-bg:             #F8FAFC; --stride-surface:        #FFFFFF;
+      --stride-surface-hover:  #F1F5F9; --stride-text-primary:   #111827;
+      --stride-text-secondary: #6B7280; --stride-text-muted:     #9CA3AF;
+      --stride-border:         #E5E7EB; --stride-border-soft:    #EEF2F7;
+      --stride-topbar-bg:      #FFFFFF; --stride-topbar-border:  #E5E7EB;
+      --stride-shadow-xs:      0 1px 2px rgba(0,0,0,0.05);
+      --stride-shadow-sm:      0 1px 3px rgba(0,0,0,0.08),0 1px 2px -1px rgba(0,0,0,0.06);
+      --stride-shadow-md:      0 4px 6px -1px rgba(0,0,0,0.07),0 2px 4px -2px rgba(0,0,0,0.05);
+      --stride-success:        #10B981; --stride-success-bg:     #ECFDF5;
+      --stride-warning:        #F59E0B; --stride-warning-bg:     #FFFBEB;
+      --stride-error:          #EF4444; --stride-error-bg:       #FEF2F2;
+      --stride-info:           #3B82F6; --stride-info-bg:        #EFF6FF;
+      --stride-radius-lg:      0.75rem; --stride-radius-xl: 0.875rem; --stride-radius-2xl: 1rem;
+    }
+    [data-theme="dark"] {
+      --stride-primary:        #818CF8; --stride-primary-hover:  #6366F1;
+      --stride-primary-subtle: rgba(129,140,248,0.12); --stride-primary-ring: rgba(129,140,248,0.25);
+      --stride-accent:         #A78BFA; --stride-accent-subtle: rgba(167,139,250,0.12);
+      --stride-nav-bg:         #0F172A; --stride-nav-border: rgba(255,255,255,0.06);
+      --stride-nav-text:       #E2E8F0; --stride-nav-icon: #C7D2FE;
+      --stride-nav-muted:      #94A3B8; --stride-nav-active: rgba(129,140,248,0.16);
+      --stride-nav-hover:      rgba(129,140,248,0.10);
+      --stride-bg:             #0B1120; --stride-surface: #111827;
+      --stride-surface-hover:  #1F2937; --stride-text-primary: #F9FAFB;
+      --stride-text-secondary: #CBD5E1; --stride-text-muted: #94A3B8;
+      --stride-border:         #1E293B; --stride-border-soft: #334155;
+      --stride-topbar-bg:      #111827; --stride-topbar-border: #1E293B;
+      --stride-shadow-xs:      0 1px 2px rgba(0,0,0,0.3);
+      --stride-shadow-sm:      0 1px 3px rgba(0,0,0,0.4),0 1px 2px -1px rgba(0,0,0,0.3);
+      --stride-shadow-md:      0 4px 6px -1px rgba(0,0,0,0.4),0 2px 4px -2px rgba(0,0,0,0.3);
+      --stride-success:        #34D399; --stride-success-bg: rgba(52,211,153,0.12);
+      --stride-warning:        #FCD34D; --stride-warning-bg: rgba(252,211,77,0.12);
+      --stride-error:          #F87171; --stride-error-bg:   rgba(248,113,113,0.12);
+      --stride-info:           #60A5FA; --stride-info-bg:    rgba(96,165,250,0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Inter', system-ui, sans-serif; background: var(--stride-bg); color: var(--stride-text-primary); }
+
+    /* ── Shell ── */
+    .shell { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: 240px; flex-shrink: 0; background: var(--stride-nav-bg); border-right: 1px solid var(--stride-nav-border); display: flex; flex-direction: column; overflow-y: auto; }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 20px 20px 16px; border-bottom: 1px solid var(--stride-nav-border); }
+    .logo-mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg,#6366F1,#8B5CF6); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .logo-text { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+    .logo-badge { font-size: 9px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: var(--stride-nav-muted); background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; margin-left: auto; }
+    .nav-section { padding: 12px 12px 4px; }
+    .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--stride-nav-muted); padding: 0 8px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; color: var(--stride-nav-text); font-size: 13.5px; font-weight: 500; transition: background 0.15s; text-decoration: none; }
+    .nav-item:hover { background: var(--stride-nav-hover); }
+    .nav-item.active { background: var(--stride-nav-active); color: #fff; border-left: 3px solid var(--stride-primary); padding-left: 7px; }
+    .nav-icon { width: 16px; text-align: center; flex-shrink: 0; font-size: 14px; color: var(--stride-nav-icon); }
+    .nav-item.active .nav-icon { color: var(--stride-primary); }
+    .nav-badge { margin-left: auto; font-size: 10px; font-weight: 600; background: var(--stride-primary); color: #fff; padding: 1px 6px; border-radius: 10px; }
+    .sidebar-footer { margin-top: auto; padding: 12px; border-top: 1px solid var(--stride-nav-border); }
+    .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+    .user-card:hover { background: var(--stride-nav-hover); }
+    .user-av { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg,#6366F1,#8B5CF6); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0; }
+
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    .topbar { height: 56px; flex-shrink: 0; background: var(--stride-topbar-bg); border-bottom: 1px solid var(--stride-topbar-border); display: flex; align-items: center; gap: 12px; padding: 0 24px; box-shadow: var(--stride-shadow-xs); }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+    .bc-item { color: var(--stride-text-muted); }
+    .bc-sep { color: var(--stride-text-muted); font-size: 11px; }
+    .bc-current { color: var(--stride-text-primary); font-weight: 600; }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .icon-btn { width: 34px; height: 34px; border-radius: 8px; border: none; cursor: pointer; background: transparent; color: var(--stride-text-secondary); display: flex; align-items: center; justify-content: center; font-size: 15px; transition: background 0.15s; }
+    .icon-btn:hover { background: var(--stride-surface-hover); }
+    .topbar-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg,#6366F1,#8B5CF6); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; cursor: pointer; }
+
+    .page-content { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* ── Buttons ── */
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: var(--stride-radius-xl); font-size: 13.5px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap; font-family: inherit; }
+    .btn-primary { background: var(--stride-primary); color: #fff; }
+    .btn-primary:hover { background: var(--stride-primary-hover); box-shadow: 0 4px 12px var(--stride-primary-ring); }
+    .btn-ghost { background: transparent; color: var(--stride-text-secondary); border: 1px solid var(--stride-border); }
+    .btn-ghost:hover { background: var(--stride-surface-hover); color: var(--stride-text-primary); }
+    .btn-sm { padding: 5px 12px; font-size: 12.5px; }
+
+    /* ── Page header ── */
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; }
+    .page-subtitle { font-size: 13px; color: var(--stride-text-secondary); margin-top: 2px; }
+
+    /* ── Period / filter bar ── */
+    .filter-bar { background: var(--stride-surface); border: 1px solid var(--stride-border); border-radius: var(--stride-radius-xl); padding: 12px 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; box-shadow: var(--stride-shadow-xs); }
+    .period-tabs { display: flex; gap: 2px; background: var(--stride-bg); border: 1px solid var(--stride-border); border-radius: var(--stride-radius-lg); padding: 3px; }
+    .period-tab { padding: 5px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 500; cursor: pointer; color: var(--stride-text-muted); border: none; background: transparent; transition: all 0.15s; font-family: inherit; }
+    .period-tab.active { background: var(--stride-surface); color: var(--stride-text-primary); font-weight: 600; box-shadow: var(--stride-shadow-xs); }
+    .filter-select { height: 34px; padding: 0 28px 0 10px; border: 1.5px solid var(--stride-border); border-radius: var(--stride-radius-lg); background: var(--stride-bg); color: var(--stride-text-primary); font-size: 13px; font-family: inherit; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; outline: none; transition: border-color 0.15s; }
+    .filter-select:focus { border-color: var(--stride-primary); box-shadow: 0 0 0 3px var(--stride-primary-ring); }
+    .filter-sep { width: 1px; height: 24px; background: var(--stride-border); flex-shrink: 0; }
+    .date-range { display: flex; align-items: center; gap: 6px; }
+    .date-input { height: 34px; padding: 0 10px; border: 1.5px solid var(--stride-border); border-radius: var(--stride-radius-lg); background: var(--stride-bg); color: var(--stride-text-primary); font-size: 12.5px; font-family: inherit; outline: none; cursor: pointer; }
+    .date-input:focus { border-color: var(--stride-primary); }
+    .date-sep { font-size: 11px; color: var(--stride-text-muted); }
+    .last-updated { font-size: 11.5px; color: var(--stride-text-muted); margin-left: auto; }
+
+    /* ── KPI cards ── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+    .kpi-card { background: var(--stride-surface); border: 1px solid var(--stride-border); border-radius: var(--stride-radius-2xl); padding: 18px 20px; box-shadow: var(--stride-shadow-xs); position: relative; overflow: hidden; }
+    .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius: var(--stride-radius-2xl) var(--stride-radius-2xl) 0 0; }
+    .kpi-card.blue::before  { background: var(--stride-primary); }
+    .kpi-card.green::before { background: var(--stride-success); }
+    .kpi-card.amber::before { background: var(--stride-warning); }
+    .kpi-card.red::before   { background: var(--stride-error); }
+    .kpi-card.purple::before{ background: var(--stride-accent); }
+    .kpi-icon { font-size: 20px; margin-bottom: 10px; }
+    .kpi-label { font-size: 11.5px; font-weight: 500; color: var(--stride-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .kpi-value { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; line-height: 1; margin-bottom: 8px; }
+    .kpi-delta { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 2px 7px; border-radius: 99px; }
+    .delta-up   { background: var(--stride-success-bg); color: var(--stride-success); }
+    .delta-down { background: var(--stride-error-bg); color: var(--stride-error); }
+    .delta-flat { background: var(--stride-surface-hover); color: var(--stride-text-muted); border: 1px solid var(--stride-border); }
+    .kpi-sub { font-size: 11.5px; color: var(--stride-text-muted); margin-top: 4px; }
+
+    /* ── Sparkline ── */
+    .sparkline { display: flex; align-items: flex-end; gap: 3px; height: 32px; margin-top: 10px; }
+    .spark-bar { flex: 1; border-radius: 3px 3px 0 0; min-height: 4px; opacity: 0.7; transition: opacity 0.15s; }
+    .spark-bar:hover { opacity: 1; }
+
+    /* ── Section card ── */
+    .section-card { background: var(--stride-surface); border: 1px solid var(--stride-border); border-radius: var(--stride-radius-2xl); box-shadow: var(--stride-shadow-xs); overflow: hidden; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--stride-border-soft); }
+    .section-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+    .section-subtitle { font-size: 12px; color: var(--stride-text-muted); margin-top: 1px; }
+    .section-body { padding: 20px; }
+
+    /* ── Bar chart (CSS) ── */
+    .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; }
+    .bar-label { font-size: 12px; color: var(--stride-text-secondary); width: 90px; flex-shrink: 0; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-track { flex: 1; height: 10px; background: var(--stride-bg); border-radius: 99px; overflow: hidden; border: 1px solid var(--stride-border-soft); }
+    .bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+    .bar-val { font-size: 12px; font-weight: 600; color: var(--stride-text-primary); width: 36px; flex-shrink: 0; text-align: right; }
+
+    /* ── Trend chart (CSS columns) ── */
+    .trend-chart { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding-bottom: 24px; position: relative; border-bottom: 1px solid var(--stride-border-soft); }
+    .trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; position: relative; }
+    .trend-bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.4s ease; cursor: pointer; position: relative; }
+    .trend-bar:hover { filter: brightness(1.1); }
+    .trend-bar .tooltip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--stride-text-primary); color: var(--stride-surface); font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; white-space: nowrap; z-index: 10; }
+    .trend-bar:hover .tooltip { display: block; }
+    .trend-month { font-size: 10px; color: var(--stride-text-muted); position: absolute; bottom: -20px; white-space: nowrap; }
+    .trend-two { display: flex; gap: 2px; width: 100%; align-items: flex-end; }
+    .trend-two .trend-bar { width: 45%; }
+
+    /* ── Donut (CSS) ── */
+    .donut-wrap { display: flex; align-items: center; gap: 24px; }
+    .donut { width: 100px; height: 100px; border-radius: 50%; flex-shrink: 0; position: relative; }
+    .donut-center { position: absolute; inset: 18px; border-radius: 50%; background: var(--stride-surface); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .donut-pct { font-size: 18px; font-weight: 700; line-height: 1; }
+    .donut-sub { font-size: 9px; color: var(--stride-text-muted); }
+    .legend { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .legend-item { display: flex; align-items: center; gap: 8px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label { font-size: 12px; color: var(--stride-text-secondary); flex: 1; }
+    .legend-pct { font-size: 12px; font-weight: 600; color: var(--stride-text-primary); }
+
+    /* ── Two-column grid ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .three-col { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+
+    /* ── Table inside card ── */
+    .mini-table { width: 100%; border-collapse: collapse; }
+    .mini-table th { font-size: 11px; font-weight: 600; color: var(--stride-text-muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px; border-bottom: 1px solid var(--stride-border); text-align: left; }
+    .mini-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--stride-border-soft); vertical-align: middle; }
+    .mini-table tr:last-child td { border-bottom: none; }
+    .mini-table tr:hover td { background: var(--stride-surface-hover); }
+
+    /* Status pills */
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 99px; font-size: 11.5px; font-weight: 600; }
+    .pill-green  { background: var(--stride-success-bg); color: var(--stride-success); }
+    .pill-amber  { background: var(--stride-warning-bg); color: var(--stride-warning); }
+    .pill-red    { background: var(--stride-error-bg); color: var(--stride-error); }
+    .pill-blue   { background: var(--stride-info-bg); color: var(--stride-info); }
+
+    /* Role-gated section */
+    .role-gated { position: relative; }
+    .role-gate-overlay { display: none; position: absolute; inset: 0; background: rgba(248,250,252,0.85); backdrop-filter: blur(3px); border-radius: var(--stride-radius-2xl); z-index: 10; align-items: center; justify-content: center; flex-direction: column; gap: 8px; }
+    [data-theme="dark"] .role-gate-overlay { background: rgba(11,17,32,0.85); }
+    .role-gate-overlay.visible { display: flex; }
+    .role-gate-icon { font-size: 28px; }
+    .role-gate-text { font-size: 13px; font-weight: 600; color: var(--stride-text-secondary); }
+
+    /* ── Annotation bar ── */
+    .annotation-bar { background: #1E1B4B; color: #e5e7eb; padding: 6px 16px; font-size: 11.5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border-bottom: 2px solid #6366F1; flex-shrink: 0; }
+    .ann-label { color: #a5b4fc; font-weight: 600; }
+    .ann-chip { padding: 3px 10px; border-radius: 99px; cursor: pointer; font-weight: 500; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); transition: all 0.15s; }
+    .ann-chip:hover { background: rgba(99,102,241,0.25); border-color: #818CF8; }
+    .ann-chip.active { background: #6366F1; border-color: #6366F1; color: #fff; }
+    .ann-sep { color: rgba(255,255,255,0.2); }
+    .ann-note { color: #94a3b8; font-style: italic; margin-left: auto; }
+
+    /* ── Mobile ── */
+    .mobile-hamburger { display: none; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
+    @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } .three-col { grid-template-columns: 1fr; } }
+    @media (max-width: 768px)  {
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .two-col  { grid-template-columns: 1fr; }
+      .sidebar  { position: fixed; left: -240px; top: 0; bottom: 0; z-index: 50; transition: left 0.25s ease; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .mobile-hamburger { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: none; background: transparent; cursor: pointer; color: var(--stride-text-secondary); font-size: 18px; }
+      .page-content { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Annotation bar -->
+<div class="annotation-bar">
+  <span class="ann-label">🖼 US-034.7</span>
+  <span class="ann-sep">|</span>
+  <span class="ann-label">View as:</span>
+  <span class="ann-chip active" onclick="setRole('admin',this)">Admin</span>
+  <span class="ann-chip" onclick="setRole('ops',this)">Ops Manager</span>
+  <span class="ann-chip" onclick="setRole('finance',this)">Finance</span>
+  <span class="ann-chip" onclick="setRole('field',this)">Field Worker</span>
+  <span class="ann-sep">|</span>
+  <span class="ann-label">Period:</span>
+  <span class="ann-chip" onclick="setPeriod('7d',this)">7 days</span>
+  <span class="ann-chip active" id="ann-period-30d" onclick="setPeriod('30d',this)">30 days</span>
+  <span class="ann-chip" onclick="setPeriod('90d',this)">90 days</span>
+  <span class="ann-sep">|</span>
+  <span class="ann-label">Theme:</span>
+  <span class="ann-chip" id="theme-toggle" onclick="toggleTheme()">☀️ Light</span>
+  <span class="ann-note">Reporting — KPIs, trend charts, breakdowns, role-aware sections</span>
+</div>
+
+<div class="shell">
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">S</div>
+      <span class="logo-text">STRIDE</span>
+      <span class="logo-badge">Beta</span>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Main</div>
+      <a href="#" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a href="#" class="nav-item"><span class="nav-icon">⬡</span> Workflows <span class="nav-badge">12</span></a>
+      <a href="#" class="nav-item"><span class="nav-icon">☰</span> Tasks</a>
+      <a href="#" class="nav-item"><span class="nav-icon">📅</span> Scheduling</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Operations</div>
+      <a href="#" class="nav-item"><span class="nav-icon">👥</span> User Management</a>
+      <a href="#" class="nav-item"><span class="nav-icon">🔔</span> Notifications</a>
+      <a href="#" class="nav-item active"><span class="nav-icon">📊</span> Reports</a>
+      <a href="#" class="nav-item"><span class="nav-icon">💳</span> Invoicing</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">System</div>
+      <a href="#" class="nav-item"><span class="nav-icon">⚙️</span> Settings</a>
+      <a href="#" class="nav-item"><span class="nav-icon">🛡️</span> Admin</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-av">RM</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12.5px;font-weight:600;color:var(--stride-nav-text);">Ramki Mario</div>
+          <div style="font-size:11px;color:var(--stride-nav-muted);" id="sidebar-role">System Admin</div>
+        </div>
+        <span style="color:var(--stride-nav-muted);font-size:12px;">⋮</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <button class="mobile-hamburger" onclick="openSidebar()">☰</button>
+      <div class="breadcrumb">
+        <span class="bc-item">STRIDE</span>
+        <span class="bc-sep">›</span>
+        <span class="bc-current">Reports</span>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn">🔔</button>
+        <button class="icon-btn">❓</button>
+        <div class="topbar-avatar">RM</div>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Page header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Reports &amp; Analytics</h1>
+          <p class="page-subtitle" id="page-sub">Operational performance, workflow throughput, and team productivity metrics.</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" onclick="alert('Schedule report email — Phase 4')">📅 Schedule</button>
+          <button class="btn btn-ghost" onclick="alert('Export PDF — Phase 4')">↓ Export PDF</button>
+          <button class="btn btn-primary" onclick="alert('Export CSV — Phase 4')">↓ Export CSV</button>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <div class="period-tabs" id="period-tabs">
+          <button class="period-tab" onclick="setPeriod('7d',this)">7D</button>
+          <button class="period-tab active" onclick="setPeriod('30d',this)">30D</button>
+          <button class="period-tab" onclick="setPeriod('90d',this)">90D</button>
+          <button class="period-tab" onclick="setPeriod('ytd',this)">YTD</button>
+        </div>
+        <div class="filter-sep"></div>
+        <div class="date-range">
+          <input class="date-input" type="date" value="2026-04-15" />
+          <span class="date-sep">→</span>
+          <input class="date-input" type="date" value="2026-05-15" />
+        </div>
+        <div class="filter-sep"></div>
+        <select class="filter-select" onchange="renderAll()">
+          <option>All Workflow Types</option>
+          <option>Onboarding</option>
+          <option>Maintenance</option>
+          <option>Compliance</option>
+          <option>Dispatch</option>
+          <option>Inspection</option>
+          <option>Finance</option>
+        </select>
+        <select class="filter-select" onchange="renderAll()">
+          <option>All Teams</option>
+          <option>Engineering</option>
+          <option>Operations</option>
+          <option>Finance</option>
+          <option>Field</option>
+        </select>
+        <span class="last-updated">Last updated: Today, 2:34 PM</span>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="kpi-grid" id="kpi-grid"><!-- injected --></div>
+
+      <!-- Trend chart + Workflow type breakdown -->
+      <div class="three-col">
+
+        <!-- Workflow completion trend -->
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">📈 Workflow Completion Trend</div>
+              <div class="section-subtitle" id="trend-sub">Completed vs. Started — last 30 days</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--stride-text-muted);"><span style="width:10px;height:10px;border-radius:3px;background:var(--stride-primary);display:inline-block;"></span>Completed</div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--stride-text-muted);"><span style="width:10px;height:10px;border-radius:3px;background:var(--stride-border);display:inline-block;"></span>Started</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="trend-chart" id="trend-chart"><!-- injected --></div>
+            <div style="margin-top:16px;display:flex;gap:20px;flex-wrap:wrap;">
+              <div><div style="font-size:11px;color:var(--stride-text-muted);margin-bottom:2px;">Avg completion rate</div><div style="font-size:18px;font-weight:700;color:var(--stride-success);" id="avg-rate">84%</div></div>
+              <div><div style="font-size:11px;color:var(--stride-text-muted);margin-bottom:2px;">Peak month</div><div style="font-size:18px;font-weight:700;" id="peak-month">May</div></div>
+              <div><div style="font-size:11px;color:var(--stride-text-muted);margin-bottom:2px;">Total completed</div><div style="font-size:18px;font-weight:700;color:var(--stride-primary);" id="total-comp">127</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workflow type breakdown -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">🍩 By Workflow Type</div>
+          </div>
+          <div class="section-body">
+            <div class="donut-wrap" style="margin-bottom:16px;">
+              <div class="donut" style="background:conic-gradient(#6366F1 0% 30%, #10B981 30% 52%, #F59E0B 52% 68%, #3B82F6 68% 80%, #8B5CF6 80% 90%, #9CA3AF 90% 100%);">
+                <div class="donut-center"><div class="donut-pct">48</div><div class="donut-sub">workflows</div></div>
+              </div>
+              <div class="legend">
+                <div class="legend-item"><div class="legend-dot" style="background:#6366F1"></div><span class="legend-label">Onboarding</span><span class="legend-pct">30%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div><span class="legend-label">Maintenance</span><span class="legend-pct">22%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div><span class="legend-label">Compliance</span><span class="legend-pct">16%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#3B82F6"></div><span class="legend-label">Dispatch</span><span class="legend-pct">12%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#8B5CF6"></div><span class="legend-label">Inspection</span><span class="legend-pct">10%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#9CA3AF"></div><span class="legend-label">Finance</span><span class="legend-pct">10%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-col row: Team productivity + SLA compliance -->
+      <div class="two-col">
+
+        <!-- Team productivity bar chart -->
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">👥 Team Productivity</div>
+              <div class="section-subtitle">Workflows completed per team member this period</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="bar-chart">
+              <div class="bar-row"><span class="bar-label">James O.</span><div class="bar-track"><div class="bar-fill" style="width:92%;background:var(--stride-primary)"></div></div><span class="bar-val">23</span></div>
+              <div class="bar-row"><span class="bar-label">Sarah K.</span><div class="bar-track"><div class="bar-fill" style="width:84%;background:var(--stride-primary)"></div></div><span class="bar-val">21</span></div>
+              <div class="bar-row"><span class="bar-label">Ahmed S.</span><div class="bar-track"><div class="bar-fill" style="width:76%;background:var(--stride-primary)"></div></div><span class="bar-val">19</span></div>
+              <div class="bar-row"><span class="bar-label">Jack N.</span><div class="bar-track"><div class="bar-fill" style="width:68%;background:var(--stride-primary)"></div></div><span class="bar-val">17</span></div>
+              <div class="bar-row"><span class="bar-label">Grace W.</span><div class="bar-track"><div class="bar-fill" style="width:60%;background:var(--stride-accent)"></div></div><span class="bar-val">15</span></div>
+              <div class="bar-row"><span class="bar-label">Marcus L.</span><div class="bar-track"><div class="bar-fill" style="width:48%;background:var(--stride-accent)"></div></div><span class="bar-val">12</span></div>
+              <div class="bar-row"><span class="bar-label">Carlos D.</span><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--stride-info)"></div></div><span class="bar-val">10</span></div>
+              <div class="bar-row"><span class="bar-label">Karen Y.</span><div class="bar-track"><div class="bar-fill" style="width:32%;background:var(--stride-info)"></div></div><span class="bar-val">8</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLA compliance -->
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">⏱ SLA Compliance</div>
+              <div class="section-subtitle">On-time completion rate by type</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="bar-chart" style="gap:12px;">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;"><span style="color:var(--stride-text-secondary)">Onboarding</span><span style="font-weight:700;color:var(--stride-success)">96%</span></div>
+                <div class="bar-track" style="height:12px;"><div class="bar-fill" style="width:96%;background:var(--stride-success)"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;"><span style="color:var(--stride-text-secondary)">Maintenance</span><span style="font-weight:700;color:var(--stride-success)">88%</span></div>
+                <div class="bar-track" style="height:12px;"><div class="bar-fill" style="width:88%;background:var(--stride-success)"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;"><span style="color:var(--stride-text-secondary)">Compliance</span><span style="font-weight:700;color:var(--stride-primary)">79%</span></div>
+                <div class="bar-track" style="height:12px;"><div class="bar-fill" style="width:79%;background:var(--stride-primary)"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;"><span style="color:var(--stride-text-secondary)">Dispatch</span><span style="font-weight:700;color:var(--stride-warning)">71%</span></div>
+                <div class="bar-track" style="height:12px;"><div class="bar-fill" style="width:71%;background:var(--stride-warning)"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;"><span style="color:var(--stride-text-secondary)">Inspection</span><span style="font-weight:700;color:var(--stride-warning)">65%</span></div>
+                <div class="bar-track" style="height:12px;"><div class="bar-fill" style="width:65%;background:var(--stride-warning)"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;"><span style="color:var(--stride-text-secondary)">Finance</span><span style="font-weight:700;color:var(--stride-error)">52%</span></div>
+                <div class="bar-track" style="height:12px;"><div class="bar-fill" style="width:52%;background:var(--stride-error)"></div></div>
+              </div>
+            </div>
+            <div style="margin-top:16px;padding:10px 12px;background:var(--stride-warning-bg);border-radius:var(--stride-radius-lg);border-left:3px solid var(--stride-warning);">
+              <div style="font-size:12px;font-weight:600;color:var(--stride-warning);">⚠ Finance SLA below target (60%)</div>
+              <div style="font-size:11.5px;color:var(--stride-text-secondary);margin-top:2px;">3 overdue workflows require immediate attention.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overdue workflows table -->
+      <div class="section-card">
+        <div class="section-header">
+          <div>
+            <div class="section-title">🔴 Overdue &amp; At-Risk Workflows</div>
+            <div class="section-subtitle">Workflows past due date or stalled for &gt;3 days</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="alert('View all — links to Workflow List filtered by overdue')">View All</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Workflow</th>
+                <th>Type</th>
+                <th>Assignee</th>
+                <th>Due Date</th>
+                <th>Overdue By</th>
+                <th>Priority</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div style="font-weight:600;">IT Asset Refresh — Laptops Q2</div><div style="font-size:11px;color:var(--stride-text-muted);">WF-0031</div></td>
+                <td><span style="font-size:12px;color:var(--stride-text-secondary);">🔧 Maintenance</span></td>
+                <td><span style="font-size:12.5px;">Carlos D.</span></td>
+                <td style="color:var(--stride-error);font-weight:600;">10 May 2026</td>
+                <td><span class="pill pill-red">5 days</span></td>
+                <td><span style="font-size:12px;font-weight:600;color:var(--stride-warning);">↑ High</span></td>
+                <td><button class="btn btn-ghost btn-sm" onclick="alert('Open WF-0031')">View</button></td>
+              </tr>
+              <tr>
+                <td><div style="font-weight:600;">Emergency HVAC Repair</div><div style="font-size:11px;color:var(--stride-text-muted);">WF-0029</div></td>
+                <td><span style="font-size:12px;color:var(--stride-text-secondary);">🔧 Maintenance</span></td>
+                <td><span style="font-size:12.5px;">James O.</span></td>
+                <td style="color:var(--stride-error);font-weight:600;">12 May 2026</td>
+                <td><span class="pill pill-red">3 days</span></td>
+                <td><span style="font-size:12px;font-weight:600;color:var(--stride-error);">⚠ Critical</span></td>
+                <td><button class="btn btn-ghost btn-sm" onclick="alert('Open WF-0029')">View</button></td>
+              </tr>
+              <tr>
+                <td><div style="font-weight:600;">Field Technician Dispatch — Zone 3</div><div style="font-size:11px;color:var(--stride-text-muted);">WF-0034</div></td>
+                <td><span style="font-size:12px;color:var(--stride-text-secondary);">📍 Dispatch</span></td>
+                <td><span style="font-size:12.5px;">James O.</span></td>
+                <td style="color:var(--stride-warning);font-weight:600;">16 May 2026</td>
+                <td><span class="pill pill-amber">Due today</span></td>
+                <td><span style="font-size:12px;font-weight:600;color:var(--stride-error);">⚠ Critical</span></td>
+                <td><button class="btn btn-ghost btn-sm" onclick="alert('Open WF-0034')">View</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Finance section (role-gated) -->
+      <div class="section-card role-gated" id="finance-section">
+        <div class="role-gate-overlay" id="finance-gate">
+          <div class="role-gate-icon">🔒</div>
+          <div class="role-gate-text">Finance &amp; Billing data — Admin and Finance roles only</div>
+        </div>
+        <div class="section-header">
+          <div>
+            <div class="section-title">💰 Finance &amp; Invoicing Summary</div>
+            <div class="section-subtitle">Billing, invoices, and cost per workflow type</div>
+          </div>
+          <span style="font-size:11.5px;background:var(--stride-success-bg);color:var(--stride-success);padding:2px 8px;border-radius:99px;font-weight:600;">Admin + Finance</span>
+        </div>
+        <div class="section-body">
+          <div class="two-col">
+            <div>
+              <div class="bar-chart">
+                <div class="bar-row"><span class="bar-label">Onboarding</span><div class="bar-track"><div class="bar-fill" style="width:88%;background:var(--stride-success)"></div></div><span class="bar-val">£12k</span></div>
+                <div class="bar-row"><span class="bar-label">Compliance</span><div class="bar-track"><div class="bar-fill" style="width:72%;background:var(--stride-success)"></div></div><span class="bar-val">£9.8k</span></div>
+                <div class="bar-row"><span class="bar-label">Maintenance</span><div class="bar-track"><div class="bar-fill" style="width:56%;background:var(--stride-warning)"></div></div><span class="bar-val">£7.6k</span></div>
+                <div class="bar-row"><span class="bar-label">Dispatch</span><div class="bar-track"><div class="bar-fill" style="width:38%;background:var(--stride-warning)"></div></div><span class="bar-val">£5.1k</span></div>
+                <div class="bar-row"><span class="bar-label">Inspection</span><div class="bar-track"><div class="bar-fill" style="width:24%;background:var(--stride-error)"></div></div><span class="bar-val">£3.2k</span></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="background:var(--stride-bg);border:1px solid var(--stride-border);border-radius:var(--stride-radius-xl);padding:14px 16px;">
+                <div style="font-size:11px;color:var(--stride-text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Total Invoiced (MTD)</div>
+                <div style="font-size:26px;font-weight:700;color:var(--stride-success);">£37,700</div>
+                <div style="font-size:12px;color:var(--stride-text-muted);margin-top:2px;">vs £31,200 last month <span style="color:var(--stride-success);font-weight:600;">↑ 21%</span></div>
+              </div>
+              <div style="background:var(--stride-bg);border:1px solid var(--stride-border);border-radius:var(--stride-radius-xl);padding:14px 16px;">
+                <div style="font-size:11px;color:var(--stride-text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Outstanding Invoices</div>
+                <div style="font-size:26px;font-weight:700;color:var(--stride-warning);">£8,450</div>
+                <div style="font-size:12px;color:var(--stride-text-muted);margin-top:2px;">4 invoices awaiting payment</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+/* ── Data per period ── */
+const DATA = {
+  '7d': {
+    kpis: [
+      { label:'Workflows Completed', value:'18',   delta:'+3',   up:true,  sub:'vs prev 7 days', color:'blue',   icon:'✅', spark:[40,55,60,70,80,75,90] },
+      { label:'Avg Completion Time', value:'2.1d', delta:'-0.4d',up:true,  sub:'days per workflow',color:'green', icon:'⏱', spark:[70,65,60,55,50,52,48] },
+      { label:'Tasks Overdue',       value:'3',    delta:'+1',   up:false, sub:'vs prev 7 days', color:'red',    icon:'⚠️', spark:[20,25,30,28,35,30,40] },
+      { label:'Active Users',        value:'19',   delta:'0',    up:null,  sub:'logged in this period',color:'purple',icon:'👥',spark:[60,62,65,60,70,68,72] },
+    ],
+    trend: [
+      {m:'Mon',c:3,s:4},{m:'Tue',c:2,s:3},{m:'Wed',c:4,s:4},{m:'Thu',c:2,s:3},{m:'Fri',c:3,s:4},{m:'Sat',c:2,s:2},{m:'Sun',c:2,s:2},
+    ],
+    avgRate:'82%', peak:'Fri', totalComp:'18',
+  },
+  '30d': {
+    kpis: [
+      { label:'Workflows Completed', value:'127',  delta:'+18',  up:true,  sub:'vs prev 30 days', color:'blue',  icon:'✅', spark:[55,60,65,70,62,80,75,85,78,90] },
+      { label:'Avg Completion Time', value:'1.8d', delta:'-0.6d',up:true,  sub:'days per workflow',color:'green',icon:'⏱', spark:[80,75,70,68,65,60,58,55,52,50] },
+      { label:'Tasks Overdue',       value:'7',    delta:'-2',   up:true,  sub:'vs prev 30 days', color:'amber', icon:'⚠️', spark:[45,50,40,35,30,38,32,28,25,30] },
+      { label:'Active Users',        value:'21',   delta:'+3',   up:true,  sub:'logged in this period',color:'purple',icon:'👥',spark:[55,58,60,65,62,68,70,72,69,75] },
+    ],
+    trend: [
+      {m:'Apr 15',c:8,s:10},{m:'Apr 20',c:10,s:12},{m:'Apr 25',c:9,s:11},{m:'Apr 30',c:12,s:14},
+      {m:'May 5',c:14,s:15},{m:'May 10',c:11,s:13},{m:'May 15',c:13,s:14},
+    ],
+    avgRate:'84%', peak:'May 5', totalComp:'127',
+  },
+  '90d': {
+    kpis: [
+      { label:'Workflows Completed', value:'341',  delta:'+54',  up:true,  sub:'vs prev 90 days', color:'blue',  icon:'✅', spark:[50,55,60,65,70,75,80,85,80,90] },
+      { label:'Avg Completion Time', value:'2.4d', delta:'+0.2d',up:false, sub:'days per workflow',color:'amber', icon:'⏱', spark:[60,62,65,60,55,58,62,60,65,68] },
+      { label:'Tasks Overdue',       value:'14',   delta:'-5',   up:true,  sub:'vs prev 90 days', color:'green', icon:'⚠️', spark:[65,60,55,50,45,48,42,38,35,32] },
+      { label:'Active Users',        value:'24',   delta:'+7',   up:true,  sub:'peak user count',  color:'purple',icon:'👥',spark:[40,45,50,55,60,65,68,70,72,75] },
+    ],
+    trend: [
+      {m:'Feb',c:38,s:45},{m:'Mar',c:52,s:58},{m:'Apr',c:48,s:54},{m:'May',c:42,s:49},
+    ],
+    avgRate:'81%', peak:'March', totalComp:'341',
+  },
+  'ytd': {
+    kpis: [
+      { label:'Workflows Completed', value:'489',  delta:'+89',  up:true,  sub:'vs same period last year',color:'blue',icon:'✅',spark:[45,50,60,65,70,75,80,85,82,90] },
+      { label:'Avg Completion Time', value:'2.2d', delta:'-0.3d',up:true,  sub:'days per workflow',color:'green',icon:'⏱',spark:[75,72,70,68,65,62,60,58,55,52] },
+      { label:'Tasks Overdue',       value:'19',   delta:'-11',  up:true,  sub:'vs same period last year',color:'green',icon:'⚠️',spark:[70,65,60,55,50,45,40,38,35,32] },
+      { label:'Active Users',        value:'24',   delta:'+12',  up:true,  sub:'total platform users',color:'purple',icon:'👥',spark:[20,25,30,35,40,50,55,60,68,75] },
+    ],
+    trend: [
+      {m:'Jan',c:60,s:72},{m:'Feb',c:75,s:85},{m:'Mar',c:92,s:100},{m:'Apr',c:89,s:97},{m:'May',c:42,s:49},
+    ],
+    avgRate:'86%', peak:'March', totalComp:'489',
+  },
+};
+
+const ROLE_META = {
+  admin:   { label:'System Admin',    subtitle:'Operational performance, workflow throughput, and team productivity metrics.' },
+  ops:     { label:'Ops Manager',     subtitle:'Workflow completion, team productivity, and SLA compliance for your area.' },
+  finance: { label:'Finance Manager', subtitle:'Financial summary, invoicing, and billing analytics.' },
+  field:   { label:'Field Worker',    subtitle:'Your assigned task completion and personal performance metrics.' },
+};
+
+let currentPeriod = '30d';
+let currentRole   = 'admin';
+
+/* ── KPI render ── */
+function renderKPIs(d) {
+  const sparkColors = {blue:['#6366F1'],green:['#10B981'],amber:['#F59E0B'],red:['#EF4444'],purple:['#8B5CF6']};
+  document.getElementById('kpi-grid').innerHTML = d.kpis.map(k => {
+    const deltaCls = k.up === true ? 'delta-up' : k.up === false ? 'delta-down' : 'delta-flat';
+    const arrow    = k.up === true ? '↑' : k.up === false ? '↓' : '→';
+    const bars = k.spark.map(v => {
+      const h = Math.round(4 + (v/100)*28);
+      return `<div class="spark-bar" style="height:${h}px;background:${sparkColors[k.color][0]};"></div>`;
+    }).join('');
+    return `
+      <div class="kpi-card ${k.color}">
+        <div class="kpi-icon">${k.icon}</div>
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-value">${k.value}</div>
+        <span class="kpi-delta ${deltaCls}">${arrow} ${k.delta}</span>
+        <div class="kpi-sub">${k.sub}</div>
+        <div class="sparkline">${bars}</div>
+      </div>`;
+  }).join('');
+}
+
+/* ── Trend chart render ── */
+function renderTrend(d) {
+  const maxVal = Math.max(...d.trend.map(t => t.s));
+  document.getElementById('trend-chart').innerHTML = d.trend.map(t => {
+    const hC = Math.round((t.c / maxVal) * 100);
+    const hS = Math.round((t.s / maxVal) * 100);
+    return `
+      <div class="trend-col">
+        <div class="trend-two">
+          <div class="trend-bar" style="height:${hC}%;background:var(--stride-primary);">
+            <div class="tooltip">${t.c} completed</div>
+          </div>
+          <div class="trend-bar" style="height:${hS}%;background:var(--stride-border);">
+            <div class="tooltip">${t.s} started</div>
+          </div>
+        </div>
+        <span class="trend-month">${t.m}</span>
+      </div>`;
+  }).join('');
+  document.getElementById('avg-rate').textContent   = d.avgRate;
+  document.getElementById('peak-month').textContent = d.peak;
+  document.getElementById('total-comp').textContent = d.totalComp;
+}
+
+/* ── Role gating ── */
+function applyRoleGating(role) {
+  const gate = document.getElementById('finance-gate');
+  gate.classList.toggle('visible', role === 'ops' || role === 'field');
+  document.getElementById('sidebar-role').textContent = ROLE_META[role].label;
+  document.getElementById('page-sub').textContent     = ROLE_META[role].subtitle;
+
+  // For field worker, swap KPIs to personal view
+  if (role === 'field') {
+    document.getElementById('kpi-grid').innerHTML = `
+      <div class="kpi-card green"><div class="kpi-icon">✅</div><div class="kpi-label">My Tasks Completed</div><div class="kpi-value">12</div><span class="kpi-delta delta-up">↑ 3</span><div class="kpi-sub">vs last period</div></div>
+      <div class="kpi-card blue"><div class="kpi-icon">🔄</div><div class="kpi-label">Tasks In Progress</div><div class="kpi-value">4</div><span class="kpi-delta delta-flat">→ 0</span><div class="kpi-sub">currently assigned</div></div>
+      <div class="kpi-card amber"><div class="kpi-icon">⏰</div><div class="kpi-label">Avg Task Time</div><div class="kpi-value">3.2h</div><span class="kpi-delta delta-up">↑ -0.5h</span><div class="kpi-sub">vs team avg 4.1h</div></div>
+      <div class="kpi-card purple"><div class="kpi-icon">⭐</div><div class="kpi-label">On-Time Rate</div><div class="kpi-value">94%</div><span class="kpi-delta delta-up">↑ 6%</span><div class="kpi-sub">above team target</div></div>
+    `;
+  }
+}
+
+/* ── Period switcher ── */
+function setPeriod(p, el) {
+  currentPeriod = p;
+  // period-tabs buttons
+  document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
+  const btn = Array.from(document.querySelectorAll('.period-tab')).find(b => b.textContent.toLowerCase().replace(' ','') === p.toLowerCase() || b.textContent === {'7d':'7D','30d':'30D','90d':'90D','ytd':'YTD'}[p]);
+  if (btn) btn.classList.add('active');
+  // annotation chips
+  document.querySelectorAll('.ann-chip').forEach(c => {
+    if (['7 days','30 days','90 days'].includes(c.textContent.trim())) c.classList.remove('active');
+  });
+  if (el && ['7 days','30 days','90 days'].includes(el.textContent.trim())) el.classList.add('active');
+  renderAll();
+}
+
+function setRole(r, el) {
+  currentRole = r;
+  document.querySelectorAll('.ann-chip').forEach(c => {
+    if (['Admin','Ops Manager','Finance','Field Worker'].includes(c.textContent.trim())) c.classList.remove('active');
+  });
+  el.classList.add('active');
+  renderAll();
+}
+
+function renderAll() {
+  const d = DATA[currentPeriod];
+  if (currentRole !== 'field') renderKPIs(d);
+  renderTrend(d);
+  applyRoleGating(currentRole);
+  document.getElementById('trend-sub').textContent =
+    {  '7d':'Completed vs. Started — last 7 days', '30d':'Completed vs. Started — last 30 days',
+       '90d':'Completed vs. Started — last 90 days','ytd':'Completed vs. Started — year to date' }[currentPeriod];
+}
+
+/* ── Theme ── */
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('theme-toggle').textContent = isDark ? '☀️ Light' : '🌙 Dark';
+}
+
+/* ── Mobile ── */
+function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+/* ── Init ── */
+renderAll();
+</script>
+</body>
+</html>
