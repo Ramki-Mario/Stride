@@ -1,7 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { tap } from 'rxjs/operators';
+import { switchMap, tap } from 'rxjs/operators';
 
 export interface AuthUser {
   userId: string;
@@ -26,10 +26,15 @@ export class AuthService {
     );
   }
 
+  /**
+   * Posts credentials to BFF, then pipes into checkSession() so the user
+   * signal is populated before the component's `next` callback fires.
+   * Returns Observable<AuthUser> (same shape as checkSession).
+   */
   login(email: string, password: string) {
     return this.http
       .post<void>('/bff/auth/login', { email, password })
-      .pipe(tap(() => this.checkSession().subscribe()));
+      .pipe(switchMap(() => this.checkSession()));
   }
 
   logout() {

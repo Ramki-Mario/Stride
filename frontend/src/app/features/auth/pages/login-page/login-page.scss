@@ -1,0 +1,454 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Auth Layout — STRIDE Login Page
+// Matches the 02-login.html prototype design.
+// All colours are sourced from --stride-* CSS custom properties defined in
+// frontend/src/styles.scss so light/dark theming is inherited automatically.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Shell ────────────────────────────────────────────────────────────────────
+
+.auth-shell {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+
+  // Deep navy indigo gradient — same as prototype
+  background: linear-gradient(135deg, #0f0e2a 0%, #1e1b4b 40%, #312e81 70%, #1e1b4b 100%);
+  background-size: 300% 300%;
+  animation: authGradientDrift 18s ease infinite;
+
+  :host-context([data-theme='dark']) & {
+    background: linear-gradient(135deg, #020817 0%, #0f0e2a 40%, #1e1b4b 70%, #0f172a 100%);
+  }
+}
+
+@keyframes authGradientDrift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+// ── Dot-grid pattern overlay ──────────────────────────────────────────────────
+
+.auth-bg-pattern {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(99, 102, 241, 0.15) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+// ── Brand block (above card) ──────────────────────────────────────────────────
+
+.auth-brand {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.auth-logo-mark {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--stride-primary);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.auth-brand-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.06em;
+}
+
+.auth-brand-sub {
+  margin-top: 0.375rem;
+  font-size: 0.8125rem;
+  color: rgba(196, 205, 255, 0.65);
+}
+
+// ── Card ─────────────────────────────────────────────────────────────────────
+
+.auth-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 26rem;
+  padding: 2.5rem;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 1.25rem;
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.35),
+    0 8px 16px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(16px);
+
+  :host-context([data-theme='dark']) & {
+    background: rgba(17, 24, 39, 0.97);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.auth-card-header {
+  margin-bottom: 1.75rem;
+  text-align: center;
+}
+
+.auth-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--stride-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.auth-card-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--stride-text-secondary);
+}
+
+// ── Alert banner ─────────────────────────────────────────────────────────────
+
+.auth-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  margin-bottom: 1.25rem;
+  animation: alertFadeIn 180ms ease;
+}
+
+@keyframes alertFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.auth-alert--error {
+  background: var(--stride-error-bg);
+  border: 1px solid var(--stride-error-border);
+  border-left: 4px solid var(--stride-error);
+  color: var(--stride-error);
+}
+
+// ── Form ─────────────────────────────────────────────────────────────────────
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// ── Fields ────────────────────────────────────────────────────────────────────
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.auth-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.auth-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--stride-text-primary);
+}
+
+.auth-forgot-link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--stride-primary);
+  text-decoration: none;
+  transition: color 150ms;
+
+  &:hover {
+    color: var(--stride-primary-hover);
+    text-decoration: underline;
+  }
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1.5px solid var(--stride-border);
+  border-radius: 0.75rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: var(--stride-text-primary);
+  background: var(--stride-bg);
+  outline: none;
+  transition: border-color 150ms, box-shadow 150ms, background 150ms;
+
+  &::placeholder {
+    color: var(--stride-text-muted);
+  }
+
+  &:focus {
+    border-color: var(--stride-primary);
+    background: var(--stride-surface);
+    box-shadow: 0 0 0 3px var(--stride-primary-ring);
+  }
+
+  &--error {
+    border-color: var(--stride-error);
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+    }
+  }
+
+  &--pass {
+    padding-right: 2.75rem;
+  }
+
+  :host-context([data-theme='dark']) & {
+    background: var(--stride-surface);
+  }
+}
+
+// ── Password wrapper + toggle ─────────────────────────────────────────────────
+
+.auth-pass-wrapper {
+  position: relative;
+}
+
+.auth-pass-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: var(--stride-text-muted);
+  display: flex;
+  align-items: center;
+  transition: color 150ms;
+
+  &:hover {
+    color: var(--stride-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--stride-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+// ── Field error message ───────────────────────────────────────────────────────
+
+.auth-field-error {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--stride-error);
+  margin-top: 0.125rem;
+  animation: alertFadeIn 150ms ease;
+}
+
+// ── Remember me ───────────────────────────────────────────────────────────────
+
+.auth-remember-row {
+  display: flex;
+  align-items: center;
+}
+
+.auth-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--stride-text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.auth-checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--stride-primary);
+  cursor: pointer;
+}
+
+// ── Submit button ─────────────────────────────────────────────────────────────
+
+.auth-submit-btn {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: var(--stride-primary);
+  border: none;
+  border-radius: 0.75rem;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background 150ms, box-shadow 150ms, transform 80ms;
+  margin-top: 0.25rem;
+
+  &:hover:not(:disabled) {
+    background: var(--stride-primary-hover);
+    box-shadow: 0 4px 14px var(--stride-primary-ring);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.985);
+  }
+
+  &:disabled {
+    background: color-mix(in srgb, var(--stride-primary) 60%, white 40%);
+    cursor: not-allowed;
+
+    :host-context([data-theme='dark']) & {
+      background: color-mix(in srgb, var(--stride-primary) 45%, #0b1120 55%);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+// ── Loading spinner (CSS-only, no external deps) ──────────────────────────────
+
+.auth-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: authSpin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes authSpin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Divider ───────────────────────────────────────────────────────────────────
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--stride-border);
+  }
+
+  span {
+    font-size: 0.8125rem;
+    color: var(--stride-text-muted);
+    white-space: nowrap;
+  }
+}
+
+// ── SSO button ────────────────────────────────────────────────────────────────
+
+.auth-sso-btn {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: 1.5px solid var(--stride-border);
+  border-radius: 0.75rem;
+  background: var(--stride-surface);
+  color: var(--stride-text-primary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: not-allowed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  opacity: 0.6;
+  transition: border-color 150ms, background 150ms;
+}
+
+.auth-sso-badge {
+  margin-left: auto;
+  font-size: 0.6875rem;
+  padding: 0.125rem 0.375rem;
+  background: var(--stride-surface-hover);
+  color: var(--stride-text-muted);
+  border: 1px solid var(--stride-border-soft);
+  border-radius: 9999px;
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+
+.auth-footer {
+  position: relative;
+  z-index: 1;
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: rgba(196, 205, 255, 0.45);
+}
+
+.auth-footer-sep {
+  opacity: 0.5;
+}
+
+.auth-footer-link {
+  color: inherit;
+  text-decoration: underline;
+  transition: opacity 150ms;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .auth-footer {
+    flex-direction: column;
+    gap: 0.25rem;
+
+    .auth-footer-sep {
+      display: none;
+    }
+  }
+}
