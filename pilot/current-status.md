@@ -114,8 +114,8 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
   - [x] US-034.5 Workflow Detail — `05-workflow-detail.html` PR #67 ✅
   - [x] US-034.6 User Management — `06-user-management.html` PR #68 ✅
   - [x] US-034.7 Reporting — `07-reporting.html` PR #69 ✅
-- [ ] **US-030: Angular login page (PrimeNG reactive form) ← UNBLOCKED, next story (GitHub #28, EP-015)**
-- [ ] US-031: Auth guard + APP_INITIALIZER session check ← blocked on US-030 (GitHub #29, EP-015)
+- [x] **US-030: Angular login page (reactive form, CSS-only spinner, login.readme.md KT) — PR #70 ✅ (2026-05-15)**
+- [ ] **US-031: Auth guard + APP_INITIALIZER session check ← UNBLOCKED, next story (GitHub #29, EP-015)**
 - [x] US-032: appsettings.Development.json — EP-016 closed ✅ (PR #54)
 - [x] **US-035: System Context Diagram — EP-017 (#47, PR #53, Done)**
 - [ ] **US-036: Container Diagram (C4 L2) — EP-017 (#48, trigger: end of Phase 2)**
@@ -134,13 +134,13 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 
 ### GitHub Board State (as of 2026-05-15, end of session)
 - EP-001 through EP-014: ✅ Done (closed)
-- EP-015 (Angular Login UI, #15): 🔵 Open — US-034 partially done (5/7), US-030, US-031 pending
+- EP-015 (Angular Login UI, #15): 🔵 Open — US-034 ✅ Done (7/7), US-030 ✅ Done (PR #70), US-031 next
 - EP-016 (appsettings.Development, #16): ✅ Done
 - EP-017 (Architecture Diagrams, #46): 🔵 Open — US-035 done (1/6)
 - Issues #55 (US-034.1), #56 (US-034.2), #57 (US-034.3), #58 (US-034.4), #59 (US-034.5): ✅ Closed/Done
 - Issues #60 (US-034.6) PR #68, #61 (US-034.7) PR #69: ✅ Done
 - Issue #37 (US-034 parent): ✅ Closed
-- **US-030 Angular login page (#28): ⬜ Next — UNBLOCKED**
+- **US-031 Auth guard + APP_INITIALIZER (#29): ⬜ Next — UNBLOCKED (US-030 done)**
 
 ## Phase 3 — Core Workflow Engine (Pending)
 ## Phase 4 — Dashboard & Reporting (Pending)
