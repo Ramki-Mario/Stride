@@ -97,9 +97,9 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 - [x] US-021: ITenantResolver + TenantResolver (Dapper-based, corporate domain + fallback) (PR #34)
 - [x] US-022: EF Core configurations + InitialCreate migration + DefaultRoles seed constants (PR #35)
 - [x] US-023: IUserRepository, IRoleRepository, ITenantRepository implementations (PR #38)
+- [x] US-024: IJwtTokenService + BFF auth endpoints (login/logout/me) + Redis ITicketStore (PR #39)
 
 ### Pending
-- [ ] US-024: JWT strategy + BFF auth endpoints (login, logout, me) + Redis session store
 - [ ] US-025: JWT configuration via appsettings
 - [ ] US-026: MediatR command and query handlers (Login, Register, AssignRole, GetUser)
 - [ ] US-027: FluentValidation validators for commands

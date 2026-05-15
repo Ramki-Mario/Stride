@@ -301,7 +301,7 @@
 
 | ID | Story | Tasks | Complexity | Status |
 |---|---|---|---|---|
-| US-024 | As a user, logging in returns an HttpOnly cookie — no token in the browser | T-074 Implement IJwtTokenService + JwtTokenService<br>T-075 Implement ISessionStore (Redis-backed)<br>T-076 Implement BFF LoginEndpoint (POST /bff/auth/login)<br>T-077 Implement BFF LogoutEndpoint (POST /bff/auth/logout)<br>T-078 Implement BFF MeEndpoint (GET /bff/auth/me) | L | [ ] |
+| US-024 | As a user, logging in returns an HttpOnly cookie — no token in the browser | T-074 Implement IJwtTokenService + JwtTokenService<br>T-075 Implement ISessionStore (Redis-backed)<br>T-076 Implement BFF LoginEndpoint (POST /bff/auth/login)<br>T-077 Implement BFF LogoutEndpoint (POST /bff/auth/logout)<br>T-078 Implement BFF MeEndpoint (GET /bff/auth/me) | L | [x] |
 | US-025 | As a developer, JWT configuration is environment-driven | T-079 Add Jwt:Secret, Jwt:Issuer, Jwt:ExpiryMinutes to appsettings + .env.example | XS | [ ] |
 
 **Dependencies:** EP-010
