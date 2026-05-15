@@ -153,9 +153,10 @@ Phase 3 (Core Workflow Engine) — **In Progress**.
   - WorkflowDefinitionRepository + WorkflowInstanceRepository (TenantAwareRepository)
   - IWorkflowReadService + WorkflowReadService (Dapper — list views + dashboard KPIs)
   - InitialCreate migration applied to local SQL Express
-- EP-019 #73 (Application Layer): US-044 #80, US-045 #81, US-046 #82, US-047 #83, US-048 #84
-- EP-020 #74 (Infrastructure): US-049 #85, US-050 #86, US-051 #87
-- EP-021 #75 (API Layer): US-052 #88, US-053 #89
+- EP-021 #75 (API Layer): US-052 #88 ✅, US-053 #89 ✅ — **Done** (PR #107, 2026-05-16)
+  - WorkflowsController: 12 endpoints (definition CRUD + instance lifecycle)
+  - StepsController: 4 step operation endpoints (assign/complete/fail/skip)
+  - Request DTOs, ITenantContext injection fix, api.readme.md KT doc
 - EP-022 #76 (Angular UI): US-054 #90, US-055 #91, US-056 #92, US-057 #93
 
 ## Phase 4 — Dashboard & Reporting (Pending — board populated 2026-05-16)

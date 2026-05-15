@@ -1,0 +1,477 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     STRIDE — Workflow List Page   (US-054 · EP-022)
+     Design reference: pilot/docs/ui-mockups/04-workflow-list.html
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- ── Page Header ─────────────────────────────────────────────────────── -->
+<div class="wfl-page-header">
+  <div>
+    <h1 class="wfl-page-title">Workflows</h1>
+    <p class="wfl-page-subtitle">
+      Manage and monitor all operational workflows across your organisation.
+    </p>
+  </div>
+  <div class="wfl-header-actions">
+    <button class="wfl-btn wfl-btn-primary" (click)="navigateToCreate()">
+      <span class="pi pi-plus"></span> New Workflow
+    </button>
+  </div>
+</div>
+
+<!-- ── Error Banner ─────────────────────────────────────────────────────── -->
+@if (errorMessage()) {
+  <div class="wfl-error-banner" role="alert">
+    <span class="pi pi-exclamation-triangle"></span>
+    {{ errorMessage() }}
+    <button class="wfl-error-retry" (click)="loadWorkflows()">Retry</button>
+  </div>
+}
+
+<!-- ── Summary Strip ────────────────────────────────────────────────────── -->
+<div class="wfl-summary-strip">
+  <!-- All -->
+  <div
+    class="wfl-summary-card"
+    [class.active]="statusFilter() === ''"
+    (click)="setStatusFilter('')"
+    (keydown.enter)="setStatusFilter('')"
+    tabindex="0"
+    role="button"
+    aria-label="Show all workflows"
+  >
+    <div class="wfl-summary-label">All Workflows</div>
+    <div class="wfl-summary-count primary">{{ statusCounts().all }}</div>
+  </div>
+
+  <!-- Draft -->
+  <div
+    class="wfl-summary-card"
+    [class.active]="statusFilter() === 'Draft'"
+    (click)="setStatusFilter('Draft')"
+    (keydown.enter)="setStatusFilter('Draft')"
+    tabindex="0"
+    role="button"
+    aria-label="Show Draft workflows"
+  >
+    <div class="wfl-summary-label">Draft</div>
+    <div class="wfl-summary-count muted">{{ statusCounts().draft }}</div>
+  </div>
+
+  <!-- Active -->
+  <div
+    class="wfl-summary-card"
+    [class.active]="statusFilter() === 'Active'"
+    (click)="setStatusFilter('Active')"
+    (keydown.enter)="setStatusFilter('Active')"
+    tabindex="0"
+    role="button"
+    aria-label="Show Active workflows"
+  >
+    <div class="wfl-summary-label">Active</div>
+    <div class="wfl-summary-count running">{{ statusCounts().active }}</div>
+  </div>
+
+  <!-- Archived -->
+  <div
+    class="wfl-summary-card"
+    [class.active]="statusFilter() === 'Archived'"
+    (click)="setStatusFilter('Archived')"
+    (keydown.enter)="setStatusFilter('Archived')"
+    tabindex="0"
+    role="button"
+    aria-label="Show Archived workflows"
+  >
+    <div class="wfl-summary-label">Archived</div>
+    <div class="wfl-summary-count muted">{{ statusCounts().archived }}</div>
+  </div>
+</div>
+
+<!-- ── Toolbar ──────────────────────────────────────────────────────────── -->
+<div class="wfl-toolbar">
+
+  <!-- Bulk actions bar (visible when rows are selected) -->
+  @if (selectionCount() > 0) {
+    <div class="wfl-bulk-bar" role="status" aria-live="polite">
+      <span class="wfl-bulk-label">
+        <span class="pi pi-check-square"></span>
+        {{ selectionCount() }} selected
+      </span>
+      <button class="wfl-btn wfl-btn-ghost wfl-btn-sm" (click)="clearSelection()">
+        Clear
+      </button>
+      <button
+        class="wfl-btn wfl-btn-danger wfl-btn-sm"
+        (click)="bulkDelete()"
+        aria-label="Delete selected workflows"
+      >
+        <span class="pi pi-trash"></span> Delete
+      </button>
+    </div>
+  }
+
+  <!-- Search -->
+  <div class="wfl-search-wrap">
+    <span class="pi pi-search wfl-search-icon" aria-hidden="true"></span>
+    <input
+      class="wfl-search-input"
+      type="search"
+      placeholder="Search workflows…"
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchTerm.set($event)"
+      aria-label="Search workflows"
+    />
+  </div>
+
+  <!-- Status filter -->
+  <select
+    class="wfl-filter-select"
+    [ngModel]="statusFilter()"
+    (ngModelChange)="statusFilter.set($event)"
+    aria-label="Filter by status"
+  >
+    <option value="">All Statuses</option>
+    <option value="Draft">Draft</option>
+    <option value="Active">Active</option>
+    <option value="Archived">Archived</option>
+  </select>
+
+  <!-- Sort -->
+  <select
+    class="wfl-filter-select"
+    [ngModel]="sortBy()"
+    (ngModelChange)="sortBy.set($event)"
+    aria-label="Sort by"
+  >
+    <option value="updatedAt">Sort: Last Updated</option>
+    <option value="name">Sort: Name A–Z</option>
+    <option value="createdAt">Sort: Created</option>
+    <option value="status">Sort: Status</option>
+    <option value="stepCount">Sort: Step Count</option>
+  </select>
+
+  <!-- Divider -->
+  <div class="wfl-toolbar-divider" aria-hidden="true"></div>
+
+  <!-- View toggle -->
+  <div class="wfl-view-toggle" role="group" aria-label="View mode">
+    <button
+      class="wfl-view-btn"
+      [class.active]="viewMode() === 'table'"
+      (click)="setView('table')"
+      title="Table view"
+      aria-pressed="{{ viewMode() === 'table' }}"
+    >
+      <span class="pi pi-list"></span>
+    </button>
+    <button
+      class="wfl-view-btn"
+      [class.active]="viewMode() === 'cards'"
+      (click)="setView('cards')"
+      title="Card view"
+      aria-pressed="{{ viewMode() === 'cards' }}"
+    >
+      <span class="pi pi-th-large"></span>
+    </button>
+  </div>
+</div>
+
+<!-- ── Loading Skeleton ─────────────────────────────────────────────────── -->
+@if (isLoading()) {
+  <div class="wfl-table-wrap" aria-busy="true" aria-label="Loading workflows">
+    <table class="wfl-table">
+      <thead>
+        <tr>
+          <th class="col-check"></th>
+          <th>Workflow</th>
+          <th>Status</th>
+          <th>Steps</th>
+          <th>Last Updated</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (i of [1,2,3,4,5]; track i) {
+          <tr>
+            <td><div class="wfl-skeleton wfl-skeleton-sm"></div></td>
+            <td><div class="wfl-skeleton" style="width: 60%"></div></td>
+            <td><div class="wfl-skeleton wfl-skeleton-pill"></div></td>
+            <td><div class="wfl-skeleton wfl-skeleton-sm"></div></td>
+            <td><div class="wfl-skeleton wfl-skeleton-sm"></div></td>
+            <td></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+<!-- ── Empty State ──────────────────────────────────────────────────────── -->
+@else if (filteredWorkflows().length === 0) {
+  <div class="wfl-empty-state" role="status">
+    <div class="wfl-empty-icon">
+      <span class="pi pi-inbox"></span>
+    </div>
+    <h3 class="wfl-empty-title">
+      @if (searchTerm() || statusFilter()) {
+        No workflows match your filters
+      } @else {
+        No workflows yet
+      }
+    </h3>
+    <p class="wfl-empty-desc">
+      @if (searchTerm() || statusFilter()) {
+        Try clearing a filter or adjusting your search term.
+      } @else {
+        Create your first workflow to get started with operational orchestration.
+      }
+    </p>
+    @if (searchTerm() || statusFilter()) {
+      <button class="wfl-btn wfl-btn-ghost" (click)="clearFilters()">
+        <span class="pi pi-filter-slash"></span> Clear filters
+      </button>
+    } @else {
+      <button class="wfl-btn wfl-btn-primary" (click)="navigateToCreate()">
+        <span class="pi pi-plus"></span> New Workflow
+      </button>
+    }
+  </div>
+}
+
+<!-- ── Table View ───────────────────────────────────────────────────────── -->
+@else if (viewMode() === 'table') {
+  <div class="wfl-table-wrap" role="region" aria-label="Workflow definitions">
+    <table class="wfl-table">
+      <thead>
+        <tr>
+          <!-- Select-all checkbox -->
+          <th class="col-check">
+            <input
+              type="checkbox"
+              class="wfl-cb"
+              [checked]="allOnPageSelected"
+              (change)="toggleAll($any($event.target).checked)"
+              aria-label="Select all on this page"
+            />
+          </th>
+          <th (click)="sortBy.set('name')" class="sortable" aria-sort="{{ sortBy() === 'name' ? 'ascending' : 'none' }}">
+            Workflow
+            @if (sortBy() === 'name') { <span class="pi pi-arrow-up sort-icon"></span> }
+          </th>
+          <th (click)="sortBy.set('status')" class="sortable">
+            Status
+            @if (sortBy() === 'status') { <span class="pi pi-arrow-up sort-icon"></span> }
+          </th>
+          <th (click)="sortBy.set('stepCount')" class="sortable col-steps">
+            Steps
+            @if (sortBy() === 'stepCount') { <span class="pi pi-arrow-up sort-icon"></span> }
+          </th>
+          <th (click)="sortBy.set('updatedAt')" class="sortable col-date">
+            Last Updated
+            @if (sortBy() === 'updatedAt') { <span class="pi pi-arrow-down sort-icon"></span> }
+          </th>
+          <th class="col-actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (wf of paginatedWorkflows(); track wf.id; let idx = $index) {
+          <tr
+            [class.selected]="isSelected(wf.id)"
+            (click)="openWorkflow(wf.id)"
+            role="row"
+            tabindex="0"
+            (keydown.enter)="openWorkflow(wf.id)"
+            [attr.aria-label]="'Open workflow ' + wf.name"
+          >
+            <!-- Checkbox -->
+            <td class="col-check" (click)="$event.stopPropagation()">
+              <input
+                type="checkbox"
+                class="wfl-cb"
+                [checked]="isSelected(wf.id)"
+                (change)="toggleRow(wf.id)"
+                [attr.aria-label]="'Select ' + wf.name"
+              />
+            </td>
+
+            <!-- Name + description + ID -->
+            <td class="col-name">
+              <div class="wfl-name">{{ wf.name }}</div>
+              @if (wf.description) {
+                <div class="wfl-desc">{{ wf.description }}</div>
+              }
+              <div class="wfl-id">{{ wf.id.substring(0, 8).toUpperCase() }}</div>
+            </td>
+
+            <!-- Status badge -->
+            <td>
+              <span class="wfl-badge" [ngClass]="statusClass(wf.status)">
+                <span class="wfl-badge-dot"></span>
+                {{ statusLabel(wf.status) }}
+              </span>
+            </td>
+
+            <!-- Step count -->
+            <td class="col-steps">
+              <span class="wfl-step-count">
+                <span class="pi pi-list"></span>
+                {{ wf.stepCount }}
+              </span>
+            </td>
+
+            <!-- Last updated -->
+            <td class="col-date">
+              <span class="wfl-date" [title]="formatDate(wf.updatedAt)">
+                {{ relativeDate(wf.updatedAt) }}
+              </span>
+            </td>
+
+            <!-- Row actions (visible on hover) -->
+            <td class="col-actions" (click)="$event.stopPropagation()">
+              <div class="wfl-row-actions">
+                <button
+                  class="wfl-row-btn"
+                  title="View workflow"
+                  (click)="openWorkflow(wf.id)"
+                  aria-label="View {{ wf.name }}"
+                >
+                  <span class="pi pi-eye"></span>
+                </button>
+                <button
+                  class="wfl-row-btn danger"
+                  title="Delete workflow"
+                  (click)="toggleRow(wf.id)"
+                  aria-label="Select {{ wf.name }} for deletion"
+                >
+                  <span class="pi pi-trash"></span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  @if (totalPages() > 1) {
+    <div class="wfl-pagination" role="navigation" aria-label="Pagination">
+      <span class="wfl-pagination-info">
+        Showing {{ showingFrom() }}–{{ showingTo() }} of {{ filteredWorkflows().length }} workflows
+      </span>
+      <div class="wfl-pagination-controls">
+        <button
+          class="wfl-page-btn"
+          [disabled]="currentPage() === 1"
+          (click)="goToPage(currentPage() - 1)"
+          aria-label="Previous page"
+        >
+          <span class="pi pi-chevron-left"></span>
+        </button>
+
+        @for (page of pagesArray(); track page) {
+          <button
+            class="wfl-page-btn"
+            [class.active]="currentPage() === page"
+            (click)="goToPage(page)"
+            [attr.aria-label]="'Page ' + page"
+            [attr.aria-current]="currentPage() === page ? 'page' : null"
+          >
+            {{ page }}
+          </button>
+        }
+
+        <button
+          class="wfl-page-btn"
+          [disabled]="currentPage() === totalPages()"
+          (click)="goToPage(currentPage() + 1)"
+          aria-label="Next page"
+        >
+          <span class="pi pi-chevron-right"></span>
+        </button>
+      </div>
+    </div>
+  }
+}
+
+<!-- ── Card View ────────────────────────────────────────────────────────── -->
+@else {
+  <div class="wfl-card-grid" role="list" aria-label="Workflow definitions">
+    @for (wf of paginatedWorkflows(); track wf.id) {
+      <article
+        class="wfl-card"
+        role="listitem"
+        tabindex="0"
+        (click)="openWorkflow(wf.id)"
+        (keydown.enter)="openWorkflow(wf.id)"
+        [attr.aria-label]="wf.name + ' — ' + statusLabel(wf.status)"
+      >
+        <!-- Card header: title + status badge -->
+        <div class="wfl-card-header">
+          <div class="wfl-card-title-wrap">
+            <div class="wfl-card-title">{{ wf.name }}</div>
+            <div class="wfl-id">{{ wf.id.substring(0, 8).toUpperCase() }}</div>
+          </div>
+          <span class="wfl-badge" [ngClass]="statusClass(wf.status)">
+            <span class="wfl-badge-dot"></span>
+            {{ statusLabel(wf.status) }}
+          </span>
+        </div>
+
+        <!-- Description -->
+        @if (wf.description) {
+          <p class="wfl-card-desc">{{ wf.description }}</p>
+        }
+
+        <!-- Footer: step count + date -->
+        <div class="wfl-card-footer">
+          <span class="wfl-step-count">
+            <span class="pi pi-list"></span>
+            {{ wf.stepCount }} step{{ wf.stepCount !== 1 ? 's' : '' }}
+          </span>
+          <span class="wfl-date" [title]="formatDate(wf.updatedAt)">
+            {{ relativeDate(wf.updatedAt) }}
+          </span>
+        </div>
+      </article>
+    }
+  </div>
+
+  <!-- Card-view pagination -->
+  @if (totalPages() > 1) {
+    <div class="wfl-pagination" role="navigation" aria-label="Pagination">
+      <span class="wfl-pagination-info">
+        Showing {{ showingFrom() }}–{{ showingTo() }} of {{ filteredWorkflows().length }} workflows
+      </span>
+      <div class="wfl-pagination-controls">
+        <button
+          class="wfl-page-btn"
+          [disabled]="currentPage() === 1"
+          (click)="goToPage(currentPage() - 1)"
+          aria-label="Previous page"
+        >
+          <span class="pi pi-chevron-left"></span>
+        </button>
+
+        @for (page of pagesArray(); track page) {
+          <button
+            class="wfl-page-btn"
+            [class.active]="currentPage() === page"
+            (click)="goToPage(page)"
+            [attr.aria-label]="'Page ' + page"
+          >
+            {{ page }}
+          </button>
+        }
+
+        <button
+          class="wfl-page-btn"
+          [disabled]="currentPage() === totalPages()"
+          (click)="goToPage(currentPage() + 1)"
+          aria-label="Next page"
+        >
+          <span class="pi pi-chevron-right"></span>
+        </button>
+      </div>
+    </div>
+  }
+}

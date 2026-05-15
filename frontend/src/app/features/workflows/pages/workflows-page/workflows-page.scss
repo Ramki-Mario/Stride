@@ -1,0 +1,725 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Workflow List Page — Component Styles
+   All colours reference STRIDE design-system tokens (CSS custom properties)
+   defined in src/styles.scss. No raw colour values here.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:host {
+  display: block;
+  padding: 1.5rem;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+// ── Page Header ────────────────────────────────────────────────────────────
+
+.wfl-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.wfl-page-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--stride-text-primary);
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+.wfl-page-subtitle {
+  font-size: 0.8125rem;
+  color: var(--stride-text-secondary);
+  margin: 0.125rem 0 0;
+}
+
+.wfl-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+// ── Buttons ────────────────────────────────────────────────────────────────
+
+.wfl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--stride-radius-xl);
+  font-size: 0.84375rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background var(--stride-transition), box-shadow var(--stride-transition);
+  white-space: nowrap;
+  line-height: 1;
+
+  &-primary {
+    background: var(--stride-primary);
+    color: var(--stride-text-inverse);
+    &:hover {
+      background: var(--stride-primary-hover);
+      box-shadow: 0 4px 12px var(--stride-primary-ring);
+    }
+  }
+
+  &-ghost {
+    background: transparent;
+    color: var(--stride-text-secondary);
+    border: 1px solid var(--stride-border);
+    &:hover {
+      background: var(--stride-surface-hover);
+      color: var(--stride-text-primary);
+    }
+  }
+
+  &-danger {
+    background: var(--stride-error-bg);
+    color: var(--stride-error);
+    border: 1px solid var(--stride-error-border);
+    &:hover {
+      background: var(--stride-error);
+      color: var(--stride-text-inverse);
+    }
+  }
+
+  &-sm {
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+  }
+}
+
+// ── Error Banner ───────────────────────────────────────────────────────────
+
+.wfl-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  background: var(--stride-error-bg);
+  border: 1px solid var(--stride-error-border);
+  border-radius: var(--stride-radius-lg);
+  color: var(--stride-error);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.wfl-error-retry {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--stride-error);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  &:hover { opacity: 0.8; }
+}
+
+// ── Summary Strip ──────────────────────────────────────────────────────────
+
+.wfl-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.wfl-summary-card {
+  background: var(--stride-surface);
+  border: 1px solid var(--stride-border);
+  border-radius: var(--stride-radius-xl);
+  padding: 0.875rem 1rem;
+  box-shadow: var(--stride-shadow-xs);
+  cursor: pointer;
+  transition: box-shadow var(--stride-transition), border-color var(--stride-transition);
+  outline: none;
+
+  &:hover {
+    box-shadow: var(--stride-shadow-sm);
+    border-color: var(--stride-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--stride-primary);
+    outline-offset: 2px;
+  }
+
+  &.active {
+    border-color: var(--stride-primary);
+    background: var(--stride-primary-subtle);
+  }
+}
+
+.wfl-summary-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--stride-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
+
+.wfl-summary-count {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--stride-text-primary);
+  line-height: 1;
+
+  &.primary  { color: var(--stride-primary); }
+  &.running  { color: var(--stride-primary); }
+  &.success  { color: var(--stride-success); }
+  &.warning  { color: var(--stride-warning); }
+  &.error    { color: var(--stride-error); }
+  &.muted    { color: var(--stride-text-muted); }
+}
+
+// ── Toolbar ────────────────────────────────────────────────────────────────
+
+.wfl-toolbar {
+  background: var(--stride-surface);
+  border: 1px solid var(--stride-border);
+  border-radius: var(--stride-radius-xl) var(--stride-radius-xl) 0 0;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.wfl-bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--stride-primary-subtle);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--stride-radius-lg);
+}
+
+.wfl-bulk-label {
+  font-size: 0.78125rem;
+  font-weight: 600;
+  color: var(--stride-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.wfl-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 11.25rem;
+  max-width: 20rem;
+}
+
+.wfl-search-icon {
+  position: absolute;
+  left: 0.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--stride-text-muted);
+  font-size: 0.8125rem;
+  pointer-events: none;
+}
+
+.wfl-search-input {
+  width: 100%;
+  height: 2.125rem;
+  padding: 0 0.625rem 0 2rem;
+  border: 1.5px solid var(--stride-border);
+  border-radius: var(--stride-radius-lg);
+  background: var(--stride-bg);
+  color: var(--stride-text-primary);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  transition: border-color var(--stride-transition);
+  outline: none;
+
+  &:focus {
+    border-color: var(--stride-primary);
+    box-shadow: 0 0 0 3px var(--stride-primary-ring);
+  }
+
+  &::placeholder {
+    color: var(--stride-text-muted);
+  }
+}
+
+.wfl-filter-select {
+  height: 2.125rem;
+  padding: 0 1.75rem 0 0.625rem;
+  border: 1.5px solid var(--stride-border);
+  border-radius: var(--stride-radius-lg);
+  background: var(--stride-bg);
+  color: var(--stride-text-primary);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  transition: border-color var(--stride-transition);
+  outline: none;
+
+  &:focus {
+    border-color: var(--stride-primary);
+    box-shadow: 0 0 0 3px var(--stride-primary-ring);
+  }
+}
+
+.wfl-toolbar-divider {
+  width: 1px;
+  height: 1.5rem;
+  background: var(--stride-border);
+  flex-shrink: 0;
+}
+
+.wfl-view-toggle {
+  display: flex;
+  gap: 0.125rem;
+}
+
+.wfl-view-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--stride-radius-sm);
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--stride-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  transition: background var(--stride-transition), color var(--stride-transition);
+
+  &.active {
+    background: var(--stride-primary-subtle);
+    color: var(--stride-primary);
+  }
+
+  &:hover:not(.active) {
+    background: var(--stride-surface-hover);
+    color: var(--stride-text-primary);
+  }
+}
+
+// ── Table ──────────────────────────────────────────────────────────────────
+
+.wfl-table-wrap {
+  background: var(--stride-surface);
+  border: 1px solid var(--stride-border);
+  border-top: none;
+  border-radius: 0 0 var(--stride-radius-xl) var(--stride-radius-xl);
+  overflow-x: auto;
+}
+
+.wfl-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead th {
+    background: var(--stride-bg);
+    border-bottom: 1px solid var(--stride-border);
+    padding: 0.625rem 0.875rem;
+    text-align: left;
+    font-size: 0.71875rem;
+    font-weight: 600;
+    color: var(--stride-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+
+    &.sortable {
+      cursor: pointer;
+      user-select: none;
+      &:hover { color: var(--stride-text-primary); }
+    }
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--stride-border-soft);
+    transition: background var(--stride-transition);
+    cursor: pointer;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background: var(--stride-surface-hover); }
+    &.selected { background: var(--stride-primary-subtle); }
+    &:focus-visible { outline: 2px solid var(--stride-primary); outline-offset: -2px; }
+  }
+
+  td {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.84375rem;
+    color: var(--stride-text-primary);
+    vertical-align: middle;
+  }
+}
+
+.col-check  { width: 2.5rem; }
+.col-name   { min-width: 12.5rem; }
+.col-steps  { width: 5rem; }
+.col-date   { width: 8rem; }
+.col-actions { width: 5rem; }
+
+.sort-icon {
+  display: inline-block;
+  margin-left: 0.25rem;
+  font-size: 0.625rem;
+  opacity: 0.6;
+}
+
+// ── Cell content helpers ───────────────────────────────────────────────────
+
+.wfl-name {
+  font-weight: 600;
+  color: var(--stride-text-primary);
+  font-size: 0.84375rem;
+}
+
+.wfl-desc {
+  font-size: 0.75rem;
+  color: var(--stride-text-secondary);
+  margin-top: 0.125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 28rem;
+}
+
+.wfl-id {
+  font-size: 0.6875rem;
+  color: var(--stride-text-muted);
+  margin-top: 0.125rem;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  letter-spacing: 0.04em;
+}
+
+.wfl-step-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  color: var(--stride-text-secondary);
+  font-weight: 500;
+}
+
+.wfl-date {
+  font-size: 0.8125rem;
+  color: var(--stride-text-secondary);
+}
+
+// ── Checkbox ───────────────────────────────────────────────────────────────
+
+.wfl-cb {
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--stride-radius-xs);
+  border: 1.5px solid var(--stride-border);
+  cursor: pointer;
+  background: var(--stride-surface);
+  appearance: none;
+  transition: border-color var(--stride-transition), background var(--stride-transition);
+  accent-color: var(--stride-primary);
+
+  &:checked {
+    background: var(--stride-primary);
+    border-color: var(--stride-primary);
+  }
+
+  &:hover { border-color: var(--stride-primary); }
+
+  &:focus-visible {
+    outline: 2px solid var(--stride-primary);
+    outline-offset: 2px;
+  }
+}
+
+// ── Status Badge ───────────────────────────────────────────────────────────
+
+.wfl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  padding: 0.1875rem 0.5625rem;
+  border-radius: var(--stride-radius-full);
+  font-size: 0.71875rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  // Default (Draft)
+  background: var(--stride-surface-hover);
+  color: var(--stride-text-muted);
+  border: 1px solid var(--stride-border);
+
+  &.badge-active    { background: var(--stride-primary-subtle); color: var(--stride-primary); border-color: transparent; }
+  &.badge-running   { background: var(--stride-primary-subtle); color: var(--stride-primary); border-color: transparent; }
+  &.badge-completed { background: var(--stride-success-bg);     color: var(--stride-success); border-color: transparent; }
+  &.badge-paused    { background: var(--stride-warning-bg);     color: var(--stride-warning); border-color: transparent; }
+  &.badge-failed    { background: var(--stride-error-bg);       color: var(--stride-error);   border-color: transparent; }
+  &.badge-cancelled { background: var(--stride-error-bg);       color: var(--stride-error);   border-color: transparent; }
+  &.badge-archived  { background: var(--stride-surface-hover);  color: var(--stride-text-muted); }
+  &.badge-draft     { background: var(--stride-surface-hover);  color: var(--stride-text-muted); }
+}
+
+.wfl-badge-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: var(--stride-radius-full);
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+// ── Row Actions ────────────────────────────────────────────────────────────
+
+.wfl-row-actions {
+  display: flex;
+  gap: 0.125rem;
+  opacity: 0;
+  transition: opacity var(--stride-transition);
+
+  tr:hover & { opacity: 1; }
+  tr.selected & { opacity: 1; }
+}
+
+.wfl-row-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--stride-radius-sm);
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--stride-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  transition: background var(--stride-transition), color var(--stride-transition);
+
+  &:hover {
+    background: var(--stride-surface-hover);
+    color: var(--stride-text-primary);
+  }
+
+  &.danger:hover {
+    background: var(--stride-error-bg);
+    color: var(--stride-error);
+  }
+}
+
+// ── Card Grid ──────────────────────────────────────────────────────────────
+
+.wfl-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18.75rem, 1fr));
+  gap: 0.875rem;
+  // No top border radius — connects to toolbar
+  border: 1px solid var(--stride-border);
+  border-top: none;
+  border-radius: 0 0 var(--stride-radius-xl) var(--stride-radius-xl);
+  padding: 1rem;
+  background: var(--stride-bg);
+}
+
+.wfl-card {
+  background: var(--stride-surface);
+  border: 1px solid var(--stride-border);
+  border-radius: var(--stride-radius-2xl);
+  padding: 1rem;
+  box-shadow: var(--stride-shadow-xs);
+  cursor: pointer;
+  transition: box-shadow var(--stride-transition), border-color var(--stride-transition), transform 100ms ease;
+  outline: none;
+
+  &:hover {
+    box-shadow: var(--stride-shadow-md);
+    border-color: var(--stride-primary);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--stride-primary);
+    outline-offset: 2px;
+  }
+}
+
+.wfl-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.625rem;
+  margin-bottom: 0.625rem;
+}
+
+.wfl-card-title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.wfl-card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--stride-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wfl-card-desc {
+  font-size: 0.75rem;
+  color: var(--stride-text-secondary);
+  margin: 0.375rem 0 0.75rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wfl-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.625rem;
+  border-top: 1px solid var(--stride-border-soft);
+}
+
+// ── Pagination ─────────────────────────────────────────────────────────────
+
+.wfl-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--stride-surface);
+  border: 1px solid var(--stride-border);
+  border-top: none;
+  border-radius: 0 0 var(--stride-radius-xl) var(--stride-radius-xl);
+}
+
+.wfl-pagination-info {
+  font-size: 0.78125rem;
+  color: var(--stride-text-muted);
+}
+
+.wfl-pagination-controls {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.wfl-page-btn {
+  min-width: 2rem;
+  height: 2rem;
+  border-radius: var(--stride-radius-md);
+  border: 1px solid var(--stride-border);
+  background: var(--stride-surface);
+  color: var(--stride-text-secondary);
+  font-size: 0.78125rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--stride-transition);
+  padding: 0 0.375rem;
+
+  &:hover:not(:disabled):not(.active) {
+    border-color: var(--stride-primary);
+    color: var(--stride-primary);
+  }
+
+  &.active {
+    background: var(--stride-primary);
+    border-color: var(--stride-primary);
+    color: var(--stride-text-inverse);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+// ── Empty State ────────────────────────────────────────────────────────────
+
+.wfl-empty-state {
+  text-align: center;
+  padding: 3.75rem 1.25rem;
+  background: var(--stride-surface);
+  border: 1px solid var(--stride-border);
+  border-top: none;
+  border-radius: 0 0 var(--stride-radius-xl) var(--stride-radius-xl);
+}
+
+.wfl-empty-icon {
+  font-size: 2.5rem;
+  color: var(--stride-text-muted);
+  opacity: 0.4;
+  margin-bottom: 0.75rem;
+}
+
+.wfl-empty-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--stride-text-primary);
+  margin: 0 0 0.375rem;
+}
+
+.wfl-empty-desc {
+  font-size: 0.8125rem;
+  color: var(--stride-text-muted);
+  margin: 0 0 1.25rem;
+}
+
+// ── Skeleton Loading ───────────────────────────────────────────────────────
+
+.wfl-skeleton {
+  height: 0.875rem;
+  background: linear-gradient(
+    90deg,
+    var(--stride-border) 25%,
+    var(--stride-surface-hover) 50%,
+    var(--stride-border) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--stride-radius-sm);
+  animation: wfl-shimmer 1.5s infinite;
+  width: 80%;
+
+  &-sm   { width: 40%; }
+  &-pill { width: 5rem; border-radius: var(--stride-radius-full); }
+}
+
+@keyframes wfl-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  :host { padding: 0.875rem; }
+
+  .col-date,
+  .col-steps { display: none; }
+
+  .wfl-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wfl-pagination {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}
