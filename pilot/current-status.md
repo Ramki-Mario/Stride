@@ -2,7 +2,8 @@
 
 ## Current Stage
 Phase 1 (Monorepo & Foundation) — **Complete**.
-Phase 2 (Identity & Tenant Foundation) — **In Progress**.
+Phase 2 (Identity & Tenant Foundation) — **Complete**.
+Phase 3 (Core Workflow Engine) — **In Progress**.
 
 ---
 
@@ -138,8 +139,10 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 - EP-017 (Architecture Diagrams, #46): 🔵 Open — US-035 done (1/6); US-036–039 now unblocked (Phase 2 backend + UI complete)
 - **Phase 2 is now functionally complete. US-036–039 architecture diagrams are next.**
 
-## Phase 3 — Core Workflow Engine (Pending — board populated 2026-05-16)
-- EP-018 #72 (Domain Model): US-041 #77, US-042 #78, US-043 #79
+## Phase 3 — Core Workflow Engine (**In Progress** — started 2026-05-16)
+- EP-018 #72 (Domain Model): US-041 #77 ✅, US-042 #78 ✅, US-043 #79 ✅ — **Done** (PR #104, 2026-05-16)
+  - 4 entity files: WorkflowDefinition, StepDefinition, WorkflowInstance, StepInstance
+  - 12 domain events, 2 enums, WorkflowDomainException, domain.readme.md KT doc
 - EP-019 #73 (Application Layer): US-044 #80, US-045 #81, US-046 #82, US-047 #83, US-048 #84
 - EP-020 #74 (Infrastructure): US-049 #85, US-050 #86, US-051 #87
 - EP-021 #75 (API Layer): US-052 #88, US-053 #89

@@ -522,14 +522,14 @@ These stories are not phase-specific — they run alongside regular sprints at d
 
 ---
 
-## Sprint 3 — Core Workflow Engine (PLANNED)
+## Sprint 3 — Core Workflow Engine (IN PROGRESS)
 
 **Phase:** Phase 3
-**Status:** PENDING — GitHub issues created, board populated (2026-05-16)
+**Status:** IN PROGRESS — EP-018 Done (2026-05-16)
 
 | Epic | GitHub # | Stories | Status |
 |---|---|---|---|
-| EP-018 Workflow Domain Model | #72 | US-041 #77, US-042 #78, US-043 #79 | ⬜ Backlog |
+| EP-018 Workflow Domain Model | #72 | US-041 #77 ✅, US-042 #78 ✅, US-043 #79 ✅ | ✅ Done — PR #104 |
 | EP-019 Workflow Application Layer | #73 | US-044 #80, US-045 #81, US-046 #82, US-047 #83, US-048 #84 | ⬜ Backlog |
 | EP-020 Workflow Infrastructure | #74 | US-049 #85, US-050 #86, US-051 #87 | ⬜ Backlog |
 | EP-021 Workflow API Layer | #75 | US-052 #88, US-053 #89 | ⬜ Backlog |
@@ -610,8 +610,8 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | Phase 1 committed to GitHub | S1 | [x] Done |
 | Tenant-scoped login with Redis session | S2 | [x] Done (US-024) |
 | RBAC claims authorization wired | S2 | [x] Done (US-029) |
-| Angular auth guard + BFF session check | S2 | [ ] Pending (US-030/031) |
-| Workflow domain model + state machine | S3 | [ ] |
+| Angular auth guard + BFF session check | S2 | [x] Done — US-030 PR #70, US-031 PR #71 |
+| Workflow domain model + state machine | S3 | [x] Done — EP-018 PR #104 |
 | EF Core + Dapper split strategy proven | S4 | [ ] |
 | All modules observable (Serilog + Seq + OTEL) | S5 | [ ] |
 | Tenant onboarding flow complete | S6 | [ ] |
