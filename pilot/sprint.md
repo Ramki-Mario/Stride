@@ -525,22 +525,61 @@ These stories are not phase-specific — they run alongside regular sprints at d
 ## Sprint 3 — Core Workflow Engine (PLANNED)
 
 **Phase:** Phase 3
-**Status:** PENDING — not started
+**Status:** PENDING — GitHub issues created, board populated (2026-05-16)
 
-High-level epics (to be expanded before sprint start):
-- EP-017: Workflow Domain Model (Workflow, Task, State Machine)
-- EP-018: Workflow Application Layer (Commands/Queries/Events)
-- EP-019: Workflow Infrastructure (EF Core + `workflows` schema)
-- EP-020: Scheduling Module (recurring tasks, scheduled triggers)
-- EP-021: Workflow API Layer (endpoints, MediatR dispatch)
-- EP-022: Angular Workflow UI (list, detail, create, status)
+| Epic | GitHub # | Stories | Status |
+|---|---|---|---|
+| EP-018 Workflow Domain Model | #72 | US-041 #77, US-042 #78, US-043 #79 | ⬜ Backlog |
+| EP-019 Workflow Application Layer | #73 | US-044 #80, US-045 #81, US-046 #82, US-047 #83, US-048 #84 | ⬜ Backlog |
+| EP-020 Workflow Infrastructure | #74 | US-049 #85, US-050 #86, US-051 #87 | ⬜ Backlog |
+| EP-021 Workflow API Layer | #75 | US-052 #88, US-053 #89 | ⬜ Backlog |
+| EP-022 Angular Workflow UI | #76 | US-054 #90, US-055 #91, US-056 #92, US-057 #93 | ⬜ Backlog |
+
+### Phase 3 Story Summary
+| Story | Description | GitHub # | Size |
+|---|---|---|---|
+| US-041 | WorkflowDefinition + WorkflowInstance aggregates | #77 | M |
+| US-042 | Workflow state machine + domain events | #78 | M |
+| US-043 | Step + StepInstance entities | #79 | S |
+| US-044 | CreateWorkflow + UpdateWorkflow + DeleteWorkflow commands | #80 | M |
+| US-045 | Workflow lifecycle commands (Start, Pause, Resume, Cancel) | #81 | M |
+| US-046 | Step commands (AssignStep, CompleteStep, FailStep) | #82 | M |
+| US-047 | Workflow queries (GetWorkflow, ListWorkflows, GetWorkflowHistory) | #83 | S |
+| US-048 | FluentValidation validators for workflow commands | #84 | S |
+| US-049 | EF Core configs + workflows schema migration | #85 | M |
+| US-050 | IWorkflowRepository + IStepRepository implementations | #86 | M |
+| US-051 | Dapper read models for workflow list and dashboard queries | #87 | M |
+| US-052 | WorkflowsController (CRUD + lifecycle endpoints) | #88 | M |
+| US-053 | StepsController (assign, complete, fail, list) | #89 | S |
+| US-054 | Angular Workflow list page | #90 | M |
+| US-055 | Angular Workflow detail page | #91 | M |
+| US-056 | Create + Edit workflow form | #92 | M |
+| US-057 | Step assign + complete modals | #93 | S |
 
 ---
 
 ## Sprint 4 — Dashboard & Reporting (PLANNED)
 
-**Phase:** Phase 4 — not started
+**Phase:** Phase 4
+**Status:** PENDING — GitHub issues created, board populated (2026-05-16)
 **Key note:** Dapper read models for reporting queries (ADR-005)
+
+| Epic | GitHub # | Stories | Status |
+|---|---|---|---|
+| EP-023 Reporting Read Models | #94 | US-058 #98 | ⬜ Backlog |
+| EP-024 Reporting Application Layer | #95 | US-059 #99, US-060 #100 | ⬜ Backlog |
+| EP-025 Reporting API Layer | #96 | US-061 #101 | ⬜ Backlog |
+| EP-026 Angular Dashboard + Reporting UI | #97 | US-062 #102, US-063 #103 | ⬜ Backlog |
+
+### Phase 4 Story Summary
+| Story | Description | GitHub # | Size |
+|---|---|---|---|
+| US-058 | Dapper reporting DTOs + reporting schema | #98 | M |
+| US-059 | KPI + trend aggregation query handlers | #99 | M |
+| US-060 | GetReportList + GenerateReport + ExportReportCsv handlers | #100 | M |
+| US-061 | DashboardController + ReportsController | #101 | M |
+| US-062 | Angular Dashboard page | #102 | M |
+| US-063 | Angular Reporting page | #103 | M |
 
 ---
 

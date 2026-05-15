@@ -138,8 +138,18 @@ Phase 2 (Identity & Tenant Foundation) — **In Progress**.
 - EP-017 (Architecture Diagrams, #46): 🔵 Open — US-035 done (1/6); US-036–039 now unblocked (Phase 2 backend + UI complete)
 - **Phase 2 is now functionally complete. US-036–039 architecture diagrams are next.**
 
-## Phase 3 — Core Workflow Engine (Pending)
-## Phase 4 — Dashboard & Reporting (Pending)
+## Phase 3 — Core Workflow Engine (Pending — board populated 2026-05-16)
+- EP-018 #72 (Domain Model): US-041 #77, US-042 #78, US-043 #79
+- EP-019 #73 (Application Layer): US-044 #80, US-045 #81, US-046 #82, US-047 #83, US-048 #84
+- EP-020 #74 (Infrastructure): US-049 #85, US-050 #86, US-051 #87
+- EP-021 #75 (API Layer): US-052 #88, US-053 #89
+- EP-022 #76 (Angular UI): US-054 #90, US-055 #91, US-056 #92, US-057 #93
+
+## Phase 4 — Dashboard & Reporting (Pending — board populated 2026-05-16)
+- EP-023 #94 (Reporting Read Models): US-058 #98
+- EP-024 #95 (Reporting App Layer): US-059 #99, US-060 #100
+- EP-025 #96 (Reporting API): US-061 #101
+- EP-026 #97 (Angular Dashboard+Reporting UI): US-062 #102, US-063 #103
 ## Phase 5 — Notifications & Observability (Pending)
 ## Phase 6 — SaaS Readiness (Pending)
 ## Phase 7 — Portfolio & Deployment Polish (Pending)
