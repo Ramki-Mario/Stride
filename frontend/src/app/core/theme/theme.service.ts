@@ -58,7 +58,9 @@ export class ThemeService {
 
   private _applyPalette(palette: ThemePalette): void {
     if (!this.isBrowser) return;
-    if (palette === 'indigo') {
+    // Purple is the root default — no attribute needed.
+    // Indigo is the alternative — requires data-palette="indigo".
+    if (palette === 'purple') {
       document.documentElement.removeAttribute('data-palette');
     } else {
       document.documentElement.setAttribute('data-palette', palette);
@@ -76,11 +78,11 @@ export class ThemeService {
   }
 
   private _resolveInitialPalette(): ThemePalette {
-    if (!this.isBrowser) return 'indigo';
+    if (!this.isBrowser) return 'purple';
     try {
       const stored = localStorage.getItem(PALETTE_STORAGE_KEY) as ThemePalette | null;
       if (stored === 'indigo' || stored === 'purple') return stored;
     } catch { /* ignore */ }
-    return 'indigo';
+    return 'purple';   // Purple is the new official default
   }
 }

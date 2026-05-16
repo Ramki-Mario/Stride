@@ -1,7 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    STRIDE — Global Design System
    Stack : Angular 21 · Tailwind CSS 4 · PrimeNG 21 · Inter font
-   Theme : Premium Indigo + Purple SaaS (light + dark)
+   Theme : Premium Purple SaaS (light + dark)  ·  v2 2026-05-16
+   Palette: Default = Purple (#B97AF9)  |  Alt = Indigo (#6366F1)
    Docs  : pilot/docs/ui-mockups/ for visual reference
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -21,45 +22,54 @@
      The @theme inline block below exposes the same value to Tailwind utilities. */
   --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
-  /* Primary — Indigo */
-  --stride-primary:         #6366F1;
-  --stride-primary-hover:   #4F46E5;
-  --stride-primary-active:  #4338CA;
-  --stride-primary-subtle:  #EEF2FF;
-  --stride-primary-ring:    rgba(99, 102, 241, 0.25);
+  /* ── Primary — Premium Purple ──────────────────────────────────────────── */
+  --stride-primary:         #B97AF9;
+  --stride-primary-hover:   #A45CF7;
+  --stride-primary-active:  #8C54B9;
+  --stride-primary-subtle:  rgba(185, 122, 249, 0.10);
+  --stride-primary-ring:    rgba(185, 122, 249, 0.25);
 
-  /* Accent — Purple (sparingly) */
-  --stride-accent:          #8B5CF6;
-  --stride-accent-subtle:   #F5F3FF;
+  /* ── Accent — Vivid Fuchsia ─────────────────────────────────────────────── */
+  --stride-accent:          #E15CFA;
+  --stride-accent-subtle:   rgba(225, 92, 250, 0.10);
 
-  /* Sidebar / Navigation */
-  --stride-nav-bg:          #1E1B4B;
-  --stride-nav-item-active: #6366F1;
-  --stride-nav-item-hover:  rgba(99, 102, 241, 0.12);
-  --stride-nav-text:        #E5E7EB;
-  --stride-nav-icon:        #C7D2FE;
-  --stride-nav-muted:       #A5B4FC;
-  --stride-nav-border:      rgba(255, 255, 255, 0.08);
+  /* ── Lavender highlight ─────────────────────────────────────────────────── */
+  --stride-lavender:        #E8B0FC;
 
-  /* Backgrounds */
-  --stride-bg:              #F8FAFC;
-  --stride-surface:         #FFFFFF;
-  --stride-surface-hover:   #F1F5F9;
-  --stride-surface-raised:  #FFFFFF;
+  /* ── Secondary navy ─────────────────────────────────────────────────────── */
+  --stride-secondary:       #1E1B4B;
 
-  /* Typography */
-  --stride-text-primary:    #111827;
+  /* ── Sidebar / Navigation — light surface ───────────────────────────────── */
+  --stride-nav-bg:          #FFFFFF;
+  --stride-nav-item-active: rgba(185, 122, 249, 0.12);
+  --stride-nav-item-hover:  rgba(185, 122, 249, 0.08);
+  --stride-nav-text:        #6B7280;
+  --stride-nav-icon:        #8C54B9;
+  --stride-nav-muted:       #9CA3AF;
+  --stride-nav-border:      #E8E1F0;
+  --stride-nav-active-text: #A45CF7;
+  --stride-nav-brand-text:  #1F2937;
+
+  /* ── Backgrounds ────────────────────────────────────────────────────────── */
+  --stride-bg:                #F7F4FA;
+  --stride-surface:           #FFFFFF;
+  --stride-surface-secondary: #F3EEF8;
+  --stride-surface-hover:     #EFE9F4;
+  --stride-surface-raised:    #FFFFFF;
+
+  /* ── Typography ─────────────────────────────────────────────────────────── */
+  --stride-text-primary:    #1F2937;
   --stride-text-secondary:  #6B7280;
   --stride-text-muted:      #9CA3AF;
   --stride-text-inverse:    #FFFFFF;
-  --stride-text-link:       #6366F1;
+  --stride-text-link:       #A45CF7;
 
-  /* Borders */
-  --stride-border:          #E5E7EB;
-  --stride-border-soft:     #EEF2F7;
-  --stride-border-focus:    #6366F1;
+  /* ── Borders ────────────────────────────────────────────────────────────── */
+  --stride-border:          #E8E1F0;
+  --stride-border-soft:     #F2EDF7;
+  --stride-border-focus:    #B97AF9;
 
-  /* Status */
+  /* ── Status ─────────────────────────────────────────────────────────────── */
   --stride-success:         #10B981;
   --stride-success-bg:      #ECFDF5;
   --stride-success-border:  #A7F3D0;
@@ -69,153 +79,193 @@
   --stride-error:           #EF4444;
   --stride-error-bg:        #FEF2F2;
   --stride-error-border:    #FECACA;
-  --stride-info:            #3B82F6;
+  --stride-info:            #5CABEC;
   --stride-info-bg:         #EFF6FF;
   --stride-info-border:     #BFDBFE;
 
-  /* Shadows */
-  --stride-shadow-xs:  0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --stride-shadow-sm:  0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
-  --stride-shadow-md:  0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --stride-shadow-lg:  0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-  --stride-shadow-xl:  0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  /* ── Analytics / Chart palette ──────────────────────────────────────────── */
+  --stride-chart-primary:   #B97AF9;
+  --stride-chart-secondary: #5CABEC;
+  --stride-chart-tertiary:  #57D5C5;
+  --stride-chart-support:   #FC9FA2;
 
-  /* Radii */
-  --stride-radius-xs:  0.25rem;   /* 4px  */
-  --stride-radius-sm:  0.375rem;  /* 6px  */
-  --stride-radius-md:  0.5rem;    /* 8px  */
-  --stride-radius-lg:  0.75rem;   /* 12px */
-  --stride-radius-xl:  0.875rem;  /* 14px — inputs, buttons */
-  --stride-radius-2xl: 1rem;      /* 16px — cards */
-  --stride-radius-full: 9999px;   /* pills/avatars */
+  /* ── Shadows — purple-tinted premium ────────────────────────────────────── */
+  --stride-shadow-xs:   0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --stride-shadow-sm:   0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --stride-shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --stride-shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --stride-shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.07), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+  --stride-shadow-card: 0 8px 30px rgba(185, 122, 249, 0.08);
 
-  /* Topbar */
-  --stride-topbar-bg:     #FFFFFF;
-  --stride-topbar-border: #E5E7EB;
-  --stride-topbar-height: 3.75rem;
+  /* ── Radii ──────────────────────────────────────────────────────────────── */
+  --stride-radius-xs:   0.25rem;   /*  4px */
+  --stride-radius-sm:   0.375rem;  /*  6px */
+  --stride-radius-md:   0.5rem;    /*  8px */
+  --stride-radius-lg:   0.75rem;   /* 12px */
+  --stride-radius-xl:   0.875rem;  /* 14px — inputs, buttons */
+  --stride-radius-2xl:  1rem;      /* 16px — cards */
+  --stride-radius-3xl:  1.25rem;   /* 20px — large cards */
+  --stride-radius-full: 9999px;    /* pills / avatars */
 
-  /* Transitions */
+  /* ── Topbar — frosted glass ─────────────────────────────────────────────── */
+  --stride-topbar-bg:       rgba(255, 255, 255, 0.85);
+  --stride-topbar-border:   #E8E1F0;
+  --stride-topbar-height:   3.75rem;
+  --stride-topbar-backdrop: blur(12px);
+
+  /* ── Transitions ────────────────────────────────────────────────────────── */
   --stride-transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 [data-theme="dark"] {
-  /* Primary — Indigo (lightened for dark bg) */
-  --stride-primary:         #818CF8;
-  --stride-primary-hover:   #6366F1;
-  --stride-primary-active:  #4F46E5;
-  --stride-primary-subtle:  rgba(129, 140, 248, 0.12);
-  --stride-primary-ring:    rgba(129, 140, 248, 0.3);
+  /* ── Primary — lightened for dark surfaces ──────────────────────────────── */
+  --stride-primary:         #C79BFA;
+  --stride-primary-hover:   #B97AF9;
+  --stride-primary-active:  #A45CF7;
+  --stride-primary-subtle:  rgba(199, 155, 250, 0.14);
+  --stride-primary-ring:    rgba(199, 155, 250, 0.30);
 
-  /* Accent — Purple */
-  --stride-accent:          #A78BFA;
-  --stride-accent-subtle:   rgba(167, 139, 250, 0.1);
+  /* ── Accent ─────────────────────────────────────────────────────────────── */
+  --stride-accent:          #E9A7FF;
+  --stride-accent-subtle:   rgba(233, 167, 255, 0.10);
 
-  /* Sidebar / Navigation */
-  --stride-nav-bg:          #0F172A;
-  --stride-nav-item-active: #818CF8;
-  --stride-nav-item-hover:  rgba(129, 140, 248, 0.16);
-  --stride-nav-text:        #E2E8F0;
-  --stride-nav-icon:        #C7D2FE;
+  /* ── Lavender ───────────────────────────────────────────────────────────── */
+  --stride-lavender:        #C4B5FD;
+
+  /* ── Sidebar / Navigation — dark ────────────────────────────────────────── */
+  --stride-nav-bg:          #111827;
+  --stride-nav-item-active: rgba(185, 122, 249, 0.18);
+  --stride-nav-item-hover:  rgba(185, 122, 249, 0.10);
+  --stride-nav-text:        #CBD5E1;
+  --stride-nav-icon:        #C4B5FD;
   --stride-nav-muted:       #94A3B8;
   --stride-nav-border:      rgba(255, 255, 255, 0.06);
+  --stride-nav-active-text: #D8B4FE;
+  --stride-nav-brand-text:  #E2E8F0;
 
-  /* Backgrounds */
-  --stride-bg:              #0B1120;
-  --stride-surface:         #111827;
-  --stride-surface-hover:   #1F2937;
-  --stride-surface-raised:  #1E293B;
+  /* ── Backgrounds ────────────────────────────────────────────────────────── */
+  --stride-bg:                #0F172A;
+  --stride-surface:           #161B2B;
+  --stride-surface-secondary: #1F2937;
+  --stride-surface-hover:     #263244;
+  --stride-surface-raised:    #1E293B;
 
-  /* Typography */
+  /* ── Typography ─────────────────────────────────────────────────────────── */
   --stride-text-primary:    #F9FAFB;
   --stride-text-secondary:  #CBD5E1;
   --stride-text-muted:      #94A3B8;
   --stride-text-inverse:    #111827;
-  --stride-text-link:       #818CF8;
+  --stride-text-link:       #C79BFA;
 
-  /* Borders */
-  --stride-border:          #1E293B;
-  --stride-border-soft:     #334155;
-  --stride-border-focus:    #818CF8;
+  /* ── Borders ────────────────────────────────────────────────────────────── */
+  --stride-border:          #2A3447;
+  --stride-border-soft:     #374151;
+  --stride-border-focus:    #C79BFA;
 
-  /* Status */
+  /* ── Status ─────────────────────────────────────────────────────────────── */
   --stride-success:         #34D399;
-  --stride-success-bg:      rgba(52, 211, 153, 0.1);
+  --stride-success-bg:      rgba(52, 211, 153, 0.10);
   --stride-success-border:  rgba(52, 211, 153, 0.25);
   --stride-warning:         #FBBF24;
-  --stride-warning-bg:      rgba(251, 191, 36, 0.1);
+  --stride-warning-bg:      rgba(251, 191, 36, 0.10);
   --stride-warning-border:  rgba(251, 191, 36, 0.25);
   --stride-error:           #F87171;
-  --stride-error-bg:        rgba(248, 113, 113, 0.1);
+  --stride-error-bg:        rgba(248, 113, 113, 0.10);
   --stride-error-border:    rgba(248, 113, 113, 0.25);
   --stride-info:            #60A5FA;
-  --stride-info-bg:         rgba(96, 165, 250, 0.1);
+  --stride-info-bg:         rgba(96, 165, 250, 0.10);
   --stride-info-border:     rgba(96, 165, 250, 0.25);
 
-  /* Shadows (elevation-only — no harsh borders) */
-  --stride-shadow-xs:  0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --stride-shadow-sm:  0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
-  --stride-shadow-md:  0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-  --stride-shadow-lg:  0 10px 15px -3px rgba(0, 0, 0, 0.45), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
-  --stride-shadow-xl:  0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.35);
+  /* ── Analytics / Chart palette — muted for dark ─────────────────────────── */
+  --stride-chart-primary:   #C79BFA;
+  --stride-chart-secondary: #60A5FA;
+  --stride-chart-tertiary:  #2DD4BF;
+  --stride-chart-support:   #FCA5A5;
 
-  /* Topbar */
-  --stride-topbar-bg:     #111827;
-  --stride-topbar-border: #1E293B;
+  /* ── Shadows — elevation only ───────────────────────────────────────────── */
+  --stride-shadow-xs:   0 1px 2px 0 rgba(0, 0, 0, 0.30);
+  --stride-shadow-sm:   0 1px 3px 0 rgba(0, 0, 0, 0.40), 0 1px 2px -1px rgba(0, 0, 0, 0.30);
+  --stride-shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.40), 0 2px 4px -2px rgba(0, 0, 0, 0.30);
+  --stride-shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.45), 0 4px 6px -4px rgba(0, 0, 0, 0.30);
+  --stride-shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.50), 0 8px 10px -6px rgba(0, 0, 0, 0.35);
+  --stride-shadow-card: 0 8px 24px rgba(0, 0, 0, 0.25);
+
+  /* ── Topbar — frosted dark glass ────────────────────────────────────────── */
+  --stride-topbar-bg:       rgba(22, 27, 43, 0.85);
+  --stride-topbar-border:   #2A3447;
+  --stride-topbar-backdrop: blur(12px);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   1b. PURPLE PALETTE
-   Applied when <html data-palette="purple"> is set.
-   Composes with data-theme — e.g. dark-purple = both attributes present.
-   Only overrides the tokens that differ from the Indigo default.
+   1b. INDIGO PALETTE (ALTERNATIVE)
+   Applied when <html data-palette="indigo"> is set.
+   Restores the classic STRIDE Indigo system for tenants who prefer it.
+   Composes with data-theme — indigo-light and indigo-dark both work.
+   Only overrides the tokens that differ from the Purple default.
    ───────────────────────────────────────────────────────────────────────── */
 
-[data-palette="purple"] {
-  /* Primary — Violet */
-  --stride-primary:         #7C3AED;
-  --stride-primary-hover:   #6D28D9;
-  --stride-primary-active:  #5B21B6;
-  --stride-primary-subtle:  #F5F3FF;
-  --stride-primary-ring:    rgba(124, 58, 237, 0.25);
+[data-palette="indigo"] {
+  /* Primary — Classic Indigo */
+  --stride-primary:         #6366F1;
+  --stride-primary-hover:   #4F46E5;
+  --stride-primary-active:  #4338CA;
+  --stride-primary-subtle:  #EEF2FF;
+  --stride-primary-ring:    rgba(99, 102, 241, 0.25);
 
-  /* Accent — Pink */
-  --stride-accent:          #EC4899;
-  --stride-accent-subtle:   #FDF2F8;
+  /* Accent */
+  --stride-accent:          #8B5CF6;
+  --stride-accent-subtle:   #F5F3FF;
 
-  /* Sidebar — deep purple-navy */
-  --stride-nav-bg:          #2D1B69;
-  --stride-nav-item-active: #7C3AED;
-  --stride-nav-item-hover:  rgba(124, 58, 237, 0.14);
-  --stride-nav-icon:        #DDD6FE;
-  --stride-nav-muted:       #C4B5FD;
+  /* Sidebar — signature dark navy */
+  --stride-nav-bg:          #1E1B4B;
+  --stride-nav-item-active: rgba(99, 102, 241, 0.18);
+  --stride-nav-item-hover:  rgba(99, 102, 241, 0.12);
+  --stride-nav-text:        #E5E7EB;
+  --stride-nav-icon:        #C7D2FE;
+  --stride-nav-muted:       #A5B4FC;
+  --stride-nav-border:      rgba(255, 255, 255, 0.08);
+  --stride-nav-active-text: #6366F1;
+  --stride-nav-brand-text:  #FFFFFF;
 
   /* Focus + link */
-  --stride-border-focus:    #7C3AED;
-  --stride-text-link:       #7C3AED;
+  --stride-border-focus:    #6366F1;
+  --stride-text-link:       #6366F1;
+
+  /* Chart */
+  --stride-chart-primary:   #6366F1;
+
+  /* Card shadow — indigo-tinted */
+  --stride-shadow-card:     0 8px 30px rgba(99, 102, 241, 0.08);
+
+  /* Topbar — solid white (no blur needed with dark sidebar) */
+  --stride-topbar-bg:       #FFFFFF;
+  --stride-topbar-border:   #E5E7EB;
+  --stride-topbar-backdrop: none;
 }
 
-[data-palette="purple"][data-theme="dark"] {
-  /* Lighten primary for dark backgrounds */
-  --stride-primary:         #A78BFA;
-  --stride-primary-hover:   #7C3AED;
-  --stride-primary-active:  #6D28D9;
-  --stride-primary-subtle:  rgba(167, 139, 250, 0.12);
-  --stride-primary-ring:    rgba(167, 139, 250, 0.3);
+[data-palette="indigo"][data-theme="dark"] {
+  --stride-primary:         #818CF8;
+  --stride-primary-hover:   #6366F1;
+  --stride-primary-active:  #4F46E5;
+  --stride-primary-subtle:  rgba(129, 140, 248, 0.12);
+  --stride-primary-ring:    rgba(129, 140, 248, 0.30);
 
-  /* Sidebar — very dark violet-black */
-  --stride-nav-bg:          #1A0F3C;
-  --stride-nav-item-active: #A78BFA;
-  --stride-nav-item-hover:  rgba(167, 139, 250, 0.16);
-  --stride-nav-icon:        #EDE9FE;
-  --stride-nav-muted:       #DDD6FE;
+  --stride-nav-bg:          #0F172A;
+  --stride-nav-item-active: rgba(129, 140, 248, 0.16);
+  --stride-nav-item-hover:  rgba(129, 140, 248, 0.10);
+  --stride-nav-text:        #E2E8F0;
+  --stride-nav-icon:        #C7D2FE;
+  --stride-nav-muted:       #94A3B8;
+  --stride-nav-active-text: #818CF8;
+  --stride-nav-brand-text:  #E2E8F0;
 
-  /* Accent — softer pink */
-  --stride-accent:          #F472B6;
-  --stride-accent-subtle:   rgba(244, 114, 182, 0.1);
+  --stride-border-focus:    #818CF8;
+  --stride-text-link:       #818CF8;
+  --stride-chart-primary:   #818CF8;
 
-  /* Focus + link */
-  --stride-border-focus:    #A78BFA;
-  --stride-text-link:       #A78BFA;
+  --stride-topbar-bg:       #111827;
+  --stride-topbar-border:   #1E293B;
+  --stride-topbar-backdrop: none;
 }
 
 
@@ -233,12 +283,15 @@
   --color-primary-subtle:   var(--stride-primary-subtle);
   --color-accent:           var(--stride-accent);
   --color-accent-subtle:    var(--stride-accent-subtle);
+  --color-lavender:         var(--stride-lavender);
+  --color-secondary:        var(--stride-secondary);
 
   /* Backgrounds */
-  --color-background:       var(--stride-bg);
-  --color-surface:          var(--stride-surface);
-  --color-surface-hover:    var(--stride-surface-hover);
-  --color-surface-raised:   var(--stride-surface-raised);
+  --color-background:          var(--stride-bg);
+  --color-surface:             var(--stride-surface);
+  --color-surface-secondary:   var(--stride-surface-secondary);
+  --color-surface-hover:       var(--stride-surface-hover);
+  --color-surface-raised:      var(--stride-surface-raised);
 
   /* Navigation */
   --color-nav-bg:           var(--stride-nav-bg);
@@ -246,6 +299,7 @@
   --color-nav-hover:        var(--stride-nav-item-hover);
   --color-nav-text:         var(--stride-nav-text);
   --color-nav-icon:         var(--stride-nav-icon);
+  --color-nav-active-text:  var(--stride-nav-active-text);
 
   /* Text */
   --color-text-primary:     var(--stride-text-primary);
@@ -265,24 +319,32 @@
   --color-error:            var(--stride-error);
   --color-info:             var(--stride-info);
 
+  /* Charts */
+  --color-chart-primary:    var(--stride-chart-primary);
+  --color-chart-secondary:  var(--stride-chart-secondary);
+  --color-chart-tertiary:   var(--stride-chart-tertiary);
+  --color-chart-support:    var(--stride-chart-support);
+
   /* Topbar */
   --color-topbar:           var(--stride-topbar-bg);
   --color-topbar-border:    var(--stride-topbar-border);
 
   /* Border radii */
-  --radius-xs:  var(--stride-radius-xs);
-  --radius-sm:  var(--stride-radius-sm);
-  --radius-md:  var(--stride-radius-md);
-  --radius-lg:  var(--stride-radius-lg);
-  --radius-xl:  var(--stride-radius-xl);
-  --radius-2xl: var(--stride-radius-2xl);
+  --radius-xs:   var(--stride-radius-xs);
+  --radius-sm:   var(--stride-radius-sm);
+  --radius-md:   var(--stride-radius-md);
+  --radius-lg:   var(--stride-radius-lg);
+  --radius-xl:   var(--stride-radius-xl);
+  --radius-2xl:  var(--stride-radius-2xl);
+  --radius-3xl:  var(--stride-radius-3xl);
 
   /* Shadows */
-  --shadow-xs:  var(--stride-shadow-xs);
-  --shadow-sm:  var(--stride-shadow-sm);
-  --shadow-md:  var(--stride-shadow-md);
-  --shadow-lg:  var(--stride-shadow-lg);
-  --shadow-xl:  var(--stride-shadow-xl);
+  --shadow-xs:   var(--stride-shadow-xs);
+  --shadow-sm:   var(--stride-shadow-sm);
+  --shadow-md:   var(--stride-shadow-md);
+  --shadow-lg:   var(--stride-shadow-lg);
+  --shadow-xl:   var(--stride-shadow-xl);
+  --shadow-card: var(--stride-shadow-card);
 
   /* Typography */
   --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -417,7 +479,7 @@
   --p-datatable-header-cell-selected-color:  var(--stride-primary);
   --p-datatable-row-selected-background:     var(--stride-primary-subtle);
   --p-datatable-row-selected-color:          var(--stride-primary);
-  --p-datatable-row-striped-background:      #161F2E;
+  --p-datatable-row-striped-background:      var(--stride-surface-secondary);
   --p-datatable-filter-overlay-select-background: var(--stride-surface);
   --p-datatable-filter-overlay-select-border-color: var(--stride-border);
   --p-datatable-filter-rule-border-color:    var(--stride-border);
@@ -683,7 +745,12 @@ body {
   background: var(--stride-surface);
   border: 1px solid var(--stride-border-soft);
   border-radius: var(--stride-radius-2xl) !important;
-  box-shadow: var(--stride-shadow-sm);
+  box-shadow: var(--stride-shadow-card);
+  transition: box-shadow var(--stride-transition), transform 150ms ease;
+}
+.p-card:hover {
+  box-shadow: 0 12px 40px rgba(185, 122, 249, 0.12);
+  transform: translateY(-1px);
 }
 .p-card .p-card-header {
   border-bottom: 1px solid var(--stride-border-soft);
@@ -1054,13 +1121,38 @@ body {
     font-size: 1.125rem;
     flex-shrink: 0;
 
-    &.indigo  { background: var(--stride-primary-subtle); color: var(--stride-primary); }
-    &.purple  { background: var(--stride-accent-subtle);  color: var(--stride-accent); }
+    &.purple  { background: var(--stride-primary-subtle); color: var(--stride-primary); }
+    &.fuchsia { background: var(--stride-accent-subtle);  color: var(--stride-accent); }
     &.green   { background: var(--stride-success-bg);     color: var(--stride-success); }
     &.amber   { background: var(--stride-warning-bg);     color: var(--stride-warning); }
     &.blue    { background: var(--stride-info-bg);        color: var(--stride-info); }
     &.red     { background: var(--stride-error-bg);       color: var(--stride-error); }
+    &.teal    { background: rgba(87, 213, 197, 0.12);     color: var(--stride-chart-tertiary); }
   }
+}
+
+/* ── Analytics gradient cards ── */
+/* Usage: <div class="stride-analytic-card stride-analytic-card--sales"> */
+.stride-analytic-card {
+  border-radius: var(--stride-radius-2xl);
+  padding: 1.25rem 1.5rem;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--stride-shadow-md);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+  }
+
+  &--sales    { background: linear-gradient(135deg, #FCA5A5, #F9A8D4); }
+  &--orders   { background: linear-gradient(135deg, #60A5FA, #3B82F6); }
+  &--visitors { background: linear-gradient(135deg, #5EEAD4, #2DD4BF); }
+  &--revenue  { background: linear-gradient(135deg, #B97AF9, #7C3AED); }
 }
 
 /* ── Field group (label + input + error) ── */
@@ -1194,6 +1286,10 @@ body {
   align-items: center;
   padding: 0 1.25rem;
   gap: 0.75rem;
+  position: relative;
+  z-index: 20;
+  backdrop-filter: var(--stride-topbar-backdrop, none);
+  -webkit-backdrop-filter: var(--stride-topbar-backdrop, none);
 }
 
 .stride-content {

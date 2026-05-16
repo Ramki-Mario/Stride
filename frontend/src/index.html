@@ -31,12 +31,13 @@
       document.documentElement.setAttribute('data-theme', mode);
 
       // ── Colour palette ──────────────────────────────────────────────────
+      // Purple is the new official default — no attribute needed.
+      // Indigo is the alternative and requires data-palette="indigo".
       var storedPalette = null;
       try { storedPalette = localStorage.getItem('stride-palette'); } catch (_) {}
-      if (storedPalette === 'purple') {
-        document.documentElement.setAttribute('data-palette', 'purple');
+      if (storedPalette === 'indigo') {
+        document.documentElement.setAttribute('data-palette', 'indigo');
       }
-      // Indigo is the default — no attribute needed (keeps HTML clean).
     })();
   </script>
 </head>

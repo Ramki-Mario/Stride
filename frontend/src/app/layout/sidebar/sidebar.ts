@@ -123,7 +123,7 @@ interface NavGroup {
       transition: background 150ms, color 150ms;
     }
     .sb-collapse-btn:hover {
-      background: rgba(99, 102, 241, 0.12);
+      background: var(--stride-nav-item-hover);
       color: var(--stride-nav-text);
     }
 
@@ -136,6 +136,7 @@ interface NavGroup {
       padding: 1.125rem 2.5rem 1.125rem 1rem;
       border-bottom: 1px solid var(--stride-nav-border);
       flex-shrink: 0;
+      transition: border-color var(--stride-transition);
     }
 
     .sb-logo {
@@ -153,12 +154,13 @@ interface NavGroup {
       flex: 1;
       font-size: 1.0625rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--stride-nav-brand-text);
       letter-spacing: 0.03em;
       white-space: nowrap;
       overflow: hidden;
       transition: opacity 200ms cubic-bezier(0.4,0,0.2,1),
-                  max-width 200ms cubic-bezier(0.4,0,0.2,1);
+                  max-width 200ms cubic-bezier(0.4,0,0.2,1),
+                  color var(--stride-transition);
       max-width: 8rem;
     }
 
@@ -171,7 +173,7 @@ interface NavGroup {
     .sb-tenant {
       margin: 0.625rem 0.75rem;
       padding: 0.5rem 0.75rem;
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--stride-nav-item-active);
       border: 1px solid var(--stride-nav-border);
       border-radius: 0.625rem;
       display: flex;
@@ -247,13 +249,13 @@ interface NavGroup {
     }
 
     .sb-nav-item:hover {
-      background: rgba(99, 102, 241, 0.12);
-      color: #fff;
+      background: var(--stride-nav-item-hover);
+      color: var(--stride-nav-active-text);
     }
 
     .sb-nav-item.active {
-      background: rgba(99, 102, 241, 0.18);
-      color: var(--stride-primary);
+      background: var(--stride-nav-item-active);
+      color: var(--stride-nav-active-text);
       font-weight: 550;
     }
 
@@ -266,7 +268,7 @@ interface NavGroup {
       transform: translateY(-50%);
       width: 3px;
       height: 65%;
-      background: var(--stride-primary);
+      background: var(--stride-nav-active-text);
       border-radius: 2px;
     }
 
@@ -313,7 +315,7 @@ interface NavGroup {
     }
 
     .sb-user:hover {
-      background: rgba(99, 102, 241, 0.10);
+      background: var(--stride-nav-item-hover);
     }
 
     .sb-user-avatar {

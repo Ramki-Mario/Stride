@@ -525,7 +525,7 @@ These stories are not phase-specific — they run alongside regular sprints at d
 ## Sprint 3 — Core Workflow Engine (IN PROGRESS)
 
 **Phase:** Phase 3
-**Status:** ✅ COMPLETE — EP-018 ✅ EP-019 ✅ EP-020 ✅ EP-021 ✅ EP-022 ✅ (2026-05-16)
+**Status:** ✅ COMPLETE — EP-018 ✅ EP-019 ✅ EP-020 ✅ EP-021 ✅ EP-022 ✅ EP-028 [-] (2026-05-16)
 
 | Epic | GitHub # | Stories | Status |
 |---|---|---|---|
@@ -534,6 +534,7 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | EP-020 Workflow Infrastructure | #74 | US-049 #85 ✅, US-050 #86 ✅, US-051 #87 ✅ | ✅ Done — PR #106 |
 | EP-021 Workflow API Layer | #75 | US-052 #88 ✅, US-053 #89 ✅ | ✅ Done — PR #107 |
 | EP-022 Angular Workflow UI | #76 | US-054 #90 ✅, US-055 #91 ✅, US-056 #92 ✅, US-057 #93 ✅ | ✅ Done — PRs #108 #110 #111 #112 |
+| EP-028 Premium Purple Design System | — | US-071–US-075 | [-] In Progress |
 
 ### Phase 3 Story Summary
 | Story | Description | GitHub # | Size |
@@ -555,6 +556,40 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | US-055 | Angular Workflow detail page | #91 | M |
 | US-056 | Create + Edit workflow form | #92 | M |
 | US-057 | Step assign + complete modals | #93 | S |
+
+---
+
+### EP-028 — Premium Purple Design System (Official v2 Palette)
+
+**Goal:** Replace the Indigo default palette with the ChatGPT-analysed premium Purple design system. Deliver a production-ready token overhaul, light-sidebar layout, frosted-glass topbar, analytics card gradients, and full PrimeNG component alignment.
+
+**Background:** Ramki provided a reference SaaS dashboard image. ChatGPT extracted the visual language (soft lavender-purple gradients, white surfaces, pastel analytics cards) and produced the official STRIDE v2 colour spec. Purple (`#B97AF9`) replaces Indigo (`#6366F1`) as the root default; the Indigo palette is preserved as `data-palette="indigo"` for tenants who prefer it.
+
+**Acceptance Criteria:**
+- [x] `:root` tokens updated to Premium Purple palette — primary `#B97AF9`, accent `#E15CFA`
+- [x] Light sidebar (`#FFFFFF` bg, muted text, purple active items)
+- [x] Dark sidebar preserved (`#111827`)
+- [x] Topbar frosted glass (`rgba(255,255,255,0.85)` + `backdrop-filter: blur(12px)`)
+- [x] `--stride-nav-brand-text` token prevents white-on-white brand name
+- [x] Analytics chart token set (`--stride-chart-*`) for future chart components
+- [x] `.stride-analytic-card--{variant}` gradient helper classes
+- [x] `[data-palette="indigo"]` overrides preserve classic system
+- [x] `ThemeService` defaults to `'purple'`; indigo applied via `data-palette="indigo"`
+- [x] Anti-flash script updated to match new palette default logic
+- [x] PrimeNG card shadow uses `--stride-shadow-card` (purple-tinted)
+- [ ] Sidebar border separating it from main content (light mode polish)
+- [ ] Login page restyled for new palette
+
+| ID | Story | Complexity | Status |
+|---|---|---|---|
+| US-071 | As a designer, the default STRIDE palette is Premium Purple with soft lavender aesthetics | M | [-] In Progress |
+| US-072 | As a developer, the light sidebar uses white surface with purple active states | S | [-] In Progress |
+| US-073 | As a developer, the topbar uses frosted-glass backdrop-filter in both themes | S | [-] In Progress |
+| US-074 | As a developer, analytics card gradient helpers are available as `.stride-analytic-card--*` | XS | [-] In Progress |
+| US-075 | As a tenant admin, the Indigo palette is preserved as an alternative via the palette switcher | S | [-] In Progress |
+
+**Dependencies:** EP-022 (shell layout provides the component hosts), EP-027 (BYOT palette switcher in topbar)
+**Risks:** Light sidebar requires `--stride-nav-brand-text` token in all future sidebar implementations to avoid white-on-white brand text regression.
 
 ---
 

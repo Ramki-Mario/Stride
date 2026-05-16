@@ -65,17 +65,17 @@ const ROUTE_LABELS: Record<string, string> = {
 
     <!-- ── Palette switcher ─────────────────────────────── -->
     <div class="tb-palette-wrap" title="Switch colour palette" aria-label="Colour palette">
+      <button class="tb-palette-dot tb-palette-dot--purple"
+              [class.active]="palette() === 'purple'"
+              (click)="setPalette('purple')"
+              aria-label="Purple theme (default)"
+              [attr.aria-pressed]="palette() === 'purple'">
+      </button>
       <button class="tb-palette-dot tb-palette-dot--indigo"
               [class.active]="palette() === 'indigo'"
               (click)="setPalette('indigo')"
               aria-label="Indigo theme"
               [attr.aria-pressed]="palette() === 'indigo'">
-      </button>
-      <button class="tb-palette-dot tb-palette-dot--purple"
-              [class.active]="palette() === 'purple'"
-              (click)="setPalette('purple')"
-              aria-label="Purple theme"
-              [attr.aria-pressed]="palette() === 'purple'">
       </button>
     </div>
 
