@@ -6,6 +6,7 @@ using STRIDE.BuildingBlocks.Infrastructure.Correlation;
 using STRIDE.BuildingBlocks.Infrastructure.Extensions;
 using STRIDE.BuildingBlocks.Infrastructure.Tenant;
 using STRIDE.Modules.Identity.API.Extensions;
+using STRIDE.Modules.Identity.Infrastructure.Persistence.SeedData;
 using STRIDE.Modules.Workflows.API.Extensions;
 using STRIDE.Modules.Scheduling.API.Extensions;
 using STRIDE.Modules.Reporting.API.Extensions;
@@ -88,6 +89,11 @@ builder.Services
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+// ── Development seed data ──────────────────────────────────────────────────
+// Creates test@gmail.com / 1234abcd + Admin role + Tenant on first run.
+// Idempotent — safe to leave enabled; skipped outside Development.
+await DevDataSeeder.SeedAsync(app);
 
 // ── Middleware Pipeline ────────────────────────────────────────────────────
 app.UseExceptionHandler();   // Must be first so it wraps all downstream middleware.
