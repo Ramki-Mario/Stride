@@ -83,6 +83,7 @@ builder.Services.AddCors(opts => opts.AddPolicy("SPA", policy =>
           .AllowCredentials()));
 
 builder.Services.AddControllers();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
