@@ -562,15 +562,15 @@ These stories are not phase-specific — they run alongside regular sprints at d
 
 **Phase:** Phase 3.1
 **Milestone:** Bring Your Own Theme (GitHub Milestone #9)
-**Status:** [-] IN PROGRESS — EP-027 ✅ closed · EP-028 [-] (US-076, US-077 pending) (2026-05-16)
+**Status:** ✅ COMPLETE — EP-027 ✅ EP-028 ✅ EP-029 ✅ (2026-05-16)
 
 > Phase 3.1 is a design-system sub-sprint that runs after the core Workflow Engine (Phase 3) and before Dashboard & Reporting (Phase 4). It consolidates all palette and theme work under EP-029 ThemeBuilder.
 
 | Epic | GitHub # | Stories | Status |
 |---|---|---|---|
-| EP-029 ThemeBuilder (parent) | #127 | — | [-] In Progress |
+| EP-029 ThemeBuilder (parent) | #127 | — | ✅ Done — closed |
 | EP-027 BYOT Foundation | #117 | US-064 #115 ✅, US-065 #118 ✅, US-066 #119 ✅ | ✅ Done — closed (Phase 6: US-067–070 deferred) |
-| EP-028 Premium Purple Design System | #120 | US-071–075 ✅, US-076 #128 ⬜, US-077 #129 ⬜ | [-] In Progress |
+| EP-028 Premium Purple Design System | #120 | US-071–075 ✅, US-076 #128 ✅, US-077 #129 ✅ | ✅ Done — closed |
 
 ---
 
@@ -636,8 +636,8 @@ These stories are not phase-specific — they run alongside regular sprints at d
 - [x] `ThemeService` defaults to `'purple'`; indigo applied via `data-palette="indigo"`
 - [x] Anti-flash script updated to match new palette default logic
 - [x] PrimeNG card shadow uses `--stride-shadow-card` (purple-tinted)
-- [ ] Sidebar right-border separating it from main content (light mode polish) → **US-076 #128**
-- [ ] Login page restyled for new palette → **US-077 #129**
+- [x] Sidebar right-border separating it from main content (light mode polish) → **US-076 #128 — PR #130**
+- [x] Login page restyled for new palette → **US-077 #129 — PR #131**
 
 | ID | Story | GitHub # | Complexity | Status |
 |---|---|---|---|---|
@@ -646,8 +646,8 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | US-073 | As a developer, the topbar uses frosted-glass backdrop-filter in both themes | #123 | S | [x] Done — PR #116 |
 | US-074 | As a developer, analytics card gradient helpers are available as `.stride-analytic-card--*` | #124 | XS | [x] Done — PR #116 |
 | US-075 | As a tenant admin, the Indigo palette is preserved as an alternative via the palette switcher | #125 | S | [x] Done — PR #116 |
-| US-076 | As a user, the sidebar has a right-border in light mode separating it from main content | #128 | XS | [ ] Backlog |
-| US-077 | As a user, the login page uses Premium Purple design tokens consistently | #129 | S | [ ] Backlog |
+| US-076 | As a user, the sidebar has a right-border in light mode separating it from main content | #128 | XS | [x] Done — PR #130 |
+| US-077 | As a user, the login page uses Premium Purple design tokens consistently | #129 | S | [x] Done — PR #131 |
 
 **Dependencies:** EP-022 (shell layout), EP-027 (BYOT palette switcher in topbar)
 **Risks:** Light sidebar requires `--stride-nav-brand-text` token in all future sidebar implementations.

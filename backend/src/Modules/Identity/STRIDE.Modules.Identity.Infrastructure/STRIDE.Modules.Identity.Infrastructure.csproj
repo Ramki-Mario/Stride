@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <EmbeddedResource Include="Tenant\Queries\*.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\STRIDE.Modules.Identity.Domain\STRIDE.Modules.Identity.Domain.csproj" />
     <ProjectReference Include="..\STRIDE.Modules.Identity.Application\STRIDE.Modules.Identity.Application.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\STRIDE.BuildingBlocks.Infrastructure\STRIDE.BuildingBlocks.Infrastructure.csproj" />
