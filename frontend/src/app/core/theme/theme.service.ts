@@ -1,25 +1,35 @@
 import { Injectable, signal, computed, effect, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-export type ThemeMode = 'light' | 'dark';
+export type ThemeMode    = 'light' | 'dark';
+export type ThemePalette = 'indigo' | 'purple';
 
-const STORAGE_KEY = 'stride-theme';
+const MODE_STORAGE_KEY    = 'stride-theme';
+const PALETTE_STORAGE_KEY = 'stride-palette';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly platformId = inject(PLATFORM_ID);
-  private readonly isBrowser = isPlatformBrowser(this.platformId);
+  private readonly isBrowser  = isPlatformBrowser(this.platformId);
 
   /** Current theme mode — read from localStorage, falls back to system preference */
   readonly mode = signal<ThemeMode>(this._resolveInitialTheme());
+
+  /** Current colour palette — read from localStorage, defaults to 'indigo' */
+  readonly palette = signal<ThemePalette>(this._resolveInitialPalette());
 
   /** True when dark mode is active */
   readonly isDark = computed(() => this.mode() === 'dark');
 
   constructor() {
-    // Apply theme to <html> whenever the signal changes
+    // Apply theme mode to <html> whenever the signal changes
     effect(() => {
-      this._applyTheme(this.mode());
+      this._applyMode(this.mode());
+    });
+
+    // Apply colour palette to <html> whenever the signal changes
+    effect(() => {
+      this._applyPalette(this.palette());
     });
   }
 
@@ -28,39 +38,49 @@ export class ThemeService {
     this.mode.update(m => m === 'light' ? 'dark' : 'light');
   }
 
-  /** Explicitly set the theme */
+  /** Explicitly set the theme mode */
   setTheme(mode: ThemeMode): void {
     this.mode.set(mode);
   }
 
-  private _applyTheme(mode: ThemeMode): void {
+  /** Switch to a different colour palette */
+  setPalette(palette: ThemePalette): void {
+    this.palette.set(palette);
+  }
+
+  // ── Private helpers ────────────────────────────────────────────────────
+
+  private _applyMode(mode: ThemeMode): void {
     if (!this.isBrowser) return;
-    const html = document.documentElement;
-    html.setAttribute('data-theme', mode);
-    // Persist choice
-    try {
-      localStorage.setItem(STORAGE_KEY, mode);
-    } catch {
-      // localStorage may be unavailable (private mode, etc.)
+    document.documentElement.setAttribute('data-theme', mode);
+    try { localStorage.setItem(MODE_STORAGE_KEY, mode); } catch { /* private mode */ }
+  }
+
+  private _applyPalette(palette: ThemePalette): void {
+    if (!this.isBrowser) return;
+    if (palette === 'indigo') {
+      document.documentElement.removeAttribute('data-palette');
+    } else {
+      document.documentElement.setAttribute('data-palette', palette);
     }
+    try { localStorage.setItem(PALETTE_STORAGE_KEY, palette); } catch { /* private mode */ }
   }
 
   private _resolveInitialTheme(): ThemeMode {
     if (!this.isBrowser) return 'light';
-
-    // 1. Check persisted preference
     try {
-      const stored = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
+      const stored = localStorage.getItem(MODE_STORAGE_KEY) as ThemeMode | null;
       if (stored === 'light' || stored === 'dark') return stored;
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
 
-    // 2. Fall back to OS preference
-    if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-
-    return 'light';
+  private _resolveInitialPalette(): ThemePalette {
+    if (!this.isBrowser) return 'indigo';
+    try {
+      const stored = localStorage.getItem(PALETTE_STORAGE_KEY) as ThemePalette | null;
+      if (stored === 'indigo' || stored === 'purple') return stored;
+    } catch { /* ignore */ }
+    return 'indigo';
   }
 }

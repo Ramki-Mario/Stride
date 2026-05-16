@@ -16,18 +16,27 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap"
   />
 
-  <!-- Prevent flash of wrong theme — reads localStorage before Angular boots -->
+  <!-- Prevent flash of wrong theme/palette — reads localStorage before Angular boots -->
   <script>
     (function () {
-      var stored = null;
-      try { stored = localStorage.getItem('stride-theme'); } catch (_) {}
-      var preferred =
-        stored === 'dark' || stored === 'light'
-          ? stored
+      // ── Theme mode ──────────────────────────────────────────────────────
+      var storedMode = null;
+      try { storedMode = localStorage.getItem('stride-theme'); } catch (_) {}
+      var mode =
+        storedMode === 'dark' || storedMode === 'light'
+          ? storedMode
           : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
           ? 'dark'
           : 'light';
-      document.documentElement.setAttribute('data-theme', preferred);
+      document.documentElement.setAttribute('data-theme', mode);
+
+      // ── Colour palette ──────────────────────────────────────────────────
+      var storedPalette = null;
+      try { storedPalette = localStorage.getItem('stride-palette'); } catch (_) {}
+      if (storedPalette === 'purple') {
+        document.documentElement.setAttribute('data-palette', 'purple');
+      }
+      // Indigo is the default — no attribute needed (keeps HTML clean).
     })();
   </script>
 </head>

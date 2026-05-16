@@ -11,7 +11,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs/operators';
 import { AuthService } from '../../core/auth/auth.service';
-import { ThemeService } from '../../core/theme/theme.service';
+import { ThemeService, ThemePalette } from '../../core/theme/theme.service';
 
 /** Map URL first-segment → human-readable section label. */
 const ROUTE_LABELS: Record<string, string> = {
@@ -62,6 +62,22 @@ const ROUTE_LABELS: Record<string, string> = {
         </svg>
       }
     </button>
+
+    <!-- ── Palette switcher ─────────────────────────────── -->
+    <div class="tb-palette-wrap" title="Switch colour palette" aria-label="Colour palette">
+      <button class="tb-palette-dot tb-palette-dot--indigo"
+              [class.active]="palette() === 'indigo'"
+              (click)="setPalette('indigo')"
+              aria-label="Indigo theme"
+              [attr.aria-pressed]="palette() === 'indigo'">
+      </button>
+      <button class="tb-palette-dot tb-palette-dot--purple"
+              [class.active]="palette() === 'purple'"
+              (click)="setPalette('purple')"
+              aria-label="Purple theme"
+              [attr.aria-pressed]="palette() === 'purple'">
+      </button>
+    </div>
 
     <!-- ── Notification bell ────────────────────────────── -->
     <button class="tb-action" title="Notifications" aria-label="Notifications">
@@ -174,6 +190,38 @@ const ROUTE_LABELS: Record<string, string> = {
       background: var(--stride-surface-hover);
       color: var(--stride-text-primary);
     }
+
+    /* ── Palette switcher ───────────────────────────────── */
+    .tb-palette-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0 0.375rem;
+    }
+
+    .tb-palette-dot {
+      width: 1.125rem;
+      height: 1.125rem;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      padding: 0;
+      transition: transform 120ms, box-shadow 120ms, border-color 120ms;
+      outline: none;
+    }
+
+    .tb-palette-dot:hover {
+      transform: scale(1.15);
+    }
+
+    .tb-palette-dot.active {
+      border-color: var(--stride-border);
+      box-shadow: 0 0 0 2px var(--stride-primary);
+      transform: scale(1.1);
+    }
+
+    .tb-palette-dot--indigo { background: #6366F1; }
+    .tb-palette-dot--purple { background: #7C3AED; }
 
     /* ── User menu wrapper ──────────────────────────────── */
     .tb-user-wrap {
@@ -304,7 +352,8 @@ export class TopbarComponent {
   private readonly el     = inject(ElementRef);
   private readonly theme  = inject(ThemeService);
 
-  protected readonly isDark = this.theme.isDark;
+  protected readonly isDark    = this.theme.isDark;
+  protected readonly palette   = this.theme.palette;
 
   protected readonly dropdownOpen = signal(false);
   protected readonly user         = this.auth.user;
@@ -346,6 +395,10 @@ export class TopbarComponent {
 
   protected toggleTheme(): void {
     this.theme.toggle();
+  }
+
+  protected setPalette(p: ThemePalette): void {
+    this.theme.setPalette(p);
   }
 
   protected toggleDropdown(): void {

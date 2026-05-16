@@ -525,7 +525,7 @@ These stories are not phase-specific — they run alongside regular sprints at d
 ## Sprint 3 — Core Workflow Engine (IN PROGRESS)
 
 **Phase:** Phase 3
-**Status:** IN PROGRESS — EP-018 ✅ EP-019 ✅ EP-020 ✅ EP-021 ✅ EP-022 in progress (US-054 ✅ US-055 ✅)
+**Status:** ✅ COMPLETE — EP-018 ✅ EP-019 ✅ EP-020 ✅ EP-021 ✅ EP-022 ✅ (2026-05-16)
 
 | Epic | GitHub # | Stories | Status |
 |---|---|---|---|
@@ -533,7 +533,7 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | EP-019 Workflow Application Layer | #73 | US-044 #80 ✅, US-045 #81 ✅, US-046 #82 ✅, US-047 #83 ✅, US-048 #84 ✅ | ✅ Done — PR #105 |
 | EP-020 Workflow Infrastructure | #74 | US-049 #85 ✅, US-050 #86 ✅, US-051 #87 ✅ | ✅ Done — PR #106 |
 | EP-021 Workflow API Layer | #75 | US-052 #88 ✅, US-053 #89 ✅ | ✅ Done — PR #107 |
-| EP-022 Angular Workflow UI | #76 | US-054 #90 ✅, US-055 #91 ✅, US-056 #92 ✅, US-057 #93 | [-] In Progress |
+| EP-022 Angular Workflow UI | #76 | US-054 #90 ✅, US-055 #91 ✅, US-056 #92 ✅, US-057 #93 ✅ | ✅ Done — PRs #108 #110 #111 #112 |
 
 ### Phase 3 Story Summary
 | Story | Description | GitHub # | Size |
@@ -555,6 +555,36 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | US-055 | Angular Workflow detail page | #91 | M |
 | US-056 | Create + Edit workflow form | #92 | M |
 | US-057 | Step assign + complete modals | #93 | S |
+
+---
+
+## EP-027 — Multi-Tenant Theme System (BYOT) — Phase 3 Cross-Sprint
+
+**Type:** Frontend / Product Feature
+**Phase:** Phase 3 (foundation) → Phase 6 (tenant onboarding integration)
+**Goal:** Enable tenants to select and eventually supply their own colour palette, establishing the BYOT (Bring Your Own Theme) capability as a first-class SaaS feature.
+
+**Background:** STRIDE ships with an Indigo palette (default) and a Purple palette. The multi-palette architecture uses `data-palette` on `<html>` alongside the existing `data-theme` attribute, so light/dark compose freely with any palette. BYOT extends this so tenants can specify CSS token overrides during tenant onboarding.
+
+**Acceptance Criteria (Epic):**
+- [ ] At least two palettes (Indigo + Purple) ship and switch without page reload
+- [ ] Selected palette persists across sessions via `localStorage`
+- [ ] Flash-of-wrong-palette prevented by inline script in `index.html`
+- [ ] Palette stored per tenant in `TenantSettings` (Phase 6 integration)
+- [ ] Tenant-supplied palette validated and sanitised before application
+
+| ID | Story | Phase | Complexity | Status |
+|---|---|---|---|---|
+| US-064 | As a user, I can switch between Indigo and Purple palettes from the topbar | 3 | S | [-] In Progress |
+| US-065 | As a developer, ThemeService manages palette state with signal + localStorage persistence | 3 | S | [-] In Progress |
+| US-066 | As a developer, the anti-flash script applies both theme mode and palette before Angular boots | 3 | XS | [-] In Progress |
+| US-067 | As a tenant admin, I can configure a default colour palette for my tenant in Settings | 6 | M | [ ] |
+| US-068 | As a tenant admin, I can upload a custom CSS token set during tenant onboarding (BYOT) | 6 | L | [ ] |
+| US-069 | As a developer, tenant-supplied palette tokens are validated and sanitised server-side | 6 | M | [ ] |
+| US-070 | As a tenant admin, I can preview my custom palette before saving it live | 6 | M | [ ] |
+
+**Dependencies:** EP-022 (Angular Shell — provides topbar host), Phase 6 (tenant onboarding flow)
+**Risks:** Untrusted tenant CSS must be sanitised server-side to prevent XSS via custom properties.
 
 ---
 

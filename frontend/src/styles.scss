@@ -163,6 +163,61 @@
   --stride-topbar-border: #1E293B;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   1b. PURPLE PALETTE
+   Applied when <html data-palette="purple"> is set.
+   Composes with data-theme — e.g. dark-purple = both attributes present.
+   Only overrides the tokens that differ from the Indigo default.
+   ───────────────────────────────────────────────────────────────────────── */
+
+[data-palette="purple"] {
+  /* Primary — Violet */
+  --stride-primary:         #7C3AED;
+  --stride-primary-hover:   #6D28D9;
+  --stride-primary-active:  #5B21B6;
+  --stride-primary-subtle:  #F5F3FF;
+  --stride-primary-ring:    rgba(124, 58, 237, 0.25);
+
+  /* Accent — Pink */
+  --stride-accent:          #EC4899;
+  --stride-accent-subtle:   #FDF2F8;
+
+  /* Sidebar — deep purple-navy */
+  --stride-nav-bg:          #2D1B69;
+  --stride-nav-item-active: #7C3AED;
+  --stride-nav-item-hover:  rgba(124, 58, 237, 0.14);
+  --stride-nav-icon:        #DDD6FE;
+  --stride-nav-muted:       #C4B5FD;
+
+  /* Focus + link */
+  --stride-border-focus:    #7C3AED;
+  --stride-text-link:       #7C3AED;
+}
+
+[data-palette="purple"][data-theme="dark"] {
+  /* Lighten primary for dark backgrounds */
+  --stride-primary:         #A78BFA;
+  --stride-primary-hover:   #7C3AED;
+  --stride-primary-active:  #6D28D9;
+  --stride-primary-subtle:  rgba(167, 139, 250, 0.12);
+  --stride-primary-ring:    rgba(167, 139, 250, 0.3);
+
+  /* Sidebar — very dark violet-black */
+  --stride-nav-bg:          #1A0F3C;
+  --stride-nav-item-active: #A78BFA;
+  --stride-nav-item-hover:  rgba(167, 139, 250, 0.16);
+  --stride-nav-icon:        #EDE9FE;
+  --stride-nav-muted:       #DDD6FE;
+
+  /* Accent — softer pink */
+  --stride-accent:          #F472B6;
+  --stride-accent-subtle:   rgba(244, 114, 182, 0.1);
+
+  /* Focus + link */
+  --stride-border-focus:    #A78BFA;
+  --stride-text-link:       #A78BFA;
+}
+
 
 /* ─────────────────────────────────────────────────────────────────────────
    2. TAILWIND CSS 4 THEME INTEGRATION
