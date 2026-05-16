@@ -1,0 +1,341 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Step Action Modal — Component Styles   (US-057 · EP-022)
+   All colours reference STRIDE design-system tokens.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+// ── Backdrop ───────────────────────────────────────────────────────────────
+
+.sam-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  animation: sam-fade-in 0.15s ease;
+}
+
+@keyframes sam-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+// ── Dialog card ────────────────────────────────────────────────────────────
+
+.sam-dialog {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 28rem;
+  background: var(--stride-surface);
+  border: 1px solid var(--stride-border);
+  border-radius: var(--stride-radius-2xl);
+  box-shadow: var(--stride-shadow-lg), 0 20px 60px rgba(0, 0, 0, 0.12);
+  animation: sam-slide-up 0.18s ease;
+  overflow: hidden;
+}
+
+@keyframes sam-slide-up {
+  from { opacity: 0; transform: translateY(0.5rem) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────
+
+.sam-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1.125rem 1.25rem 0.875rem;
+  border-bottom: 1px solid var(--stride-border-soft);
+}
+
+.sam-header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.sam-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--stride-text-primary);
+  line-height: 1.2;
+  margin-bottom: 0.125rem;
+}
+
+.sam-step-name {
+  font-size: 0.8125rem;
+  color: var(--stride-text-secondary);
+  font-weight: 500;
+}
+
+.sam-close {
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: var(--stride-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--stride-border);
+  background: transparent;
+  color: var(--stride-text-muted);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+  transition: background 0.12s, color 0.12s;
+
+  &:hover {
+    background: var(--stride-surface-hover);
+    color: var(--stride-text-primary);
+  }
+}
+
+// ── Modal action icon colours ──────────────────────────────────────────────
+
+.modal-icon-primary { color: var(--stride-primary); font-size: 1.375rem; margin-top: 0.0625rem; }
+.modal-icon-success { color: var(--stride-success); font-size: 1.375rem; margin-top: 0.0625rem; }
+.modal-icon-error   { color: var(--stride-error);   font-size: 1.375rem; margin-top: 0.0625rem; }
+.modal-icon-warning { color: var(--stride-warning);  font-size: 1.375rem; margin-top: 0.0625rem; }
+
+// ── Alert ──────────────────────────────────────────────────────────────────
+
+.sam-alert-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 1.25rem 0;
+  padding: 0.625rem 0.875rem;
+  background: var(--stride-error-bg);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--stride-radius-lg);
+  color: var(--stride-error);
+  font-size: 0.8125rem;
+
+  .pi { flex-shrink: 0; }
+}
+
+// ── Body ───────────────────────────────────────────────────────────────────
+
+.sam-body {
+  padding: 1rem 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+// ── Step metadata chips ────────────────────────────────────────────────────
+
+.sam-step-meta {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sam-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1875rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--stride-surface-hover);
+  color: var(--stride-text-secondary);
+  border: 1px solid var(--stride-border);
+
+  .pi { font-size: 0.6875rem; }
+}
+
+.sam-chip-required {
+  background: rgba(99, 102, 241, 0.08);
+  color: var(--stride-primary);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.sam-chip-optional {
+  background: var(--stride-surface-hover);
+  color: var(--stride-text-muted);
+}
+
+.sam-step-desc {
+  font-size: 0.875rem;
+  color: var(--stride-text-secondary);
+  line-height: 1.55;
+}
+
+// ── Fields ─────────────────────────────────────────────────────────────────
+
+.sam-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3125rem;
+}
+
+.sam-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--stride-text-primary);
+}
+
+.sam-required { color: var(--stride-error); }
+
+.sam-input,
+.sam-textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--stride-border);
+  border-radius: var(--stride-radius-lg);
+  background: var(--stride-surface);
+  color: var(--stride-text-primary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+
+  &::placeholder { color: var(--stride-text-muted); }
+
+  &:focus {
+    border-color: var(--stride-primary);
+    box-shadow: 0 0 0 3px var(--stride-primary-ring);
+  }
+}
+
+.sam-input { font-family: 'Courier New', monospace; letter-spacing: 0.02em; }
+.sam-textarea { resize: vertical; min-height: 5rem; font-family: inherit; }
+
+.sam-input-error {
+  border-color: var(--stride-error) !important;
+  &:focus { box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); }
+}
+
+.sam-error-msg {
+  font-size: 0.78125rem;
+  color: var(--stride-error);
+  font-weight: 500;
+}
+
+.sam-hint {
+  font-size: 0.75rem;
+  color: var(--stride-text-muted);
+}
+
+// ── Warning notice ─────────────────────────────────────────────────────────
+
+.sam-warning-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  background: var(--stride-warning-bg);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--stride-radius-lg);
+  font-size: 0.8125rem;
+  color: var(--stride-text-secondary);
+  line-height: 1.5;
+
+  .pi {
+    color: var(--stride-warning);
+    font-size: 0.9375rem;
+    flex-shrink: 0;
+    margin-top: 0.0625rem;
+  }
+}
+
+// ── Confirm body ───────────────────────────────────────────────────────────
+
+.sam-confirm-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  p {
+    font-size: 0.9rem;
+    color: var(--stride-text-secondary);
+    line-height: 1.6;
+  }
+}
+
+// ── Footer ─────────────────────────────────────────────────────────────────
+
+.sam-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.625rem;
+  padding-top: 0.375rem;
+}
+
+// ── Buttons ────────────────────────────────────────────────────────────────
+
+.sam-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1.125rem;
+  border-radius: var(--stride-radius-xl);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s, opacity 0.15s;
+
+  .pi { font-size: 0.875rem; }
+
+  &:disabled { opacity: 0.65; cursor: not-allowed; }
+}
+
+.sam-btn-ghost {
+  background: transparent;
+  border: 1px solid var(--stride-border);
+  color: var(--stride-text-secondary);
+  &:hover:not(:disabled) { background: var(--stride-surface-hover); }
+}
+
+.sam-btn-primary {
+  background: var(--stride-primary);
+  color: #fff;
+  &:hover:not(:disabled) { background: var(--stride-primary-hover); }
+}
+
+.sam-btn-success {
+  background: var(--stride-success);
+  color: #fff;
+  &:hover:not(:disabled) { background: #059669; }
+}
+
+.sam-btn-danger {
+  background: var(--stride-error);
+  color: #fff;
+  &:hover:not(:disabled) { background: #dc2626; }
+}
+
+.sam-btn-warning {
+  background: var(--stride-warning);
+  color: #fff;
+  &:hover:not(:disabled) { background: #d97706; }
+}
+
+// ── Spinner ────────────────────────────────────────────────────────────────
+
+.sam-spinner {
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: sam-spin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes sam-spin {
+  to { transform: rotate(360deg); }
+}

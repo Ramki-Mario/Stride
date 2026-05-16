@@ -12,13 +12,25 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
-import { WorkflowDefinitionDetail, StepDefinition, STATUS_CONFIG, WorkflowStatus } from '../../models/workflow.models';
-import { WorkflowService } from '../../services/workflow.service';
+import {
+  WorkflowDefinitionDetail,
+  StepDefinition,
+  WorkflowInstanceDetail,
+  StepInstance,
+  StepAction,
+  STATUS_CONFIG,
+  STEP_INSTANCE_STATUS_CONFIG,
+  WorkflowStatus,
+} from '../../models/workflow.models';
+import { WorkflowService }       from '../../services/workflow.service';
+import { StepActionModalComponent } from '../../components/step-action-modal/step-action-modal';
+
+type DetailTab = 'steps' | 'run' | 'activity' | 'history';
 
 @Component({
   selector: 'app-workflow-detail-page',
   standalone: true,
-  imports: [NgClass, RouterLink],
+  imports: [NgClass, RouterLink, StepActionModalComponent],
   templateUrl: './workflow-detail-page.html',
   styleUrl: './workflow-detail-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,17 +41,30 @@ export class WorkflowDetailPageComponent implements OnInit {
   private readonly wfService  = inject(WorkflowService);
   private readonly destroyRef = inject(DestroyRef);
 
-  // ── State ────────────────────────────────────────────────────────────────
+  // ── Config exposed to template ────────────────────────────────────────────
+  readonly STATUS_CONFIG               = STATUS_CONFIG;
+  readonly STEP_INSTANCE_STATUS_CONFIG = STEP_INSTANCE_STATUS_CONFIG;
+
+  // ── Definition state ──────────────────────────────────────────────────────
   readonly workflow     = signal<WorkflowDefinitionDetail | null>(null);
   readonly isLoading    = signal(true);
   readonly errorMessage = signal<string | null>(null);
-  readonly activeTab    = signal<'steps' | 'activity' | 'history'>('steps');
+  readonly activeTab    = signal<DetailTab>('steps');
 
   /** Inline action feedback (e.g. "Activating…") */
   readonly actionPending = signal<string | null>(null);
   readonly actionError   = signal<string | null>(null);
 
-  // ── Computed ─────────────────────────────────────────────────────────────
+  // ── Instance state ────────────────────────────────────────────────────────
+  readonly instance       = signal<WorkflowInstanceDetail | null>(null);
+  readonly isLoadingInst  = signal(false);
+  readonly instanceError  = signal<string | null>(null);
+
+  // ── Modal state ───────────────────────────────────────────────────────────
+  readonly modalStep    = signal<StepInstance | null>(null);
+  readonly modalAction  = signal<StepAction | null>(null);
+
+  // ── Computed — definition ─────────────────────────────────────────────────
 
   readonly workflowId = computed(() => this.route.snapshot.paramMap.get('id') ?? '');
 
@@ -62,22 +87,50 @@ export class WorkflowDetailPageComponent implements OnInit {
     [...(this.workflow()?.steps ?? [])].sort((a, b) => a.order - b.order),
   );
 
-  readonly stepProgress = computed(() => {
-    const steps = this.sortedSteps();
-    return steps.length;
-  });
-
   readonly canActivate = computed(() => this.workflow()?.status === 'Draft');
   readonly canStart    = computed(() => this.workflow()?.status === 'Active');
   readonly canDelete   = computed(() =>
     this.workflow()?.status === 'Draft' || this.workflow()?.status === 'Archived',
   );
 
+  // ── Computed — instance ───────────────────────────────────────────────────
+
+  readonly sortedInstanceSteps = computed<StepInstance[]>(() =>
+    [...(this.instance()?.steps ?? [])].sort((a, b) => a.order - b.order),
+  );
+
+  readonly instanceProgress = computed(() => {
+    const inst = this.instance();
+    if (!inst || inst.totalSteps === 0) return 0;
+    return Math.round((inst.completedSteps / inst.totalSteps) * 100);
+  });
+
+  readonly instanceStatusClass = computed(() => {
+    const inst = this.instance();
+    return inst ? (STATUS_CONFIG[inst.status]?.cssClass ?? 'badge-draft') : '';
+  });
+
+  readonly instanceStatusLabel = computed(() => {
+    const inst = this.instance();
+    return inst ? (STATUS_CONFIG[inst.status]?.label ?? inst.status) : '';
+  });
+
+  readonly hasActiveInstance = computed(() => this.instance() !== null);
+
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
     this.loadWorkflow();
+
+    // Restore instance from query param (e.g. after Start Instance)
+    const instanceId = this.route.snapshot.queryParamMap.get('instance');
+    if (instanceId) {
+      this.loadInstance(instanceId);
+      this.activeTab.set('run');
+    }
   }
+
+  // ── Definition loading ────────────────────────────────────────────────────
 
   loadWorkflow(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -101,7 +154,25 @@ export class WorkflowDetailPageComponent implements OnInit {
       });
   }
 
-  // ── Actions ───────────────────────────────────────────────────────────────
+  // ── Instance loading ──────────────────────────────────────────────────────
+
+  loadInstance(instanceId: string): void {
+    this.isLoadingInst.set(true);
+    this.instanceError.set(null);
+
+    this.wfService
+      .getInstanceDetail(instanceId)
+      .pipe(
+        finalize(() => this.isLoadingInst.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next:  (inst) => this.instance.set(inst),
+        error: ()     => this.instanceError.set('Failed to load instance data.'),
+      });
+  }
+
+  // ── Definition actions ────────────────────────────────────────────────────
 
   activate(): void {
     const id = this.workflowId();
@@ -115,10 +186,7 @@ export class WorkflowDetailPageComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: () => {
-          // Refresh to pick up updated status
-          this.loadWorkflow();
-        },
+        next:  () => this.loadWorkflow(),
         error: () => this.actionError.set('Could not activate workflow. Please try again.'),
       });
   }
@@ -136,8 +204,14 @@ export class WorkflowDetailPageComponent implements OnInit {
       )
       .subscribe({
         next: (result) => {
-          // Navigate to instance detail (Phase 4+) — for now go back to list
-          this.router.navigate(['/workflows']);
+          // Stay on this page; load the new instance and show Run tab
+          this.loadInstance(result.workflowInstanceId);
+          this.activeTab.set('run');
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { instance: result.workflowInstanceId },
+            queryParamsHandling: 'merge',
+          });
         },
         error: () => this.actionError.set('Could not start workflow instance. Please try again.'),
       });
@@ -157,16 +231,69 @@ export class WorkflowDetailPageComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: () => this.router.navigate(['/workflows']),
+        next:  () => this.router.navigate(['/workflows']),
         error: () => this.actionError.set('Could not delete workflow. Please try again.'),
       });
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // ── Modal control ─────────────────────────────────────────────────────────
 
-  setTab(tab: 'steps' | 'activity' | 'history'): void {
+  openModal(step: StepInstance, action: StepAction): void {
+    this.modalStep.set(step);
+    this.modalAction.set(action);
+  }
+
+  closeModal(): void {
+    this.modalStep.set(null);
+    this.modalAction.set(null);
+  }
+
+  onStepActioned(): void {
+    this.closeModal();
+    // Reload instance to pick up fresh step statuses
+    const inst = this.instance();
+    if (inst) {
+      this.loadInstance(inst.id);
+    }
+  }
+
+  // ── Tab ───────────────────────────────────────────────────────────────────
+
+  setTab(tab: DetailTab): void {
     this.activeTab.set(tab);
   }
+
+  // ── Step instance helpers ─────────────────────────────────────────────────
+
+  canAssign(step: StepInstance): boolean {
+    return step.status === 'Pending' || step.status === 'InProgress';
+  }
+
+  canComplete(step: StepInstance): boolean {
+    return step.status === 'InProgress' || step.status === 'Pending';
+  }
+
+  canFail(step: StepInstance): boolean {
+    return step.status === 'InProgress' || step.status === 'Pending';
+  }
+
+  canSkip(step: StepInstance): boolean {
+    return !step.isRequired && (step.status === 'Pending' || step.status === 'InProgress');
+  }
+
+  stepInstanceStatusClass(status: string): string {
+    return STEP_INSTANCE_STATUS_CONFIG[status as keyof typeof STEP_INSTANCE_STATUS_CONFIG]?.cssClass ?? 'ssi-pending';
+  }
+
+  stepInstanceStatusLabel(status: string): string {
+    return STEP_INSTANCE_STATUS_CONFIG[status as keyof typeof STEP_INSTANCE_STATUS_CONFIG]?.label ?? status;
+  }
+
+  stepInstanceStatusIcon(status: string): string {
+    return STEP_INSTANCE_STATUS_CONFIG[status as keyof typeof STEP_INSTANCE_STATUS_CONFIG]?.icon ?? 'pi-clock';
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
 
   formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString('en-GB', {
@@ -186,16 +313,15 @@ export class WorkflowDetailPageComponent implements OnInit {
     });
   }
 
-  stepDotClass(step: StepDefinition): string {
-    // Definition steps have no execution state — use order-based placeholder style
-    return 'step-dot-pending';
-  }
-
   requiredStepCount(steps: StepDefinition[]): number {
     return steps.filter((s) => s.isRequired).length;
   }
 
-  trackById(_: number, s: StepDefinition): string {
+  trackById(_: number, s: { id: string }): string {
     return s.id;
+  }
+
+  stepDotClass(_step: StepDefinition): string {
+    return 'step-dot-pending';
   }
 }

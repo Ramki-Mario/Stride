@@ -55,6 +55,52 @@ export const STATUS_CONFIG: Record<WorkflowStatus, StatusConfig> = {
 
 export type SortKey = 'name' | 'status' | 'stepCount' | 'updatedAt' | 'createdAt';
 
+// ─── Step instance ────────────────────────────────────────────────────────────
+
+export type StepInstanceStatus = 'Pending' | 'InProgress' | 'Completed' | 'Failed' | 'Skipped';
+
+export interface StepInstance {
+  id: string;
+  stepDefinitionId: string;
+  name: string;
+  description: string | null;
+  order: number;
+  isRequired: boolean;
+  status: StepInstanceStatus;
+  assignedTo: string | null;    // userId GUID
+  completedAt: string | null;
+  failureReason: string | null;
+}
+
+export const STEP_INSTANCE_STATUS_CONFIG: Record<
+  StepInstanceStatus,
+  { label: string; cssClass: string; icon: string }
+> = {
+  Pending:    { label: 'Pending',     cssClass: 'ssi-pending',    icon: 'pi-clock'         },
+  InProgress: { label: 'In Progress', cssClass: 'ssi-inprogress', icon: 'pi-spin pi-spinner' },
+  Completed:  { label: 'Completed',   cssClass: 'ssi-completed',  icon: 'pi-check-circle'  },
+  Failed:     { label: 'Failed',      cssClass: 'ssi-failed',     icon: 'pi-times-circle'  },
+  Skipped:    { label: 'Skipped',     cssClass: 'ssi-skipped',    icon: 'pi-minus-circle'  },
+};
+
+// ─── Instance detail (GET /bff/workflows/instances/:id) ──────────────────────
+
+export interface WorkflowInstanceDetail {
+  id: string;
+  workflowDefinitionId: string;
+  workflowName: string;
+  status: WorkflowStatus;
+  totalSteps: number;
+  completedSteps: number;
+  startedAt: string;
+  completedAt: string | null;
+  steps: StepInstance[];
+}
+
+// ─── Step action types ────────────────────────────────────────────────────────
+
+export type StepAction = 'assign' | 'complete' | 'fail' | 'skip';
+
 // ─── Form request payloads ────────────────────────────────────────────────────
 
 export interface StepRequest {
