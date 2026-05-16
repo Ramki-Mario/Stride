@@ -25,8 +25,19 @@ public static class InfrastructureServiceExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, CurrentUser>();
 
-        services.AddScoped<IEventBus, MediatREventBus>();
+        return services;
+    }
 
+    /// <summary>
+    /// Registers the MediatR-backed in-process event bus (ADR-014).
+    /// Call this ONLY from STRIDE.Host — after all modules have been added so
+    /// that <see cref="MediatR.IPublisher"/> is already in the container.
+    /// The BFF has no MediatR handlers and must NOT call this method.
+    /// </summary>
+    public static IServiceCollection AddBuildingBlocksEventBus(
+        this IServiceCollection services)
+    {
+        services.AddScoped<IEventBus, MediatREventBus>();
         return services;
     }
 }
