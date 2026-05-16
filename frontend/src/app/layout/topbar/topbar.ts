@@ -11,6 +11,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs/operators';
 import { AuthService } from '../../core/auth/auth.service';
+import { ThemeService } from '../../core/theme/theme.service';
 
 /** Map URL first-segment → human-readable section label. */
 const ROUTE_LABELS: Record<string, string> = {
@@ -38,6 +39,29 @@ const ROUTE_LABELS: Record<string, string> = {
 
     <!-- Spacer -->
     <div style="flex: 1"></div>
+
+    <!-- ── Theme toggle ──────────────────────────────────── -->
+    <button class="tb-action"
+            (click)="toggleTheme()"
+            [title]="isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+            [attr.aria-label]="isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
+      @if (isDark()) {
+        <!-- Sun icon — shown in dark mode to switch to light -->
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42
+                   M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      } @else {
+        <!-- Moon icon — shown in light mode to switch to dark -->
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"
+                stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      }
+    </button>
 
     <!-- ── Notification bell ────────────────────────────── -->
     <button class="tb-action" title="Notifications" aria-label="Notifications">
@@ -278,6 +302,9 @@ export class TopbarComponent {
   private readonly auth   = inject(AuthService);
   private readonly router = inject(Router);
   private readonly el     = inject(ElementRef);
+  private readonly theme  = inject(ThemeService);
+
+  protected readonly isDark = this.theme.isDark;
 
   protected readonly dropdownOpen = signal(false);
   protected readonly user         = this.auth.user;
@@ -316,6 +343,10 @@ export class TopbarComponent {
       .map(p => p.charAt(0).toUpperCase() + p.slice(1))
       .join(' ') || 'User';
   });
+
+  protected toggleTheme(): void {
+    this.theme.toggle();
+  }
 
   protected toggleDropdown(): void {
     this.dropdownOpen.update(o => !o);
