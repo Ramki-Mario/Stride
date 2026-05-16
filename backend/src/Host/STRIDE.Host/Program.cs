@@ -30,7 +30,11 @@ builder.Services
     .AddReportingModule(builder.Configuration)
     .AddNotificationsModule(builder.Configuration)
     .AddInvoicingModule(builder.Configuration)
-    .AddAdministrationModule(builder.Configuration);
+    .AddAdministrationModule(builder.Configuration)
+    // IEventBus (MediatREventBus) depends on IPublisher — registered here AFTER
+    // all modules have called AddMediatR() so IPublisher is already in the container.
+    // This is intentionally NOT called in the BFF (BFF has no MediatR handlers).
+    .AddBuildingBlocksEventBus();
 
 // ── Controllers (all module API assemblies registered as application parts) ─
 builder.Services
