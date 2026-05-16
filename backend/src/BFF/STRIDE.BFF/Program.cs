@@ -26,35 +26,28 @@ builder.Services.AddHttpClient<IdentityApiClient>(client =>
 // builder.Services.AddHttpClient<WorkflowApiClient>(...);
 // builder.Services.AddHttpClient<SchedulingApiClient>(...);
 
-// ── Session Store ──────────────────────────────────────────────────────────
-// Development: in-memory store — no Redis required, sessions lost on restart.
-// Production:  Redis-backed store — shared across instances, server-side revocable.
+// ── Redis (session store) ──────────────────────────────────────────────────
 builder.Services.Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.SectionName));
 
-if (builder.Environment.IsDevelopment())
+var redisConnection = builder.Configuration[$"{RedisOptions.SectionName}:ConnectionString"]
+    ?? throw new InvalidOperationException("Redis:ConnectionString is not configured.");
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
 {
-    // IMemoryCache is needed by InMemoryTicketStore.
-    builder.Services.AddMemoryCache();
-    builder.Services.AddSingleton<ITicketStore, InMemoryTicketStore>();
-}
-else
-{
-    var redisConnection = builder.Configuration[$"{RedisOptions.SectionName}:ConnectionString"]
-        ?? throw new InvalidOperationException("Redis:ConnectionString is not configured.");
+    var opts = ConfigurationOptions.Parse(redisConnection);
+    // sslProtocols is not a valid connection string token in StackExchange.Redis —
+    // must be set here via ConfigurationOptions.
+    opts.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
+    // Redis Cloud free-tier cert CN does not match the public hostname —
+    // bypass validation so the TLS handshake can complete.
+    opts.CertificateValidation += (_, _, _, _) => true;
+    return ConnectionMultiplexer.Connect(opts);
+});
 
-    builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
-    {
-        var opts = ConfigurationOptions.Parse(redisConnection);
-        opts.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
-        opts.CertificateValidation += (_, _, _, _) => true;
-        return ConnectionMultiplexer.Connect(opts);
-    });
+builder.Services.AddSingleton<ITicketStore, RedisTicketStore>();
 
-    builder.Services.AddSingleton<ITicketStore, RedisTicketStore>();
-}
-
-// ── Cookie Auth backed by the environment-appropriate ticket store ─────────
-// Browser only ever sees an opaque key cookie; the ticket lives server-side.
+// ── Cookie Auth backed by Redis ticket store ──────────────────────────────
+// Browser only ever sees an opaque cookie; the JWT lives in Redis.
 builder.Services
     .AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
     .Configure<IServiceProvider>((options, sp) =>
