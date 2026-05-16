@@ -33,7 +33,15 @@ var redisConnection = builder.Configuration[$"{RedisOptions.SectionName}:Connect
     ?? throw new InvalidOperationException("Redis:ConnectionString is not configured.");
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
-    ConnectionMultiplexer.Connect(ConfigurationOptions.Parse(redisConnection)));
+{
+    var opts = ConfigurationOptions.Parse(redisConnection);
+    // Redis Cloud uses TLS — explicitly set Tls12 to avoid SSL framing errors
+    // that occur when StackExchange.Redis negotiates the wrong protocol version.
+    opts.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
+    // Accept Redis Cloud's certificate (hostname differs from CN on free-tier certs).
+    opts.CertificateValidation += (_, _, _, _) => true;
+    return ConnectionMultiplexer.Connect(opts);
+});
 
 builder.Services.AddSingleton<ITicketStore, RedisTicketStore>();
 
