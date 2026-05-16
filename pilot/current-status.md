@@ -165,11 +165,17 @@ Phase 3 (Core Workflow Engine) — **In Progress**.
 - **EP-022 #76 ✅ COMPLETE** — All 4 stories done (US-054/055/056/057)
 - **Issue #109** created: `[TASK] Wire BFF proxy routes for Workflow API` — medium priority, Phase 6
 
-## Phase 4 — Dashboard & Reporting (Pending — board populated 2026-05-16)
-- EP-023 #94 (Reporting Read Models): US-058 #98
-- EP-024 #95 (Reporting App Layer): US-059 #99, US-060 #100
-- EP-025 #96 (Reporting API): US-061 #101
-- EP-026 #97 (Angular Dashboard+Reporting UI): US-062 #102, US-063 #103
+## Phase 4 — Dashboard & Reporting (**In Progress** — 2026-05-16)
+- EP-023 #94 (Reporting Read Models): US-058 #98 ✅ **Done** (PR #132, 2026-05-16)
+  - SqlLoader utility in BuildingBlocks.Infrastructure (embedded SQL resource loader)
+  - Identity TenantResolver SQL extracted to .sql files (EmbeddedResource)
+  - Workflows WorkflowReadService SQL extracted to .sql files; dynamic concatenation eliminated
+  - Reporting Application: DashboardKpiDto, WorkflowTrendDto, ReportSummaryDto, IReportingReadService
+  - ReportingReadService (Dapper, 3 SQL files), registered scoped in DI
+  - Workflows page: native `<select>` replaced with PrimeNG `<p-select>` (STRIDE token styled)
+- EP-024 #95 (Reporting App Layer): US-059 #99, US-060 #100 — ⬜ Backlog
+- EP-025 #96 (Reporting API): US-061 #101 — ⬜ Backlog
+- EP-026 #97 (Angular Dashboard+Reporting UI): US-062 #102, US-063 #103 — ⬜ Backlog
 ## Phase 5 — Notifications & Observability (Pending)
 ## Phase 6 — SaaS Readiness (Pending)
 ## Phase 7 — Portfolio & Deployment Polish (Pending)

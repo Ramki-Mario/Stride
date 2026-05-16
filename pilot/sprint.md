@@ -654,28 +654,28 @@ These stories are not phase-specific — they run alongside regular sprints at d
 
 ---
 
-## Sprint 4 — Dashboard & Reporting (PLANNED)
+## Sprint 4 — Dashboard & Reporting (IN PROGRESS)
 
 **Phase:** Phase 4
-**Status:** PENDING — GitHub issues created, board populated (2026-05-16)
-**Key note:** Dapper read models for reporting queries (ADR-005)
+**Status:** IN PROGRESS — US-058 Done (PR #132 merged 2026-05-16), EP-023 Done. Next: US-059.
+**Key note:** Dapper read models for reporting queries (ADR-005). SqlLoader + embedded .sql pattern established. PrimeNG `<p-select>` pattern established for all future dropdowns.
 
 | Epic | GitHub # | Stories | Status |
 |---|---|---|---|
-| EP-023 Reporting Read Models | #94 | US-058 #98 | ⬜ Backlog |
+| EP-023 Reporting Read Models | #94 | US-058 #98 | ✅ Done |
 | EP-024 Reporting Application Layer | #95 | US-059 #99, US-060 #100 | ⬜ Backlog |
 | EP-025 Reporting API Layer | #96 | US-061 #101 | ⬜ Backlog |
 | EP-026 Angular Dashboard + Reporting UI | #97 | US-062 #102, US-063 #103 | ⬜ Backlog |
 
 ### Phase 4 Story Summary
-| Story | Description | GitHub # | Size |
-|---|---|---|---|
-| US-058 | Dapper reporting DTOs + reporting schema | #98 | M |
-| US-059 | KPI + trend aggregation query handlers | #99 | M |
-| US-060 | GetReportList + GenerateReport + ExportReportCsv handlers | #100 | M |
-| US-061 | DashboardController + ReportsController | #101 | M |
-| US-062 | Angular Dashboard page | #102 | M |
-| US-063 | Angular Reporting page | #103 | M |
+| Story | Description | GitHub # | Size | Status |
+|---|---|---|---|---|
+| US-058 | Dapper reporting DTOs + reporting schema | #98 | M | ✅ Done — PR #132 |
+| US-059 | KPI + trend aggregation query handlers | #99 | M | ⬜ Backlog |
+| US-060 | GetReportList + GenerateReport + ExportReportCsv handlers | #100 | M | ⬜ Backlog |
+| US-061 | DashboardController + ReportsController | #101 | M | ⬜ Backlog |
+| US-062 | Angular Dashboard page | #102 | M | ⬜ Backlog |
+| US-063 | Angular Reporting page | #103 | M | ⬜ Backlog |
 
 ---
 
