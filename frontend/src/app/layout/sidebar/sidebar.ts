@@ -32,6 +32,22 @@ interface NavGroup {
     '[class.collapsed]': 'collapsed()',
   },
   template: `
+    <!-- ── Collapse toggle — absolutely positioned so it stays visible
+         even when the sidebar is collapsed (overflow:hidden clips flex children
+         that extend past 3.75rem, but position:absolute is clipped to the
+         sidebar box which always fits a 1.625rem button at right:0.625rem) ── -->
+    <button class="sb-collapse-btn"
+            (click)="toggleCollapse()"
+            [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+           [style.transform]="collapsed() ? 'rotate(180deg)' : 'rotate(0deg)'"
+           style="transition: transform 200ms cubic-bezier(0.4,0,0.2,1)">
+        <path d="M15 18l-6-6 6-6"
+              stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
     <!-- ── Brand ──────────────────────────────────────────── -->
     <div class="sb-brand">
       <div class="sb-logo" aria-hidden="true">
@@ -42,18 +58,6 @@ interface NavGroup {
       </div>
 
       <span class="sb-brand-name">STRIDE</span>
-
-      <button class="sb-collapse-btn"
-              (click)="toggleCollapse()"
-              [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-             [style.transform]="collapsed() ? 'rotate(180deg)' : 'rotate(0deg)'"
-             style="transition: transform 200ms cubic-bezier(0.4,0,0.2,1)">
-          <path d="M15 18l-6-6 6-6"
-                stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
     </div>
 
     <!-- ── Tenant badge ──────────────────────────────────── -->
@@ -93,12 +97,43 @@ interface NavGroup {
     </div>
   `,
   styles: [`
+    /* ── Collapse button — absolutely positioned at brand-row height,
+         right-aligned. Always within the sidebar box (even at 3.75rem)
+         because right:0.5rem + button 1.625rem = 2.125rem < 3.75rem. ── */
+    :host {
+      position: relative;   /* anchor for the absolute collapse button */
+    }
+
+    .sb-collapse-btn {
+      position: absolute;
+      top: 1.0rem;          /* vertically centred in the 3.75rem brand area */
+      right: 0.5rem;
+      width: 1.625rem;
+      height: 1.625rem;
+      border-radius: var(--stride-radius-sm);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--stride-nav-muted);
+      padding: 0;
+      z-index: 1;
+      transition: background 150ms, color 150ms;
+    }
+    .sb-collapse-btn:hover {
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--stride-nav-text);
+    }
+
     /* ── Brand row ──────────────────────────────────────────── */
     .sb-brand {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      padding: 1.125rem 1rem;
+      /* Right padding leaves room for the absolutely-positioned collapse btn */
+      padding: 1.125rem 2.5rem 1.125rem 1rem;
       border-bottom: 1px solid var(--stride-nav-border);
       flex-shrink: 0;
     }
@@ -130,26 +165,6 @@ interface NavGroup {
     :host(.collapsed) .sb-brand-name {
       opacity: 0;
       max-width: 0;
-    }
-
-    .sb-collapse-btn {
-      width: 1.625rem;
-      height: 1.625rem;
-      border-radius: var(--stride-radius-sm);
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--stride-nav-muted);
-      flex-shrink: 0;
-      padding: 0;
-      transition: background 150ms, color 150ms;
-    }
-    .sb-collapse-btn:hover {
-      background: rgba(99, 102, 241, 0.12);
-      color: var(--stride-nav-text);
     }
 
     /* ── Tenant badge ─────────────────────────────────────── */

@@ -17,6 +17,10 @@
 
 :root,
 [data-theme="light"] {
+  /* Font stack — declared here so var(--font-sans) works in plain CSS.
+     The @theme inline block below exposes the same value to Tailwind utilities. */
+  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
   /* Primary — Indigo */
   --stride-primary:         #6366F1;
   --stride-primary-hover:   #4F46E5;
