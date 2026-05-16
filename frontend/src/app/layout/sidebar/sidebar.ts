@@ -102,6 +102,7 @@ interface NavGroup {
          because right:0.5rem + button 1.625rem = 2.125rem < 3.75rem. ── */
     :host {
       position: relative;   /* anchor for the absolute collapse button */
+      border-right: 1px solid var(--stride-nav-border);
     }
 
     .sb-collapse-btn {

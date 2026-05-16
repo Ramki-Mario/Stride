@@ -522,10 +522,10 @@ These stories are not phase-specific — they run alongside regular sprints at d
 
 ---
 
-## Sprint 3 — Core Workflow Engine (IN PROGRESS)
+## Sprint 3 — Core Workflow Engine (COMPLETE)
 
 **Phase:** Phase 3
-**Status:** ✅ COMPLETE — EP-018 ✅ EP-019 ✅ EP-020 ✅ EP-021 ✅ EP-022 ✅ EP-028 [-] (2026-05-16)
+**Status:** ✅ COMPLETE — EP-018 ✅ EP-019 ✅ EP-020 ✅ EP-021 ✅ EP-022 ✅ (2026-05-16)
 
 | Epic | GitHub # | Stories | Status |
 |---|---|---|---|
@@ -534,7 +534,6 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | EP-020 Workflow Infrastructure | #74 | US-049 #85 ✅, US-050 #86 ✅, US-051 #87 ✅ | ✅ Done — PR #106 |
 | EP-021 Workflow API Layer | #75 | US-052 #88 ✅, US-053 #89 ✅ | ✅ Done — PR #107 |
 | EP-022 Angular Workflow UI | #76 | US-054 #90 ✅, US-055 #91 ✅, US-056 #92 ✅, US-057 #93 ✅ | ✅ Done — PRs #108 #110 #111 #112 |
-| EP-028 Premium Purple Design System | — | US-071–US-075 | [-] In Progress |
 
 ### Phase 3 Story Summary
 | Story | Description | GitHub # | Size |
@@ -559,11 +558,71 @@ These stories are not phase-specific — they run alongside regular sprints at d
 
 ---
 
-### EP-028 — Premium Purple Design System (Official v2 Palette)
+## Sprint 3.1 — ThemeBuilder / Bring Your Own Theme (IN PROGRESS)
 
-**Goal:** Replace the Indigo default palette with the ChatGPT-analysed premium Purple design system. Deliver a production-ready token overhaul, light-sidebar layout, frosted-glass topbar, analytics card gradients, and full PrimeNG component alignment.
+**Phase:** Phase 3.1
+**Milestone:** Bring Your Own Theme (GitHub Milestone #9)
+**Status:** [-] IN PROGRESS — EP-027 ✅ closed · EP-028 [-] (US-076, US-077 pending) (2026-05-16)
 
-**Background:** Ramki provided a reference SaaS dashboard image. ChatGPT extracted the visual language (soft lavender-purple gradients, white surfaces, pastel analytics cards) and produced the official STRIDE v2 colour spec. Purple (`#B97AF9`) replaces Indigo (`#6366F1`) as the root default; the Indigo palette is preserved as `data-palette="indigo"` for tenants who prefer it.
+> Phase 3.1 is a design-system sub-sprint that runs after the core Workflow Engine (Phase 3) and before Dashboard & Reporting (Phase 4). It consolidates all palette and theme work under EP-029 ThemeBuilder.
+
+| Epic | GitHub # | Stories | Status |
+|---|---|---|---|
+| EP-029 ThemeBuilder (parent) | #127 | — | [-] In Progress |
+| EP-027 BYOT Foundation | #117 | US-064 #115 ✅, US-065 #118 ✅, US-066 #119 ✅ | ✅ Done — closed (Phase 6: US-067–070 deferred) |
+| EP-028 Premium Purple Design System | #120 | US-071–075 ✅, US-076 #128 ⬜, US-077 #129 ⬜ | [-] In Progress |
+
+---
+
+### EP-029 — ThemeBuilder (GitHub #127, Milestone: Bring Your Own Theme)
+
+**Type:** Parent Epic
+**Phase:** Phase 3.1 → Phase 6 (BYOT extension)
+**Goal:** Consolidate all theme and palette work under a single ThemeBuilder epic. Establishes STRIDE's BYOT capability — from the foundational multi-palette switcher through the Premium Purple design system to future tenant-supplied CSS token customisation.
+
+**Acceptance Criteria:**
+- [ ] Multi-palette architecture ships: Purple (default) + Indigo (`data-palette="indigo"`)
+- [ ] Palette composes with `data-theme` (light/dark) — 4 combinations work
+- [ ] Selected palette persists across sessions via `localStorage`
+- [ ] Flash-of-wrong-palette prevented by inline script in `index.html`
+- [ ] Premium Purple is the root default; no attribute needed
+- [ ] Light sidebar, frosted-glass topbar, analytics card gradients delivered
+- [ ] Phase 6: tenant-supplied palette stored in TenantSettings, validated server-side, preview available
+
+---
+
+### EP-027 — BYOT Foundation (GitHub #117) — sub-epic of EP-029
+
+**Goal:** Multi-palette switcher, ThemeService palette signal, and anti-flash script. Establishes the `data-palette` CSS architecture that all future palettes build on.
+
+**Acceptance Criteria:**
+- [x] At least two palettes (Indigo + Purple) switch without page reload
+- [x] Selected palette persists across sessions via `localStorage`
+- [x] Flash-of-wrong-palette prevented by inline script in `index.html`
+- [ ] Palette stored per tenant in `TenantSettings` (Phase 6 integration)
+- [ ] Tenant-supplied palette validated and sanitised before application
+
+| ID | Story | GitHub # | Complexity | Status |
+|---|---|---|---|---|
+| US-064 | As a user, I can switch between Indigo and Purple palettes from the topbar | #115 | S | [x] Done — PR #116 |
+| US-065 | As a developer, ThemeService manages palette state with signal + localStorage persistence | #118 | S | [x] Done — PR #116 |
+| US-066 | As a developer, the anti-flash script applies both theme mode and palette before Angular boots | #119 | XS | [x] Done — PR #116 |
+| US-067 | As a tenant admin, I can configure a default colour palette for my tenant in Settings | — | M | [ ] Phase 6 |
+| US-068 | As a tenant admin, I can upload a custom CSS token set during tenant onboarding (BYOT) | — | L | [ ] Phase 6 |
+| US-069 | As a developer, tenant-supplied palette tokens are validated and sanitised server-side | — | M | [ ] Phase 6 |
+| US-070 | As a tenant admin, I can preview my custom palette before saving it live | — | M | [ ] Phase 6 |
+
+**Dependencies:** EP-022 (Angular Shell — provides topbar host), Phase 6 (tenant onboarding flow)
+**Risks:** Untrusted tenant CSS must be sanitised server-side to prevent XSS via custom properties.
+**Phase 3.1 Status:** ✅ Closed 2026-05-16 — Phase 6 stories (US-067–070) deferred to Phase 6 epic.
+
+---
+
+### EP-028 — Premium Purple Design System (GitHub #120) — sub-epic of EP-029
+
+**Goal:** Replace the Indigo default palette with the ChatGPT-analysed premium Purple design system. Production-ready token overhaul, light-sidebar layout, frosted-glass topbar, analytics card gradients, full PrimeNG alignment.
+
+**Background:** Purple (`#B97AF9`) replaces Indigo (`#6366F1`) as the root default; Indigo preserved as `data-palette="indigo"` for tenants who prefer it.
 
 **Acceptance Criteria:**
 - [x] `:root` tokens updated to Premium Purple palette — primary `#B97AF9`, accent `#E15CFA`
@@ -577,49 +636,21 @@ These stories are not phase-specific — they run alongside regular sprints at d
 - [x] `ThemeService` defaults to `'purple'`; indigo applied via `data-palette="indigo"`
 - [x] Anti-flash script updated to match new palette default logic
 - [x] PrimeNG card shadow uses `--stride-shadow-card` (purple-tinted)
-- [ ] Sidebar border separating it from main content (light mode polish)
-- [ ] Login page restyled for new palette
+- [ ] Sidebar right-border separating it from main content (light mode polish) → **US-076 #128**
+- [ ] Login page restyled for new palette → **US-077 #129**
 
-| ID | Story | Complexity | Status |
-|---|---|---|---|
-| US-071 | As a designer, the default STRIDE palette is Premium Purple with soft lavender aesthetics | M | [-] In Progress |
-| US-072 | As a developer, the light sidebar uses white surface with purple active states | S | [-] In Progress |
-| US-073 | As a developer, the topbar uses frosted-glass backdrop-filter in both themes | S | [-] In Progress |
-| US-074 | As a developer, analytics card gradient helpers are available as `.stride-analytic-card--*` | XS | [-] In Progress |
-| US-075 | As a tenant admin, the Indigo palette is preserved as an alternative via the palette switcher | S | [-] In Progress |
-
-**Dependencies:** EP-022 (shell layout provides the component hosts), EP-027 (BYOT palette switcher in topbar)
-**Risks:** Light sidebar requires `--stride-nav-brand-text` token in all future sidebar implementations to avoid white-on-white brand text regression.
-
----
-
-## EP-027 — Multi-Tenant Theme System (BYOT) — Phase 3 Cross-Sprint
-
-**Type:** Frontend / Product Feature
-**Phase:** Phase 3 (foundation) → Phase 6 (tenant onboarding integration)
-**Goal:** Enable tenants to select and eventually supply their own colour palette, establishing the BYOT (Bring Your Own Theme) capability as a first-class SaaS feature.
-
-**Background:** STRIDE ships with an Indigo palette (default) and a Purple palette. The multi-palette architecture uses `data-palette` on `<html>` alongside the existing `data-theme` attribute, so light/dark compose freely with any palette. BYOT extends this so tenants can specify CSS token overrides during tenant onboarding.
-
-**Acceptance Criteria (Epic):**
-- [ ] At least two palettes (Indigo + Purple) ship and switch without page reload
-- [ ] Selected palette persists across sessions via `localStorage`
-- [ ] Flash-of-wrong-palette prevented by inline script in `index.html`
-- [ ] Palette stored per tenant in `TenantSettings` (Phase 6 integration)
-- [ ] Tenant-supplied palette validated and sanitised before application
-
-| ID | Story | Phase | Complexity | Status |
+| ID | Story | GitHub # | Complexity | Status |
 |---|---|---|---|---|
-| US-064 | As a user, I can switch between Indigo and Purple palettes from the topbar | 3 | S | [-] In Progress |
-| US-065 | As a developer, ThemeService manages palette state with signal + localStorage persistence | 3 | S | [-] In Progress |
-| US-066 | As a developer, the anti-flash script applies both theme mode and palette before Angular boots | 3 | XS | [-] In Progress |
-| US-067 | As a tenant admin, I can configure a default colour palette for my tenant in Settings | 6 | M | [ ] |
-| US-068 | As a tenant admin, I can upload a custom CSS token set during tenant onboarding (BYOT) | 6 | L | [ ] |
-| US-069 | As a developer, tenant-supplied palette tokens are validated and sanitised server-side | 6 | M | [ ] |
-| US-070 | As a tenant admin, I can preview my custom palette before saving it live | 6 | M | [ ] |
+| US-071 | As a designer, the default STRIDE palette is Premium Purple with soft lavender aesthetics | #121 | M | [x] Done — PR #116 |
+| US-072 | As a developer, the light sidebar uses white surface with purple active states | #122 | S | [x] Done — PR #116 |
+| US-073 | As a developer, the topbar uses frosted-glass backdrop-filter in both themes | #123 | S | [x] Done — PR #116 |
+| US-074 | As a developer, analytics card gradient helpers are available as `.stride-analytic-card--*` | #124 | XS | [x] Done — PR #116 |
+| US-075 | As a tenant admin, the Indigo palette is preserved as an alternative via the palette switcher | #125 | S | [x] Done — PR #116 |
+| US-076 | As a user, the sidebar has a right-border in light mode separating it from main content | #128 | XS | [ ] Backlog |
+| US-077 | As a user, the login page uses Premium Purple design tokens consistently | #129 | S | [ ] Backlog |
 
-**Dependencies:** EP-022 (Angular Shell — provides topbar host), Phase 6 (tenant onboarding flow)
-**Risks:** Untrusted tenant CSS must be sanitised server-side to prevent XSS via custom properties.
+**Dependencies:** EP-022 (shell layout), EP-027 (BYOT palette switcher in topbar)
+**Risks:** Light sidebar requires `--stride-nav-brand-text` token in all future sidebar implementations.
 
 ---
 

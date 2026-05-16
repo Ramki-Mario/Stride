@@ -139,7 +139,7 @@ Phase 3 (Core Workflow Engine) — **In Progress**.
 - EP-017 (Architecture Diagrams, #46): 🔵 Open — US-035 done (1/6); US-036–039 now unblocked (Phase 2 backend + UI complete)
 - **Phase 2 is now functionally complete. US-036–039 architecture diagrams are next.**
 
-## Phase 3 — Core Workflow Engine (**In Progress** — started 2026-05-16)
+## Phase 3 — Core Workflow Engine (**Complete** — 2026-05-16)
 - EP-018 #72 (Domain Model): US-041 #77 ✅, US-042 #78 ✅, US-043 #79 ✅ — **Done** (PR #104, 2026-05-16)
   - 4 entity files: WorkflowDefinition, StepDefinition, WorkflowInstance, StepInstance
   - 12 domain events, 2 enums, WorkflowDomainException, domain.readme.md KT doc
@@ -161,7 +161,8 @@ Phase 3 (Core Workflow Engine) — **In Progress**.
   - US-054 #90 ✅ — **Done** (PR #108, 2026-05-16) — Workflow list page: table/card view, filters, status badges, bulk-select, pagination, skeleton, empty state, WorkflowService, workflows-list.readme.md KT
   - US-055 #91 ✅ — **Done** (PR #110, 2026-05-16) — Workflow detail page: hero, step tracker, tabs, sidebar, actions, workflow-detail.readme.md KT
   - US-056 #92 ✅ — **Done** (PR #111, 2026-05-16) — Create + Edit workflow form (ReactiveFormsModule, dual-mode, step builder)
-  - US-057 #93 — **Next**: Step assign + complete modals
+  - US-057 #93 ✅ — **Done** (PR #112, 2026-05-16) — StepActionModalComponent (assign/complete/fail/skip) + Run tab on detail page
+- **EP-022 #76 ✅ COMPLETE** — All 4 stories done (US-054/055/056/057)
 - **Issue #109** created: `[TASK] Wire BFF proxy routes for Workflow API` — medium priority, Phase 6
 
 ## Phase 4 — Dashboard & Reporting (Pending — board populated 2026-05-16)
