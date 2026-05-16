@@ -156,10 +156,13 @@ Phase 3 (Core Workflow Engine) — **In Progress**.
 - EP-021 #75 (API Layer): US-052 #88 ✅, US-053 #89 ✅ — **Done** (PR #107, 2026-05-16)
   - WorkflowsController: 12 endpoints (definition CRUD + instance lifecycle)
   - StepsController: 4 step operation endpoints (assign/complete/fail/skip)
-  - Request DTOs, ITenantContext injection fix, api.readme.md KT doc
+  - Request DTOs, `ITenantContext` injection fix (TenantId from context, not ICurrentUser), api.readme.md KT doc
 - EP-022 #76 (Angular UI):
-  - US-054 #90 ✅ — **Done** (PR #108, 2026-05-16) — Workflow list page: table/card view, filters, status badges, bulk-select, pagination, skeleton, empty state, WorkflowService
-  - US-055 #91, US-056 #92, US-057 #93 — Pending
+  - US-054 #90 ✅ — **Done** (PR #108, 2026-05-16) — Workflow list page: table/card view, filters, status badges, bulk-select, pagination, skeleton, empty state, WorkflowService, workflows-list.readme.md KT
+  - US-055 #91 ✅ — **Done** (PR #110, 2026-05-16) — Workflow detail page: hero, step tracker, tabs, sidebar, actions, workflow-detail.readme.md KT
+  - US-056 #92 — **Next**: Create + Edit workflow form (Angular)
+  - US-057 #93 — Pending: Step assign + complete modals
+- **Issue #109** created: `[TASK] Wire BFF proxy routes for Workflow API` — medium priority, Phase 6
 
 ## Phase 4 — Dashboard & Reporting (Pending — board populated 2026-05-16)
 - EP-023 #94 (Reporting Read Models): US-058 #98

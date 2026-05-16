@@ -1,7 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { WorkflowDefinitionSummary, WorkflowDefinitionDetail, WorkflowInstanceSummary } from '../models/workflow.models';
+import {
+  WorkflowDefinitionSummary,
+  WorkflowDefinitionDetail,
+  WorkflowInstanceSummary,
+  CreateWorkflowRequest,
+  UpdateWorkflowRequest,
+} from '../models/workflow.models';
 
 /**
  * Calls the BFF endpoints for workflow data.
@@ -51,6 +57,16 @@ export class WorkflowService {
       ? `${this.base}/definitions/${definitionId}/instances`
       : `${this.base}/instances`;
     return this.http.get<WorkflowInstanceSummary[]>(url);
+  }
+
+  /** Create a new workflow definition (Draft status). */
+  createDefinition(req: CreateWorkflowRequest): Observable<{ workflowDefinitionId: string }> {
+    return this.http.post<{ workflowDefinitionId: string }>(`${this.base}/definitions`, req);
+  }
+
+  /** Update a Draft workflow definition's name and description. */
+  updateDefinition(id: string, req: UpdateWorkflowRequest): Observable<void> {
+    return this.http.put<void>(`${this.base}/definitions/${id}`, req);
   }
 
   /** Soft-delete a workflow definition. */

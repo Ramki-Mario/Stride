@@ -1,0 +1,284 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     STRIDE — Workflow Form Page   (US-056 · EP-022)
+     Handles both Create (/workflows/new) and Edit (/workflows/:id/edit)
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<div class="wff-page">
+
+  <!-- ── Breadcrumb ─────────────────────────────────────────────────────── -->
+  <nav class="wff-breadcrumb" aria-label="Breadcrumb">
+    <a routerLink="/workflows" class="wff-bc-link">Workflows</a>
+    <span class="pi pi-chevron-right wff-bc-sep" aria-hidden="true"></span>
+    <span class="wff-bc-current">{{ breadcrumb() }}</span>
+  </nav>
+
+  <!-- ── Page header ───────────────────────────────────────────────────── -->
+  <div class="wff-header">
+    <div class="wff-header-left">
+      <div class="wff-header-icon" aria-hidden="true">
+        <span [class]="isEditMode() ? 'pi pi-pencil' : 'pi pi-plus-circle'"></span>
+      </div>
+      <div>
+        <h1 class="wff-title">{{ pageTitle() }}</h1>
+        <p class="wff-subtitle">
+          @if (isEditMode()) {
+            Update the name and description. To change steps, delete and recreate the workflow.
+          } @else {
+            Define a reusable workflow template. Steps can be assigned and executed once launched.
+          }
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Load error (edit mode only) ──────────────────────────────────── -->
+  @if (loadError()) {
+    <div class="wff-alert wff-alert-error" role="alert">
+      <span class="pi pi-exclamation-triangle"></span>
+      <span>{{ loadError() }}</span>
+      <a routerLink="/workflows" class="wff-alert-link">Back to Workflows</a>
+    </div>
+  }
+
+  <!-- ── Loading skeleton (edit mode) ─────────────────────────────────── -->
+  @else if (isLoadingWorkflow()) {
+    <div class="wff-skeleton-wrap">
+      <div class="wff-skeleton-block" style="height: 4rem;"></div>
+      <div class="wff-skeleton-block" style="height: 6rem;"></div>
+    </div>
+  }
+
+  <!-- ── Main form ─────────────────────────────────────────────────────── -->
+  @else {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate autocomplete="off">
+
+      <!-- Save error banner -->
+      @if (saveError()) {
+        <div class="wff-alert wff-alert-error" role="alert">
+          <span class="pi pi-exclamation-triangle"></span>
+          <span>{{ saveError() }}</span>
+        </div>
+      }
+
+      <!-- ── Two-column layout ─────────────────────────────────────────── -->
+      <div [ngClass]="isEditMode() ? 'wff-single-col' : 'wff-cols'">
+
+        <!-- ── Left: Workflow details ──────────────────────────────────── -->
+        <section class="wff-card" aria-label="Workflow details">
+          <div class="wff-card-header">
+            <span class="pi pi-info-circle wff-card-icon"></span>
+            <h2 class="wff-card-title">Workflow Details</h2>
+          </div>
+
+          <div class="wff-card-body">
+
+            <!-- Name -->
+            <div class="wff-field">
+              <label class="wff-label" for="wf-name">
+                Workflow Name <span class="wff-required" aria-hidden="true">*</span>
+              </label>
+              <input
+                id="wf-name"
+                type="text"
+                formControlName="name"
+                class="wff-input"
+                [ngClass]="{ 'wff-input-error': isInvalid('name') }"
+                placeholder="e.g. Employee Onboarding"
+                maxlength="100"
+                aria-describedby="name-error"
+              />
+              @if (requiredError('name')) {
+                <p id="name-error" class="wff-error-msg" role="alert">Name is required.</p>
+              } @else if (maxLengthError('name')) {
+                <p id="name-error" class="wff-error-msg" role="alert">Name cannot exceed 100 characters.</p>
+              }
+              <p class="wff-hint">Must be unique within your tenant.</p>
+            </div>
+
+            <!-- Description -->
+            <div class="wff-field">
+              <label class="wff-label" for="wf-desc">Description</label>
+              <textarea
+                id="wf-desc"
+                formControlName="description"
+                class="wff-textarea"
+                rows="4"
+                placeholder="Briefly describe the purpose of this workflow…"
+                maxlength="500"
+              ></textarea>
+              <p class="wff-hint">Optional — displayed on the workflow detail page.</p>
+            </div>
+
+            <!-- Edit-mode notice: steps locked -->
+            @if (isEditMode()) {
+              <div class="wff-notice">
+                <span class="pi pi-lock wff-notice-icon"></span>
+                <div>
+                  <p class="wff-notice-title">Steps are locked</p>
+                  <p class="wff-notice-body">
+                    Step definitions cannot be changed on an existing workflow.
+                    To modify steps, archive this workflow and create a new version.
+                  </p>
+                </div>
+              </div>
+            }
+
+          </div>
+        </section>
+
+        <!-- ── Right: Steps (create mode only) ────────────────────────── -->
+        @if (!isEditMode()) {
+          <section class="wff-card" aria-label="Workflow steps">
+            <div class="wff-card-header">
+              <span class="pi pi-list wff-card-icon"></span>
+              <h2 class="wff-card-title">Steps</h2>
+              <span class="wff-step-count">{{ steps.length }}</span>
+              <button
+                type="button"
+                class="wff-btn-add-step"
+                (click)="addStep()"
+                title="Add a step"
+              >
+                <span class="pi pi-plus"></span> Add Step
+              </button>
+            </div>
+
+            <div class="wff-card-body wff-steps-body">
+
+              @if (steps.length === 0) {
+                <div class="wff-steps-empty">
+                  <span class="pi pi-list wff-steps-empty-icon"></span>
+                  <p>No steps added yet. Click <strong>Add Step</strong> to begin.</p>
+                </div>
+              }
+
+              <div class="wff-steps-list">
+                @for (step of steps; track trackByIndex($index)) {
+                  <div class="wff-step-card" [ngClass]="{ 'wff-step-card-error': isStepInvalid($index, 'name') }">
+
+                    <!-- Step header -->
+                    <div class="wff-step-header">
+                      <span class="wff-step-number">{{ $index + 1 }}</span>
+
+                      <!-- Required toggle -->
+                      <label class="wff-toggle" title="Required step">
+                        <input
+                          type="checkbox"
+                          [formControl]="$any(stepsArray.at($index).get('isRequired'))"
+                          class="wff-toggle-input"
+                        />
+                        <span class="wff-toggle-track"></span>
+                        <span class="wff-toggle-label">Required</span>
+                      </label>
+
+                      <!-- Reorder buttons -->
+                      <div class="wff-step-reorder">
+                        <button
+                          type="button"
+                          class="wff-icon-btn"
+                          (click)="moveUp($index)"
+                          [disabled]="$index === 0"
+                          title="Move up"
+                        >
+                          <span class="pi pi-chevron-up"></span>
+                        </button>
+                        <button
+                          type="button"
+                          class="wff-icon-btn"
+                          (click)="moveDown($index)"
+                          [disabled]="$index === steps.length - 1"
+                          title="Move down"
+                        >
+                          <span class="pi pi-chevron-down"></span>
+                        </button>
+                      </div>
+
+                      <!-- Remove -->
+                      <button
+                        type="button"
+                        class="wff-icon-btn wff-icon-btn-danger"
+                        (click)="removeStep($index)"
+                        [disabled]="steps.length === 1"
+                        title="Remove step"
+                      >
+                        <span class="pi pi-trash"></span>
+                      </button>
+                    </div>
+
+                    <!-- Step fields -->
+                    <div class="wff-step-fields">
+                      <div class="wff-field wff-field-compact">
+                        <label class="wff-label" [for]="'step-name-' + $index">
+                          Step Name <span class="wff-required" aria-hidden="true">*</span>
+                        </label>
+                        <input
+                          [id]="'step-name-' + $index"
+                          type="text"
+                          [formControl]="$any(stepsArray.at($index).get('name'))"
+                          class="wff-input"
+                          [ngClass]="{ 'wff-input-error': isStepInvalid($index, 'name') }"
+                          placeholder="e.g. Manager Approval"
+                          maxlength="100"
+                        />
+                        @if (stepRequiredError($index, 'name')) {
+                          <p class="wff-error-msg" role="alert">Step name is required.</p>
+                        } @else if (stepMaxLengthError($index, 'name')) {
+                          <p class="wff-error-msg" role="alert">Step name cannot exceed 100 characters.</p>
+                        }
+                      </div>
+
+                      <div class="wff-field wff-field-compact">
+                        <label class="wff-label" [for]="'step-desc-' + $index">Description</label>
+                        <input
+                          [id]="'step-desc-' + $index"
+                          type="text"
+                          [formControl]="$any(stepsArray.at($index).get('description'))"
+                          class="wff-input"
+                          placeholder="Optional step description"
+                          maxlength="250"
+                        />
+                      </div>
+                    </div>
+
+                  </div>
+                }
+              </div>
+
+              @if (stepsArray.touched && stepsArray.invalid) {
+                <p class="wff-error-msg wff-error-steps" role="alert">
+                  Please fix the errors in the steps above.
+                </p>
+              }
+
+            </div>
+          </section>
+        }
+
+      </div><!-- /wff-cols -->
+
+      <!-- ── Action bar ───────────────────────────────────────────────── -->
+      <div class="wff-actions">
+        <button type="button" class="wff-btn wff-btn-ghost" (click)="cancel()">
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="wff-btn wff-btn-primary"
+          [disabled]="isSaving()"
+          [ngClass]="{ 'wff-btn-saving': isSaving() }"
+        >
+          @if (isSaving()) {
+            <span class="wff-spinner" aria-hidden="true"></span>
+            <span>Saving…</span>
+          } @else {
+            <span [class]="isEditMode() ? 'pi pi-check' : 'pi pi-plus'"></span>
+            <span>{{ submitLabel() }}</span>
+          }
+        </button>
+      </div>
+
+    </form>
+  }
+
+</div><!-- /wff-page -->

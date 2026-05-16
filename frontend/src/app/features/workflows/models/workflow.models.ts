@@ -55,6 +55,25 @@ export const STATUS_CONFIG: Record<WorkflowStatus, StatusConfig> = {
 
 export type SortKey = 'name' | 'status' | 'stepCount' | 'updatedAt' | 'createdAt';
 
+// ─── Form request payloads ────────────────────────────────────────────────────
+
+export interface StepRequest {
+  name: string;
+  description: string | null;
+  isRequired: boolean;
+}
+
+export interface CreateWorkflowRequest {
+  name: string;
+  description: string | null;
+  steps: StepRequest[];
+}
+
+export interface UpdateWorkflowRequest {
+  name: string;
+  description: string | null;
+}
+
 // ─── Definition detail (GET /bff/workflows/definitions/:id) ──────────────────
 
 export interface StepDefinition {
