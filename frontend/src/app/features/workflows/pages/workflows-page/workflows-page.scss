@@ -258,10 +258,10 @@
   height: 2.125rem;
   padding: 0 1.75rem 0 0.625rem;
   border: 1.5px solid var(--stride-border);
-  border-radius: var(--stride-radius-lg);
-  background: var(--stride-bg);
+  border-radius: var(--stride-radius-md);
+  background: var(--stride-surface);
   color: var(--stride-text-primary);
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-family: inherit;
   cursor: pointer;
   appearance: none;
@@ -274,6 +274,42 @@
   &:focus {
     border-color: var(--stride-primary);
     box-shadow: 0 0 0 3px var(--stride-primary-ring);
+  }
+}
+
+// PrimeNG Select override — matches wfl-filter-select dimensions and STRIDE tokens
+::ng-deep .wfl-primeng-select {
+  &.p-select {
+    height: 2.25rem;
+    min-width: 9rem;
+    border: 1.5px solid var(--stride-border);
+    border-radius: var(--stride-radius-md);
+    background: var(--stride-surface);
+    font-size: 0.875rem;
+    color: var(--stride-text-primary);
+    transition: border-color 150ms, box-shadow 150ms;
+
+    &:hover {
+      border-color: var(--stride-primary);
+    }
+
+    &.p-focus {
+      border-color: var(--stride-primary);
+      box-shadow: 0 0 0 3px var(--stride-primary-ring);
+      outline: none;
+    }
+
+    .p-select-label {
+      padding: 0 0.75rem;
+      line-height: 2.25rem;
+      color: var(--stride-text-primary);
+      font-size: 0.875rem;
+    }
+
+    .p-select-dropdown {
+      width: 2rem;
+      color: var(--stride-text-muted);
+    }
   }
 }
 

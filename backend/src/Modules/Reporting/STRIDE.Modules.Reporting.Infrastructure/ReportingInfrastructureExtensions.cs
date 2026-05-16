@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using STRIDE.Modules.Reporting.Application.Abstractions;
 using STRIDE.Modules.Reporting.Infrastructure.Persistence;
+using STRIDE.Modules.Reporting.Infrastructure.ReadModels;
 
 namespace STRIDE.Modules.Reporting.Infrastructure;
 
@@ -15,6 +17,8 @@ public static class ReportingInfrastructureExtensions
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"),
                 sql => sql.MigrationsAssembly(typeof(ReportingDbContext).Assembly.FullName)));
+
+        services.AddScoped<IReportingReadService, ReportingReadService>();
 
         return services;
     }

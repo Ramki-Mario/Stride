@@ -1,12 +1,22 @@
+using System.Reflection;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using STRIDE.BuildingBlocks.Infrastructure.Persistence;
 using STRIDE.Modules.Identity.Application.Abstractions;
 
 namespace STRIDE.Modules.Identity.Infrastructure.TenantResolution;
 
 internal sealed class TenantResolver : ITenantResolver
 {
+    private static readonly string SqlResolveByCorporateDomain =
+        SqlLoader.Load(typeof(TenantResolver).Assembly,
+            "STRIDE.Modules.Identity.Infrastructure.Tenant.Queries.ResolveTenantByCorporateDomain.sql");
+
+    private static readonly string SqlResolveByUserMapping =
+        SqlLoader.Load(typeof(TenantResolver).Assembly,
+            "STRIDE.Modules.Identity.Infrastructure.Tenant.Queries.ResolveTenantByUserMapping.sql");
+
     private readonly string _connectionString;
 
     public TenantResolver(IConfiguration configuration)
@@ -37,14 +47,7 @@ internal sealed class TenantResolver : ITenantResolver
         string domain,
         CancellationToken ct)
     {
-        const string sql = """
-            SELECT TenantId
-            FROM   [identity].TenantDomainMappings
-            WHERE  CorporateDomain = @Domain
-              AND  IsDeleted = 0
-            """;
-
-        var command = new CommandDefinition(sql, new { Domain = domain }, cancellationToken: ct);
+        var command = new CommandDefinition(SqlResolveByCorporateDomain, new { Domain = domain }, cancellationToken: ct);
         return await connection.QuerySingleOrDefaultAsync<Guid?>(command);
     }
 
@@ -53,16 +56,7 @@ internal sealed class TenantResolver : ITenantResolver
         string normalizedEmail,
         CancellationToken ct)
     {
-        const string sql = """
-            SELECT utm.TenantId
-            FROM   [identity].UserTenantMappings utm
-            INNER JOIN [identity].Users u ON u.Id = utm.UserId
-            WHERE  u.NormalizedEmail = @NormalizedEmail
-              AND  u.IsDeleted = 0
-              AND  utm.IsDeleted = 0
-            """;
-
-        var command = new CommandDefinition(sql, new { NormalizedEmail = normalizedEmail.ToUpperInvariant() }, cancellationToken: ct);
+        var command = new CommandDefinition(SqlResolveByUserMapping, new { NormalizedEmail = normalizedEmail.ToUpperInvariant() }, cancellationToken: ct);
         return await connection.QuerySingleOrDefaultAsync<Guid?>(command);
     }
 

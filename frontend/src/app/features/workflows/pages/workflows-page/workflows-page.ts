@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Select } from 'primeng/select';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
@@ -25,7 +26,7 @@ import { WorkflowService } from '../../services/workflow.service';
 @Component({
   selector: 'app-workflows-page',
   standalone: true,
-  imports: [NgClass, FormsModule],
+  imports: [NgClass, FormsModule, Select],
   templateUrl: './workflows-page.html',
   styleUrl: './workflows-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +38,21 @@ export class WorkflowsPageComponent implements OnInit {
 
   // ── Expose helpers to template ──────────────────────────────────────────
   readonly STATUS_CONFIG = STATUS_CONFIG;
+
+  readonly statusOptions = [
+    { label: 'All Statuses', value: '' },
+    { label: 'Draft',        value: 'Draft' },
+    { label: 'Active',       value: 'Active' },
+    { label: 'Archived',     value: 'Archived' },
+  ];
+
+  readonly sortOptions = [
+    { label: 'Last Updated', value: 'updatedAt' },
+    { label: 'Name A–Z',     value: 'name' },
+    { label: 'Created',      value: 'createdAt' },
+    { label: 'Status',       value: 'status' },
+    { label: 'Step Count',   value: 'stepCount' },
+  ];
   readonly PAGE_SIZE = 10;
 
   // ── Server state ────────────────────────────────────────────────────────

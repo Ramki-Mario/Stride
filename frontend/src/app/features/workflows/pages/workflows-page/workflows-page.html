@@ -123,31 +123,30 @@
   </div>
 
   <!-- Status filter -->
-  <select
+  <p-select
     class="wfl-filter-select"
+    [options]="statusOptions"
+    optionLabel="label"
+    optionValue="value"
     [ngModel]="statusFilter()"
     (ngModelChange)="statusFilter.set($event)"
+    placeholder="All Statuses"
     aria-label="Filter by status"
-  >
-    <option value="">All Statuses</option>
-    <option value="Draft">Draft</option>
-    <option value="Active">Active</option>
-    <option value="Archived">Archived</option>
-  </select>
+    styleClass="wfl-primeng-select"
+  />
 
   <!-- Sort -->
-  <select
+  <p-select
     class="wfl-filter-select"
+    [options]="sortOptions"
+    optionLabel="label"
+    optionValue="value"
     [ngModel]="sortBy()"
     (ngModelChange)="sortBy.set($event)"
+    placeholder="Sort: Last Updated"
     aria-label="Sort by"
-  >
-    <option value="updatedAt">Sort: Last Updated</option>
-    <option value="name">Sort: Name A–Z</option>
-    <option value="createdAt">Sort: Created</option>
-    <option value="status">Sort: Status</option>
-    <option value="stepCount">Sort: Step Count</option>
-  </select>
+    styleClass="wfl-primeng-select"
+  />
 
   <!-- Divider -->
   <div class="wfl-toolbar-divider" aria-hidden="true"></div>
