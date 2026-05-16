@@ -19,12 +19,21 @@
   overflow-y: auto; // allows internal scroll only on very small screens
   padding: 1.5rem 1rem;
 
-  // Deep navy indigo gradient — same as prototype
-  background: linear-gradient(135deg, #0f0e2a 0%, #1e1b4b 40%, #312e81 70%, #1e1b4b 100%);
+  // Premium Purple gradient — deep violet to rich purple
+  background: linear-gradient(135deg, #280E5C 0%, #5B21A8 40%, #7C3AED 70%, #4C1D95 100%);
   background-size: 300% 300%;
   animation: authGradientDrift 18s ease infinite;
 
   :host-context([data-theme='dark']) & {
+    background: linear-gradient(135deg, #0C041E 0%, #1A0845 40%, #2E1278 70%, #120535 100%);
+  }
+
+  // Indigo palette overrides — restore original deep navy gradient
+  :host-context([data-palette='indigo']) & {
+    background: linear-gradient(135deg, #0f0e2a 0%, #1e1b4b 40%, #312e81 70%, #1e1b4b 100%);
+  }
+
+  :host-context([data-palette='indigo'][data-theme='dark']) & {
     background: linear-gradient(135deg, #020817 0%, #0f0e2a 40%, #1e1b4b 70%, #0f172a 100%);
   }
 }
@@ -41,8 +50,12 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: radial-gradient(circle, rgba(99, 102, 241, 0.15) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(185, 122, 249, 0.18) 1px, transparent 1px);
   background-size: 32px 32px;
+
+  :host-context([data-palette='indigo']) & {
+    background-image: radial-gradient(circle, rgba(99, 102, 241, 0.15) 1px, transparent 1px);
+  }
 }
 
 // ── Brand block (above card) ──────────────────────────────────────────────────
@@ -69,7 +82,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 16px rgba(185, 122, 249, 0.50);
+
+  :host-context([data-palette='indigo']) & {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  }
 }
 
 .auth-brand-name {
