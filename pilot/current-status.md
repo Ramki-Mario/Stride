@@ -160,8 +160,8 @@ Phase 3 (Core Workflow Engine) — **In Progress**.
 - EP-022 #76 (Angular UI):
   - US-054 #90 ✅ — **Done** (PR #108, 2026-05-16) — Workflow list page: table/card view, filters, status badges, bulk-select, pagination, skeleton, empty state, WorkflowService, workflows-list.readme.md KT
   - US-055 #91 ✅ — **Done** (PR #110, 2026-05-16) — Workflow detail page: hero, step tracker, tabs, sidebar, actions, workflow-detail.readme.md KT
-  - US-056 #92 — **Next**: Create + Edit workflow form (Angular)
-  - US-057 #93 — Pending: Step assign + complete modals
+  - US-056 #92 ✅ — **Done** (PR #111, 2026-05-16) — Create + Edit workflow form (ReactiveFormsModule, dual-mode, step builder)
+  - US-057 #93 — **Next**: Step assign + complete modals
 - **Issue #109** created: `[TASK] Wire BFF proxy routes for Workflow API` — medium priority, Phase 6
 
 ## Phase 4 — Dashboard & Reporting (Pending — board populated 2026-05-16)

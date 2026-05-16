@@ -1,7 +1,18 @@
 <!-- ═══════════════════════════════════════════════════════════════════════
-     STRIDE — Workflow Detail Page   (US-055 · EP-022)
+     STRIDE — Workflow Detail Page   (US-055 + US-057 · EP-022)
      Design reference: pilot/docs/ui-mockups/05-workflow-detail.html
      ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- ── Step action modal (rendered at top of host, z-indexed above page) ── -->
+@if (modalStep() && modalAction()) {
+  <app-step-action-modal
+    [instanceId]="instance()!.id"
+    [step]="modalStep()!"
+    [action]="modalAction()!"
+    (dismissed)="closeModal()"
+    (actionCompleted)="onStepActioned()"
+  />
+}
 
 <!-- ── Loading skeleton ─────────────────────────────────────────────────── -->
 @if (isLoading()) {
@@ -68,6 +79,12 @@
               <span class="wfd-badge-dot" [class.pulse]="wf.status === 'Active'"></span>
               {{ statusLabel() }}
             </span>
+            @if (hasActiveInstance()) {
+              <span class="wfd-badge badge-running">
+                <span class="wfd-badge-dot pulse"></span>
+                Instance Running
+              </span>
+            }
           </div>
         </div>
 
@@ -145,12 +162,13 @@
     <!-- ── Two-column layout ───────────────────────────────────────────── -->
     <div class="wfd-cols">
 
-      <!-- ── Left column: Steps + Activity ── -->
+      <!-- ── Left column: Tabs ── -->
       <div class="wfd-col-main">
 
-        <!-- Tab bar -->
         <div class="wfd-tabs-card">
           <div class="wfd-tab-bar" role="tablist">
+
+            <!-- Steps (definition template) -->
             <button
               class="wfd-tab"
               [class.active]="activeTab() === 'steps'"
@@ -160,6 +178,22 @@
             >
               <span class="pi pi-list-check"></span> Steps ({{ wf.steps.length }})
             </button>
+
+            <!-- Run (live instance) — only visible when an instance is loaded -->
+            @if (hasActiveInstance()) {
+              <button
+                class="wfd-tab wfd-tab-run"
+                [class.active]="activeTab() === 'run'"
+                (click)="setTab('run')"
+                role="tab"
+                [attr.aria-selected]="activeTab() === 'run'"
+              >
+                <span class="pi pi-play-circle"></span>
+                Run
+                <span class="wfd-tab-badge">{{ instance()!.completedSteps }}/{{ instance()!.totalSteps }}</span>
+              </button>
+            }
+
             <button
               class="wfd-tab"
               [class.active]="activeTab() === 'activity'"
@@ -180,7 +214,7 @@
             </button>
           </div>
 
-          <!-- Steps tab ────────────────────────────────────────────────── -->
+          <!-- ── Steps tab (definition template) ───────────────────────── -->
           @if (activeTab() === 'steps') {
             <div class="wfd-tab-panel" role="tabpanel">
               @if (sortedSteps().length === 0) {
@@ -193,25 +227,17 @@
                 </div>
               } @else {
                 <div class="wfd-step-track" role="list">
-                  @for (step of sortedSteps(); track step.id; let last = $last; let idx = $index) {
+                  @for (step of sortedSteps(); track step.id; let last = $last) {
                     <div class="wfd-step-item" role="listitem">
-
-                      <!-- Connector column -->
                       <div class="wfd-step-connector" aria-hidden="true">
-                        <div class="wfd-step-dot step-dot-pending">
-                          {{ step.order }}
-                        </div>
-                        @if (!last) {
-                          <div class="wfd-step-line"></div>
-                        }
+                        <div class="wfd-step-dot step-dot-pending">{{ step.order }}</div>
+                        @if (!last) { <div class="wfd-step-line"></div> }
                       </div>
-
-                      <!-- Step content -->
                       <div class="wfd-step-body">
                         <div class="wfd-step-header">
                           <span class="wfd-step-name">{{ step.name }}</span>
                           @if (step.isRequired) {
-                            <span class="wfd-required-badge" title="This step is required">Required</span>
+                            <span class="wfd-required-badge">Required</span>
                           } @else {
                             <span class="wfd-optional-badge">Optional</span>
                           }
@@ -227,7 +253,154 @@
             </div>
           }
 
-          <!-- Activity tab ─────────────────────────────────────────────── -->
+          <!-- ── Run tab (live instance with step modals) ───────────────── -->
+          @if (activeTab() === 'run') {
+            <div class="wfd-tab-panel" role="tabpanel">
+
+              <!-- Instance loading skeleton -->
+              @if (isLoadingInst()) {
+                <div class="wfd-inst-loading">
+                  <span class="pi pi-spin pi-spinner wfd-inst-spinner"></span>
+                  <span>Loading instance…</span>
+                </div>
+              }
+
+              <!-- Instance load error -->
+              @else if (instanceError()) {
+                <div class="wfd-error-banner" role="alert">
+                  <span class="pi pi-exclamation-triangle"></span>
+                  {{ instanceError() }}
+                </div>
+              }
+
+              @else if (instance(); as inst) {
+                <!-- Instance header strip -->
+                <div class="wfd-inst-header">
+                  <div class="wfd-inst-meta">
+                    <span class="wfd-badge" [ngClass]="instanceStatusClass()">
+                      <span class="wfd-badge-dot" [class.pulse]="inst.status === 'Running'"></span>
+                      {{ instanceStatusLabel() }}
+                    </span>
+                    <span class="wfd-inst-id">{{ inst.id.substring(0, 8).toUpperCase() }}</span>
+                    <span class="wfd-inst-started">Started {{ formatDateTime(inst.startedAt) }}</span>
+                  </div>
+
+                  <!-- Progress bar -->
+                  <div class="wfd-progress-wrap">
+                    <div class="wfd-progress-bar">
+                      <div
+                        class="wfd-progress-fill"
+                        [style.width.%]="instanceProgress()"
+                      ></div>
+                    </div>
+                    <span class="wfd-progress-label">
+                      {{ inst.completedSteps }} / {{ inst.totalSteps }} steps
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Instance step list -->
+                <div class="wfd-inst-steps" role="list">
+                  @for (step of sortedInstanceSteps(); track step.id; let last = $last) {
+                    <div
+                      class="wfd-inst-step"
+                      [ngClass]="stepInstanceStatusClass(step.status)"
+                      role="listitem"
+                    >
+                      <!-- Status icon column -->
+                      <div class="wfd-inst-step-icon-col" aria-hidden="true">
+                        <div class="wfd-inst-step-dot" [ngClass]="stepInstanceStatusClass(step.status)">
+                          <span class="pi {{ stepInstanceStatusIcon(step.status) }}"></span>
+                        </div>
+                        @if (!last) { <div class="wfd-inst-step-line"></div> }
+                      </div>
+
+                      <!-- Step content -->
+                      <div class="wfd-inst-step-content">
+                        <div class="wfd-inst-step-top">
+                          <div class="wfd-inst-step-info">
+                            <span class="wfd-step-name">{{ step.name }}</span>
+                            <span class="wfd-inst-step-status-badge" [ngClass]="stepInstanceStatusClass(step.status)">
+                              {{ stepInstanceStatusLabel(step.status) }}
+                            </span>
+                            @if (!step.isRequired) {
+                              <span class="wfd-optional-badge">Optional</span>
+                            }
+                          </div>
+
+                          <!-- Action buttons (only for actionable states) -->
+                          @if (inst.status === 'Running' || inst.status === 'Paused') {
+                            <div class="wfd-inst-step-actions">
+                              @if (canAssign(step)) {
+                                <button
+                                  class="wfd-step-action-btn assign"
+                                  (click)="openModal(step, 'assign')"
+                                  title="Assign to user"
+                                >
+                                  <span class="pi pi-user-plus"></span>
+                                </button>
+                              }
+                              @if (canComplete(step)) {
+                                <button
+                                  class="wfd-step-action-btn complete"
+                                  (click)="openModal(step, 'complete')"
+                                  title="Mark complete"
+                                >
+                                  <span class="pi pi-check"></span>
+                                </button>
+                              }
+                              @if (canFail(step)) {
+                                <button
+                                  class="wfd-step-action-btn fail"
+                                  (click)="openModal(step, 'fail')"
+                                  title="Mark failed"
+                                >
+                                  <span class="pi pi-times"></span>
+                                </button>
+                              }
+                              @if (canSkip(step)) {
+                                <button
+                                  class="wfd-step-action-btn skip"
+                                  (click)="openModal(step, 'skip')"
+                                  title="Skip step"
+                                >
+                                  <span class="pi pi-forward"></span>
+                                </button>
+                              }
+                            </div>
+                          }
+                        </div>
+
+                        @if (step.description) {
+                          <p class="wfd-step-desc">{{ step.description }}</p>
+                        }
+                        @if (step.assignedTo) {
+                          <p class="wfd-inst-step-assignee">
+                            <span class="pi pi-user"></span>
+                            Assigned to {{ step.assignedTo.substring(0, 8) }}…
+                          </p>
+                        }
+                        @if (step.failureReason) {
+                          <p class="wfd-inst-step-reason">
+                            <span class="pi pi-exclamation-triangle"></span>
+                            {{ step.failureReason }}
+                          </p>
+                        }
+                        @if (step.completedAt) {
+                          <p class="wfd-inst-step-completed">
+                            <span class="pi pi-calendar-check"></span>
+                            Completed {{ formatDateTime(step.completedAt) }}
+                          </p>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- ── Activity tab ─────────────────────────────────────────── -->
           @if (activeTab() === 'activity') {
             <div class="wfd-tab-panel" role="tabpanel">
               <div class="wfd-activity-placeholder">
@@ -241,7 +414,7 @@
             </div>
           }
 
-          <!-- History tab ──────────────────────────────────────────────── -->
+          <!-- ── History tab ─────────────────────────────────────────── -->
           @if (activeTab() === 'history') {
             <div class="wfd-tab-panel" role="tabpanel">
               <div class="wfd-activity-placeholder">

@@ -5,6 +5,7 @@ import {
   WorkflowDefinitionSummary,
   WorkflowDefinitionDetail,
   WorkflowInstanceSummary,
+  WorkflowInstanceDetail,
   CreateWorkflowRequest,
   UpdateWorkflowRequest,
 } from '../models/workflow.models';
@@ -77,5 +78,42 @@ export class WorkflowService {
   /** Cancel a running workflow instance. */
   cancelInstance(instanceId: string): Observable<void> {
     return this.http.post<void>(`${this.base}/instances/${instanceId}/cancel`, {});
+  }
+
+  /** Get a single workflow instance with all step instances and their status. */
+  getInstanceDetail(instanceId: string): Observable<WorkflowInstanceDetail> {
+    return this.http.get<WorkflowInstanceDetail>(`${this.base}/instances/${instanceId}`);
+  }
+
+  /** Assign a step instance to a user (provide their userId as assigneeId). */
+  assignStep(instanceId: string, stepId: string, assigneeId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.base}/instances/${instanceId}/steps/${stepId}/assign`,
+      { assigneeId },
+    );
+  }
+
+  /** Mark a step instance as completed by the current user. */
+  completeStep(instanceId: string, stepId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.base}/instances/${instanceId}/steps/${stepId}/complete`,
+      {},
+    );
+  }
+
+  /** Mark a step instance as failed, providing a mandatory failure reason. */
+  failStep(instanceId: string, stepId: string, reason: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.base}/instances/${instanceId}/steps/${stepId}/fail`,
+      { reason },
+    );
+  }
+
+  /** Skip a step instance (permitted for optional steps only). */
+  skipStep(instanceId: string, stepId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.base}/instances/${instanceId}/steps/${stepId}/skip`,
+      {},
+    );
   }
 }

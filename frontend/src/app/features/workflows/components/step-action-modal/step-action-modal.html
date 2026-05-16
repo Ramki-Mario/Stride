@@ -1,0 +1,205 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     Step Action Modal   (US-057 · EP-022)
+     Handles: assign | complete | fail | skip
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- Backdrop -->
+<div class="sam-backdrop" (click)="dismiss()" aria-hidden="true"></div>
+
+<!-- Dialog -->
+<div
+  class="sam-dialog"
+  role="dialog"
+  [attr.aria-label]="title"
+  aria-modal="true"
+>
+  <!-- Header -->
+  <div class="sam-header">
+    <div class="sam-header-left">
+      <span class="pi {{ iconClass }}"></span>
+      <div>
+        <h2 class="sam-title">{{ title }}</h2>
+        <p class="sam-step-name">{{ step.name }}</p>
+      </div>
+    </div>
+    <button class="sam-close" (click)="dismiss()" aria-label="Close modal">
+      <span class="pi pi-times"></span>
+    </button>
+  </div>
+
+  <!-- Error banner -->
+  @if (submitError()) {
+    <div class="sam-alert-error" role="alert">
+      <span class="pi pi-exclamation-triangle"></span>
+      {{ submitError() }}
+    </div>
+  }
+
+  <!-- Body -->
+  <div class="sam-body">
+
+    <!-- Step metadata chip row -->
+    <div class="sam-step-meta">
+      <span class="sam-chip">
+        <span class="pi pi-hashtag"></span> Order {{ step.order }}
+      </span>
+      @if (step.isRequired) {
+        <span class="sam-chip sam-chip-required">Required</span>
+      } @else {
+        <span class="sam-chip sam-chip-optional">Optional</span>
+      }
+    </div>
+
+    @if (step.description) {
+      <p class="sam-step-desc">{{ step.description }}</p>
+    }
+
+    <!-- ── ASSIGN form ─────────────────────────────────────────────────── -->
+    @if (action === 'assign') {
+      <form [formGroup]="assignForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="sam-field">
+          <label class="sam-label" for="sam-assignee">
+            Assignee User ID <span class="sam-required" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="sam-assignee"
+            type="text"
+            formControlName="assigneeId"
+            class="sam-input"
+            [ngClass]="{ 'sam-input-error': isAssigneeInvalid() }"
+            placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          @if (isAssigneeInvalid()) {
+            <p class="sam-error-msg" role="alert">
+              @if (assignForm.get('assigneeId')?.hasError('required')) {
+                Assignee is required.
+              } @else {
+                Must be a valid UUID (e.g. 4f3a1b2c-…).
+              }
+            </p>
+          }
+          <p class="sam-hint">Enter the user's account ID. User picker coming in Phase 5.</p>
+        </div>
+
+        <div class="sam-footer">
+          <button type="button" class="sam-btn sam-btn-ghost" (click)="dismiss()">Cancel</button>
+          <button
+            type="submit"
+            class="sam-btn {{ submitClass }}"
+            [disabled]="isSubmitting()"
+          >
+            @if (isSubmitting()) {
+              <span class="sam-spinner" aria-hidden="true"></span> Assigning…
+            } @else {
+              <span class="pi pi-user-plus"></span> {{ submitLabel }}
+            }
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- ── COMPLETE confirmation ──────────────────────────────────────── -->
+    @if (action === 'complete') {
+      <div class="sam-confirm-body">
+        <p>
+          Mark <strong>{{ step.name }}</strong> as <strong>Completed</strong>?
+          This action will be recorded against your user account and cannot be undone.
+        </p>
+      </div>
+      <div class="sam-footer">
+        <button type="button" class="sam-btn sam-btn-ghost" (click)="dismiss()">Cancel</button>
+        <button
+          type="button"
+          class="sam-btn {{ submitClass }}"
+          (click)="onSubmit()"
+          [disabled]="isSubmitting()"
+        >
+          @if (isSubmitting()) {
+            <span class="sam-spinner" aria-hidden="true"></span> Saving…
+          } @else {
+            <span class="pi pi-check-circle"></span> {{ submitLabel }}
+          }
+        </button>
+      </div>
+    }
+
+    <!-- ── FAIL form ───────────────────────────────────────────────────── -->
+    @if (action === 'fail') {
+      <form [formGroup]="failForm" (ngSubmit)="onSubmit()" novalidate>
+        @if (step.isRequired) {
+          <div class="sam-warning-notice">
+            <span class="pi pi-exclamation-triangle"></span>
+            Failing a <strong>required</strong> step will also fail the parent workflow instance.
+          </div>
+        }
+
+        <div class="sam-field">
+          <label class="sam-label" for="sam-reason">
+            Failure Reason <span class="sam-required" aria-hidden="true">*</span>
+          </label>
+          <textarea
+            id="sam-reason"
+            formControlName="reason"
+            class="sam-textarea"
+            [ngClass]="{ 'sam-input-error': isReasonInvalid() }"
+            rows="3"
+            placeholder="Describe what went wrong…"
+            maxlength="500"
+          ></textarea>
+          @if (isReasonInvalid()) {
+            <p class="sam-error-msg" role="alert">Failure reason is required.</p>
+          }
+        </div>
+
+        <div class="sam-footer">
+          <button type="button" class="sam-btn sam-btn-ghost" (click)="dismiss()">Cancel</button>
+          <button
+            type="submit"
+            class="sam-btn {{ submitClass }}"
+            [disabled]="isSubmitting()"
+          >
+            @if (isSubmitting()) {
+              <span class="sam-spinner sam-spinner-light" aria-hidden="true"></span> Saving…
+            } @else {
+              <span class="pi pi-times-circle"></span> {{ submitLabel }}
+            }
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- ── SKIP confirmation ──────────────────────────────────────────── -->
+    @if (action === 'skip') {
+      <div class="sam-confirm-body">
+        @if (step.isRequired) {
+          <div class="sam-warning-notice">
+            <span class="pi pi-exclamation-triangle"></span>
+            This is a <strong>required</strong> step. Skipping may not be permitted by the workflow policy.
+          </div>
+        }
+        <p>
+          Skip <strong>{{ step.name }}</strong>? The step will be marked as Skipped
+          and execution will continue to the next step.
+        </p>
+      </div>
+      <div class="sam-footer">
+        <button type="button" class="sam-btn sam-btn-ghost" (click)="dismiss()">Cancel</button>
+        <button
+          type="button"
+          class="sam-btn {{ submitClass }}"
+          (click)="onSubmit()"
+          [disabled]="isSubmitting()"
+        >
+          @if (isSubmitting()) {
+            <span class="sam-spinner" aria-hidden="true"></span> Saving…
+          } @else {
+            <span class="pi pi-forward"></span> {{ submitLabel }}
+          }
+        </button>
+      </div>
+    }
+
+  </div><!-- /sam-body -->
+</div><!-- /sam-dialog -->
