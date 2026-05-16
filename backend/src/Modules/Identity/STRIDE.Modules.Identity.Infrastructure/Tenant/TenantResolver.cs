@@ -39,7 +39,7 @@ internal sealed class TenantResolver : ITenantResolver
     {
         const string sql = """
             SELECT TenantId
-            FROM   identity.TenantDomainMappings
+            FROM   [identity].TenantDomainMappings
             WHERE  CorporateDomain = @Domain
               AND  IsDeleted = 0
             """;
@@ -55,8 +55,8 @@ internal sealed class TenantResolver : ITenantResolver
     {
         const string sql = """
             SELECT utm.TenantId
-            FROM   identity.UserTenantMappings utm
-            INNER JOIN identity.Users u ON u.Id = utm.UserId
+            FROM   [identity].UserTenantMappings utm
+            INNER JOIN [identity].Users u ON u.Id = utm.UserId
             WHERE  u.NormalizedEmail = @NormalizedEmail
               AND  u.IsDeleted = 0
               AND  utm.IsDeleted = 0
