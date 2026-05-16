@@ -1,0 +1,52 @@
+flowchart TD
+    classDef startEnd  fill:#08427B,stroke:#052E56,color:#fff,font-size:13px
+    classDef process   fill:#1168BD,stroke:#0B4884,color:#fff,font-size:13px
+    classDef decision  fill:#B45309,stroke:#92400E,color:#fff,font-size:13px
+    classDef success   fill:#047857,stroke:#065F46,color:#fff,font-size:13px
+    classDef error     fill:#B91C1C,stroke:#7F1D1D,color:#fff,font-size:13px
+    classDef note      fill:#1E1B4B,stroke:#312E81,color:#fff,font-size:12px
+
+    %% ── Entry ────────────────────────────────────────────────────────────────
+    START(["Login Request arrives at\nLoginCommandHandler\n{ email: user@company.com }"])
+
+    %% ── Step 1: extract domain ───────────────────────────────────────────────
+    EXTRACT["TenantResolver.ResolveAsync(email)\n─────────────────────────────────\nExtract email domain:\n'user@company.com' → 'company.com'"]
+
+    %% ── Path 1: corporate domain lookup ─────────────────────────────────────
+    CHECK1{"Query: TenantDomainMappings\nWHERE Domain = 'company.com'\nAND IsDeleted = false"}
+
+    %% ── Path 2: explicit user mapping ────────────────────────────────────────
+    CHECK2{"Query: UserTenantMappings\nJOIN Users ON UserId\nWHERE Users.Email = 'user@company.com'\nAND IsDeleted = false"}
+
+    %% ── Success path ─────────────────────────────────────────────────────────
+    SET["ITenantContextSetter.SetTenantId(tenantId)\n─────────────────────────────────\nTenant scope established.\nAll downstream TenantAwareRepository‹T›\ncalls auto-filter by this TenantId."]
+
+    PROCEED(["LoginCommandHandler continues:\nPBKDF2-SHA256 credential check\nJWT issued with tid = tenantId\n(sub · email · tid · roles[])"])
+
+    %% ── Error path ───────────────────────────────────────────────────────────
+    ERR(["401 Unauthorized\n─────────────\nResult.Failure: 'No tenant found\nfor this email address.'\nLogin blocked."])
+
+    %% ── Flow ─────────────────────────────────────────────────────────────────
+    START --> EXTRACT
+    EXTRACT --> CHECK1
+    CHECK1 -->|"✅  Row found\nCorporate domain registered\nto a tenant"| SET
+    CHECK1 -->|"❌  No match\nGeneric email domain\n(gmail · hotmail · etc.)"| CHECK2
+    CHECK2 -->|"✅  Row found\nUser explicitly mapped\nto a tenant"| SET
+    CHECK2 -->|"❌  No mapping\nUser not registered\nwith any tenant"| ERR
+    SET --> PROCEED
+
+    %% ── Design notes ─────────────────────────────────────────────────────────
+    NOTE1["📌  TenantRepository bypasses\nTenantAwareRepository filter.\nIt is a self-owning root —\nresolving Tenant cannot itself\nrequire a Tenant to be set."]
+
+    NOTE2["📌  Shared DB strategy (ADR-006):\nEvery subsequent query uses\nTenantId as a mandatory filter.\nTenantAwareRepository‹T,TCtx›\napplies WHERE TenantId = @tid\nAND IsDeleted = false automatically."]
+
+    CHECK1 -. "uses" .-> NOTE1
+    SET -. "enables" .-> NOTE2
+
+    %% ── Styles ───────────────────────────────────────────────────────────────
+    class START startEnd
+    class EXTRACT,SET process
+    class CHECK1,CHECK2 decision
+    class PROCEED success
+    class ERR error
+    class NOTE1,NOTE2 note

@@ -1,0 +1,69 @@
+flowchart LR
+    classDef person    fill:#08427B,stroke:#052E56,color:#fff,font-size:13px
+    classDef container fill:#1168BD,stroke:#0B4884,color:#fff,font-size:13px
+    classDef module    fill:#1558A0,stroke:#0D3B6E,color:#fff,font-size:12px
+    classDef db        fill:#555555,stroke:#333,color:#fff,font-size:12px
+    classDef extSystem fill:#999999,stroke:#6b6b6b,color:#fff,font-size:12px
+
+    %% ── Users ────────────────────────────────────────────────────────────────
+    subgraph USERS["👤  Users"]
+        direction TB
+        USR("**Tenant Admin**\n─────────────\nOperations Manager\nField Worker\nFinance User")
+    end
+
+    %% ── Browser ──────────────────────────────────────────────────────────────
+    subgraph BROWSER["🌐  Browser"]
+        direction TB
+        SPA("**Angular SPA**\n─────────────\nAngular 21 · TypeScript\nTailwind CSS 4 · PrimeNG 21\nSignals + RxJS\n─────────────\nBFF-only calls.\nNo bearer tokens\nor direct Host API access.")
+    end
+
+    %% ── STRIDE BFF ───────────────────────────────────────────────────────────
+    subgraph BFFBOX["🔷  STRIDE BFF  ·  ASP.NET Core (.NET 10)"]
+        direction TB
+        AUTHM("**Cookie Auth**\n─────────────\nHttpOnly · SameSite=Strict\nIssues opaque session cookie.\nJWT never forwarded to client.")
+        SESS("**Session Handler**\n─────────────\nRedis-backed store.\nKey: tenant:{id}:session:{id}\nTTL matches JWT expiry.")
+        PROXY("**BFF Proxy**\n─────────────\nTyped HttpClient → Host.\n/bff/auth/*\n/bff/workflows/*\n/bff/reporting/*")
+    end
+
+    %% ── STRIDE Host ──────────────────────────────────────────────────────────
+    subgraph HOSTBOX["🔷  STRIDE Host  ·  Modular Monolith (.NET 10)"]
+        direction TB
+        BB("**BuildingBlocks**\n─────────────\nResult‹T› · ITenantContext\nICurrentUser · IEventBus\nTenantAwareRepository‹T›\nIDomainEvent · AuditableEntity")
+        PIPE("**MediatR Pipeline**\n─────────────\nValidationBehaviour\nLoggingBehaviour\nTenantBehaviour")
+        subgraph MODS["Feature Modules  (each: Domain / Application / Infrastructure / API)"]
+            direction TB
+            IDENTITY("**Identity**\nUser · Role · Permission\nJWT · Tenant resolver")
+            WORKFLOWS("**Workflows**\nDefinition · Instance · Steps\nState machine · CRUD lifecycle")
+            OTHER("**Scheduling** (Ph.5)\n**Notifications** (Ph.5)\n**Reporting** · **Invoicing** (Ph.6)\n**Administration**")
+        end
+    end
+
+    %% ── Data Stores ──────────────────────────────────────────────────────────
+    subgraph DATA["☁️  Data Stores"]
+        direction TB
+        SQL[("**Azure SQL**\n─────────────\nShared DB + TenantId isolation.\nSchema-separated per module:\nidentity.* · workflows.*\nscheduling.* · reporting.*")]
+        REDIS[("**Redis**\n─────────────\nBFF: session store\nHost: cache + revocation\nKey: tenant:{id}:session:{id}")]
+    end
+
+    %% ── External (future) ────────────────────────────────────────────────────
+    subgraph EXT["☁️  External  (Future Phases)"]
+        direction TB
+        MAIL("**Email Service**\nSMTP / SendGrid\n(Phase 5)")
+        IDP("**External IdP**\nAzure AD / Auth0 / OIDC\n(Phase 6+)")
+    end
+
+    %% ── Relationships ────────────────────────────────────────────────────────
+    USR -- "HTTPS / Browser" --> SPA
+    SPA -- "HTTPS +\nHttpOnly Cookie" --> BFFBOX
+    BFFBOX -- "HTTPS /\nTyped HttpClient" --> HOSTBOX
+    BFFBOX -- "Session store\nTLS" --> REDIS
+    HOSTBOX -- "EF Core writes\nDapper reads / TLS" --> SQL
+    HOSTBOX -- "Cache + revoke\nTLS" --> REDIS
+    HOSTBOX -. "SMTP (Phase 5)" .-> MAIL
+    HOSTBOX -. "OIDC / SAML (Phase 6+)" .-> IDP
+
+    %% ── Styles ───────────────────────────────────────────────────────────────
+    class USR person
+    class SPA,AUTHM,SESS,PROXY,BB,PIPE,IDENTITY,WORKFLOWS,OTHER container
+    class SQL,REDIS db
+    class MAIL,IDP extSystem

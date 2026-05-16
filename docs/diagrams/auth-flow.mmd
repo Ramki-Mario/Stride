@@ -1,0 +1,55 @@
+flowchart TD
+    classDef actor    fill:#08427B,stroke:#052E56,color:#fff,font-size:13px
+    classDef bff      fill:#1168BD,stroke:#0B4884,color:#fff,font-size:13px
+    classDef host     fill:#0F766E,stroke:#0D5C54,color:#fff,font-size:13px
+    classDef store    fill:#555555,stroke:#333333,color:#fff,font-size:12px
+    classDef rule     fill:#1E1B4B,stroke:#312E81,color:#fff,font-size:12px
+
+    BROWSER(["🌐  Angular SPA\n(Browser)"])
+
+    %% ── BFF containers ───────────────────────────────────────────────────────
+    subgraph BFFBOX["🔷  STRIDE BFF  ·  ASP.NET Core (.NET 10)"]
+        direction TB
+        B1["**Step 1 — Receive login request**\nPOST /bff/auth/login\n{ email, password }"]
+        B2["**Step 6 — Receive JWT from Host**\nHS256 token · sub · email · tid · roles[]\nNever forwarded to browser"]
+        B3["**Step 7 — Store claims in Redis**\nKey: tenant:{tenantId}:session:{opaqueId}\nTTL = JWT expiry"]
+        B4["**Step 8 — Issue session cookie**\nSet-Cookie: session={tid}.{opaqueId}\nHttpOnly · SameSite=Strict · Secure\nOpaque value — not the JWT"]
+    end
+
+    %% ── Host containers ──────────────────────────────────────────────────────
+    subgraph HOSTBOX["🔷  STRIDE Host  ·  Modular Monolith (.NET 10)"]
+        direction TB
+        H1["**Step 2 — Receive internal login call**\nPOST /api/identity/auth/login\nInternal network only — not publicly routable"]
+        H2["**Step 3 — Resolve tenant**\nTenantResolver.ResolveAsync(email)\nExtract domain → TenantDomainMappings\nor UserTenantMappings fallback"]
+        H3["**Step 4 — Set tenant context**\nITenantContextSetter.SetTenantId(tenantId)\nAll downstream repository calls are\nautomatically tenant-scoped"]
+        H4["**Step 5 — Validate credentials**\nLoginCommandHandler\nPBKDF2-SHA256 hash compare\nIssue HS256 JWT on success"]
+    end
+
+    REDIS[("Redis\ntenant:{id}:session:{id}")]
+
+    %% ── Login flow ───────────────────────────────────────────────────────────
+    BROWSER -->|"POST /bff/auth/login\n{ email, password }"| B1
+    B1 -->|"Forward to Host\n(internal network)"| H1
+    H1 --> H2
+    H2 --> H3
+    H3 --> H4
+    H4 -->|"JWT (HS256)\nsub · email · tid · roles[]"| B2
+    B2 --> B3
+    B3 -->|"Write session claims"| REDIS
+    B3 --> B4
+    B4 -->|"HttpOnly cookie\n(no JWT in response body)"| BROWSER
+
+    %% ── Subsequent requests ──────────────────────────────────────────────────
+    BROWSER -->|"All subsequent requests:\ncookie auto-attached by browser"| B1
+
+    %% ── Security constraint note ─────────────────────────────────────────────
+    RULE["🔒  Security constraint (ADR-007 / ADR-008)\n─────────────────────────────────────────\nJWT is internal to BFF ↔ Host only.\nThe browser never sees the JWT.\nCookie value is an opaque composite:\n  tid.opaqueSessionId\nClaims are resolved server-side from\nRedis on every authenticated request."]
+
+    B2 -. "enforces" .-> RULE
+
+    %% ── Styles ───────────────────────────────────────────────────────────────
+    class BROWSER actor
+    class B1,B2,B3,B4 bff
+    class H1,H2,H3,H4 host
+    class REDIS store
+    class RULE rule
