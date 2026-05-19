@@ -25,6 +25,10 @@ internal sealed class ReportingReadService : IReportingReadService
         SqlLoader.Load(typeof(ReportingReadService).Assembly,
             "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetReportSummaries.sql");
 
+    private static readonly string SqlGetWorkflowSummary =
+        SqlLoader.Load(typeof(ReportingReadService).Assembly,
+            "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetWorkflowSummary.sql");
+
     private readonly string _connectionString;
 
     public ReportingReadService(IConfiguration configuration)
@@ -65,6 +69,19 @@ internal sealed class ReportingReadService : IReportingReadService
         await using var conn = new SqlConnection(_connectionString);
         var results = await conn.QueryAsync<ReportSummaryDto>(
             SqlGetReportSummaries,
+            new { TenantId = tenantId },
+            commandTimeout: 30);
+
+        return results.ToList().AsReadOnly();
+    }
+
+    public async Task<IReadOnlyList<WorkflowSummaryReportRowDto>> GetWorkflowSummaryAsync(
+        Guid tenantId,
+        CancellationToken ct = default)
+    {
+        await using var conn = new SqlConnection(_connectionString);
+        var results = await conn.QueryAsync<WorkflowSummaryReportRowDto>(
+            SqlGetWorkflowSummary,
             new { TenantId = tenantId },
             commandTimeout: 30);
 

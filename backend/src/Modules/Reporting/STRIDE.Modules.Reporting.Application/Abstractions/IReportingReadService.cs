@@ -27,4 +27,12 @@ public interface IReportingReadService
     Task<IReadOnlyList<ReportSummaryDto>> GetReportSummariesAsync(
         Guid tenantId,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Returns per-definition instance counts broken down by state.
+    /// Used to power the Workflow Summary report type.
+    /// </summary>
+    Task<IReadOnlyList<WorkflowSummaryReportRowDto>> GetWorkflowSummaryAsync(
+        Guid tenantId,
+        CancellationToken ct = default);
 }
