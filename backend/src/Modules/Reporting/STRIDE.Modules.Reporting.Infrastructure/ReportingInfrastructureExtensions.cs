@@ -1,3 +1,4 @@
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,10 @@ public static class ReportingInfrastructureExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        // Teach Dapper to map SQL DATE columns to DateOnly (used in WorkflowTrendDto).
+        // SqlMapper.AddTypeHandler is idempotent — safe to call on every startup.
+        SqlMapper.AddTypeHandler(DateOnlyTypeHandler.Instance);
+
         services.AddDbContext<ReportingDbContext>(options =>
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"),

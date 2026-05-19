@@ -14,6 +14,7 @@ using STRIDE.Modules.Reporting.API.Extensions;
 using STRIDE.Modules.Notifications.API.Extensions;
 using STRIDE.Modules.Invoicing.API.Extensions;
 using STRIDE.Modules.Administration.API.Extensions;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -74,6 +75,11 @@ builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // Disable the default InboundClaimTypeMap which silently renames JWT claim
+        // names to long-form Microsoft URIs (e.g. "tid" → ms/identity/claims/tenantid).
+        // With this off, every claim name in context.User matches what JwtTokenService wrote.
+        options.MapInboundClaims = false;
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer           = true,
@@ -83,10 +89,13 @@ builder.Services
             ValidIssuer              = jwtIssuer,
             ValidAudience            = jwtAudience,
             IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-            // "sub" is mapped to ClaimTypes.NameIdentifier by the JWT middleware by default.
-            // NameClaimType / RoleClaimType align handler with JwtTokenService claim shapes.
+            // With MapInboundClaims = false, claim types stay as issued by JwtTokenService:
+            //   "sub"            → UserId
+            //   "email"          → Email (short JWT name, not ClaimTypes.Email URI)
+            //   "tid"            → TenantId (our custom claim, no longer remapped)
+            //   ClaimTypes.Role  → Roles (stored with full URI by JwtTokenService)
             NameClaimType            = "sub",
-            RoleClaimType            = "role",
+            RoleClaimType            = ClaimTypes.Role,
             // 30-second clock skew tolerates minor time drift between services.
             ClockSkew                = TimeSpan.FromSeconds(30),
         };
