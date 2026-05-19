@@ -22,6 +22,9 @@ var hostBaseUrl = builder.Configuration["Services:StrideHost"]
 builder.Services.AddHttpClient<IdentityApiClient>(client =>
     client.BaseAddress = new Uri(hostBaseUrl));
 
+builder.Services.AddHttpClient<ReportingApiClient>(client =>
+    client.BaseAddress = new Uri(hostBaseUrl));
+
 // Additional typed clients added here as modules are implemented:
 // builder.Services.AddHttpClient<WorkflowApiClient>(...);
 // builder.Services.AddHttpClient<SchedulingApiClient>(...);
