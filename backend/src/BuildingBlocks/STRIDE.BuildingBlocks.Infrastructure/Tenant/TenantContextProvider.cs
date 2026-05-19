@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 
 namespace STRIDE.BuildingBlocks.Infrastructure.Tenant;
@@ -20,11 +21,15 @@ namespace STRIDE.BuildingBlocks.Infrastructure.Tenant;
 public sealed class TenantContextProvider : ITenantContext, ITenantContextSetter
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILogger<TenantContextProvider> _logger;
     private Guid? _tenantId;
 
-    public TenantContextProvider(IHttpContextAccessor httpContextAccessor)
+    public TenantContextProvider(
+        IHttpContextAccessor httpContextAccessor,
+        ILogger<TenantContextProvider> logger)
     {
         _httpContextAccessor = httpContextAccessor;
+        _logger              = logger;
     }
 
     public Guid TenantId
@@ -44,6 +49,24 @@ public sealed class TenantContextProvider : ITenantContext, ITenantContextSetter
             {
                 _tenantId = fromClaim; // cache for repeated access
                 return fromClaim;
+            }
+
+            // ── Diagnostic: dump all claims so we can see what names the JWT
+            //    middleware actually used after any claim-type mapping. Remove
+            //    this block once the root cause is confirmed.
+            var ctx = _httpContextAccessor.HttpContext;
+            if (ctx is not null)
+            {
+                var isAuth  = ctx.User.Identity?.IsAuthenticated ?? false;
+                var claims  = ctx.User.Claims.Select(c => $"{c.Type}={c.Value}");
+                _logger.LogWarning(
+                    "[TenantContext] tid claim not found. IsAuthenticated={IsAuth}. " +
+                    "All claims: [{Claims}]",
+                    isAuth, string.Join(", ", claims));
+            }
+            else
+            {
+                _logger.LogWarning("[TenantContext] IHttpContextAccessor.HttpContext is null.");
             }
 
             throw new InvalidOperationException(
