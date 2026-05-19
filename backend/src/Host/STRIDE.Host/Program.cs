@@ -7,6 +7,7 @@ using STRIDE.BuildingBlocks.Infrastructure.Extensions;
 using STRIDE.BuildingBlocks.Infrastructure.Tenant;
 using STRIDE.Modules.Identity.API.Extensions;
 using STRIDE.Modules.Identity.Infrastructure.Persistence.SeedData;
+using STRIDE.Modules.Workflows.Infrastructure.Persistence.SeedData;
 using STRIDE.Modules.Workflows.API.Extensions;
 using STRIDE.Modules.Scheduling.API.Extensions;
 using STRIDE.Modules.Reporting.API.Extensions;
@@ -95,16 +96,19 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // ── Development seed data ──────────────────────────────────────────────────
-// Creates test@gmail.com / 1234abcd + Admin role + Tenant on first run.
-// Idempotent — safe to leave enabled; skipped outside Development.
-await DevDataSeeder.SeedAsync(app);
+// Identity seed: test@gmail.com / 1234abcd + Admin role + Tenant (idempotent).
+// Workflow seed: 5 definitions + ~20 instances spread over 30 days (idempotent).
+// Both are no-ops outside the Development environment.
+var identitySeed = await DevDataSeeder.SeedAsync(app);
+if (identitySeed is var (seedTenantId, seedUserId))
+    await WorkflowDevDataSeeder.SeedAsync(app, seedTenantId, seedUserId);
 
 // ── Middleware Pipeline ────────────────────────────────────────────────────
 app.UseExceptionHandler();   // Must be first so it wraps all downstream middleware.
 app.UseSerilogRequestLogging();
 app.UseMiddleware<CorrelationIdMiddleware>();
-app.UseMiddleware<TenantMiddleware>();
-app.UseAuthentication();
+app.UseAuthentication();                     // Must run before TenantMiddleware — populates context.User from JWT.
+app.UseMiddleware<TenantMiddleware>();        // Reads "tid" claim from the now-populated context.User.
 app.UseAuthorization();
 
 app.MapControllers();

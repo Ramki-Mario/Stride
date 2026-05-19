@@ -33,10 +33,14 @@ public static class DevDataSeeder
     /// Invoke once after <c>app.Build()</c> in <c>Program.cs</c> when running
     /// in the Development environment.
     /// </summary>
-    public static async Task SeedAsync(IHost host)
+    /// <summary>
+    /// Returns the seeded (TenantId, UserId) so downstream seeders can reference
+    /// the same tenant/user without re-querying.  Returns null outside Development.
+    /// </summary>
+    public static async Task<(Guid TenantId, Guid UserId)?> SeedAsync(IHost host)
     {
         var env = host.Services.GetRequiredService<IHostEnvironment>();
-        if (!env.IsDevelopment()) return;
+        if (!env.IsDevelopment()) return null;
 
         await using var scope  = host.Services.CreateAsyncScope();
         var db                 = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
@@ -127,5 +131,7 @@ public static class DevDataSeeder
         logger.LogInformation(
             "[DevSeed] ✓ Dev seed complete — login: {Email} / {Password}",
             TestEmail, TestPassword);
+
+        return (tenantId, userId);
     }
 }
