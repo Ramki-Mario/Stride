@@ -16,11 +16,10 @@ export const appRoutes: Routes = [
       import('./layout/shell/shell').then((m) => m.ShellComponent),
     children: [
       {
-        // Dashboard is the KPI overview powered by Reporting data (US-062).
-        // The features/dashboard stub is superseded — load the real component.
+        // Dashboard KPI overview (US-062) — lives in features/dashboard per coding conventions.
         path: 'dashboard',
         loadComponent: () =>
-          import('./features/reporting/pages/dashboard-page/dashboard-page').then(
+          import('./features/dashboard/pages/dashboard-page/dashboard-page').then(
             (m) => m.DashboardPageComponent
           ),
       },

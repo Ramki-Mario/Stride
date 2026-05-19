@@ -14,8 +14,8 @@ export interface DashboardKpiDto {
 }
 
 export interface WorkflowTrendDto {
-  /** ISO date string e.g. "2026-05-19" */
-  date: string;
+  /** ISO date-only string e.g. "2026-05-19". Matches backend C# property TrendDate → JSON "trendDate". */
+  trendDate: string;
   started: number;
   completed: number;
   failed: number;

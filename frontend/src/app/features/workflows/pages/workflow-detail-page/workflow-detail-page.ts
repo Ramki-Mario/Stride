@@ -99,10 +99,18 @@ export class WorkflowDetailPageComponent implements OnInit {
     [...(this.instance()?.steps ?? [])].sort((a, b) => a.order - b.order),
   );
 
+  readonly instanceTotalSteps = computed(() =>
+    this.instance()?.steps.length ?? 0,
+  );
+
+  readonly instanceCompletedSteps = computed(() =>
+    this.instance()?.steps.filter(s => s.status === 'Completed').length ?? 0,
+  );
+
   readonly instanceProgress = computed(() => {
-    const inst = this.instance();
-    if (!inst || inst.totalSteps === 0) return 0;
-    return Math.round((inst.completedSteps / inst.totalSteps) * 100);
+    const total = this.instanceTotalSteps();
+    if (total === 0) return 0;
+    return Math.round((this.instanceCompletedSteps() / total) * 100);
   });
 
   readonly instanceStatusClass = computed(() => {

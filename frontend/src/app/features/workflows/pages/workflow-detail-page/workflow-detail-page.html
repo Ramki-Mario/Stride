@@ -190,7 +190,7 @@
               >
                 <span class="pi pi-play-circle"></span>
                 Run
-                <span class="wfd-tab-badge">{{ instance()!.completedSteps }}/{{ instance()!.totalSteps }}</span>
+                <span class="wfd-tab-badge">{{ instanceCompletedSteps() }}/{{ instanceTotalSteps() }}</span>
               </button>
             }
 
@@ -282,7 +282,7 @@
                       {{ instanceStatusLabel() }}
                     </span>
                     <span class="wfd-inst-id">{{ inst.id.substring(0, 8).toUpperCase() }}</span>
-                    <span class="wfd-inst-started">Started {{ formatDateTime(inst.startedAt) }}</span>
+                    <span class="wfd-inst-started">Started {{ formatDateTime(inst.createdAt) }}</span>
                   </div>
 
                   <!-- Progress bar -->
@@ -294,7 +294,7 @@
                       ></div>
                     </div>
                     <span class="wfd-progress-label">
-                      {{ inst.completedSteps }} / {{ inst.totalSteps }} steps
+                      {{ instanceCompletedSteps() }} / {{ instanceTotalSteps() }} steps
                     </span>
                   </div>
                 </div>
@@ -319,7 +319,7 @@
                       <div class="wfd-inst-step-content">
                         <div class="wfd-inst-step-top">
                           <div class="wfd-inst-step-info">
-                            <span class="wfd-step-name">{{ step.name }}</span>
+                            <span class="wfd-step-name">{{ step.stepName }}</span>
                             <span class="wfd-inst-step-status-badge" [ngClass]="stepInstanceStatusClass(step.status)">
                               {{ stepInstanceStatusLabel(step.status) }}
                             </span>
@@ -371,13 +371,10 @@
                           }
                         </div>
 
-                        @if (step.description) {
-                          <p class="wfd-step-desc">{{ step.description }}</p>
-                        }
-                        @if (step.assignedTo) {
+                        @if (step.assigneeId) {
                           <p class="wfd-inst-step-assignee">
                             <span class="pi pi-user"></span>
-                            Assigned to {{ step.assignedTo.substring(0, 8) }}…
+                            Assigned to {{ step.assigneeId.substring(0, 8) }}…
                           </p>
                         }
                         @if (step.failureReason) {
