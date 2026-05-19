@@ -9,10 +9,11 @@ namespace STRIDE.BuildingBlocks.Infrastructure.Identity;
 /// <see cref="IHttpContextAccessor"/>. Populated from the validated JWT
 /// claims set by AddJwtBearer on STRIDE.Host (US-025).
 ///
-/// Claim mapping mirrors JwtTokenService:
-///   sub  → UserId
-///   email (ClaimTypes.Email) → Email
-///   role (ClaimTypes.Role)   → Roles[]
+/// Claim mapping mirrors JwtTokenService (MapInboundClaims = false keeps
+/// short JWT names — no silent rename to long Microsoft URIs):
+///   "sub"   → UserId
+///   "email" → Email  (NOT ClaimTypes.Email — that URI is never set with mapping off)
+///   ClaimTypes.Role → Roles[] (stored with full URI by JwtTokenService, unchanged)
 /// </summary>
 internal sealed class CurrentUser : ICurrentUser
 {
@@ -31,8 +32,11 @@ internal sealed class CurrentUser : ICurrentUser
         }
     }
 
+    // "email" is the short JWT claim name.  With MapInboundClaims = false in
+    // AddJwtBearer, the token's "email" field is never remapped to the long
+    // ClaimTypes.Email URI, so we must look it up by its original short name.
     public string Email =>
-        Principal?.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
+        Principal?.FindFirstValue("email") ?? string.Empty;
 
     public IReadOnlyList<string> Roles =>
         Principal?.FindAll(ClaimTypes.Role)
