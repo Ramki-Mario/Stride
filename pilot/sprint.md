@@ -657,8 +657,13 @@ These stories are not phase-specific — they run alongside regular sprints at d
 ## Sprint 4 — Dashboard & Reporting (IN PROGRESS)
 
 **Phase:** Phase 4
-**Status:** IN PROGRESS — US-058–062 Done, EP-023/024/025 Done. Next: US-063 (Angular Reporting page).
-**Key note:** Dapper read models for reporting queries (ADR-005). SqlLoader + embedded .sql pattern established. PrimeNG `<p-select>` pattern established for all future dropdowns.
+**Status:** IN PROGRESS — US-058–063 in flight. EP-023/024/025 Done, BFF proxy done, infra bugs fixed. US-063 In Progress.
+**Key notes:**
+- Dapper read models for reporting queries (ADR-005). SqlLoader + embedded .sql pattern established.
+- PrimeNG `<p-select>` pattern established for all future dropdowns.
+- **JWT `MapInboundClaims = false` required:** ASP.NET Core JWT middleware renames `"tid"` → long URI by default. Always set `options.MapInboundClaims = false` in every `AddJwtBearer` call so claim names stay as issued.
+- **`CurrentUser` claim names:** With mapping off, read `"email"` (not `ClaimTypes.Email`) and `"sub"` (not `ClaimTypes.NameIdentifier`). Roles stay at `ClaimTypes.Role` (full URI — as stored by `JwtTokenService`).
+- **Dapper + `DateOnly`:** SQL `DATE` columns surface as `DateTime` in ADO.NET. Register `DateOnlyTypeHandler` in any module that uses `DateOnly` in Dapper read models.
 
 | Epic | GitHub # | Stories | Status |
 |---|---|---|---|
@@ -675,7 +680,7 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | US-060 | GetReportList + GenerateReport + ExportReportCsv handlers | #100 | M | ✅ Done — PR #133 |
 | US-061 | DashboardController + ReportsController | #101 | M | ✅ Done — PR #135 |
 | US-062 | Angular Dashboard page | #102 | M | ✅ Done — PR #136 |
-| US-063 | Angular Reporting page | #103 | M | ⬜ Next |
+| US-063 | Angular Reporting page | #103 | M | 🔵 In Progress |
 
 ---
 

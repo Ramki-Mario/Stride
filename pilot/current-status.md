@@ -187,7 +187,11 @@ Phase 4 (Dashboard & Reporting) — **In Progress** (US-063 next).
   - ReportsController: GET /, POST /generate (201), GET /{id}/export (CSV download)
 - EP-026 #97 (Angular Dashboard+Reporting UI): 🔵 In Progress
   - US-062 #102 ✅ **Done** (PR #136, 2026-05-19) — DashboardPageComponent, KPI cards, p-chart trend+doughnut, ChartThemeService, ReportingService
-  - US-063 #103 — ⬜ **Next**
+  - BFF reporting proxy ✅ **Done** (PR #137, 2026-05-19) — `/bff/reporting/*` routes wired in STRIDE.BFF; ReportingApiClient typed HttpClient
+  - Infra bug fixes ✅ **Done** (PR #138 + #139, 2026-05-19):
+    - PR #138: TenantMiddleware ordering fix + WorkflowDevDataSeeder (5 definitions, ~18 instances, backdated)
+    - PR #139: `MapInboundClaims = false` (JWT claim rename fix), `CurrentUser.Email` short-name fix, `DateOnlyTypeHandler` for Dapper
+  - US-063 #103 — 🔵 **In Progress**
 ## Phase 5 — Notifications & Observability (Pending)
 ## Phase 6 — SaaS Readiness (Pending)
 ## Phase 7 — Portfolio & Deployment Polish (Pending)
