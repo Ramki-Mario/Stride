@@ -14,8 +14,8 @@ export interface DashboardKpiDto {
 }
 
 export interface WorkflowTrendDto {
-  /** ISO date string e.g. "2026-05-19" */
-  date: string;
+  /** ISO date-only string e.g. "2026-05-19". Matches backend C# property TrendDate → JSON "trendDate". */
+  trendDate: string;
   started: number;
   completed: number;
   failed: number;
@@ -31,6 +31,16 @@ export interface ReportSummaryDto {
 }
 
 export type ReportType = 'DashboardKpi' | 'WorkflowTrend' | 'WorkflowSummary';
+
+export interface GenerateReportRequest {
+  reportType: ReportType;
+}
+
+export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
+  DashboardKpi:    'Dashboard KPI Snapshot',
+  WorkflowTrend:   'Workflow Trend (30 days)',
+  WorkflowSummary: 'Workflow Summary',
+};
 
 /** KPI card display metadata */
 export interface KpiCardConfig {

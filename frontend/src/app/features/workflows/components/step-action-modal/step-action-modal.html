@@ -19,7 +19,7 @@
       <span class="pi {{ iconClass }}"></span>
       <div>
         <h2 class="sam-title">{{ title }}</h2>
-        <p class="sam-step-name">{{ step.name }}</p>
+        <p class="sam-step-name">{{ step.stepName }}</p>
       </div>
     </div>
     <button class="sam-close" (click)="dismiss()" aria-label="Close modal">
@@ -49,10 +49,6 @@
         <span class="sam-chip sam-chip-optional">Optional</span>
       }
     </div>
-
-    @if (step.description) {
-      <p class="sam-step-desc">{{ step.description }}</p>
-    }
 
     <!-- ── ASSIGN form ─────────────────────────────────────────────────── -->
     @if (action === 'assign') {
@@ -104,7 +100,7 @@
     @if (action === 'complete') {
       <div class="sam-confirm-body">
         <p>
-          Mark <strong>{{ step.name }}</strong> as <strong>Completed</strong>?
+          Mark <strong>{{ step.stepName }}</strong> as <strong>Completed</strong>?
           This action will be recorded against your user account and cannot be undone.
         </p>
       </div>
@@ -180,7 +176,7 @@
           </div>
         }
         <p>
-          Skip <strong>{{ step.name }}</strong>? The step will be marked as Skipped
+          Skip <strong>{{ step.stepName }}</strong>? The step will be marked as Skipped
           and execution will continue to the next step.
         </p>
       </div>

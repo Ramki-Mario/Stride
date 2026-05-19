@@ -62,12 +62,13 @@ export type StepInstanceStatus = 'Pending' | 'InProgress' | 'Completed' | 'Faile
 export interface StepInstance {
   id: string;
   stepDefinitionId: string;
-  name: string;
-  description: string | null;
+  /** Matches backend StepInstanceDto.StepName → JSON "stepName". */
+  stepName: string;
   order: number;
   isRequired: boolean;
   status: StepInstanceStatus;
-  assignedTo: string | null;    // userId GUID
+  /** Matches backend StepInstanceDto.AssigneeId → JSON "assigneeId". */
+  assigneeId: string | null;
   completedAt: string | null;
   failureReason: string | null;
 }
@@ -90,11 +91,12 @@ export interface WorkflowInstanceDetail {
   workflowDefinitionId: string;
   workflowName: string;
   status: WorkflowStatus;
-  totalSteps: number;
-  completedSteps: number;
-  startedAt: string;
+  /** Matches backend WorkflowInstanceDto.CreatedAt → JSON "createdAt" (instance creation = start time). */
+  createdAt: string;
   completedAt: string | null;
   steps: StepInstance[];
+  // Note: totalSteps and completedSteps are not in the backend DTO.
+  // Compute them from steps.length and steps.filter(s => s.status === 'Completed').length.
 }
 
 // ─── Step action types ────────────────────────────────────────────────────────

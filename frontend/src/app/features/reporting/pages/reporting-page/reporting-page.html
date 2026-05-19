@@ -1,0 +1,127 @@
+<div class="rpt">
+
+  <!-- ── Page header ─────────────────────────────────────────────────── -->
+  <div class="rpt__header">
+    <div>
+      <h1 class="rpt__title">Reports</h1>
+      <p class="rpt__subtitle">Generate and download workflow activity reports.</p>
+    </div>
+    <button class="rpt-btn rpt-btn--primary" (click)="toggleForm()">
+      <span [class]="showForm() ? 'pi pi-times' : 'pi pi-plus'"></span>
+      {{ showForm() ? 'Cancel' : 'New Report' }}
+    </button>
+  </div>
+
+  <!-- ── Inline notification ─────────────────────────────────────────── -->
+  @if (notification()) {
+    <div class="rpt__notification" [ngClass]="'rpt__notification--' + notification()!.type">
+      <span [class]="notification()!.type === 'success' ? 'pi pi-check-circle' : 'pi pi-exclamation-circle'"></span>
+      <span class="rpt__notification-msg">{{ notification()!.message }}</span>
+      <button class="rpt__notification-close" (click)="dismissNotification()">
+        <span class="pi pi-times"></span>
+      </button>
+    </div>
+  }
+
+  <!-- ── Generate form panel ─────────────────────────────────────────── -->
+  @if (showForm()) {
+    <div class="rpt__form-panel">
+      <h3 class="rpt__form-title">Generate a new report</h3>
+      <div class="rpt__form-row">
+        <label class="rpt__form-label">Report type</label>
+        <p-select
+          [(ngModel)]="selectedType"
+          [options]="reportTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="rpt-type-select"
+        />
+        <button
+          class="rpt-btn rpt-btn--primary"
+          [disabled]="generating()"
+          (click)="generateReport()"
+        >
+          @if (generating()) {
+            <span class="pi pi-spin pi-spinner"></span>
+            Generating…
+          } @else {
+            <span class="pi pi-bolt"></span>
+            Generate
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ── Skeleton loader ─────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="rpt__skeleton">
+      @for (_ of [1,2,3]; track $index) {
+        <div class="rpt-skeleton-row">
+          <div class="rpt-skeleton-row__col rpt-skeleton-row__col--wide"></div>
+          <div class="rpt-skeleton-row__col"></div>
+          <div class="rpt-skeleton-row__col"></div>
+          <div class="rpt-skeleton-row__col rpt-skeleton-row__col--narrow"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Empty state ─────────────────────────────────────────────────── -->
+  @if (isEmpty()) {
+    <div class="rpt__empty">
+      <i class="pi pi-file rpt__empty-icon"></i>
+      <p class="rpt__empty-title">No reports yet</p>
+      <p class="rpt__empty-sub">Click <strong>New Report</strong> to generate your first report.</p>
+    </div>
+  }
+
+  <!-- ── Reports table ───────────────────────────────────────────────── -->
+  @if (!loading() && reports().length > 0) {
+    <div class="rpt__table-wrap">
+      <table class="rpt__table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Records</th>
+            <th>Generated</th>
+            <th>Requested by</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (report of reports(); track report.reportId) {
+            <tr class="rpt__row">
+              <td class="rpt__col--name">{{ report.name }}</td>
+              <td>
+                <span class="rpt-badge" [ngClass]="typeBadgeClass(report.reportType)">
+                  {{ REPORT_TYPE_LABELS[report.reportType] }}
+                </span>
+              </td>
+              <td class="rpt__col--num">{{ report.recordCount | number }}</td>
+              <td class="rpt__col--date">{{ formatDate(report.generatedAt) }}</td>
+              <td class="rpt__col--user">{{ report.requestedBy }}</td>
+              <td class="rpt__col--actions">
+                <button
+                  class="rpt-btn rpt-btn--ghost rpt-btn--sm"
+                  [disabled]="exportingId() !== null"
+                  (click)="exportCsv(report)"
+                  title="Download CSV"
+                >
+                  @if (exportingId() === report.reportId) {
+                    <span class="pi pi-spin pi-spinner"></span>
+                  } @else {
+                    <span class="pi pi-download"></span>
+                  }
+                  CSV
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>

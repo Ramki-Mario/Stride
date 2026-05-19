@@ -16,6 +16,7 @@ export const appRoutes: Routes = [
       import('./layout/shell/shell').then((m) => m.ShellComponent),
     children: [
       {
+        // Dashboard KPI overview (US-062) — lives in features/dashboard per coding conventions.
         path: 'dashboard',
         loadComponent: () =>
           import('./features/dashboard/pages/dashboard-page/dashboard-page').then(

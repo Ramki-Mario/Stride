@@ -25,8 +25,10 @@ builder.Services.AddHttpClient<IdentityApiClient>(client =>
 builder.Services.AddHttpClient<ReportingApiClient>(client =>
     client.BaseAddress = new Uri(hostBaseUrl));
 
+builder.Services.AddHttpClient<WorkflowApiClient>(client =>
+    client.BaseAddress = new Uri(hostBaseUrl));
+
 // Additional typed clients added here as modules are implemented:
-// builder.Services.AddHttpClient<WorkflowApiClient>(...);
 // builder.Services.AddHttpClient<SchedulingApiClient>(...);
 
 // ── Redis (session store) ──────────────────────────────────────────────────

@@ -1,0 +1,147 @@
+<div class="dashboard-page">
+
+  <!-- ── Page header ──────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header__title-group">
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Real-time operational overview for your tenant</p>
+    </div>
+  </div>
+
+  <!-- ── Error banner ─────────────────────────────────────────────────────── -->
+  @if (errorMessage()) {
+    <div class="error-banner" role="alert">
+      <i class="pi pi-exclamation-triangle"></i>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- ── Loading skeleton ─────────────────────────────────────────────────── -->
+  @if (isLoading()) {
+    <div class="kpi-grid">
+      @for (n of [1,2,3,4]; track n) {
+        <div class="kpi-card kpi-card--skeleton">
+          <div class="skeleton-icon"></div>
+          <div class="skeleton-lines">
+            <div class="skeleton-line skeleton-line--short"></div>
+            <div class="skeleton-line skeleton-line--long"></div>
+          </div>
+        </div>
+      }
+    </div>
+    <div class="charts-row">
+      <div class="chart-card chart-card--skeleton">
+        <div class="skeleton-chart"></div>
+      </div>
+      <div class="chart-card chart-card--skeleton chart-card--narrow">
+        <div class="skeleton-chart"></div>
+      </div>
+    </div>
+  }
+
+  <!-- ── Main content ─────────────────────────────────────────────────────── -->
+  @if (!isLoading() && !errorMessage()) {
+
+    <!-- KPI cards -->
+    <div class="kpi-grid">
+      @for (card of kpiCards(); track card.label) {
+        <div class="kpi-card" [ngClass]="'kpi-card--' + card.accentClass">
+          <div class="kpi-card__top">
+            <div class="kpi-card__icon"
+                 [style.background]="card.bgToken"
+                 [style.color]="card.colorToken">
+              <i [class]="card.iconClass"></i>
+            </div>
+            <span class="kpi-card__label">{{ card.label }}</span>
+          </div>
+          <div class="kpi-card__value">{{ formatNumber(card.value) }}</div>
+          <div class="kpi-card__sub">{{ card.sub }}</div>
+          <div class="kpi-card__bar">
+            <div class="kpi-card__bar-fill"
+                 [style.background]="card.colorToken"
+                 [style.width.%]="totalInstances() > 0 ? (card.value / totalInstances()) * 100 : 0">
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Charts row -->
+    <div class="charts-row">
+
+      <!-- Trend line chart -->
+      <div class="chart-card">
+        <div class="chart-card__header">
+          <div class="chart-card__title-group">
+            <h2 class="chart-card__title">Workflow Activity Trend</h2>
+            <p class="chart-card__subtitle">Daily started / completed / failed counts</p>
+          </div>
+          <!-- Trend window selector -->
+          <div class="trend-tabs" role="group" aria-label="Trend time window">
+            @for (w of trendWindows; track w.days) {
+              <button
+                class="trend-tab"
+                [ngClass]="{ 'trend-tab--active': selectedDays() === w.days }"
+                (click)="selectTrendWindow(w.days)"
+                [attr.aria-pressed]="selectedDays() === w.days">
+                {{ w.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="chart-card__body">
+          @if (trendChartData()) {
+            <p-chart
+              type="line"
+              [data]="trendChartData()"
+              [options]="trendChartOptions()"
+              styleClass="trend-chart">
+            </p-chart>
+          } @else {
+            <div class="empty-chart">
+              <i class="pi pi-chart-line"></i>
+              <span>No trend data available for the selected window.</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Status doughnut chart -->
+      <div class="chart-card chart-card--narrow">
+        <div class="chart-card__header">
+          <div class="chart-card__title-group">
+            <h2 class="chart-card__title">Instance Status</h2>
+            <p class="chart-card__subtitle">All-time distribution</p>
+          </div>
+        </div>
+
+        <div class="chart-card__body chart-card__body--doughnut">
+          @if (doughnutChartData()) {
+            <div class="doughnut-wrapper">
+              <p-chart
+                type="doughnut"
+                [data]="doughnutChartData()"
+                [options]="doughnutChartOptions()"
+                styleClass="doughnut-chart">
+              </p-chart>
+              <!-- Center label -->
+              <div class="doughnut-center" aria-hidden="true">
+                <span class="doughnut-center__value">{{ formatNumber(totalInstances()) }}</span>
+                <span class="doughnut-center__label">Total</span>
+              </div>
+            </div>
+          } @else {
+            <div class="empty-chart">
+              <i class="pi pi-chart-pie"></i>
+              <span>No instance data yet.</span>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div><!-- /charts-row -->
+
+  }<!-- /!isLoading -->
+
+</div><!-- /dashboard-page -->

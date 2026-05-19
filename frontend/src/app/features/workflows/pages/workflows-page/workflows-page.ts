@@ -13,6 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
 import {
@@ -218,8 +219,22 @@ export class WorkflowsPageComponent implements OnInit {
   // ── Bulk actions ─────────────────────────────────────────────────────────
 
   bulkDelete(): void {
-    // Placeholder — will dispatch individual delete commands
-    this.clearSelection();
+    const ids = [...this.selectedIds()];
+    if (!ids.length) return;
+
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
+    forkJoin(ids.map(id => this.wfService.deleteDefinition(id))).subscribe({
+      next: () => {
+        this.clearSelection();
+        this.loadWorkflows();
+      },
+      error: () => {
+        this.errorMessage.set('Failed to delete one or more workflows. Please try again.');
+        this.isLoading.set(false);
+      },
+    });
   }
 
   // ── Navigation ───────────────────────────────────────────────────────────
