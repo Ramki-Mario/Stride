@@ -3,7 +3,8 @@
 ## Current Stage
 Phase 1 (Monorepo & Foundation) — **Complete**.
 Phase 2 (Identity & Tenant Foundation) — **Complete**.
-Phase 3 (Core Workflow Engine) — **In Progress**.
+Phase 3 (Core Workflow Engine) — **Complete**.
+Phase 4 (Dashboard & Reporting) — **In Progress** (US-063 next).
 
 ---
 
@@ -181,8 +182,12 @@ Phase 3 (Core Workflow Engine) — **In Progress**.
   - GetReportListQuery, GenerateReportCommand, ExportReportCsvQuery + handlers + validators (US-060)
   - ReportingApplicationExtensions: pipeline behaviours wired (LoggingBehaviour + ValidationBehaviour)
   - GetWorkflowSummary.sql cross-schema query; IReportingReadService extended
-- EP-025 #96 (Reporting API): US-061 #101 — ⬜ **Next**
-- EP-026 #97 (Angular Dashboard+Reporting UI): US-062 #102, US-063 #103 — ⬜ Backlog
+- EP-025 #96 (Reporting API): US-061 #101 ✅ **Done** (PR #135, 2026-05-19)
+  - DashboardController: GET /kpis, GET /trends?days=N
+  - ReportsController: GET /, POST /generate (201), GET /{id}/export (CSV download)
+- EP-026 #97 (Angular Dashboard+Reporting UI): 🔵 In Progress
+  - US-062 #102 ✅ **Done** (PR #136, 2026-05-19) — DashboardPageComponent, KPI cards, p-chart trend+doughnut, ChartThemeService, ReportingService
+  - US-063 #103 — ⬜ **Next**
 ## Phase 5 — Notifications & Observability (Pending)
 ## Phase 6 — SaaS Readiness (Pending)
 ## Phase 7 — Portfolio & Deployment Polish (Pending)
