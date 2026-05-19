@@ -16,6 +16,7 @@ using STRIDE.Modules.Invoicing.API.Extensions;
 using STRIDE.Modules.Administration.API.Extensions;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,11 @@ builder.Services
 // ── Controllers (all module API assemblies registered as application parts) ─
 builder.Services
     .AddControllers()
+    // Serialize C# enums as their string names (e.g. "DashboardKpi", "Draft")
+    // rather than integer values. Ensures the Angular client can send/receive
+    // enum fields by name without needing a custom mapping layer.
+    .AddJsonOptions(opts =>
+        opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
     .AddApplicationPart(typeof(IdentityModuleExtensions).Assembly)
     .AddApplicationPart(typeof(WorkflowsModuleExtensions).Assembly)
     .AddApplicationPart(typeof(SchedulingModuleExtensions).Assembly)

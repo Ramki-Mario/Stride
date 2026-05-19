@@ -8,10 +8,7 @@ import {
 } from '@angular/core';
 import { NgClass, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
 import { ReportingService } from '../../services/reporting.service';
 import {
   ReportSummaryDto,
@@ -23,14 +20,12 @@ import {
   selector: 'app-reporting-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, DecimalPipe, FormsModule, ButtonModule, SelectModule, ToastModule],
-  providers: [MessageService],
+  imports: [NgClass, DecimalPipe, FormsModule, SelectModule],
   templateUrl: './reporting-page.html',
   styleUrl: './reporting-page.scss',
 })
 export class ReportingPageComponent implements OnInit {
   private readonly svc = inject(ReportingService);
-  private readonly msg = inject(MessageService);
 
   // ── State ────────────────────────────────────────────────────────────────
 
@@ -39,6 +34,9 @@ export class ReportingPageComponent implements OnInit {
   protected readonly showForm    = signal(false);
   protected readonly generating  = signal(false);
   protected readonly exportingId = signal<string | null>(null);
+
+  /** Inline notification: null = none, 'success' | 'error' */
+  protected readonly notification = signal<{ type: 'success' | 'error'; message: string } | null>(null);
 
   /** Selected report type in the generate form */
   protected selectedType: ReportType = 'DashboardKpi';
@@ -66,31 +64,31 @@ export class ReportingPageComponent implements OnInit {
   protected toggleForm(): void {
     this.showForm.update(v => !v);
     if (!this.showForm()) this.selectedType = 'DashboardKpi';
+    this.notification.set(null);
   }
 
   protected generateReport(): void {
     this.generating.set(true);
+    this.notification.set(null);
     this.svc.generateReport({ reportType: this.selectedType }).subscribe({
       next: () => {
-        this.msg.add({
-          severity: 'success',
-          summary: 'Report generated',
-          detail: `${REPORT_TYPE_LABELS[this.selectedType]} saved to your report list.`,
-          life: 4000,
-        });
         this.showForm.set(false);
         this.selectedType = 'DashboardKpi';
+        this.notification.set({
+          type: 'success',
+          message: `${REPORT_TYPE_LABELS[this.selectedType] ?? 'Report'} generated successfully.`,
+        });
         this.loadReports();
       },
       error: () => {
-        this.msg.add({
-          severity: 'error',
-          summary: 'Generation failed',
-          detail: 'Please try again.',
-        });
+        this.notification.set({ type: 'error', message: 'Report generation failed. Please try again.' });
         this.generating.set(false);
       },
     });
+  }
+
+  protected dismissNotification(): void {
+    this.notification.set(null);
   }
 
   protected exportCsv(report: ReportSummaryDto): void {
@@ -106,11 +104,7 @@ export class ReportingPageComponent implements OnInit {
         this.exportingId.set(null);
       },
       error: () => {
-        this.msg.add({
-          severity: 'error',
-          summary: 'Export failed',
-          detail: 'Could not download CSV.',
-        });
+        this.notification.set({ type: 'error', message: 'CSV export failed. Please try again.' });
         this.exportingId.set(null);
       },
     });

@@ -1,8 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Reporting Page
+// Reporting Page  (mirrors STRIDE button conventions from workflows-page.scss)
 // ─────────────────────────────────────────────────────────────────────────────
 
-.reporting {
+.rpt {
   padding: 1.5rem 2rem;
   max-width: 1200px;
 
@@ -27,6 +27,49 @@
     font-size: 0.875rem;
     color: var(--stride-text-muted);
     margin: 0;
+  }
+
+  // ── Inline notification ───────────────────────────────────────────────────
+
+  &__notification {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--stride-radius-lg);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+
+    &--success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #059669;
+    }
+
+    &--error {
+      background: var(--stride-error-bg);
+      border: 1px solid var(--stride-error-border);
+      color: var(--stride-error);
+    }
+  }
+
+  &__notification-msg { flex: 1; }
+
+  &__notification-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    opacity: 0.6;
+    padding: 0;
+    color: inherit;
+    &:hover { opacity: 1; }
+    .pi { font-size: 0.625rem; }
   }
 
   // ── Generate form panel ───────────────────────────────────────────────────
@@ -61,11 +104,8 @@
     white-space: nowrap;
   }
 
-  ::ng-deep .reporting__type-select {
+  ::ng-deep .rpt-type-select {
     min-width: 240px;
-    .p-select {
-      border-radius: var(--stride-radius-input);
-    }
   }
 
   // ── Skeleton ──────────────────────────────────────────────────────────────
@@ -123,7 +163,6 @@
     font-size: 0.875rem;
 
     thead tr {
-      background: var(--stride-surface-muted, var(--stride-surface-card));
       border-bottom: 1px solid var(--stride-border);
     }
 
@@ -141,7 +180,7 @@
 
   &__row {
     border-bottom: 1px solid var(--stride-border);
-    transition: background 0.15s;
+    transition: background var(--stride-transition);
 
     &:last-child { border-bottom: none; }
 
@@ -154,16 +193,65 @@
     }
   }
 
-  &__col--name  { font-weight: 500; }
-  &__col--num   { font-variant-numeric: tabular-nums; }
-  &__col--date  { color: var(--stride-text-secondary); white-space: nowrap; }
-  &__col--user  { color: var(--stride-text-secondary); }
-  &__col--actions { text-align: right; width: 60px; }
+  &__col--name    { font-weight: 500; }
+  &__col--num     { font-variant-numeric: tabular-nums; }
+  &__col--date    { color: var(--stride-text-secondary); white-space: nowrap; }
+  &__col--user    { color: var(--stride-text-secondary); }
+  &__col--actions { text-align: right; width: 80px; }
 }
 
-// ── Skeleton rows ────────────────────────────────────────────────────────────
+// ── Buttons (same conventions as wfl-btn in workflows-page.scss) ─────────────
 
-.skeleton-row {
+.rpt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--stride-radius-xl);
+  font-size: 0.84375rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background var(--stride-transition), box-shadow var(--stride-transition);
+  white-space: nowrap;
+  line-height: 1;
+
+  &--primary {
+    background: var(--stride-primary);
+    color: var(--stride-text-inverse);
+    &:hover:not(:disabled) {
+      background: var(--stride-primary-hover);
+      box-shadow: 0 4px 12px var(--stride-primary-ring);
+    }
+    &:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: var(--stride-text-secondary);
+    border: 1px solid var(--stride-border);
+    &:hover:not(:disabled) {
+      background: var(--stride-surface-hover);
+      color: var(--stride-text-primary);
+    }
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &--sm {
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+  }
+}
+
+// ── Skeleton rows ─────────────────────────────────────────────────────────────
+
+.rpt-skeleton-row {
   display: flex;
   gap: 1rem;
   padding: 0.875rem 1rem;
@@ -178,44 +266,44 @@
     background: linear-gradient(
       90deg,
       var(--stride-surface-muted, #f1f5f9) 25%,
-      var(--stride-surface-card)            50%,
+      var(--stride-surface-card) 50%,
       var(--stride-surface-muted, #f1f5f9) 75%
     );
     background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
+    animation: rpt-shimmer 1.4s infinite;
 
     &--wide   { flex: 2.5; }
     &--narrow { flex: 0.5; }
   }
 }
 
-@keyframes shimmer {
+@keyframes rpt-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-// ── Type badges ──────────────────────────────────────────────────────────────
+// ── Type badges ───────────────────────────────────────────────────────────────
 
-.badge {
+.rpt-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.2rem 0.6rem;
+  padding: 0.2rem 0.625rem;
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
 
-  &--kpi {
-    background: rgba(var(--stride-primary-rgb, 185 122 249), 0.12);
+  &.badge--kpi {
+    background: rgba(185, 122, 249, 0.12);
     color: var(--stride-primary);
   }
 
-  &--trend {
+  &.badge--trend {
     background: rgba(59, 130, 246, 0.12);
     color: #3b82f6;
   }
 
-  &--summary {
+  &.badge--summary {
     background: rgba(16, 185, 129, 0.12);
     color: #10b981;
   }
