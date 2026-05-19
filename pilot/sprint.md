@@ -654,23 +654,26 @@ These stories are not phase-specific — they run alongside regular sprints at d
 
 ---
 
-## Sprint 4 — Dashboard & Reporting (IN PROGRESS)
+## Sprint 4 — Dashboard & Reporting (COMPLETE ✅)
 
 **Phase:** Phase 4
-**Status:** IN PROGRESS — US-058–063 in flight. EP-023/024/025 Done, BFF proxy done, infra bugs fixed. US-063 In Progress.
-**Key notes:**
-- Dapper read models for reporting queries (ADR-005). SqlLoader + embedded .sql pattern established.
-- PrimeNG `<p-select>` pattern established for all future dropdowns.
-- **JWT `MapInboundClaims = false` required:** ASP.NET Core JWT middleware renames `"tid"` → long URI by default. Always set `options.MapInboundClaims = false` in every `AddJwtBearer` call so claim names stay as issued.
-- **`CurrentUser` claim names:** With mapping off, read `"email"` (not `ClaimTypes.Email`) and `"sub"` (not `ClaimTypes.NameIdentifier`). Roles stay at `ClaimTypes.Role` (full URI — as stored by `JwtTokenService`).
-- **Dapper + `DateOnly`:** SQL `DATE` columns surface as `DateTime` in ADO.NET. Register `DateOnlyTypeHandler` in any module that uses `DateOnly` in Dapper read models.
+**Status:** ✅ COMPLETE — All stories done (US-058–063), all epics closed (EP-023/024/025/026). PRs #132–#140 merged.
+**Key patterns established:**
+- Dapper read models + SqlLoader + embedded .sql pattern (ADR-005)
+- PrimeNG `<p-select>` pattern for all future dropdowns
+- JWT `MapInboundClaims = false` mandatory — claim names: `"sub"`, `"email"`, `"tid"`, `ClaimTypes.Role`
+- `DateOnlyTypeHandler` required for any Dapper read model with `DateOnly` fields
+- JSON field name alignment: always verify C# property → camelCase → Angular interface (root cause of "Invalid Date")
+- `WorkflowInstanceDto` has no `totalSteps`/`completedSteps`; derive from `steps.length` + filter
+- Feature folder convention: `features/dashboard/` not `features/reporting/` for dashboard pages
+- `DateOnly` → JS: always `new Date(\`${iso}T00:00:00\`)` to avoid UTC-offset wrong-day issue
 
 | Epic | GitHub # | Stories | Status |
 |---|---|---|---|
-| EP-023 Reporting Read Models | #94 | US-058 #98 | ✅ Done |
-| EP-024 Reporting Application Layer | #95 | US-059 #99, US-060 #100 | ✅ Done |
-| EP-025 Reporting API Layer | #96 | US-061 #101 | ✅ Done |
-| EP-026 Angular Dashboard + Reporting UI | #97 | US-062 #102, US-063 #103 | 🔵 In Progress |
+| EP-023 Reporting Read Models | #94 | US-058 #98 | ✅ Done — closed |
+| EP-024 Reporting Application Layer | #95 | US-059 #99, US-060 #100 | ✅ Done — closed |
+| EP-025 Reporting API Layer | #96 | US-061 #101 | ✅ Done — closed |
+| EP-026 Angular Dashboard + Reporting UI | #97 | US-062 #102, US-063 #103 | ✅ Done — closed |
 
 ### Phase 4 Story Summary
 | Story | Description | GitHub # | Size | Status |
@@ -680,7 +683,7 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | US-060 | GetReportList + GenerateReport + ExportReportCsv handlers | #100 | M | ✅ Done — PR #133 |
 | US-061 | DashboardController + ReportsController | #101 | M | ✅ Done — PR #135 |
 | US-062 | Angular Dashboard page | #102 | M | ✅ Done — PR #136 |
-| US-063 | Angular Reporting page | #103 | M | 🔵 In Progress |
+| US-063 | Angular Reporting page + bug fixes | #103 | M | ✅ Done — PRs #138–#140 |
 
 ---
 
@@ -715,7 +718,7 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | Workflow domain model + state machine | S3 | [x] Done — EP-018 PR #104 |
 | Workflow API layer (CRUD + lifecycle) | S3 | [x] Done — EP-021 PR #107 |
 | Angular Workflow list + detail UI | S3 | [x] Done — US-054 PR #108, US-055 PR #110 |
-| EF Core + Dapper split strategy proven | S4 | [ ] |
+| EF Core + Dapper split strategy proven | S4 | [x] Done — Phase 4 complete |
 | All modules observable (Serilog + Seq + OTEL) | S5 | [ ] |
 | Tenant onboarding flow complete | S6 | [ ] |
 | Deployed to Azure with CI/CD | S7 | [ ] |

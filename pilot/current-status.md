@@ -4,7 +4,7 @@
 Phase 1 (Monorepo & Foundation) — **Complete**.
 Phase 2 (Identity & Tenant Foundation) — **Complete**.
 Phase 3 (Core Workflow Engine) — **Complete**.
-Phase 4 (Dashboard & Reporting) — **In Progress** (US-063 next).
+Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epics closed).
 
 ---
 
@@ -166,32 +166,20 @@ Phase 4 (Dashboard & Reporting) — **In Progress** (US-063 next).
 - **EP-022 #76 ✅ COMPLETE** — All 4 stories done (US-054/055/056/057)
 - **Issue #109** created: `[TASK] Wire BFF proxy routes for Workflow API` — medium priority, Phase 6
 
-## Phase 4 — Dashboard & Reporting (**In Progress** — 2026-05-16)
-- EP-023 #94 (Reporting Read Models): US-058 #98 ✅ **Done** (PR #132, 2026-05-16)
-  - SqlLoader utility in BuildingBlocks.Infrastructure (embedded SQL resource loader)
-  - Identity TenantResolver SQL extracted to .sql files (EmbeddedResource)
-  - Workflows WorkflowReadService SQL extracted to .sql files; dynamic concatenation eliminated
-  - Reporting Application: DashboardKpiDto, WorkflowTrendDto, ReportSummaryDto, IReportingReadService
-  - ReportingReadService (Dapper, 3 SQL files), registered scoped in DI
-  - Workflows page: native `<select>` replaced with PrimeNG `<p-select>` (STRIDE token styled)
-- EP-024 #95 (Reporting App Layer): US-059 #99, US-060 #100 ✅ **Done** (PR #133, 2026-05-19)
-  - Report domain entity + ReportType enum (DashboardKpi/WorkflowTrend/WorkflowSummary)
-  - ReportConfiguration (EF Core, string enum, composite index) + ReportRepository
-  - reporting.Reports InitialCreate migration — applied to local SQL Express
-  - GetDashboardKpisQuery, GetWorkflowTrendsQuery + handlers + validators (US-059)
-  - GetReportListQuery, GenerateReportCommand, ExportReportCsvQuery + handlers + validators (US-060)
-  - ReportingApplicationExtensions: pipeline behaviours wired (LoggingBehaviour + ValidationBehaviour)
-  - GetWorkflowSummary.sql cross-schema query; IReportingReadService extended
-- EP-025 #96 (Reporting API): US-061 #101 ✅ **Done** (PR #135, 2026-05-19)
-  - DashboardController: GET /kpis, GET /trends?days=N
-  - ReportsController: GET /, POST /generate (201), GET /{id}/export (CSV download)
-- EP-026 #97 (Angular Dashboard+Reporting UI): 🔵 In Progress
-  - US-062 #102 ✅ **Done** (PR #136, 2026-05-19) — DashboardPageComponent, KPI cards, p-chart trend+doughnut, ChartThemeService, ReportingService
-  - BFF reporting proxy ✅ **Done** (PR #137, 2026-05-19) — `/bff/reporting/*` routes wired in STRIDE.BFF; ReportingApiClient typed HttpClient
-  - Infra bug fixes ✅ **Done** (PR #138 + #139, 2026-05-19):
-    - PR #138: TenantMiddleware ordering fix + WorkflowDevDataSeeder (5 definitions, ~18 instances, backdated)
-    - PR #139: `MapInboundClaims = false` (JWT claim rename fix), `CurrentUser.Email` short-name fix, `DateOnlyTypeHandler` for Dapper
-  - US-063 #103 — 🔵 **In Progress**
+## Phase 4 — Dashboard & Reporting (**Complete** ✅ — 2026-05-19)
+- EP-023 #94 ✅ **Done** (PR #132): SqlLoader, Dapper reporting DTOs, IReportingReadService
+- EP-024 #95 ✅ **Done** (PR #133): Report domain entity, GenerateReport + ExportReportCsv handlers, WorkflowTrend handlers
+- EP-025 #96 ✅ **Done** (PR #135): DashboardController, ReportsController (generate + export CSV)
+- EP-026 #97 ✅ **Done** (PRs #136–#140):
+  - US-062: DashboardPageComponent, KPI cards, p-chart trend+doughnut, ChartThemeService
+  - BFF reporting proxy: `/bff/reporting/*` routes wired; ReportingApiClient typed HttpClient
+  - BFF workflow proxy: `WorkflowApiClient` + BFF `WorkflowsController` — all `/bff/workflows/*` routes wired
+  - Infra fixes (PR #138/#139): TenantMiddleware ordering, WorkflowDevDataSeeder, `MapInboundClaims = false`, `DateOnlyTypeHandler`
+  - US-063: Angular Reporting page — generate/list/export reports, inline notifications, STRIDE button conventions
+  - Bug fixes (PR #140): CSV export field name mismatch (`Id` → `ReportId`), bulk delete implemented, `JsonStringEnumConverter` global, Invalid Date fixes (`trendDate`, `createdAt`, `stepName`, `assigneeId`), dashboard moved to `features/dashboard/`
+
+**All Phase 4 epics closed (EP-023/024/025/026). All stories CLOSED (#98–#103).**
+
 ## Phase 5 — Notifications & Observability (Pending)
 ## Phase 6 — SaaS Readiness (Pending)
 ## Phase 7 — Portfolio & Deployment Polish (Pending)
