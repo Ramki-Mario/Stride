@@ -173,8 +173,15 @@ Phase 3 (Core Workflow Engine) — **In Progress**.
   - Reporting Application: DashboardKpiDto, WorkflowTrendDto, ReportSummaryDto, IReportingReadService
   - ReportingReadService (Dapper, 3 SQL files), registered scoped in DI
   - Workflows page: native `<select>` replaced with PrimeNG `<p-select>` (STRIDE token styled)
-- EP-024 #95 (Reporting App Layer): US-059 #99, US-060 #100 — ⬜ Backlog
-- EP-025 #96 (Reporting API): US-061 #101 — ⬜ Backlog
+- EP-024 #95 (Reporting App Layer): US-059 #99, US-060 #100 ✅ **Done** (PR #133, 2026-05-19)
+  - Report domain entity + ReportType enum (DashboardKpi/WorkflowTrend/WorkflowSummary)
+  - ReportConfiguration (EF Core, string enum, composite index) + ReportRepository
+  - reporting.Reports InitialCreate migration — applied to local SQL Express
+  - GetDashboardKpisQuery, GetWorkflowTrendsQuery + handlers + validators (US-059)
+  - GetReportListQuery, GenerateReportCommand, ExportReportCsvQuery + handlers + validators (US-060)
+  - ReportingApplicationExtensions: pipeline behaviours wired (LoggingBehaviour + ValidationBehaviour)
+  - GetWorkflowSummary.sql cross-schema query; IReportingReadService extended
+- EP-025 #96 (Reporting API): US-061 #101 — ⬜ **Next**
 - EP-026 #97 (Angular Dashboard+Reporting UI): US-062 #102, US-063 #103 — ⬜ Backlog
 ## Phase 5 — Notifications & Observability (Pending)
 ## Phase 6 — SaaS Readiness (Pending)
