@@ -32,6 +32,16 @@ export interface ReportSummaryDto {
 
 export type ReportType = 'DashboardKpi' | 'WorkflowTrend' | 'WorkflowSummary';
 
+export interface GenerateReportRequest {
+  reportType: ReportType;
+}
+
+export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
+  DashboardKpi:    'Dashboard KPI Snapshot',
+  WorkflowTrend:   'Workflow Trend (30 days)',
+  WorkflowSummary: 'Workflow Summary',
+};
+
 /** KPI card display metadata */
 export interface KpiCardConfig {
   label: string;

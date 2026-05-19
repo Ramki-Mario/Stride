@@ -1,0 +1,119 @@
+<p-toast position="top-right" />
+
+<div class="reporting">
+
+  <!-- ── Page header ─────────────────────────────────────────────────── -->
+  <div class="reporting__header">
+    <div class="reporting__header-left">
+      <h1 class="reporting__title">Reports</h1>
+      <p class="reporting__subtitle">Generate and download workflow activity reports.</p>
+    </div>
+    <button
+      pButton
+      (click)="toggleForm()"
+      [label]="showForm() ? 'Cancel' : 'New Report'"
+      [icon]="showForm() ? 'pi pi-times' : 'pi pi-plus'"
+      [severity]="showForm() ? 'secondary' : 'primary'"
+      class="reporting__new-btn"
+    ></button>
+  </div>
+
+  <!-- ── Generate form panel ─────────────────────────────────────────── -->
+  @if (showForm()) {
+    <div class="reporting__form-panel">
+      <h3 class="reporting__form-title">Generate a new report</h3>
+      <div class="reporting__form-row">
+        <label class="reporting__form-label" for="reportType">Report type</label>
+        <p-select
+          inputId="reportType"
+          [(ngModel)]="selectedType"
+          [options]="reportTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="reporting__type-select"
+        />
+        <button
+          pButton
+          label="Generate"
+          icon="pi pi-bolt"
+          [loading]="generating()"
+          [disabled]="generating()"
+          (click)="generateReport()"
+          class="reporting__generate-btn"
+        ></button>
+      </div>
+    </div>
+  }
+
+  <!-- ── Skeleton loader ─────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="reporting__skeleton">
+      @for (_ of [1,2,3]; track $index) {
+        <div class="skeleton-row">
+          <div class="skeleton-row__col skeleton-row__col--wide"></div>
+          <div class="skeleton-row__col"></div>
+          <div class="skeleton-row__col"></div>
+          <div class="skeleton-row__col skeleton-row__col--narrow"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Empty state ─────────────────────────────────────────────────── -->
+  @if (isEmpty()) {
+    <div class="reporting__empty">
+      <i class="pi pi-file reporting__empty-icon"></i>
+      <p class="reporting__empty-title">No reports yet</p>
+      <p class="reporting__empty-sub">Click <strong>New Report</strong> to generate your first report.</p>
+    </div>
+  }
+
+  <!-- ── Reports table ───────────────────────────────────────────────── -->
+  @if (!loading() && reports().length > 0) {
+    <div class="reporting__table-wrap">
+      <table class="reporting__table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Records</th>
+            <th>Generated</th>
+            <th>Requested by</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (report of reports(); track report.reportId) {
+            <tr class="reporting__row">
+              <td class="reporting__col--name">{{ report.name }}</td>
+              <td>
+                <span class="badge" [ngClass]="typeBadgeClass(report.reportType)">
+                  {{ REPORT_TYPE_LABELS[report.reportType] }}
+                </span>
+              </td>
+              <td class="reporting__col--num">{{ report.recordCount | number }}</td>
+              <td class="reporting__col--date">{{ formatDate(report.generatedAt) }}</td>
+              <td class="reporting__col--user">{{ report.requestedBy }}</td>
+              <td class="reporting__col--actions">
+                <button
+                  pButton
+                  icon="pi pi-download"
+                  severity="secondary"
+                  [outlined]="true"
+                  size="small"
+                  pTooltip="Download CSV"
+                  tooltipPosition="left"
+                  [loading]="exportingId() === report.reportId"
+                  [disabled]="exportingId() !== null"
+                  (click)="exportCsv(report)"
+                  class="reporting__export-btn"
+                ></button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>

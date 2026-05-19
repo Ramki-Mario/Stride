@@ -1,0 +1,222 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Reporting Page
+// ─────────────────────────────────────────────────────────────────────────────
+
+.reporting {
+  padding: 1.5rem 2rem;
+  max-width: 1200px;
+
+  // ── Header ────────────────────────────────────────────────────────────────
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--stride-text-primary);
+    margin: 0 0 0.25rem;
+  }
+
+  &__subtitle {
+    font-size: 0.875rem;
+    color: var(--stride-text-muted);
+    margin: 0;
+  }
+
+  // ── Generate form panel ───────────────────────────────────────────────────
+
+  &__form-panel {
+    background: var(--stride-surface-card);
+    border: 1px solid var(--stride-border);
+    border-radius: var(--stride-radius-card);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--stride-shadow-card);
+  }
+
+  &__form-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--stride-text-primary);
+    margin: 0 0 1rem;
+  }
+
+  &__form-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  &__form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--stride-text-secondary);
+    white-space: nowrap;
+  }
+
+  ::ng-deep .reporting__type-select {
+    min-width: 240px;
+    .p-select {
+      border-radius: var(--stride-radius-input);
+    }
+  }
+
+  // ── Skeleton ──────────────────────────────────────────────────────────────
+
+  &__skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  // ── Empty state ───────────────────────────────────────────────────────────
+
+  &__empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--stride-surface-card);
+    border-radius: var(--stride-radius-card);
+    border: 1px dashed var(--stride-border);
+  }
+
+  &__empty-icon {
+    font-size: 3rem;
+    color: var(--stride-text-muted);
+    opacity: 0.4;
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  &__empty-title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--stride-text-secondary);
+    margin: 0 0 0.375rem;
+  }
+
+  &__empty-sub {
+    font-size: 0.875rem;
+    color: var(--stride-text-muted);
+    margin: 0;
+  }
+
+  // ── Table ─────────────────────────────────────────────────────────────────
+
+  &__table-wrap {
+    background: var(--stride-surface-card);
+    border: 1px solid var(--stride-border);
+    border-radius: var(--stride-radius-card);
+    box-shadow: var(--stride-shadow-card);
+    overflow: hidden;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+
+    thead tr {
+      background: var(--stride-surface-muted, var(--stride-surface-card));
+      border-bottom: 1px solid var(--stride-border);
+    }
+
+    thead th {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--stride-text-muted);
+      white-space: nowrap;
+    }
+  }
+
+  &__row {
+    border-bottom: 1px solid var(--stride-border);
+    transition: background 0.15s;
+
+    &:last-child { border-bottom: none; }
+
+    &:hover { background: var(--stride-surface-hover, rgba(0,0,0,0.02)); }
+
+    td {
+      padding: 0.875rem 1rem;
+      vertical-align: middle;
+      color: var(--stride-text-primary);
+    }
+  }
+
+  &__col--name  { font-weight: 500; }
+  &__col--num   { font-variant-numeric: tabular-nums; }
+  &__col--date  { color: var(--stride-text-secondary); white-space: nowrap; }
+  &__col--user  { color: var(--stride-text-secondary); }
+  &__col--actions { text-align: right; width: 60px; }
+}
+
+// ── Skeleton rows ────────────────────────────────────────────────────────────
+
+.skeleton-row {
+  display: flex;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  background: var(--stride-surface-card);
+  border-radius: var(--stride-radius-card);
+  border: 1px solid var(--stride-border);
+
+  &__col {
+    height: 16px;
+    flex: 1;
+    border-radius: 4px;
+    background: linear-gradient(
+      90deg,
+      var(--stride-surface-muted, #f1f5f9) 25%,
+      var(--stride-surface-card)            50%,
+      var(--stride-surface-muted, #f1f5f9) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+
+    &--wide   { flex: 2.5; }
+    &--narrow { flex: 0.5; }
+  }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// ── Type badges ──────────────────────────────────────────────────────────────
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &--kpi {
+    background: rgba(var(--stride-primary-rgb, 185 122 249), 0.12);
+    color: var(--stride-primary);
+  }
+
+  &--trend {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+  }
+
+  &--summary {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+  }
+}

@@ -2,10 +2,11 @@ import { Routes } from '@angular/router';
 
 export const reportingRoutes: Routes = [
   {
+    // /reporting  → Reporting page (report list, generate, export CSV) — US-063
     path: '',
     loadComponent: () =>
-      import('./pages/dashboard-page/dashboard-page').then(
-        (m) => m.DashboardPageComponent,
+      import('./pages/reporting-page/reporting-page').then(
+        (m) => m.ReportingPageComponent,
       ),
   },
 ];
