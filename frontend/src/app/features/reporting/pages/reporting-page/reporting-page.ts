@@ -72,11 +72,12 @@ export class ReportingPageComponent implements OnInit {
     this.notification.set(null);
     this.svc.generateReport({ reportType: this.selectedType }).subscribe({
       next: () => {
+        const label = REPORT_TYPE_LABELS[this.selectedType] ?? 'Report';
         this.showForm.set(false);
         this.selectedType = 'DashboardKpi';
         this.notification.set({
           type: 'success',
-          message: `${REPORT_TYPE_LABELS[this.selectedType] ?? 'Report'} generated successfully.`,
+          message: `${label} generated successfully.`,
         });
         this.loadReports();
       },

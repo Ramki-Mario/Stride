@@ -1,10 +1,12 @@
 -- Summary list of saved reports for the tenant, newest first.
+-- Column aliases are camelCase-friendly: ReportId → reportId, RequestedBy → requestedBy.
 SELECT
-    r.Id,
+    r.Id          AS ReportId,
     r.Name,
     r.ReportType,
     r.GeneratedAt,
-    r.RecordCount
+    r.RecordCount,
+    r.CreatedBy   AS RequestedBy
 FROM reporting.Reports r
 WHERE r.TenantId  = @TenantId
   AND r.IsDeleted = 0
