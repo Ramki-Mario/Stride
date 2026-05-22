@@ -8,8 +8,9 @@ namespace STRIDE.BFF.Controllers;
 /// <summary>
 /// BFF proxy for tenant settings endpoints.
 ///
-///   GET  /bff/administration/settings  — get current tenant settings
-///   PUT  /bff/administration/settings  — update tenant settings
+///   GET  /bff/administration/settings              — get current tenant settings
+///   PUT  /bff/administration/settings              — update settings (+ CSS sanitisation report)
+///   GET  /bff/administration/settings/css-template — download --stride-* token template file
 /// </summary>
 [ApiController]
 [Authorize]
@@ -40,7 +41,28 @@ public sealed class TenantSettingsController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         var response = await _settings.UpdateSettingsAsync(body, token, ct);
-        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
+
+        if (!response.IsSuccessStatusCode) return await ProxyAsync(response);
+
+        // 200 means CSS was included and a sanitisation report was returned; proxy it.
+        // 204 means settings-only update with no CSS.
+        return response.StatusCode == System.Net.HttpStatusCode.NoContent
+            ? NoContent()
+            : await ProxyAsync(response);
+    }
+
+    /// <summary>GET /bff/administration/settings/css-template — proxies the CSS file download.</summary>
+    [HttpGet("css-template")]
+    public async Task<IActionResult> GetCssTemplate(CancellationToken ct)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _settings.GetCssTemplateAsync(token, ct);
+        if (!response.IsSuccessStatusCode) return await ProxyAsync(response);
+
+        var css = await response.Content.ReadAsByteArrayAsync(ct);
+        return File(css, "text/css", "stride-theme-template.css");
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

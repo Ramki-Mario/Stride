@@ -7,8 +7,9 @@ namespace STRIDE.BFF.HttpClients;
 /// <summary>
 /// Typed HttpClient for the Administration module tenant-settings surface.
 ///
-///   GET  /bff/administration/settings  → GET  /api/administration/settings
-///   PUT  /bff/administration/settings  → PUT  /api/administration/settings
+///   GET  /bff/administration/settings              → GET  /api/administration/settings
+///   PUT  /bff/administration/settings              → PUT  /api/administration/settings
+///   GET  /bff/administration/settings/css-template → GET  /api/administration/settings/css-template
 /// </summary>
 public sealed class TenantSettingsApiClient
 {
@@ -21,6 +22,9 @@ public sealed class TenantSettingsApiClient
 
     public Task<HttpResponseMessage> UpdateSettingsAsync(object body, string token, CancellationToken ct = default)
         => _client.SendAsync(BuildWithBody(HttpMethod.Put, "/api/administration/settings", body, token), ct);
+
+    public Task<HttpResponseMessage> GetCssTemplateAsync(string token, CancellationToken ct = default)
+        => _client.SendAsync(Build(HttpMethod.Get, "/api/administration/settings/css-template", token), ct);
 
     // ── helpers ───────────────────────────────────────────────────────────────
 

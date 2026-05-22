@@ -24,5 +24,10 @@ public sealed class UpdateTenantSettingsCommandValidator
         RuleFor(x => x.Timezone)
             .NotEmpty()
             .MaximumLength(100);
+
+        RuleFor(x => x.CustomCss)
+            .MaximumLength(100_000)
+            .WithMessage("CSS input must not exceed 100,000 characters.")
+            .When(x => x.CustomCss is not null);
     }
 }

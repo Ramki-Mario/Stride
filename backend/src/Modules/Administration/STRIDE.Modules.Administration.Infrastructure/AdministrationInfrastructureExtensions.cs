@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using STRIDE.Modules.Administration.Application.Abstractions;
 using STRIDE.Modules.Administration.Infrastructure.Persistence;
 using STRIDE.Modules.Administration.Infrastructure.ReadModels;
+using STRIDE.Modules.Administration.Infrastructure.Services;
 
 namespace STRIDE.Modules.Administration.Infrastructure;
 
@@ -24,6 +25,9 @@ public static class AdministrationInfrastructureExtensions
 
         // TenantSettings EF repository.
         services.AddScoped<ITenantSettingsRepository, TenantSettingsRepository>();
+
+        // CSS sanitiser — stateless, safe as singleton.
+        services.AddSingleton<ICssSanitiser, CssSanitiser>();
 
         return services;
     }

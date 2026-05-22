@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="ReadModels\Queries\*.sql" />
+    <EmbeddedResource Include="Resources\stride-theme-template.css" />
   </ItemGroup>
 
   <ItemGroup>

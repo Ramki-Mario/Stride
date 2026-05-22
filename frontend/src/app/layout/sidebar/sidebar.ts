@@ -426,8 +426,9 @@ export class SidebarComponent {
     {
       label: 'Administration',
       items: [
-        { label: 'Users',          route: '/administration',        icon: 'pi-users',      exact: true },
-        { label: 'System Health',  route: '/administration/health', icon: 'pi-heart-fill' },
+        { label: 'Users',            route: '/administration',          icon: 'pi-users',      exact: true },
+        { label: 'Tenant Settings', route: '/administration/settings', icon: 'pi-palette' },
+        { label: 'System Health',   route: '/administration/health',   icon: 'pi-heart-fill' },
       ],
     },
   ];

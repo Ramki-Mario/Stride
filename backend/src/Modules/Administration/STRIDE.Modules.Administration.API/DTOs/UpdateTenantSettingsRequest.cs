@@ -13,5 +13,11 @@ public sealed class UpdateTenantSettingsRequest
     [Required, MaxLength(100)]
     public string Timezone { get; set; } = "UTC";
 
-    public string? CustomCssTokensJson { get; set; }
+    /// <summary>
+    /// Raw CSS text from the client. When provided, it is sanitised server-side
+    /// and only <c>--stride-*</c> tokens inside <c>:root {}</c> are stored.
+    /// Null means "keep existing CSS tokens unchanged".
+    /// </summary>
+    [MaxLength(100_000)]
+    public string? CustomCss { get; set; }
 }
