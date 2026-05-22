@@ -787,13 +787,8 @@ export class InvoicingPageComponent implements OnInit {
     return range;
   });
 
-  readonly invoiceTotal = computed(() => {
-    return this.lineItemsArray.controls.reduce((sum, ctrl) => {
-      const price = Number(ctrl.get('unitPrice')?.value ?? 0);
-      const qty   = Number(ctrl.get('quantity')?.value  ?? 0);
-      return sum + Math.round(price * qty * 100) / 100;
-    }, 0);
-  });
+  readonly lineItemSubtotals = signal<number[]>([0]);
+  readonly invoiceTotal      = signal<number>(0);
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -801,6 +796,18 @@ export class InvoicingPageComponent implements OnInit {
     this.search$
       .pipe(debounceTime(350), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(term => { this.searchTerm.set(term); this.reload(1); });
+
+    // Keep invoiceTotal and lineItemSubtotals in sync with the FormArray.
+    // computed() doesn't track FormArray value changes (they're RxJS, not signals).
+    this.lineItemsArray.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((items: { unitPrice: unknown; quantity: unknown }[]) => {
+        const subtotals = items.map(item =>
+          Math.round(Number(item.unitPrice ?? 0) * Number(item.quantity ?? 0) * 100) / 100,
+        );
+        this.lineItemSubtotals.set(subtotals);
+        this.invoiceTotal.set(subtotals.reduce((sum, s) => sum + s, 0));
+      });
 
     this.reload();
   }
@@ -852,9 +859,7 @@ export class InvoicingPageComponent implements OnInit {
   }
 
   lineSubtotal(index: number): number {
-    const ctrl = this.lineItemsArray.at(index);
-    return Math.round(Number(ctrl.get('unitPrice')?.value ?? 0) *
-                      Number(ctrl.get('quantity')?.value ?? 0) * 100) / 100;
+    return this.lineItemSubtotals()[index] ?? 0;
   }
 
   submitCreate(): void {

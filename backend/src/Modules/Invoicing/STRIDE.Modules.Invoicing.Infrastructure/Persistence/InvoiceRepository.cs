@@ -12,12 +12,12 @@ public sealed class InvoiceRepository : IInvoiceRepository
 
     public Task<Invoice?> GetByIdAsync(Guid tenantId, Guid invoiceId, CancellationToken ct = default) =>
         _ctx.Invoices
-            .Include("_lineItems")
+            .Include(i => i.LineItems)
             .FirstOrDefaultAsync(i => i.TenantId == tenantId && i.Id == invoiceId, ct);
 
     public Task<Invoice?> GetByNumberAsync(Guid tenantId, string invoiceNumber, CancellationToken ct = default) =>
         _ctx.Invoices
-            .Include("_lineItems")
+            .Include(i => i.LineItems)
             .FirstOrDefaultAsync(
                 i => i.TenantId == tenantId && i.InvoiceNumber == invoiceNumber, ct);
 
