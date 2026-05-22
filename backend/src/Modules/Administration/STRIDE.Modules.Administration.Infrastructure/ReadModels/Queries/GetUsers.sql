@@ -14,11 +14,11 @@ SELECT
     u.IsActive,
     u.IsPending,
     u.CreatedAt
-FROM  identity.Users      u
-LEFT JOIN identity.UserRoles   ur ON ur.UserId   = u.Id
-                                 AND ur.TenantId  = u.TenantId
-                                 AND ur.IsDeleted = 0
-LEFT JOIN identity.Roles       r  ON r.Id         = ur.RoleId
+FROM  [identity].Users      u
+LEFT JOIN [identity].UserRoles   ur ON ur.UserId   = u.Id
+                                   AND ur.TenantId  = u.TenantId
+                                   AND ur.IsDeleted = 0
+LEFT JOIN [identity].Roles       r  ON r.Id         = ur.RoleId
                                  AND r.IsDeleted   = 0
 WHERE u.TenantId  = @TenantId
   AND u.IsDeleted = 0
