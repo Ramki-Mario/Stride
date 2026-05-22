@@ -12,15 +12,17 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import { firstValueFrom, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 
 import { appRoutes } from './app.routes';
 import { correlationInterceptor } from './core/http/correlation.interceptor';
 import { errorInterceptor } from './core/http/error.interceptor';
 import { AuthService } from './core/auth/auth.service';
+import { ThemeService } from './core/theme/theme.service';
 
 /**
- * Checks the BFF session cookie on application boot.
+ * Checks the BFF session cookie on application boot and applies the tenant's
+ * server-stored default palette immediately after the session is confirmed.
  *
  * Angular waits for all APP_INITIALIZER factories to resolve before rendering
  * any routes, so authGuard's isAuthenticated() short-circuit will fire on the
@@ -31,9 +33,15 @@ import { AuthService } from './core/auth/auth.service';
  * The AuthService._user signal stays null; authGuard redirects to /login.
  */
 function initSession() {
-  const auth = inject(AuthService);
+  const auth  = inject(AuthService);
+  const theme = inject(ThemeService);
   return () => firstValueFrom(
-    auth.checkSession().pipe(catchError(() => of(null))),
+    auth.checkSession().pipe(
+      tap(user => {
+        if (user) theme.applyPaletteFromSession(user.defaultPalette);
+      }),
+      catchError(() => of(null)),
+    ),
     { defaultValue: null },
   );
 }

@@ -40,6 +40,9 @@ builder.Services.AddHttpClient<AdminApiClient>(client =>
 builder.Services.AddHttpClient<InvoicingApiClient>(client =>
     client.BaseAddress = new Uri(hostBaseUrl));
 
+builder.Services.AddHttpClient<TenantSettingsApiClient>(client =>
+    client.BaseAddress = new Uri(hostBaseUrl));
+
 // ── Redis (session store) ──────────────────────────────────────────────────
 builder.Services.Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.SectionName));
 

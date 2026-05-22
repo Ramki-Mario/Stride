@@ -48,6 +48,19 @@ export class ThemeService {
     this.palette.set(palette);
   }
 
+  /**
+   * Applies the tenant's server-stored default palette from the AuthUser signal.
+   * Called in APP_INITIALIZER after checkSession() resolves so that the server-side
+   * preference overrides the local localStorage value on every login/session restore.
+   *
+   * Accepts any string from the API; silently ignores unknown values (falls back to 'purple').
+   */
+  applyPaletteFromSession(rawPalette: string | undefined | null): void {
+    const palette: ThemePalette =
+      rawPalette === 'indigo' || rawPalette === 'purple' ? rawPalette : 'purple';
+    this.setPalette(palette);
+  }
+
   // ── Private helpers ────────────────────────────────────────────────────
 
   private _applyMode(mode: ThemeMode): void {

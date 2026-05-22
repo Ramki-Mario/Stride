@@ -11,4 +11,9 @@ export const administrationRoutes: Routes = [
     loadComponent: () =>
       import('./pages/health-page/health-page').then((m) => m.HealthPageComponent),
   },
+  {
+    path: 'settings',
+    loadComponent: () =>
+      import('./pages/settings-page/settings-page').then((m) => m.SettingsPageComponent),
+  },
 ];

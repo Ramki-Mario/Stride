@@ -8,6 +8,7 @@ export interface AuthUser {
   email: string;
   tenantId: string;
   roles: string[];
+  defaultPalette: string;
 }
 
 @Injectable({ providedIn: 'root' })

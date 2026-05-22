@@ -1,0 +1,101 @@
+/*
+ * STRIDE Tenant Theme Template
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Edit the values below, then upload this file on the Settings → Branding page.
+ *
+ * Rules:
+ *   • Only --stride-* properties inside :root {} are applied.
+ *   • url(), expression(), @import and <script> are always rejected.
+ *   • Everything outside :root {} is ignored.
+ *   • After upload, the Settings page shows which tokens were accepted (green)
+ *     and which were rejected (amber) so you can fix any issues.
+ *
+ * Tip: Use the colour picker in your OS / design tool, then paste hex values.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+:root {
+
+  /* ── Brand colours ─────────────────────────────────────────────────────── */
+  --stride-primary:          #B97AF9;   /* Main interactive colour (buttons, links) */
+  --stride-primary-hover:    #A45CF7;   /* Hover state */
+  --stride-primary-active:   #8C54B9;   /* Pressed / active state */
+  --stride-primary-subtle:   rgba(185, 122, 249, 0.10);  /* Tinted backgrounds */
+  --stride-primary-ring:     rgba(185, 122, 249, 0.25);  /* Focus ring */
+
+  --stride-accent:           #E15CFA;   /* Secondary highlight colour */
+  --stride-accent-subtle:    rgba(225, 92, 250, 0.10);
+
+  --stride-lavender:         #E8B0FC;   /* Decorative accent, badges */
+
+  /* ── Navigation ────────────────────────────────────────────────────────── */
+  --stride-nav-bg:           #FFFFFF;   /* Sidebar background */
+  --stride-nav-item-active:  rgba(185, 122, 249, 0.12);
+  --stride-nav-item-hover:   rgba(185, 122, 249, 0.08);
+  --stride-nav-text:         #6B7280;
+  --stride-nav-icon:         #8C54B9;
+  --stride-nav-muted:        #9CA3AF;
+  --stride-nav-border:       #E8E1F0;
+  --stride-nav-active-text:  #A45CF7;
+  --stride-nav-brand-text:   #1F2937;
+
+  /* ── Page backgrounds ──────────────────────────────────────────────────── */
+  --stride-bg:                #F7F4FA;   /* Outer page background */
+  --stride-surface:           #FFFFFF;   /* Card / panel background */
+  --stride-surface-secondary: #F3EEF8;
+  --stride-surface-hover:     #EFE9F4;
+  --stride-surface-raised:    #FFFFFF;   /* Elevated surfaces (modals) */
+
+  /* ── Typography ────────────────────────────────────────────────────────── */
+  --stride-text-primary:     #1F2937;
+  --stride-text-secondary:   #6B7280;
+  --stride-text-muted:       #9CA3AF;
+  --stride-text-inverse:     #FFFFFF;
+  --stride-text-link:        #A45CF7;
+
+  /* ── Borders ───────────────────────────────────────────────────────────── */
+  --stride-border:           #E8E1F0;
+  --stride-border-soft:      #F2EDF7;
+  --stride-border-focus:     #B97AF9;
+
+  /* ── Status colours ────────────────────────────────────────────────────── */
+  --stride-success:          #10B981;
+  --stride-success-bg:       #ECFDF5;
+  --stride-success-border:   #A7F3D0;
+
+  --stride-warning:          #F59E0B;
+  --stride-warning-bg:       #FFFBEB;
+  --stride-warning-border:   #FDE68A;
+
+  --stride-error:            #EF4444;
+  --stride-error-bg:         #FEF2F2;
+  --stride-error-border:     #FECACA;
+
+  --stride-info:             #5CABEC;
+  --stride-info-bg:          #EFF6FF;
+  --stride-info-border:      #BFDBFE;
+
+  /* ── Charts ────────────────────────────────────────────────────────────── */
+  --stride-chart-primary:    #B97AF9;
+  --stride-chart-secondary:  #5CABEC;
+  --stride-chart-tertiary:   #57D5C5;
+  --stride-chart-support:    #FC9FA2;
+
+  /* ── Border radius ─────────────────────────────────────────────────────── */
+  --stride-radius-xs:   0.25rem;    /*  4px */
+  --stride-radius-sm:   0.375rem;   /*  6px */
+  --stride-radius-md:   0.5rem;     /*  8px */
+  --stride-radius-lg:   0.75rem;    /* 12px */
+  --stride-radius-xl:   0.875rem;   /* 14px — inputs, buttons */
+  --stride-radius-2xl:  1rem;       /* 16px — cards */
+  --stride-radius-3xl:  1.25rem;    /* 20px — large cards */
+
+  /* ── Shadows ───────────────────────────────────────────────────────────── */
+  --stride-shadow-xs:   0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --stride-shadow-sm:   0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --stride-shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --stride-shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --stride-shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.07), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+  --stride-shadow-card: 0 8px 30px rgba(185, 122, 249, 0.08);
+
+}
