@@ -418,6 +418,12 @@ export class SidebarComponent {
       ],
     },
     {
+      label: 'Invoicing',
+      items: [
+        { label: 'Invoices', route: '/invoicing', icon: 'pi-file-edit' },
+      ],
+    },
+    {
       label: 'Administration',
       items: [
         { label: 'Users',          route: '/administration',        icon: 'pi-users',      exact: true },
