@@ -201,22 +201,34 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 **EP-034 #145 ✅ COMPLETE** — All 3 stories done. Phase 5 Notifications & Observability fully complete.
 
-## Phase 6 — SaaS Readiness (Planned 🔵 — 2026-05-22)
+## Phase 6 — SaaS Readiness (🔵 In Progress — 2026-05-22)
 
 **Sprint Goal:** Activate the Administration and Invoicing stubs, deliver BYOT per-tenant customisation, build a self-service onboarding wizard, and harden the platform with rate limiting and an audit trail.
 
 ### Epics
-| Epic | Scope | Stories | Status |
-|---|---|---|---|
-| EP-035 | Tenant User Administration (Administration module — list, invite, role, deactivate) | US-090–094 | [ ] Pending |
-| EP-036 | Invoicing Core (Invoice aggregate → API → Angular list + KPI cards) | US-095–099 | [ ] Pending |
-| EP-037 | Tenant Settings & BYOT (TenantSettings entity, per-tenant palette, CSS upload + sanitise + preview) | US-100–105 | [ ] Pending |
-| EP-038 | Tenant Onboarding Flow (4-step wizard, RegisterTenantCommand, auto-login) | US-106–108 | [ ] Pending |
-| EP-039 | SaaS Hardening (per-tenant rate limiting, AuditLog entity + trail, audit-log page) | US-109–111 | [ ] Pending |
+| Epic | GitHub # | Stories | PR | Status |
+|---|---|---|---|---|
+| EP-035 Tenant User Administration | #163 | US-090–094 (#168–172) | #190 ✅ | ✅ Done |
+| EP-036 Invoicing Core | #164 | US-095–099 (#173–177) | — | ⏳ Next |
+| EP-037 Tenant Settings & BYOT | #165 | US-100–105 (#178–183) | — | ⏳ Pending |
+| EP-038 Tenant Onboarding Flow | #166 | US-106–108 (#184–186) | — | ⏳ Pending |
+| EP-039 SaaS Hardening | #167 | US-109–111 (#187–189) | — | ⏳ Pending |
 
 **Architectural milestone unlocked:** Tenant onboarding flow complete (EP-038)
 **Deferred stories resolved:** US-067–070 (BYOT, EP-027) land as US-103–105 in EP-037
 **Note:** BFF Workflow proxy (#109) was completed in Phase 4 (PR #138) — not Phase 6 work.
+
+### ⚠️ GitHub Issue Hierarchy Process (MANDATORY for every sprint)
+When creating issues for a new phase/sprint, always:
+1. Create Epic issues → assign milestone → label `phase-N` + `epic`
+2. Create US issues → assign same milestone → label `phase-N` + `user-story`
+3. Link each US as a sub-issue of its Epic immediately after creation:
+```powershell
+$childId = (gh api repos/Ramki-Mario/Stride/issues/{child_number} | ConvertFrom-Json).id
+gh api --method POST repos/Ramki-Mario/Stride/issues/{epic_number}/sub_issues --field "sub_issue_id=$childId"
+```
+4. Add all issues to project board + set Status = Backlog
+API note: uses integer `.id` (not `nodeId`, not issue `number`). 422 = already linked (safe to ignore).
 
 ## Phase 7 — Portfolio & Deployment Polish (Pending)
 
