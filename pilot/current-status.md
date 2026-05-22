@@ -180,7 +180,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 **All Phase 4 epics closed (EP-023/024/025/026). All stories CLOSED (#98–#103).**
 
-## Phase 5 — Notifications & Observability (In Progress)
+## Phase 5 — Notifications & Observability (**Complete** ✅ — 2026-05-22)
 
 ### Completed
 - [x] US-078 #146 ✅ — Notification entity + NotificationType enum + NotificationCreatedEvent + INotificationRepository (PR #158, 2026-05-22)
@@ -195,10 +195,11 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - [x] US-085 #153 ✅ — Angular NotificationBellComponent (icon + unread count badge + dropdown panel, 60s polling) (PR #161, 2026-05-22)
 - [x] US-086 #154 ✅ — Angular Notifications page (All/Unread tabs, skeleton, mark-as-read, dismiss, bulk mark-all-read) (PR #161, 2026-05-22)
 
-### Pending
-- [ ] US-087 #155 — Serilog structured logging + correlation ID enrichment
-- [ ] US-088 #156 — OpenTelemetry traces + metrics
-- [ ] US-089 #157 — Health-check endpoints per module
+- [x] US-087 #155 ✅ — SerilogEnrichmentMiddleware: UserId + TenantId on every log line (PR #162, 2026-05-22)
+- [x] US-088 #156 ✅ — SQL Server + Redis health checks (ready tag) + UIResponseWriter verbose JSON (PR #162, 2026-05-22)
+- [x] US-089 #157 ✅ — Angular /administration/health page: status cards, auto-refresh, BFF proxy (PR #162, 2026-05-22)
+
+**EP-034 #145 ✅ COMPLETE** — All 3 stories done. Phase 5 Notifications & Observability fully complete.
 
 ## Phase 6 — SaaS Readiness (Pending)
 ## Phase 7 — Portfolio & Deployment Polish (Pending)
