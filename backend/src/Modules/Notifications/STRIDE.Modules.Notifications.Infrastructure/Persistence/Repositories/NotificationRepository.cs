@@ -44,4 +44,7 @@ internal sealed class NotificationRepository
         Context.Notifications.Update(notification);
         return Task.CompletedTask;
     }
+
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        => Context.SaveChangesAsync(cancellationToken);
 }

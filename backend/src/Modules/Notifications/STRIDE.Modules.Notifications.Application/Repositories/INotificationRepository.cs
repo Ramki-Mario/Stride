@@ -27,4 +27,7 @@ public interface INotificationRepository
 
     /// <summary>Persists changes to an existing notification (e.g., MarkAsRead / Delete).</summary>
     Task UpdateAsync(Notification notification, CancellationToken cancellationToken = default);
+
+    /// <summary>Flushes all pending changes to the database and dispatches domain events.</summary>
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
