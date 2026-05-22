@@ -201,7 +201,23 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 **EP-034 #145 ✅ COMPLETE** — All 3 stories done. Phase 5 Notifications & Observability fully complete.
 
-## Phase 6 — SaaS Readiness (Pending)
+## Phase 6 — SaaS Readiness (Planned 🔵 — 2026-05-22)
+
+**Sprint Goal:** Activate the Administration and Invoicing stubs, deliver BYOT per-tenant customisation, build a self-service onboarding wizard, and harden the platform with rate limiting and an audit trail.
+
+### Epics
+| Epic | Scope | Stories | Status |
+|---|---|---|---|
+| EP-035 | Tenant User Administration (Administration module — list, invite, role, deactivate) | US-090–094 | [ ] Pending |
+| EP-036 | Invoicing Core (Invoice aggregate → API → Angular list + KPI cards) | US-095–099 | [ ] Pending |
+| EP-037 | Tenant Settings & BYOT (TenantSettings entity, per-tenant palette, CSS upload + sanitise + preview) | US-100–105 | [ ] Pending |
+| EP-038 | Tenant Onboarding Flow (4-step wizard, RegisterTenantCommand, auto-login) | US-106–108 | [ ] Pending |
+| EP-039 | SaaS Hardening (per-tenant rate limiting, AuditLog entity + trail, audit-log page) | US-109–111 | [ ] Pending |
+
+**Architectural milestone unlocked:** Tenant onboarding flow complete (EP-038)
+**Deferred stories resolved:** US-067–070 (BYOT, EP-027) land as US-103–105 in EP-037
+**Note:** BFF Workflow proxy (#109) was completed in Phase 4 (PR #138) — not Phase 6 work.
+
 ## Phase 7 — Portfolio & Deployment Polish (Pending)
 
 ---

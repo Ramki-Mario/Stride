@@ -34,8 +34,8 @@ builder.Services.AddHttpClient<NotificationsApiClient>(client =>
 builder.Services.AddHttpClient<HealthApiClient>(client =>
     client.BaseAddress = new Uri(hostBaseUrl));
 
-// Additional typed clients added here as modules are implemented:
-// builder.Services.AddHttpClient<SchedulingApiClient>(...);
+builder.Services.AddHttpClient<AdminApiClient>(client =>
+    client.BaseAddress = new Uri(hostBaseUrl));
 
 // ── Redis (session store) ──────────────────────────────────────────────────
 builder.Services.Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.SectionName));

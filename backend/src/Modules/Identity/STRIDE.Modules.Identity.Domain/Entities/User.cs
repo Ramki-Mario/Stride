@@ -14,6 +14,13 @@ public sealed class User : AuditableEntity
     public Password PasswordHash { get; private set; } = default!;
     public bool IsActive { get; private set; }
 
+    /// <summary>
+    /// True when the user was created via an invitation and has not yet activated
+    /// their account.  A pending user cannot log in until their account is
+    /// activated (e.g. they set a password through the invitation link).
+    /// </summary>
+    public bool IsPending { get; private set; }
+
     public IReadOnlyList<UserRole> Roles => _roles.AsReadOnly();
 
     private User() { }
@@ -34,9 +41,37 @@ public sealed class User : AuditableEntity
             DisplayName = displayName.Trim(),
             PasswordHash = passwordHash,
             IsActive = true,
+            IsPending = false,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             CreatedBy = createdBy
+        };
+
+        user.RaiseDomainEvent(new UserCreatedEvent(user.Id, tenantId, user.Email));
+        return user;
+    }
+
+    /// <summary>Creates an invited (pending) user who cannot log in until activated.</summary>
+    public static User Invite(
+        Guid tenantId,
+        string email,
+        string displayName,
+        Password placeholderPasswordHash,
+        Guid invitedBy)
+    {
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            Email = email.Trim(),
+            NormalizedEmail = email.Trim().ToUpperInvariant(),
+            DisplayName = displayName.Trim(),
+            PasswordHash = placeholderPasswordHash,
+            IsActive = false,
+            IsPending = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            CreatedBy = invitedBy
         };
 
         user.RaiseDomainEvent(new UserCreatedEvent(user.Id, tenantId, user.Email));
@@ -57,6 +92,13 @@ public sealed class User : AuditableEntity
     public void Deactivate()
     {
         IsActive = false;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Reactivate()
+    {
+        IsActive = true;
+        IsPending = false;
         UpdatedAt = DateTime.UtcNow;
     }
 

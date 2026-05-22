@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using STRIDE.Modules.Administration.Application.Abstractions;
 using STRIDE.Modules.Administration.Infrastructure.Persistence;
+using STRIDE.Modules.Administration.Infrastructure.ReadModels;
 
 namespace STRIDE.Modules.Administration.Infrastructure;
 
@@ -15,6 +17,10 @@ public static class AdministrationInfrastructureExtensions
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"),
                 sql => sql.MigrationsAssembly(typeof(AdministrationDbContext).Assembly.FullName)));
+
+        // Dapper read and write services for the Administration module.
+        services.AddScoped<IAdminReadService,  AdminReadService>();
+        services.AddScoped<IAdminWriteService, AdminWriteService>();
 
         return services;
     }
