@@ -3,6 +3,8 @@
   <ItemGroup>
     <ProjectReference Include="..\STRIDE.Modules.Notifications.Domain\STRIDE.Modules.Notifications.Domain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\STRIDE.BuildingBlocks.Application\STRIDE.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\STRIDE.BuildingBlocks.Infrastructure\STRIDE.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Workflows\STRIDE.Modules.Workflows.Domain\STRIDE.Modules.Workflows.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
