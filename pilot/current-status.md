@@ -180,7 +180,24 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 **All Phase 4 epics closed (EP-023/024/025/026). All stories CLOSED (#98–#103).**
 
-## Phase 5 — Notifications & Observability (Pending)
+## Phase 5 — Notifications & Observability (In Progress)
+
+### Completed
+- [x] US-078 #146 ✅ — Notification entity + NotificationType enum + NotificationCreatedEvent + INotificationRepository (PR #158, 2026-05-22)
+- [x] US-079 #147 ✅ — EF Core config + notifications schema migration + NotificationRepository (PR #158, 2026-05-22)
+
+### Pending
+- [ ] US-080 #148 — CreateNotificationCommand + handler + validator
+- [ ] US-081 #149 — MarkNotificationAsReadCommand + GetNotificationsQuery + handlers
+- [ ] US-082 #150 — NotificationCreatedEvent handler (triggered by workflow domain events)
+- [ ] US-083 #151 — NotificationsController (GET list, POST mark-read, DELETE soft-delete)
+- [ ] US-084 #152 — BFF proxy routes `/bff/notifications/*` + NotificationsApiClient
+- [ ] US-085 #153 — Angular NotificationBellComponent (icon + unread count badge + dropdown)
+- [ ] US-086 #154 — Angular Notifications page (full list + read/dismiss)
+- [ ] US-087 #155 — Serilog structured logging + correlation ID enrichment
+- [ ] US-088 #156 — OpenTelemetry traces + metrics
+- [ ] US-089 #157 — Health-check endpoints per module
+
 ## Phase 6 — SaaS Readiness (Pending)
 ## Phase 7 — Portfolio & Deployment Polish (Pending)
 
