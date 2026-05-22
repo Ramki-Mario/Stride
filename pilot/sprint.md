@@ -846,7 +846,231 @@ These stories are not phase-specific — they run alongside regular sprints at d
 
 ## Sprint 6 — SaaS Readiness (PLANNED)
 
-**Phase:** Phase 6 — not started
+**Sprint Goal:** Bring the two remaining stub modules to life (Administration + Invoicing), deliver BYOT per-tenant customisation, build the tenant self-service onboarding wizard, and harden the platform with rate limiting and an admin audit trail. Meets the "Tenant onboarding flow complete" architectural milestone.
+
+**Phase:** Phase 6
+**Status:** 🔵 In Progress — EP-035 complete (2026-05-22). EP-036 next.
+
+**Modules activated this phase:** Administration (from stub), Invoicing (from stub)
+**Deferred stories resolved:** US-067–070 (BYOT from EP-027) land as US-103–105 inside EP-037.
+**Issue #109 note:** BFF workflow proxy (`WorkflowApiClient` + BFF `WorkflowsController`) was wired in Phase 4 (PR #138) — already complete, no Phase 6 work needed.
+
+| Epic | GitHub # | Stories | Status |
+|---|---|---|---|
+| EP-035 Tenant User Administration | #163 | US-090–094 (#168–172) | [x] Done |
+| EP-036 Invoicing Core | #164 | US-095–099 (#173–177) | [ ] Pending |
+| EP-037 Tenant Settings & BYOT | #165 | US-100–105 (#178–183) | [ ] Pending |
+| EP-038 Tenant Onboarding Flow | #166 | US-106–108 (#184–186) | [ ] Pending |
+| EP-039 SaaS Hardening | #167 | US-109–111 (#187–189) | [ ] Pending |
+
+### Phase 6 Story Summary
+| Story | Description | GitHub # | Size | Status |
+|---|---|---|---|---|
+| US-090 | GetUsersQuery: paginated, searchable, role + status filter | #168 | M | [x] |
+| US-091 | InviteUserCommand: create pending user, fire in-app notification | #169 | M | [x] |
+| US-092 | UpdateUserRoleCommand + DeactivateUser + ReactivateUser commands | #170 | S | [x] |
+| US-093 | AdministrationController (5 endpoints) + BFF AdminApiClient + BFF proxy | #171 | S | [x] |
+| US-094 | Angular /administration users page: table, search, filter, invite modal, row actions | #172 | L | [x] |
+| US-095 | Invoice aggregate + InvoiceLineItem value object + InvoiceStatus enum + domain events | #173 | M | [ ] |
+| US-096 | InvoiceConfiguration + EF Core migration + InvoiceRepository | #174 | S | [ ] |
+| US-097 | GenerateInvoice / SendInvoice / MarkPaid / VoidInvoice commands + list/get queries | #175 | L | [ ] |
+| US-098 | InvoicesController (6 endpoints) + InvoicingApiClient + BFF InvoicingController | #176 | M | [ ] |
+| US-099 | Angular /invoicing page: list, summary cards, create modal, pay/void actions | #177 | L | [ ] |
+| US-100 | TenantSettings entity + ITenantSettingsRepository + administration schema migration | #178 | S | [ ] |
+| US-101 | GetTenantSettingsQuery + UpdateTenantSettingsCommand + handler + validator | #179 | S | [ ] |
+| US-102 | TenantSettingsController (GET/PUT) + BFF proxy; /auth/me extended with defaultPalette | #180 | S | [ ] |
+| US-103 | Tenant default palette applied on login from settings; ThemeService reads /auth/me | #181 | M | [ ] |
+| US-104 | BYOT CSS token upload + server-side whitelist sanitiser + stored as JSON | #182 | L | [ ] |
+| US-105 | Angular palette preview mode: apply tokens without saving; Preview/Save/Reset buttons | #183 | M | [ ] |
+| US-106 | RegisterTenantCommand: creates Tenant + first Admin user atomically; Plan enum | #184 | L | [ ] |
+| US-107 | TenantsController: POST /tenants/register (unauthenticated) + BFF proxy | #185 | S | [ ] |
+| US-108 | Angular onboarding wizard: 4-step (org → admin → appearance → invite), auto-login | #186 | XL | [ ] |
+| US-109 | Per-tenant rate limiting: sliding window 100 req/60s, 429 + Retry-After | #187 | M | [ ] |
+| US-110 | AuditLog entity + IAuditLogger + administration migration; injected into key handlers | #188 | M | [ ] |
+| US-111 | GetAuditLogQuery + AuditLogController + BFF proxy + Angular /administration/audit-log page | #189 | M | [ ] |
+
+---
+
+### EP-035 — Tenant User Administration
+
+**Goal:** Implement the Administration module fully: list tenant users, invite new members, manage roles, and deactivate/reactivate accounts. Replaces the current placeholder `/administration` page.
+
+**Acceptance Criteria:**
+- `GET /api/administration/users?page=1&pageSize=20&search=&role=&status=` → paged `AdminUserDto` list (via Dapper read model)
+- `POST /api/administration/users/invite` → creates `User` with `IsActive = false`, `IsPending = true`; dispatches `CreateNotificationCommand` to notify the invitee
+- `PUT /api/administration/users/{id}/role` → changes role (Admin / Member / Viewer); only Admin callers
+- `PUT /api/administration/users/{id}/deactivate` + `PUT /api/administration/users/{id}/reactivate`
+- All endpoints require `[Authorize(Policy = "CanManageUsers")]`
+- BFF routes: `/bff/administration/users/*` forwarded to Host
+- Angular `/administration` page: users table (name, email, role badge, status badge, last-active), search bar, role filter, status filter (`Active / Pending / Inactive`), Invite modal (email + role dropdown), row action menu (Change Role / Deactivate / Reactivate), skeleton loader, empty state, pagination
+
+| ID | Story | Tasks | Complexity | Status |
+|---|---|---|---|---|
+| US-090 | As an admin, I can see a paginated, searchable list of my tenant's users | GetUsersQuery + handler + AdminUserDto + Dapper read (joins users, user_roles, tenants) | M | [x] |
+| US-091 | As an admin, I can invite a new user to my tenant by email | InviteUserCommand + handler + validator; creates User (IsActive=false, IsPending=true); dispatches CreateNotificationCommand; IsPending flag on User entity | M | [x] |
+| US-092 | As an admin, I can change a user's role, deactivate, or reactivate them | UpdateUserRoleCommand + DeactivateUserCommand + ReactivateUserCommand + handlers + validators | S | [x] |
+| US-093 | As a developer, administration operations are exposed via API and BFF proxy | AdministrationController (5 endpoints) + AdminApiClient typed HttpClient + BFF AdminController proxy | S | [x] |
+| US-094 | As an admin, I see a polished users management page with invite and edit modals | Angular /administration page: p-table + search + filter + invite modal (ReactiveForm) + row action menu + skeleton + empty state + pagination | L | [x] |
+
+**Dependencies:** Identity module (User entity, IUserRepository, roles), Notifications module (CreateNotificationCommand)
+**Risks:**
+- Invite must enforce `TenantId` — never allow cross-tenant user creation
+- `IsPending` flag needs adding to `User` entity and EF config (non-breaking migration)
+
+---
+
+### EP-036 — Invoicing Core
+
+**Goal:** Implement the Invoicing module end-to-end: Invoice aggregate, generation/payment lifecycle, full API, BFF proxy, and an Angular invoicing page with summary KPIs.
+
+**Acceptance Criteria:**
+- `Invoice` aggregate: `InvoiceNumber` (tenant-scoped sequential, e.g. `INV-0001`), `TenantId`, `RecipientName`, `LineItems[]` (description, quantity, unitPrice), `TotalAmount` (computed), `Currency`, `Status` (`Draft / Sent / Paid / Overdue / Void`), `DueDate`, `IssuedAt`
+- Domain events: `InvoiceGeneratedEvent`, `InvoiceSentEvent`, `InvoicePaidEvent`, `InvoiceVoidedEvent`
+- Commands: `GenerateInvoice`, `SendInvoice`, `MarkInvoicePaid`, `VoidInvoice`
+- Queries: `GetInvoiceById`, `ListInvoices (page, pageSize, status filter)`, `GetInvoiceSummary` (total count, total amount, paid, outstanding, overdue)
+- `invoicing.*` SQL schema; EF Core migration
+- REST: `GET /api/invoicing/invoices`, `POST /api/invoicing/invoices`, `GET /api/invoicing/invoices/{id}`, `POST /api/invoicing/invoices/{id}/send`, `POST /api/invoicing/invoices/{id}/pay`, `DELETE /api/invoicing/invoices/{id}` (void)
+- Angular `/invoicing` page: summary KPI cards (Total / Paid / Outstanding / Overdue), invoice table (number, recipient, amount, status badge, due date), Create Invoice modal (line items builder), action buttons (Send / Mark Paid / Void), skeleton, empty state
+
+| ID | Story | Tasks | Complexity | Status |
+|---|---|---|---|---|
+| US-095 | As a tenant admin, I have an Invoice aggregate with full lifecycle | Invoice entity + InvoiceLineItem value object + InvoiceStatus enum + InvoiceNumber generator + domain events + IInvoiceRepository | M | [ ] |
+| US-096 | As a developer, invoices are persisted in the invoicing schema | InvoiceConfiguration + InvoiceLineItemConfiguration (owned entity) + invoicing schema migration + InvoiceRepository | S | [ ] |
+| US-097 | As a tenant admin, I can generate, send, pay, and void invoices via commands | GenerateInvoice + SendInvoice + MarkInvoicePaid + VoidInvoice commands + handlers + validators; ListInvoices + GetInvoiceById + GetInvoiceSummary queries + handlers + Dapper reads | L | [ ] |
+| US-098 | As a developer, invoicing operations are exposed via REST API and BFF proxy | InvoicesController (6 endpoints) + request DTOs + InvoicingApiClient typed HttpClient + BFF InvoicingController proxy | M | [ ] |
+| US-099 | As a tenant admin, I can manage invoices from the Angular Invoicing page | Angular /invoicing page: summary KPI cards + p-table + Create modal (ReactiveForm, dynamic line items) + Send/Pay/Void row actions + skeleton + empty state | L | [ ] |
+
+**Dependencies:** BuildingBlocks.Domain, EF Core patterns from Identity/Workflows
+**Risks:**
+- `InvoiceNumber` must be tenant-scoped sequential — use a Dapper `MAX(invoice_number) + 1` with optimistic retry or a dedicated `InvoiceSequence` table; avoid global IDENTITY
+- `InvoiceLineItem` as an EF Owned Entity collection (`OwnsMany`) — same pattern as step definitions
+
+---
+
+### EP-037 — Tenant Settings & BYOT Customisation
+
+**Goal:** Persist tenant configuration server-side (`TenantSettings` entity). Deliver the four deferred BYOT stories (US-067–070): per-tenant default palette applied on login, custom CSS token upload, server-side sanitisation, and live preview mode.
+
+**Acceptance Criteria:**
+- `TenantSettings` entity in Administration domain: `TenantId` (1:1 FK to Tenant), `DisplayName`, `DefaultPalette` (`purple` | `indigo`), `CustomCssTokensJson` (nullable), `Timezone`
+- EF Core config + `administration` schema migration (new table `administration.tenant_settings`)
+- `GetTenantSettingsQuery` + `UpdateTenantSettingsCommand` + handler + validator
+- `GET /api/administration/settings` → `TenantSettingsDto`; `PUT /api/administration/settings` → 204
+- BFF `/auth/me` response extended with `defaultPalette` field (read from `TenantSettings`)
+- Angular `ThemeService.applyPaletteFromSession()` reads `defaultPalette` from `AuthService.currentUser()` signal and applies on login + settings save
+- Angular `/administration/settings` page: display name input, timezone picker, palette selector with live preview chips (Purple / Indigo), BYOT CSS upload area
+- BYOT sanitiser (C#): whitelist-only — accepts CSS text, extracts only `--stride-*` custom property assignments inside `:root {}`, strips everything else (no `url()`, `expression()`, `<script>`, `@import`)
+- Preview mode: "Preview" button injects sanitised tokens into a `<style id="byot-preview">` tag in document `<head>` without saving; "Save" persists; "Reset" removes preview tokens
+
+| ID | Story | Tasks | Complexity | Status |
+|---|---|---|---|---|
+| US-100 | As a developer, TenantSettings persists tenant configuration server-side | TenantSettings entity + ITenantSettingsRepository + EF Core config + administration schema migration | S | [ ] |
+| US-101 | As a developer, tenant settings are read and updated via MediatR | GetTenantSettingsQuery + handler + TenantSettingsDto; UpdateTenantSettingsCommand + handler + validator | S | [ ] |
+| US-102 | As a developer, tenant settings are exposed via API and BFF; /auth/me carries defaultPalette | TenantSettingsController (GET/PUT) + BFF proxy; extend MeResponse + BFF /auth/me with defaultPalette from TenantSettings lookup | S | [ ] |
+| US-103 (was US-067) | As a tenant admin, my chosen default palette is applied automatically for all my users on login | Angular ThemeService.applyPaletteFromSession() reads defaultPalette from AuthService signal; applied in APP_INITIALIZER after /auth/me resolves | M | [ ] |
+| US-104 (was US-068 + US-069) | As a tenant admin, I can upload a custom CSS token set (BYOT); tokens are sanitised server-side before storage | CssSanitiser service: extract only --stride-* properties in :root {}; reject url()/expression()/script; store sanitised JSON in TenantSettings.CustomCssTokensJson; return validation errors on bad input | L | [ ] |
+| US-105 (was US-070) | As a tenant admin, I can preview my custom palette before saving it live | Angular preview mode: inject tokens into <style id="byot-preview">; Preview / Save / Reset buttons in settings page; preview cleared on navigation away | M | [ ] |
+
+**Dependencies:** EP-035 (Administration module structure), Identity module (`MeResponse`, `/auth/me` endpoint)
+**Risks:**
+- Untrusted tenant CSS is a potential XSS vector — `CssSanitiser` must be deny-by-default: only emit known-safe `--stride-*` property assignments; never emit anything else
+- Extending `/auth/me` adds a Dapper call to `TenantSettings` on every session check — cache in BFF Redis session or lazy-load on settings page
+
+---
+
+### EP-038 — Tenant Onboarding Flow
+
+**Goal:** Self-service tenant registration wizard. A new customer creates their organisation, admin account, and first team invites in a single guided Angular flow — no manual provisioning required. Meets the **"Tenant onboarding flow complete"** architectural milestone.
+
+**Acceptance Criteria:**
+- `RegisterTenantCommand(orgName, slug, plan, adminEmail, adminPassword, adminDisplayName)` + handler: atomically creates `Tenant` + `User` (Admin role) + `TenantDomainMapping` (if corporate domain) + `UserTenantMapping`; returns JWT
+- `Plan` enum added to `Tenant` entity: `Starter / Pro / Enterprise`
+- `POST /api/identity/tenants/register` — unauthenticated; no `[Authorize]`; no `TenantMiddleware` interference (sets `TenantId` on context after creation, like `LoginCommand`)
+- BFF `/bff/tenants/register` proxies to Host; auto-calls `/auth/login` to issue session cookie on success
+- Angular `/onboarding` route — excluded from `authGuard`; 4-step stepper:
+  1. **Organisation** — organisation name, slug (auto-generated, editable), plan tier (radio cards with feature bullets)
+  2. **Admin Account** — display name, email, password (strength meter), confirm password
+  3. **Appearance** — palette picker (Purple / Indigo), theme toggle (Light / Dark); live preview in stepper background
+  4. **Invite Team** — optional: up to 5 email address inputs; sends invitations on completion
+- On completion → auto-login → redirect to `/dashboard`
+- Login page gains a "Create your workspace →" link pointing to `/onboarding`
+- Slug uniqueness validated client-side (debounced API check) and server-side (unique constraint)
+
+| ID | Story | Tasks | Complexity | Status |
+|---|---|---|---|---|
+| US-106 | As a new customer, I can register my organisation and first admin account in one command | RegisterTenantCommand + handler + validator; Plan enum on Tenant entity (non-breaking migration); slug uniqueness constraint | L | [ ] |
+| US-107 | As a developer, tenant registration is accessible via unauthenticated API and BFF | TenantsController: POST /api/identity/tenants/register (no [Authorize]) + DTO; BFF TenantRegistrationApiClient + BFF proxy; auto-session after registration | S | [ ] |
+| US-108 | As a new customer, I complete the 4-step onboarding wizard and land on the dashboard | Angular OnboardingPageComponent: 4-step stepper with form validation per step; appearance live preview; invite step calls InviteUserCommand for each email; auto-login on complete; "Create your workspace" link on login page | XL | [ ] |
+
+**Dependencies:** EP-035 (InviteUserCommand for step 4), EP-037 (palette options + ThemeService)
+**Risks:**
+- `RegisterTenantCommand` handler must set `TenantId` on `ITenantContext` after Tenant creation — same bypass pattern as `LoginCommand` (sets context manually before downstream operations)
+- Slug uniqueness must be enforced at the DB level (`UNIQUE INDEX` on `tenants.slug`) not just in the validator
+- Onboarding route (`/onboarding`) must be listed as a `canActivate: []` exception in `app.routes.ts` to bypass the root `authGuard`
+
+---
+
+### EP-039 — SaaS Hardening
+
+**Goal:** Protect the platform from API abuse with per-tenant rate limiting, and give tenant admins full visibility into sensitive operations via an audit trail.
+
+**Acceptance Criteria:**
+- Rate limiter: ASP.NET Core `AddRateLimiter` with a `TenantSlidingWindowPolicy` — 100 requests per 60-second window per `TenantId` (read from JWT `tid` claim); anonymous requests share a single global bucket; 429 response includes `Retry-After` header
+- `AuditLog` entity in Administration domain: `Id`, `TenantId`, `ActorId` (UserId), `ActorEmail`, `Action` (string constant), `ResourceType`, `ResourceId` (nullable), `OldValueJson` (nullable), `NewValueJson` (nullable), `Timestamp`
+- Audit events captured (via `IAuditLogger.LogAsync(...)` injected into command handlers): user invited, user role changed, user deactivated/reactivated, invoice generated/sent/paid/voided, tenant settings updated
+- `GET /api/administration/audit-log?page=1&pageSize=50&from=&to=&action=` → paged `AuditLogEntryDto` list; Admin role only
+- Angular `/administration/audit-log` page: table (timestamp, actor, action badge, resource, details expander), date range filter, action dropdown filter, skeleton, empty state
+
+| ID | Story | Tasks | Complexity | Status |
+|---|---|---|---|---|
+| US-109 | As a SaaS operator, each tenant is rate-limited to prevent API abuse | AddRateLimiter in Host Program.cs; TenantSlidingWindowPolicy: reads tid claim, falls back to IP for anonymous; app.UseRateLimiter(); 429 + Retry-After | M | [ ] |
+| US-110 | As a developer, sensitive admin actions are written to an audit log | AuditLog entity + EF config + administration schema migration; IAuditLogger interface + EF-backed AuditLogger; injected into InviteUser, UpdateUserRole, Deactivate, GenerateInvoice, MarkPaid, VoidInvoice, UpdateTenantSettings handlers | M | [ ] |
+| US-111 | As a tenant admin, I can view the audit trail for my organisation | GetAuditLogQuery + Dapper read + handler; AuditLogController (GET) + BFF proxy + BFF AdminController extension; Angular /administration/audit-log page: table + date filter + action filter + skeleton | M | [ ] |
+
+**Dependencies:** EP-035 (Administration module), EP-036 (invoice events to audit), EP-037 (settings events to audit)
+**Risks:**
+- `AuditLog` table grows unboundedly — add `INDEX ON (tenant_id, timestamp DESC)`; plan a TTL purge background job in Phase 7
+- `IAuditLogger` must not block the command handler if audit write fails — fire-and-forget with structured logging fallback
+
+---
+
+### Sprint 6 Dependency Order
+
+```
+EP-035 (User Administration)   ← unblocked; start here
+  ├─► EP-037 (Tenant Settings + BYOT)
+  │     └─► EP-038 (Onboarding — needs palette + invite)
+  └─► EP-039 (SaaS Hardening — audits admin actions)
+
+EP-036 (Invoicing)             ← parallel with EP-037 after EP-035 done
+  └─► EP-039 (audit captures invoice events)
+```
+
+---
+
+### Sprint 6 Architectural Risks
+
+| Risk | Severity | Mitigation |
+|---|---|---|
+| RegisterTenantCommand bypasses TenantMiddleware | HIGH | Handler sets TenantId manually on ITenantContext after Tenant creation (same pattern as LoginCommand) |
+| BYOT custom CSS enabling XSS via custom properties | HIGH | CssSanitiser: deny-by-default, whitelist only `--stride-*` properties in `:root {}` |
+| InviteUserCommand cross-tenant user creation | HIGH | Handler reads TenantId from ITenantContext (JWT), never from request body |
+| AuditLog table growth | MEDIUM | Indexed on (tenant_id, timestamp); Phase 7 adds TTL purge job |
+| Slug uniqueness race condition at registration | MEDIUM | DB UNIQUE INDEX enforces constraint; handler catches DbUpdateException and maps to validation error |
+| /auth/me extended with TenantSettings lookup | LOW | Cache defaultPalette in Redis session payload; avoid per-request Dapper query |
+
+---
+
+### Sprint 6 Cross-Cutting Concerns
+
+| Concern | Strategy |
+|---|---|
+| Rate limiting | ASP.NET Core built-in; tenant-aware policy reads `tid` claim |
+| Audit trail | `IAuditLogger` interface in Application; EF-backed impl in Infrastructure; injected into relevant command handlers |
+| BYOT sanitisation | Server-side C# whitelist parser; CSS never trusted from client |
+| Tenant registration | Single `RegisterTenantCommand` creates Tenant + User + assigns Admin role atomically in a single EF transaction |
+| Palette per tenant | `defaultPalette` stored in `TenantSettings`; propagated via `/auth/me`; applied by `ThemeService` on session bootstrap |
+| Audit log read isolation | Dapper (not EF Core) for paged audit reads — consistent with ADR-005 |
 
 ---
 
@@ -870,7 +1094,7 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | Workflow API layer (CRUD + lifecycle) | S3 | [x] Done — EP-021 PR #107 |
 | Angular Workflow list + detail UI | S3 | [x] Done — US-054 PR #108, US-055 PR #110 |
 | EF Core + Dapper split strategy proven | S4 | [x] Done — Phase 4 complete |
-| All modules observable (Serilog + Seq + OTEL) | S5 | [ ] |
+| All modules observable (Serilog + Seq + OTEL) | S5 | [x] Done — EP-034 PR #162 |
 | Tenant onboarding flow complete | S6 | [ ] |
 | Deployed to Azure with CI/CD | S7 | [ ] |
 

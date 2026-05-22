@@ -30,6 +30,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(512);
 
         builder.Property(u => u.IsActive).IsRequired();
+        builder.Property(u => u.IsPending).IsRequired().HasDefaultValue(false);
         builder.Property(u => u.TenantId).IsRequired();
         builder.Property(u => u.CreatedAt).IsRequired();
         builder.Property(u => u.UpdatedAt).IsRequired();
