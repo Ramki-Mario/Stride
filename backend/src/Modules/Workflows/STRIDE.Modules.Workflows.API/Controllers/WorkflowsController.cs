@@ -238,6 +238,18 @@ public sealed class WorkflowsController : ControllerBase
     }
 
     /// <summary>
+    /// List all workflow instances for the current tenant (across all definitions).
+    /// GET /api/workflows/instances
+    /// </summary>
+    [HttpGet("instances")]
+    [ProducesResponseType(typeof(IReadOnlyList<WorkflowInstanceSummaryDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ListAllInstances(CancellationToken ct)
+    {
+        var result = await _mediator.Send(new ListWorkflowInstancesQuery(), ct);
+        return Ok(result.Value);
+    }
+
+    /// <summary>
     /// List all workflow instances for a given definition.
     /// GET /api/workflows/{id}/instances
     /// </summary>

@@ -76,6 +76,9 @@ public sealed class WorkflowApiClient
 
     // ── Instances ─────────────────────────────────────────────────────────
 
+    public Task<HttpResponseMessage> GetAllInstancesAsync(string token, CancellationToken ct = default)
+        => _client.SendAsync(Build(HttpMethod.Get, "/api/workflows/instances", token), ct);
+
     public Task<HttpResponseMessage> GetInstanceAsync(Guid instanceId, string token, CancellationToken ct = default)
         => _client.SendAsync(Build(HttpMethod.Get, $"/api/workflows/instances/{instanceId}", token), ct);
 
