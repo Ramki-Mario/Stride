@@ -189,11 +189,13 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - [x] US-081 #149 ✅ — GetNotificationsQuery + GetUnreadCountQuery + handlers + validators (PR #159, 2026-05-22)
 - [x] US-082 #150 ✅ — Workflow domain event handlers: WorkflowStarted/Completed/Failed, StepAssigned/Completed → auto-create notifications (PR #159, 2026-05-22)
 
-### Pending
+### Completed (continued)
 - [x] US-083 #151 ✅ — NotificationsController: GET list, GET unread-count, POST read, DELETE (PR #160, 2026-05-22)
 - [x] US-084 #152 ✅ — NotificationsApiClient + BFF NotificationsController proxy `/bff/notifications/*` (PR #160, 2026-05-22)
-- [ ] US-085 #153 — Angular NotificationBellComponent (icon + unread count badge + dropdown)
-- [ ] US-086 #154 — Angular Notifications page (full list + read/dismiss)
+- [x] US-085 #153 ✅ — Angular NotificationBellComponent (icon + unread count badge + dropdown panel, 60s polling) (PR #161, 2026-05-22)
+- [x] US-086 #154 ✅ — Angular Notifications page (All/Unread tabs, skeleton, mark-as-read, dismiss, bulk mark-all-read) (PR #161, 2026-05-22)
+
+### Pending
 - [ ] US-087 #155 — Serilog structured logging + correlation ID enrichment
 - [ ] US-088 #156 — OpenTelemetry traces + metrics
 - [ ] US-089 #157 — Health-check endpoints per module
