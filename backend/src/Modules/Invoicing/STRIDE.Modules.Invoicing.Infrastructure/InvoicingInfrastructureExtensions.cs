@@ -1,7 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using STRIDE.Modules.Invoicing.Application.Abstractions;
+using STRIDE.Modules.Invoicing.Domain.Repositories;
 using STRIDE.Modules.Invoicing.Infrastructure.Persistence;
+using STRIDE.Modules.Invoicing.Infrastructure.ReadModels;
 
 namespace STRIDE.Modules.Invoicing.Infrastructure;
 
@@ -15,6 +18,9 @@ public static class InvoicingInfrastructureExtensions
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"),
                 sql => sql.MigrationsAssembly(typeof(InvoicingDbContext).Assembly.FullName)));
+
+        services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+        services.AddScoped<IInvoiceReadService, InvoiceReadService>();
 
         return services;
     }

@@ -1,0 +1,29 @@
+using Microsoft.EntityFrameworkCore;
+using STRIDE.Modules.Invoicing.Domain.Entities;
+using STRIDE.Modules.Invoicing.Domain.Repositories;
+
+namespace STRIDE.Modules.Invoicing.Infrastructure.Persistence;
+
+public sealed class InvoiceRepository : IInvoiceRepository
+{
+    private readonly InvoicingDbContext _ctx;
+
+    public InvoiceRepository(InvoicingDbContext ctx) => _ctx = ctx;
+
+    public Task<Invoice?> GetByIdAsync(Guid tenantId, Guid invoiceId, CancellationToken ct = default) =>
+        _ctx.Invoices
+            .Include("_lineItems")
+            .FirstOrDefaultAsync(i => i.TenantId == tenantId && i.Id == invoiceId, ct);
+
+    public Task<Invoice?> GetByNumberAsync(Guid tenantId, string invoiceNumber, CancellationToken ct = default) =>
+        _ctx.Invoices
+            .Include("_lineItems")
+            .FirstOrDefaultAsync(
+                i => i.TenantId == tenantId && i.InvoiceNumber == invoiceNumber, ct);
+
+    public async Task AddAsync(Invoice invoice, CancellationToken ct = default) =>
+        await _ctx.Invoices.AddAsync(invoice, ct);
+
+    public Task SaveChangesAsync(CancellationToken ct = default) =>
+        _ctx.SaveChangesAsync(ct);
+}

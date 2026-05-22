@@ -58,6 +58,13 @@ export const appRoutes: Routes = [
             (m) => m.administrationRoutes
           ),
       },
+      {
+        path: 'invoicing',
+        loadChildren: () =>
+          import('./features/invoicing/invoicing.routes').then(
+            (m) => m.invoicingRoutes
+          ),
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },
