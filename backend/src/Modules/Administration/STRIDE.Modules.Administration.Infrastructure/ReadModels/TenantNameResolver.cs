@@ -1,6 +1,5 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
+using STRIDE.BuildingBlocks.Infrastructure.Persistence;
 using STRIDE.Modules.Administration.Application.Abstractions;
 
 namespace STRIDE.Modules.Administration.Infrastructure.ReadModels;
@@ -12,15 +11,13 @@ namespace STRIDE.Modules.Administration.Infrastructure.ReadModels;
 /// </summary>
 internal sealed class TenantNameResolver : ITenantNameResolver
 {
-    private readonly string _connectionString;
+    private readonly IDbConnectionFactory _db;
 
-    public TenantNameResolver(IConfiguration configuration)
-        => _connectionString = configuration.GetConnectionString("DefaultConnection")
-           ?? throw new InvalidOperationException("DefaultConnection is not configured.");
+    public TenantNameResolver(IDbConnectionFactory db) => _db = db;
 
     public async Task<string> ResolveAsync(Guid tenantId, CancellationToken ct = default)
     {
-        await using var conn = new SqlConnection(_connectionString);
+        await using var conn = await _db.OpenConnectionAsync(ct);
         var name = await conn.ExecuteScalarAsync<string?>(
             new CommandDefinition(
                 "SELECT TOP 1 Name FROM [identity].Tenants WHERE Id = @TenantId AND IsDeleted = 0",

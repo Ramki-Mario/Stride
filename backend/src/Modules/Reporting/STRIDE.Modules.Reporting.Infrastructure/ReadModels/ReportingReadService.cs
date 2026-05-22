@@ -1,6 +1,4 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using STRIDE.BuildingBlocks.Infrastructure.Persistence;
 using STRIDE.Modules.Reporting.Application.Abstractions;
 using STRIDE.Modules.Reporting.Application.ReadModels;
@@ -29,21 +27,19 @@ internal sealed class ReportingReadService : IReportingReadService
         SqlLoader.Load(typeof(ReportingReadService).Assembly,
             "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetWorkflowSummary.sql");
 
-    private readonly string _connectionString;
+    private readonly IDbConnectionFactory _db;
 
-    public ReportingReadService(IConfiguration configuration)
-    {
-        _connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("DefaultConnection is not configured.");
-    }
+    public ReportingReadService(IDbConnectionFactory db) => _db = db;
 
     public async Task<DashboardKpiDto> GetDashboardKpisAsync(Guid tenantId, CancellationToken ct = default)
     {
-        await using var conn = new SqlConnection(_connectionString);
+        await using var conn = await _db.OpenConnectionAsync(ct);
         var result = await conn.QuerySingleOrDefaultAsync<DashboardKpiDto>(
-            SqlGetDashboardKpis,
-            new { TenantId = tenantId },
-            commandTimeout: 30);
+            new CommandDefinition(
+                SqlGetDashboardKpis,
+                new { TenantId = tenantId },
+                commandTimeout: 30,
+                cancellationToken: ct));
 
         return result ?? new DashboardKpiDto(0, 0, 0, 0, 0, 0);
     }
@@ -53,11 +49,13 @@ internal sealed class ReportingReadService : IReportingReadService
         int days = 30,
         CancellationToken ct = default)
     {
-        await using var conn = new SqlConnection(_connectionString);
+        await using var conn = await _db.OpenConnectionAsync(ct);
         var results = await conn.QueryAsync<WorkflowTrendDto>(
-            SqlGetWorkflowTrends,
-            new { TenantId = tenantId, Days = days },
-            commandTimeout: 30);
+            new CommandDefinition(
+                SqlGetWorkflowTrends,
+                new { TenantId = tenantId, Days = days },
+                commandTimeout: 30,
+                cancellationToken: ct));
 
         return results.ToList().AsReadOnly();
     }
@@ -66,11 +64,13 @@ internal sealed class ReportingReadService : IReportingReadService
         Guid tenantId,
         CancellationToken ct = default)
     {
-        await using var conn = new SqlConnection(_connectionString);
+        await using var conn = await _db.OpenConnectionAsync(ct);
         var results = await conn.QueryAsync<ReportSummaryDto>(
-            SqlGetReportSummaries,
-            new { TenantId = tenantId },
-            commandTimeout: 30);
+            new CommandDefinition(
+                SqlGetReportSummaries,
+                new { TenantId = tenantId },
+                commandTimeout: 30,
+                cancellationToken: ct));
 
         return results.ToList().AsReadOnly();
     }
@@ -79,11 +79,13 @@ internal sealed class ReportingReadService : IReportingReadService
         Guid tenantId,
         CancellationToken ct = default)
     {
-        await using var conn = new SqlConnection(_connectionString);
+        await using var conn = await _db.OpenConnectionAsync(ct);
         var results = await conn.QueryAsync<WorkflowSummaryReportRowDto>(
-            SqlGetWorkflowSummary,
-            new { TenantId = tenantId },
-            commandTimeout: 30);
+            new CommandDefinition(
+                SqlGetWorkflowSummary,
+                new { TenantId = tenantId },
+                commandTimeout: 30,
+                cancellationToken: ct));
 
         return results.ToList().AsReadOnly();
     }

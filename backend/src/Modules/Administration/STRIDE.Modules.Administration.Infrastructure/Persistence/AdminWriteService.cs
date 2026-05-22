@@ -1,6 +1,5 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
+using STRIDE.BuildingBlocks.Infrastructure.Persistence;
 using STRIDE.Modules.Administration.Application.Abstractions;
 
 namespace STRIDE.Modules.Administration.Infrastructure.Persistence;
@@ -11,11 +10,9 @@ namespace STRIDE.Modules.Administration.Infrastructure.Persistence;
 /// </summary>
 internal sealed class AdminWriteService : IAdminWriteService
 {
-    private readonly string _connectionString;
+    private readonly IDbConnectionFactory _db;
 
-    public AdminWriteService(IConfiguration configuration)
-        => _connectionString = configuration.GetConnectionString("DefaultConnection")
-           ?? throw new InvalidOperationException("DefaultConnection is not configured.");
+    public AdminWriteService(IDbConnectionFactory db) => _db = db;
 
     // ── Invite ────────────────────────────────────────────────────────────────
 
@@ -27,9 +24,8 @@ internal sealed class AdminWriteService : IAdminWriteService
         Guid invitedBy,
         CancellationToken ct = default)
     {
-        await using var conn = new SqlConnection(_connectionString);
-        await conn.OpenAsync(ct);
-        await using var tx = await conn.BeginTransactionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var tx   = await conn.BeginTransactionAsync(ct);
 
         var userId = Guid.NewGuid();
         var now    = DateTime.UtcNow;
@@ -127,9 +123,8 @@ internal sealed class AdminWriteService : IAdminWriteService
     public async Task UpdateUserRoleAsync(
         Guid tenantId, Guid userId, string newRoleName, Guid updatedBy, CancellationToken ct = default)
     {
-        await using var conn = new SqlConnection(_connectionString);
-        await conn.OpenAsync(ct);
-        await using var tx = await conn.BeginTransactionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var tx   = await conn.BeginTransactionAsync(ct);
 
         var roleId = await conn.ExecuteScalarAsync<Guid?>(
             new CommandDefinition(
@@ -140,7 +135,7 @@ internal sealed class AdminWriteService : IAdminWriteService
         if (roleId is null)
             throw new InvalidOperationException($"Role '{newRoleName}' not found.");
 
-        // Soft-delete existing roles for this user in this tenant
+        // Soft-delete existing role assignment for this user in this tenant
         await conn.ExecuteAsync(
             new CommandDefinition(
                 "UPDATE [identity].UserRoles SET IsDeleted = 1, UpdatedAt = @Now WHERE TenantId = @TenantId AND UserId = @UserId AND IsDeleted = 0",
@@ -174,7 +169,7 @@ internal sealed class AdminWriteService : IAdminWriteService
 
     public async Task DeactivateUserAsync(Guid tenantId, Guid userId, CancellationToken ct = default)
     {
-        await using var conn = new SqlConnection(_connectionString);
+        await using var conn = await _db.OpenConnectionAsync(ct);
         await conn.ExecuteAsync(
             new CommandDefinition(
                 "UPDATE [identity].Users SET IsActive = 0, UpdatedAt = @Now WHERE TenantId = @TenantId AND Id = @UserId AND IsDeleted = 0",
@@ -186,7 +181,7 @@ internal sealed class AdminWriteService : IAdminWriteService
 
     public async Task ReactivateUserAsync(Guid tenantId, Guid userId, CancellationToken ct = default)
     {
-        await using var conn = new SqlConnection(_connectionString);
+        await using var conn = await _db.OpenConnectionAsync(ct);
         await conn.ExecuteAsync(
             new CommandDefinition(
                 "UPDATE [identity].Users SET IsActive = 1, IsPending = 0, UpdatedAt = @Now WHERE TenantId = @TenantId AND Id = @UserId AND IsDeleted = 0",

@@ -1,6 +1,4 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.BuildingBlocks.Infrastructure.Persistence;
 using STRIDE.Modules.Administration.Application.Abstractions;
@@ -22,11 +20,9 @@ internal sealed class AdminReadService : IAdminReadService
         SqlLoader.Load(typeof(AdminReadService).Assembly,
             "STRIDE.Modules.Administration.Infrastructure.ReadModels.Queries.CountUsers.sql");
 
-    private readonly string _connectionString;
+    private readonly IDbConnectionFactory _db;
 
-    public AdminReadService(IConfiguration configuration)
-        => _connectionString = configuration.GetConnectionString("DefaultConnection")
-           ?? throw new InvalidOperationException("DefaultConnection is not configured.");
+    public AdminReadService(IDbConnectionFactory db) => _db = db;
 
     public async Task<PagedResult<AdminUserDto>> GetUsersAsync(
         Guid tenantId,
@@ -38,17 +34,17 @@ internal sealed class AdminReadService : IAdminReadService
         CancellationToken ct = default)
     {
         var offset = (page - 1) * pageSize;
-        var param = new
+        var param  = new
         {
             TenantId = tenantId,
             Search   = string.IsNullOrWhiteSpace(search) ? null : search.Trim(),
             Role     = string.IsNullOrWhiteSpace(role)   ? null : role.Trim(),
             Status   = string.IsNullOrWhiteSpace(status) ? null : status.Trim(),
             Offset   = offset,
-            PageSize = pageSize
+            PageSize = pageSize,
         };
 
-        await using var conn = new SqlConnection(_connectionString);
+        await using var conn = await _db.OpenConnectionAsync(ct);
 
         var total = await conn.ExecuteScalarAsync<int>(
             new CommandDefinition(SqlCountUsers, param, cancellationToken: ct));

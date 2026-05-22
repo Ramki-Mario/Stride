@@ -1,6 +1,4 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.BuildingBlocks.Infrastructure.Persistence;
 using STRIDE.Modules.Invoicing.Application.Abstractions;
@@ -24,11 +22,9 @@ internal sealed class InvoiceReadService : IInvoiceReadService
 
     private static readonly string[] StatusLabels = ["Draft", "Sent", "Paid", "Void"];
 
-    private readonly string _connectionString;
+    private readonly IDbConnectionFactory _db;
 
-    public InvoiceReadService(IConfiguration configuration)
-        => _connectionString = configuration.GetConnectionString("DefaultConnection")
-           ?? throw new InvalidOperationException("DefaultConnection is not configured.");
+    public InvoiceReadService(IDbConnectionFactory db) => _db = db;
 
     public async Task<PagedResult<InvoiceSummaryDto>> GetInvoicesAsync(
         Guid tenantId, string? search, int? status,
@@ -43,7 +39,7 @@ internal sealed class InvoiceReadService : IInvoiceReadService
             PageSize = pageSize,
         };
 
-        await using var conn = new SqlConnection(_connectionString);
+        await using var conn = await _db.OpenConnectionAsync(ct);
 
         var total = await conn.ExecuteScalarAsync<int>(
             new CommandDefinition(SqlCountInvoices, param, cancellationToken: ct));
@@ -77,14 +73,14 @@ internal sealed class InvoiceReadService : IInvoiceReadService
     {
         var param = new { TenantId = tenantId, InvoiceId = invoiceId };
 
-        await using var conn = new SqlConnection(_connectionString);
+        await using var conn = await _db.OpenConnectionAsync(ct);
 
         var rows = (await conn.QueryAsync<dynamic>(
             new CommandDefinition(SqlGetById, param, cancellationToken: ct))).ToList();
 
         if (rows.Count == 0) return null;
 
-        var first = rows[0];
+        var first     = rows[0];
         int statusInt = (int)first.Status;
 
         var lineItems = rows

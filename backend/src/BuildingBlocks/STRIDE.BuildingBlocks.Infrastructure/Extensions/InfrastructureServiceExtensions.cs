@@ -5,6 +5,7 @@ using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Events;
 using STRIDE.BuildingBlocks.Infrastructure.Events;
 using STRIDE.BuildingBlocks.Infrastructure.Identity;
+using STRIDE.BuildingBlocks.Infrastructure.Persistence;
 using STRIDE.BuildingBlocks.Infrastructure.Tenant;
 
 namespace STRIDE.BuildingBlocks.Infrastructure.Extensions;
@@ -24,6 +25,13 @@ public static class InfrastructureServiceExtensions
         // Current user — populated from JWT claims by the Host's JWT Bearer middleware.
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, CurrentUser>();
+
+        // Database connection factory — all Dapper services inject this instead of
+        // SqlConnection directly. To switch to MySQL: register MySqlConnectionFactory here.
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("DefaultConnection is not configured.");
+        services.AddSingleton<IDbConnectionFactory>(
+            new SqlServerConnectionFactory(connectionString));
 
         return services;
     }

@@ -1,6 +1,4 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using STRIDE.BuildingBlocks.Infrastructure.Persistence;
 using STRIDE.Modules.Workflows.Application.Abstractions;
 
@@ -29,23 +27,21 @@ internal sealed class WorkflowReadService : IWorkflowReadService
         SqlLoader.Load(typeof(WorkflowReadService).Assembly,
             "STRIDE.Modules.Workflows.Infrastructure.ReadModels.Queries.GetDashboardStats.sql");
 
-    private readonly string _connectionString;
+    private readonly IDbConnectionFactory _db;
 
-    public WorkflowReadService(IConfiguration configuration)
-    {
-        _connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("DefaultConnection string is not configured.");
-    }
+    public WorkflowReadService(IDbConnectionFactory db) => _db = db;
 
     public async Task<IReadOnlyList<WorkflowDefinitionReadModel>> GetWorkflowDefinitionSummariesAsync(
         Guid tenantId,
         CancellationToken ct = default)
     {
-        await using var conn = new SqlConnection(_connectionString);
+        await using var conn = await _db.OpenConnectionAsync(ct);
         var results = await conn.QueryAsync<WorkflowDefinitionReadModel>(
-            SqlGetDefinitionSummaries,
-            new { TenantId = tenantId },
-            commandTimeout: 30);
+            new CommandDefinition(
+                SqlGetDefinitionSummaries,
+                new { TenantId = tenantId },
+                commandTimeout: 30,
+                cancellationToken: ct));
 
         return results.ToList().AsReadOnly();
     }
@@ -59,11 +55,13 @@ internal sealed class WorkflowReadService : IWorkflowReadService
             ? SqlGetInstanceSummariesByDefinition
             : SqlGetInstanceSummaries;
 
-        await using var conn = new SqlConnection(_connectionString);
+        await using var conn = await _db.OpenConnectionAsync(ct);
         var results = await conn.QueryAsync<WorkflowInstanceReadModel>(
-            sql,
-            new { TenantId = tenantId, DefinitionId = definitionId },
-            commandTimeout: 30);
+            new CommandDefinition(
+                sql,
+                new { TenantId = tenantId, DefinitionId = definitionId },
+                commandTimeout: 30,
+                cancellationToken: ct));
 
         return results.ToList().AsReadOnly();
     }
@@ -72,11 +70,13 @@ internal sealed class WorkflowReadService : IWorkflowReadService
         Guid tenantId,
         CancellationToken ct = default)
     {
-        await using var conn = new SqlConnection(_connectionString);
+        await using var conn = await _db.OpenConnectionAsync(ct);
         var stats = await conn.QuerySingleOrDefaultAsync<WorkflowDashboardStats>(
-            SqlGetDashboardStats,
-            new { TenantId = tenantId },
-            commandTimeout: 30);
+            new CommandDefinition(
+                SqlGetDashboardStats,
+                new { TenantId = tenantId },
+                commandTimeout: 30,
+                cancellationToken: ct));
 
         return stats ?? new WorkflowDashboardStats(0, 0, 0, 0, 0, 0);
     }
