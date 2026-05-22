@@ -493,7 +493,9 @@ import { InvoiceSummaryDto, InvoiceStatus, INVOICE_STATUS_LABELS } from '../../m
     .inv-table-wrap {
       border: 1px solid var(--stride-border-soft);
       border-radius: var(--stride-radius-lg);
-      overflow: hidden;
+      /* overflow: hidden would clip the absolutely-positioned action menus.
+         Use overflow: visible and round the corner cells instead. */
+      overflow: visible;
       background: var(--stride-surface);
     }
     .inv-table {
@@ -505,6 +507,12 @@ import { InvoiceSummaryDto, InvoiceStatus, INVOICE_STATUS_LABELS } from '../../m
       background: var(--stride-surface-secondary);
       border-bottom: 1px solid var(--stride-border-soft);
     }
+    /* Round the top corners of the header row to match the wrapper */
+    .inv-table thead tr th:first-child { border-top-left-radius: var(--stride-radius-lg); }
+    .inv-table thead tr th:last-child  { border-top-right-radius: var(--stride-radius-lg); }
+    /* Round the bottom corners of the last data row */
+    .inv-table tbody tr:last-child td:first-child { border-bottom-left-radius: var(--stride-radius-lg); }
+    .inv-table tbody tr:last-child td:last-child  { border-bottom-right-radius: var(--stride-radius-lg); }
     .inv-table th {
       padding: 0.625rem 1rem;
       text-align: left;
