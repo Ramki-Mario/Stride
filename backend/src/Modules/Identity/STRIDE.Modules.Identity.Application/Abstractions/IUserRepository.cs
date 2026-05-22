@@ -19,6 +19,13 @@ public interface IUserRepository
     /// <summary>Stages a new user for insertion. Caller must call SaveChangesAsync.</summary>
     Task AddAsync(User user, CancellationToken ct = default);
 
+    /// <summary>
+    /// Stages a UserTenantMapping for insertion alongside a new user.
+    /// Used during tenant registration to support TenantResolver fallback on subsequent logins.
+    /// Caller must call SaveChangesAsync.
+    /// </summary>
+    Task AddTenantMappingAsync(UserTenantMapping mapping, CancellationToken ct = default);
+
     /// <summary>Marks an existing user as modified. Caller must call SaveChangesAsync.</summary>
     void Update(User user);
 

@@ -33,6 +33,9 @@ internal sealed class UserRepository : TenantAwareRepository<User, IdentityDbCon
     public async Task AddAsync(User user, CancellationToken ct = default)
         => await Context.Users.AddAsync(user, ct);
 
+    public async Task AddTenantMappingAsync(UserTenantMapping mapping, CancellationToken ct = default)
+        => await Context.UserTenantMappings.AddAsync(mapping, ct);
+
     public void Update(User user)
         => Context.Users.Update(user);
 

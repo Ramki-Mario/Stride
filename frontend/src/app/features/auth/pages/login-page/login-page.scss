@@ -460,6 +460,25 @@
   border-radius: 9999px;
 }
 
+// ── Create workspace link ─────────────────────────────────────────────────────
+
+.auth-create-link {
+  position: relative;
+  z-index: 1;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: var(--stride-text-muted);
+  text-align: center;
+}
+
+.auth-create-link-anchor {
+  color: var(--stride-text-link);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover { text-decoration: underline; }
+}
+
 // ── Footer ────────────────────────────────────────────────────────────────────
 
 .auth-footer {
