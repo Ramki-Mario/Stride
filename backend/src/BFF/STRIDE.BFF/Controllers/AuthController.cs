@@ -1,5 +1,6 @@
 using System.Net.Http;
 using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -17,13 +18,18 @@ namespace STRIDE.BFF.Controllers;
 [Route("bff/auth")]
 public sealed class AuthController : ControllerBase
 {
-    private readonly IdentityApiClient _identity;
+    private readonly IdentityApiClient       _identity;
+    private readonly TenantSettingsApiClient _tenantSettings;
     private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IdentityApiClient identity, ILogger<AuthController> logger)
+    public AuthController(
+        IdentityApiClient       identity,
+        TenantSettingsApiClient tenantSettings,
+        ILogger<AuthController> logger)
     {
-        _identity = identity;
-        _logger = logger;
+        _identity       = identity;
+        _tenantSettings = tenantSettings;
+        _logger         = logger;
     }
 
     /// <summary>
@@ -46,7 +52,7 @@ public sealed class AuthController : ControllerBase
             _logger.LogError(ex, "Host identity API unreachable during login.");
             return StatusCode(StatusCodes.Status502BadGateway, new ProblemDetails
             {
-                Title = "Identity service unavailable",
+                Title  = "Identity service unavailable",
                 Detail = "Unable to reach the identity service. Please try again shortly.",
                 Status = StatusCodes.Status502BadGateway
             });
@@ -55,16 +61,16 @@ public sealed class AuthController : ControllerBase
         if (hostResponse is null)
             return Unauthorized(new ProblemDetails
             {
-                Title = "Invalid credentials",
+                Title  = "Invalid credentials",
                 Status = StatusCodes.Status401Unauthorized
             });
 
-        var principal = BuildPrincipal(hostResponse);
+        var principal  = BuildPrincipal(hostResponse);
         var properties = new AuthenticationProperties
         {
             IsPersistent = true,
-            IssuedUtc = DateTimeOffset.UtcNow,
-            ExpiresUtc = new DateTimeOffset(hostResponse.ExpiresAtUtc, TimeSpan.Zero),
+            IssuedUtc    = DateTimeOffset.UtcNow,
+            ExpiresUtc   = new DateTimeOffset(hostResponse.ExpiresAtUtc, TimeSpan.Zero),
             AllowRefresh = false
         };
         properties.StoreTokens(new[]
@@ -77,7 +83,10 @@ public sealed class AuthController : ControllerBase
             principal,
             properties);
 
-        return Ok(ToMeResponse(hostResponse));
+        // Fetch defaultPalette immediately after login so the login response is complete.
+        var defaultPalette = await GetDefaultPaletteAsync(hostResponse.AccessToken, ct);
+
+        return Ok(ToMeResponse(hostResponse, defaultPalette));
     }
 
     /// <summary>
@@ -91,28 +100,60 @@ public sealed class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// GET /bff/auth/me. Returns the current user's session info. Used by Angular
-    /// on app boot (APP_INITIALIZER) and after any 401.
+    /// GET /bff/auth/me. Returns the current user's session info including defaultPalette.
+    /// Called by Angular on app boot (APP_INITIALIZER) and after any 401.
     /// </summary>
     [HttpGet("me")]
     [Authorize]
-    public IActionResult Me()
+    public async Task<IActionResult> Me(CancellationToken ct)
     {
         var user = HttpContext.User;
         if (!TryParseGuidClaim(user, "sub", out var userId) ||
-            !TryParseGuidClaim(user, "tid", out var tenantId))
+            !TryParseGuidClaim(user, "tid", out _))
         {
             return Unauthorized();
         }
 
-        var email = user.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
-        var displayName = user.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
-        var roles = user.FindAll(ClaimTypes.Role).Select(c => c.Value).ToArray();
+        var email       = user.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
+        var displayName = user.FindFirst(ClaimTypes.Name)?.Value  ?? string.Empty;
+        var roles       = user.FindAll(ClaimTypes.Role).Select(c => c.Value).ToArray();
+        var tenantId    = GetTenantIdFromClaims(user);
 
-        return Ok(new MeResponse(userId, tenantId, email, displayName, roles));
+        var token          = await HttpContext.GetTokenAsync("access_token");
+        var defaultPalette = token is not null
+            ? await GetDefaultPaletteAsync(token, ct)
+            : "purple";
+
+        return Ok(new MeResponse(userId, tenantId, email, displayName, roles, defaultPalette));
     }
 
-    // ── helpers ────────────────────────────────────────────────────────────
+    // ── helpers ────────────────────────────────────────────────────────────────
+
+    private async Task<string> GetDefaultPaletteAsync(string token, CancellationToken ct)
+    {
+        try
+        {
+            var response = await _tenantSettings.GetSettingsAsync(token, ct);
+            if (!response.IsSuccessStatusCode) return "purple";
+
+            var json = await response.Content.ReadAsStringAsync(ct);
+            using var doc = JsonDocument.Parse(json);
+            return doc.RootElement.TryGetProperty("defaultPalette", out var prop)
+                ? prop.GetString() ?? "purple"
+                : "purple";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to fetch defaultPalette for /auth/me — using default.");
+            return "purple";
+        }
+    }
+
+    private static Guid GetTenantIdFromClaims(ClaimsPrincipal user)
+    {
+        TryParseGuidClaim(user, "tid", out var tenantId);
+        return tenantId;
+    }
 
     private static ClaimsPrincipal BuildPrincipal(HostLoginResponse response)
     {
@@ -121,8 +162,8 @@ public sealed class AuthController : ControllerBase
             new("sub", response.UserId.ToString("N")),
             new("tid", response.TenantId.ToString("N")),
             new(ClaimTypes.NameIdentifier, response.UserId.ToString("N")),
-            new(ClaimTypes.Email, response.Email),
-            new(ClaimTypes.Name, response.DisplayName)
+            new(ClaimTypes.Email,          response.Email),
+            new(ClaimTypes.Name,           response.DisplayName)
         };
         claims.AddRange(response.Roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
@@ -130,8 +171,8 @@ public sealed class AuthController : ControllerBase
         return new ClaimsPrincipal(identity);
     }
 
-    private static MeResponse ToMeResponse(HostLoginResponse r) =>
-        new(r.UserId, r.TenantId, r.Email, r.DisplayName, r.Roles);
+    private static MeResponse ToMeResponse(HostLoginResponse r, string defaultPalette) =>
+        new(r.UserId, r.TenantId, r.Email, r.DisplayName, r.Roles, defaultPalette);
 
     private static bool TryParseGuidClaim(ClaimsPrincipal user, string claimType, out Guid value)
     {

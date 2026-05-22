@@ -31,4 +31,5 @@ public sealed record MeResponse(
     Guid TenantId,
     string Email,
     string DisplayName,
-    IReadOnlyList<string> Roles);
+    IReadOnlyList<string> Roles,
+    string DefaultPalette = "purple");

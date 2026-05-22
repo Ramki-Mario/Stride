@@ -22,6 +22,9 @@ public static class AdministrationInfrastructureExtensions
         services.AddScoped<IAdminReadService,  AdminReadService>();
         services.AddScoped<IAdminWriteService, AdminWriteService>();
 
+        // TenantSettings EF repository.
+        services.AddScoped<ITenantSettingsRepository, TenantSettingsRepository>();
+
         return services;
     }
 }
