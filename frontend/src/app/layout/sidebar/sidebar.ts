@@ -420,7 +420,8 @@ export class SidebarComponent {
     {
       label: 'Administration',
       items: [
-        { label: 'Users',    route: '/administration', icon: 'pi-users', exact: true },
+        { label: 'Users',          route: '/administration',        icon: 'pi-users',      exact: true },
+        { label: 'System Health',  route: '/administration/health', icon: 'pi-heart-fill' },
       ],
     },
   ];

@@ -31,6 +31,9 @@ builder.Services.AddHttpClient<WorkflowApiClient>(client =>
 builder.Services.AddHttpClient<NotificationsApiClient>(client =>
     client.BaseAddress = new Uri(hostBaseUrl));
 
+builder.Services.AddHttpClient<HealthApiClient>(client =>
+    client.BaseAddress = new Uri(hostBaseUrl));
+
 // Additional typed clients added here as modules are implemented:
 // builder.Services.AddHttpClient<SchedulingApiClient>(...);
 

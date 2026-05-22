@@ -1,9 +1,12 @@
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using STRIDE.Host.ErrorHandling;
 using STRIDE.BuildingBlocks.Infrastructure.Correlation;
 using STRIDE.BuildingBlocks.Infrastructure.Extensions;
+using STRIDE.BuildingBlocks.Infrastructure.Logging;
 using STRIDE.BuildingBlocks.Infrastructure.Tenant;
 using STRIDE.Modules.Identity.API.Extensions;
 using STRIDE.Modules.Identity.Infrastructure.Persistence.SeedData;
@@ -56,8 +59,22 @@ builder.Services
     .AddApplicationPart(typeof(AdministrationModuleExtensions).Assembly);
 
 // ── Health Checks ──────────────────────────────────────────────────────────
-// SQL Server health check added in Phase 2 when Identity DB is initialized.
-builder.Services.AddHealthChecks();
+// SQL Server + Redis checks tagged "ready" so /health/ready includes them.
+// /health/live is a liveness probe (no dependency checks — always 200 if the
+// process is running). /health reports everything with verbose JSON output.
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+var redisConnStr     = builder.Configuration["Redis:ConnectionString"]!;
+
+builder.Services
+    .AddHealthChecks()
+    .AddSqlServer(
+        connectionString: connectionString,
+        name:             "sql-server",
+        tags:             ["ready", "db"])
+    .AddRedis(
+        redisConnectionString: redisConnStr,
+        name:                  "redis",
+        tags:                  ["ready", "cache"]);
 
 // ── Global Exception Handler ───────────────────────────────────────────────
 // Converts ValidationException → 400 (RFC 7807) and unhandled → 500.
@@ -124,11 +141,27 @@ app.UseSerilogRequestLogging();
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseAuthentication();                     // Must run before TenantMiddleware — populates context.User from JWT.
 app.UseMiddleware<TenantMiddleware>();        // Reads "tid" claim from the now-populated context.User.
+app.UseMiddleware<SerilogEnrichmentMiddleware>(); // Enriches every log line with UserId + TenantId from JWT.
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHealthChecks("/health");
-app.MapHealthChecks("/health/live",  new() { Predicate = _ => false });
-app.MapHealthChecks("/health/ready", new() { Predicate = r => r.Tags.Contains("ready") });
+
+// /health      — all checks, verbose JSON (for dev / monitoring dashboards)
+// /health/live — liveness probe: always 200 if the process responds (no dependency checks)
+// /health/ready — readiness probe: SQL Server + Redis must be reachable
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
+});
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate      = _ => false,
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate      = r => r.Tags.Contains("ready"),
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
+});
 
 app.Run();
