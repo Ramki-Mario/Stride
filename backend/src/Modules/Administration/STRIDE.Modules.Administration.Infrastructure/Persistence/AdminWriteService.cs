@@ -37,7 +37,7 @@ internal sealed class AdminWriteService : IAdminWriteService
         // 1. Resolve role ID by name
         var roleId = await conn.ExecuteScalarAsync<Guid?>(
             new CommandDefinition(
-                "SELECT TOP 1 Id FROM identity.Roles WHERE TenantId = @TenantId AND NormalizedName = @Name AND IsDeleted = 0",
+                "SELECT TOP 1 Id FROM [identity].Roles WHERE TenantId = @TenantId AND NormalizedName = @Name AND IsDeleted = 0",
                 new { TenantId = tenantId, Name = roleName.ToUpperInvariant() },
                 transaction: tx, cancellationToken: ct));
 
@@ -47,7 +47,7 @@ internal sealed class AdminWriteService : IAdminWriteService
         // 2. Check email uniqueness within tenant
         var exists = await conn.ExecuteScalarAsync<bool>(
             new CommandDefinition(
-                "SELECT CAST(1 AS BIT) FROM identity.Users WHERE TenantId = @TenantId AND NormalizedEmail = @Email AND IsDeleted = 0",
+                "SELECT CAST(1 AS BIT) FROM [identity].Users WHERE TenantId = @TenantId AND NormalizedEmail = @Email AND IsDeleted = 0",
                 new { TenantId = tenantId, Email = email.ToUpperInvariant() },
                 transaction: tx, cancellationToken: ct));
 
@@ -58,7 +58,7 @@ internal sealed class AdminWriteService : IAdminWriteService
         await conn.ExecuteAsync(
             new CommandDefinition(
                 """
-                INSERT INTO identity.Users
+                INSERT INTO [identity].Users
                     (Id, TenantId, Email, NormalizedEmail, DisplayName, PasswordHash,
                      IsActive, IsPending, CreatedAt, UpdatedAt, CreatedBy, IsDeleted)
                 VALUES
@@ -82,7 +82,7 @@ internal sealed class AdminWriteService : IAdminWriteService
         await conn.ExecuteAsync(
             new CommandDefinition(
                 """
-                INSERT INTO identity.UserRoles
+                INSERT INTO [identity].UserRoles
                     (Id, TenantId, UserId, RoleId, CreatedAt, UpdatedAt, CreatedBy, IsDeleted)
                 VALUES
                     (@Id, @TenantId, @UserId, @RoleId, @Now, @Now, @CreatedBy, 0)
@@ -102,8 +102,8 @@ internal sealed class AdminWriteService : IAdminWriteService
         await conn.ExecuteAsync(
             new CommandDefinition(
                 """
-                INSERT INTO identity.UserTenantMappings
-                    (Id, TenantId, UserId, Role, CreatedAt, UpdatedAt, CreatedBy, IsDeleted)
+                INSERT INTO [identity].UserTenantMappings
+                    (Id, TenantId, UserId, RoleName, CreatedAt, UpdatedAt, CreatedBy, IsDeleted)
                 VALUES
                     (@Id, @TenantId, @UserId, @Role, @Now, @Now, @CreatedBy, 0)
                 """,
@@ -133,7 +133,7 @@ internal sealed class AdminWriteService : IAdminWriteService
 
         var roleId = await conn.ExecuteScalarAsync<Guid?>(
             new CommandDefinition(
-                "SELECT TOP 1 Id FROM identity.Roles WHERE TenantId = @TenantId AND NormalizedName = @Name AND IsDeleted = 0",
+                "SELECT TOP 1 Id FROM [identity].Roles WHERE TenantId = @TenantId AND NormalizedName = @Name AND IsDeleted = 0",
                 new { TenantId = tenantId, Name = newRoleName.ToUpperInvariant() },
                 transaction: tx, cancellationToken: ct));
 
@@ -143,7 +143,7 @@ internal sealed class AdminWriteService : IAdminWriteService
         // Soft-delete existing roles for this user in this tenant
         await conn.ExecuteAsync(
             new CommandDefinition(
-                "UPDATE identity.UserRoles SET IsDeleted = 1, UpdatedAt = @Now WHERE TenantId = @TenantId AND UserId = @UserId AND IsDeleted = 0",
+                "UPDATE [identity].UserRoles SET IsDeleted = 1, UpdatedAt = @Now WHERE TenantId = @TenantId AND UserId = @UserId AND IsDeleted = 0",
                 new { TenantId = tenantId, UserId = userId, Now = DateTime.UtcNow },
                 transaction: tx, cancellationToken: ct));
 
@@ -151,7 +151,7 @@ internal sealed class AdminWriteService : IAdminWriteService
         await conn.ExecuteAsync(
             new CommandDefinition(
                 """
-                INSERT INTO identity.UserRoles
+                INSERT INTO [identity].UserRoles
                     (Id, TenantId, UserId, RoleId, CreatedAt, UpdatedAt, CreatedBy, IsDeleted)
                 VALUES
                     (@Id, @TenantId, @UserId, @RoleId, @Now, @Now, @CreatedBy, 0)
@@ -177,7 +177,7 @@ internal sealed class AdminWriteService : IAdminWriteService
         await using var conn = new SqlConnection(_connectionString);
         await conn.ExecuteAsync(
             new CommandDefinition(
-                "UPDATE identity.Users SET IsActive = 0, UpdatedAt = @Now WHERE TenantId = @TenantId AND Id = @UserId AND IsDeleted = 0",
+                "UPDATE [identity].Users SET IsActive = 0, UpdatedAt = @Now WHERE TenantId = @TenantId AND Id = @UserId AND IsDeleted = 0",
                 new { TenantId = tenantId, UserId = userId, Now = DateTime.UtcNow },
                 cancellationToken: ct));
     }
@@ -189,7 +189,7 @@ internal sealed class AdminWriteService : IAdminWriteService
         await using var conn = new SqlConnection(_connectionString);
         await conn.ExecuteAsync(
             new CommandDefinition(
-                "UPDATE identity.Users SET IsActive = 1, IsPending = 0, UpdatedAt = @Now WHERE TenantId = @TenantId AND Id = @UserId AND IsDeleted = 0",
+                "UPDATE [identity].Users SET IsActive = 1, IsPending = 0, UpdatedAt = @Now WHERE TenantId = @TenantId AND Id = @UserId AND IsDeleted = 0",
                 new { TenantId = tenantId, UserId = userId, Now = DateTime.UtcNow },
                 cancellationToken: ct));
     }
