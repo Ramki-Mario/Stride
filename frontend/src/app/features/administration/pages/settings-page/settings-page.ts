@@ -1,15 +1,18 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnDestroy,
   OnInit,
   inject,
   signal,
 } from '@angular/core';
-import { KeyValuePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { TenantSettingsService } from '../../services/tenant-settings.service';
 import { SanitisedCssResult } from '../../models/tenant-settings.models';
+
+/** DOM id of the injected preview style element. */
+const PREVIEW_STYLE_ID = 'byot-preview';
 
 @Component({
   selector: 'app-settings-page',
@@ -19,7 +22,7 @@ import { SanitisedCssResult } from '../../models/tenant-settings.models';
   template: `
     <div class="settings-page">
 
-      <!-- ── Header ────────────────────────────────────────────────────── -->
+      <!-- ── Header ─────────────────────────────────────────────────────── -->
       <div class="settings-header">
         <div>
           <h1 class="settings-title">Tenant Settings</h1>
@@ -27,7 +30,7 @@ import { SanitisedCssResult } from '../../models/tenant-settings.models';
         </div>
       </div>
 
-      <!-- ── Load error ────────────────────────────────────────────────── -->
+      <!-- ── Load error ─────────────────────────────────────────────────── -->
       @if (svc.error()) {
         <div class="stride-banner stride-banner--error" style="margin-bottom:1.5rem">
           {{ svc.error() }}
@@ -35,83 +38,83 @@ import { SanitisedCssResult } from '../../models/tenant-settings.models';
       }
 
       @if (svc.isLoading()) {
-        <!-- Skeleton -->
         <div class="settings-skeleton">
-          @for (_ of [1,2,3]; track $index) {
-            <div class="skeleton-row"></div>
-          }
+          @for (_ of [1,2,3]; track $index) { <div class="skeleton-row"></div> }
         </div>
+
       } @else if (svc.settings()) {
 
-        <!-- ── Section 1: Branding ──────────────────────────────────────── -->
+        <!-- ── Section 1: Branding ────────────────────────────────────── -->
         <div class="settings-card">
           <h2 class="settings-section-title">Branding</h2>
 
           <div class="settings-field">
             <label class="settings-label" for="displayName">Display Name</label>
-            <input
-              id="displayName"
-              class="stride-input"
-              type="text"
-              maxlength="200"
-              placeholder="Your organisation name"
-              [(ngModel)]="displayName" />
+            <input id="displayName" class="stride-input" type="text" maxlength="200"
+              placeholder="Your organisation name" [(ngModel)]="displayName" />
             <p class="settings-hint">Shown in the app header and emails sent to your users.</p>
           </div>
 
           <div class="settings-field">
             <label class="settings-label" for="timezone">Timezone</label>
-            <input
-              id="timezone"
-              class="stride-input"
-              type="text"
-              maxlength="100"
-              placeholder="UTC"
-              [(ngModel)]="timezone" />
-            <p class="settings-hint">IANA timezone identifier, e.g. <code>Europe/London</code>, <code>America/New_York</code>.</p>
+            <input id="timezone" class="stride-input" type="text" maxlength="100"
+              placeholder="UTC" [(ngModel)]="timezone" />
+            <p class="settings-hint">IANA identifier, e.g. <code>Europe/London</code>, <code>America/New_York</code>.</p>
           </div>
 
           <div class="settings-field">
             <label class="settings-label">Colour Palette</label>
             <div class="palette-options">
-              <button
-                type="button"
-                class="palette-option"
+              <button type="button" class="palette-option"
                 [class.palette-option--active]="defaultPalette === 'purple'"
                 (click)="defaultPalette = 'purple'">
-                <span class="palette-swatch palette-swatch--purple"></span>
-                Purple
+                <span class="palette-swatch palette-swatch--purple"></span>Purple
               </button>
-              <button
-                type="button"
-                class="palette-option"
+              <button type="button" class="palette-option"
                 [class.palette-option--active]="defaultPalette === 'indigo'"
                 (click)="defaultPalette = 'indigo'">
-                <span class="palette-swatch palette-swatch--indigo"></span>
-                Indigo
+                <span class="palette-swatch palette-swatch--indigo"></span>Indigo
               </button>
             </div>
             <p class="settings-hint">Applied automatically for all users in your organisation on login.</p>
           </div>
 
           <div class="settings-actions">
-            <button
-              class="stride-btn stride-btn-primary"
-              [disabled]="saving()"
+            <button class="stride-btn stride-btn-primary" [disabled]="saving()"
               (click)="saveSettings()">
               {{ saving() ? 'Saving…' : 'Save Settings' }}
             </button>
-            @if (saveSuccess()) {
-              <span class="settings-save-ok">✓ Saved</span>
-            }
-            @if (saveError()) {
-              <span class="settings-save-err">{{ saveError() }}</span>
-            }
+            @if (saveSuccess()) { <span class="settings-save-ok">✓ Saved</span> }
+            @if (saveError())   { <span class="settings-save-err">{{ saveError() }}</span> }
           </div>
         </div>
 
-        <!-- ── Section 2: BYOT CSS Tokens ──────────────────────────────── -->
+        <!-- ── Section 2: Custom CSS Tokens ──────────────────────────── -->
         <div class="settings-card" style="margin-top:1.5rem">
+
+          <!-- Preview mode active banner ──────────────────────────────── -->
+          @if (isPreviewing()) {
+            <div class="preview-banner">
+              <div class="preview-banner__left">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                  <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <strong>Preview mode active</strong> — tokens injected locally, not yet saved to your account.
+              </div>
+              <div class="preview-banner__actions">
+                <button class="stride-btn stride-btn-primary btn-sm" [disabled]="saving()"
+                  (click)="saveCss()">
+                  {{ saving() ? 'Saving…' : 'Save' }}
+                </button>
+                <button class="stride-btn stride-btn-ghost btn-sm" (click)="resetPreview()">
+                  Reset
+                </button>
+              </div>
+            </div>
+          }
+
           <div class="byot-header">
             <div>
               <h2 class="settings-section-title">Custom CSS Tokens</h2>
@@ -120,10 +123,7 @@ import { SanitisedCssResult } from '../../models/tenant-settings.models';
                 Only <code>--stride-*</code> properties inside <code>:root&nbsp;&#123;&#125;</code> are applied.
               </p>
             </div>
-            <button
-              type="button"
-              class="stride-btn stride-btn-secondary"
-              (click)="downloadTemplate()">
+            <button type="button" class="stride-btn stride-btn-secondary" (click)="downloadTemplate()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="margin-right:6px">
                 <path d="M12 3v13M6 11l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -132,7 +132,7 @@ import { SanitisedCssResult } from '../../models/tenant-settings.models';
             </button>
           </div>
 
-          <!-- File input trigger -->
+          <!-- File upload + textarea ───────────────────────────────────── -->
           <div class="byot-upload-row">
             <label class="byot-file-label" for="cssFileInput">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -142,46 +142,47 @@ import { SanitisedCssResult } from '../../models/tenant-settings.models';
               </svg>
               Upload .css file
             </label>
-            <input
-              id="cssFileInput"
-              type="file"
-              accept=".css,text/css"
-              style="display:none"
-              (change)="onFileSelected($event)" />
+            <input id="cssFileInput" type="file" accept=".css,text/css"
+              style="display:none" (change)="onFileSelected($event)" />
             <span class="byot-or">or paste below</span>
           </div>
 
-          <!-- Textarea -->
-          <textarea
-            class="byot-textarea"
-            rows="12"
+          <textarea class="byot-textarea" rows="12"
             placeholder=":root &#123;&#10;  --stride-primary: #B97AF9;&#10;  --stride-bg: #F7F4FA;&#10;&#125;"
             [(ngModel)]="rawCss">
           </textarea>
 
+          <!-- Action row: Preview | Save | Clear ──────────────────────── -->
           <div class="byot-submit-row">
-            <button
-              class="stride-btn stride-btn-primary"
-              [disabled]="uploading() || !rawCss.trim()"
-              (click)="uploadCss()">
-              {{ uploading() ? 'Validating…' : 'Apply & Save' }}
+            <button class="stride-btn stride-btn-secondary"
+              [disabled]="!rawCss.trim()"
+              (click)="previewCss()"
+              title="Inject tokens into the page immediately without saving">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="margin-right:5px">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              Preview
             </button>
-            <button
-              class="stride-btn stride-btn-ghost"
-              [disabled]="uploading()"
+            <button class="stride-btn stride-btn-primary"
+              [disabled]="saving() || !rawCss.trim()"
+              (click)="saveCss()">
+              {{ saving() ? 'Saving…' : 'Save CSS' }}
+            </button>
+            <button class="stride-btn stride-btn-ghost" [disabled]="saving()"
               (click)="clearCss()">
               Clear
             </button>
           </div>
 
-          <!-- Sanitisation feedback ─────────────────────────────────── -->
+          <!-- Save feedback ────────────────────────────────────────────── -->
           @if (sanitiseResult()) {
             <div class="byot-feedback">
 
-              @if (sanitiseResult()!.acceptedTokens && objectKeys(sanitiseResult()!.acceptedTokens).length > 0) {
+              @if (objectKeys(sanitiseResult()!.acceptedTokens).length > 0) {
                 <div class="byot-feedback-section">
                   <p class="byot-feedback-title byot-feedback-title--success">
-                    ✓ {{ objectKeys(sanitiseResult()!.acceptedTokens).length }} token(s) accepted
+                    ✓ {{ objectKeys(sanitiseResult()!.acceptedTokens).length }} token(s) accepted and saved
                   </p>
                   <div class="byot-chips">
                     @for (key of objectKeys(sanitiseResult()!.acceptedTokens); track key) {
@@ -193,16 +194,14 @@ import { SanitisedCssResult } from '../../models/tenant-settings.models';
                 </div>
               }
 
-              @if ((sanitiseResult()!.rejectedEntries?.length ?? 0) > 0) {
+              @if (sanitiseResult()!.rejectedEntries.length > 0) {
                 <div class="byot-feedback-section" style="margin-top:0.75rem">
                   <p class="byot-feedback-title byot-feedback-title--warn">
                     ⚠ {{ sanitiseResult()!.rejectedEntries.length }} entry(s) rejected
                   </p>
                   <div class="byot-chips">
                     @for (entry of sanitiseResult()!.rejectedEntries; track entry) {
-                      <span class="byot-chip byot-chip--rejected">
-                        <code>{{ entry }}</code>
-                      </span>
+                      <span class="byot-chip byot-chip--rejected"><code>{{ entry }}</code></span>
                     }
                   </div>
                 </div>
@@ -216,62 +215,68 @@ import { SanitisedCssResult } from '../../models/tenant-settings.models';
               {{ uploadError() }}
             </div>
           }
-        </div>
 
+        </div>
       }
     </div>
   `,
   styles: [`
-    .settings-page    { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
-    .settings-header  { margin-bottom: 1.5rem; }
-    .settings-title   { font-size: 1.5rem; font-weight: 700; color: var(--stride-text-primary); margin: 0 0 0.25rem; }
-    .settings-subtitle{ font-size: 0.875rem; color: var(--stride-text-secondary); margin: 0; }
+    .settings-page     { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+    .settings-header   { margin-bottom: 1.5rem; }
+    .settings-title    { font-size: 1.5rem; font-weight: 700; color: var(--stride-text-primary); margin: 0 0 0.25rem; }
+    .settings-subtitle { font-size: 0.875rem; color: var(--stride-text-secondary); margin: 0; }
 
     .settings-card {
-      background: var(--stride-surface);
-      border: 1px solid var(--stride-border);
-      border-radius: var(--stride-radius-2xl);
-      padding: 1.5rem;
+      background: var(--stride-surface); border: 1px solid var(--stride-border);
+      border-radius: var(--stride-radius-2xl); padding: 1.5rem;
       box-shadow: var(--stride-shadow-xs);
     }
-    .settings-section-title {
-      font-size: 1rem; font-weight: 600; color: var(--stride-text-primary);
-      margin: 0 0 1.25rem;
-    }
-    .settings-field   { margin-bottom: 1.25rem; }
-    .settings-label   { display: block; font-size: 0.875rem; font-weight: 500; color: var(--stride-text-primary); margin-bottom: 0.375rem; }
-    .settings-hint    { font-size: 0.75rem; color: var(--stride-text-muted); margin: 0.375rem 0 0; }
-    .settings-actions { display: flex; align-items: center; gap: 0.75rem; padding-top: 0.5rem; }
-    .settings-save-ok { font-size: 0.875rem; color: var(--stride-success); }
-    .settings-save-err{ font-size: 0.875rem; color: var(--stride-error); }
+    .settings-section-title { font-size: 1rem; font-weight: 600; color: var(--stride-text-primary); margin: 0 0 1.25rem; }
+    .settings-field    { margin-bottom: 1.25rem; }
+    .settings-label    { display: block; font-size: 0.875rem; font-weight: 500; color: var(--stride-text-primary); margin-bottom: 0.375rem; }
+    .settings-hint     { font-size: 0.75rem; color: var(--stride-text-muted); margin: 0.375rem 0 0; }
+    .settings-actions  { display: flex; align-items: center; gap: 0.75rem; padding-top: 0.5rem; }
+    .settings-save-ok  { font-size: 0.875rem; color: var(--stride-success); }
+    .settings-save-err { font-size: 0.875rem; color: var(--stride-error); }
 
     /* Skeleton */
-    .settings-skeleton  { display: flex; flex-direction: column; gap: 1rem; }
-    .skeleton-row       { height: 3rem; background: var(--stride-surface-secondary); border-radius: var(--stride-radius-md); animation: pulse 1.5s ease-in-out infinite; }
-    @keyframes pulse    { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .settings-skeleton { display: flex; flex-direction: column; gap: 1rem; }
+    .skeleton-row      { height: 3rem; background: var(--stride-surface-secondary); border-radius: var(--stride-radius-md); animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:.5} }
 
     /* Palette picker */
-    .palette-options      { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-    .palette-option       { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: 1.5px solid var(--stride-border); border-radius: var(--stride-radius-xl); background: var(--stride-surface); font-size: 0.875rem; cursor: pointer; transition: border-color 120ms, background 120ms; }
-    .palette-option:hover { border-color: var(--stride-primary); background: var(--stride-primary-subtle); }
-    .palette-option--active { border-color: var(--stride-primary); background: var(--stride-primary-subtle); font-weight: 600; }
-    .palette-swatch       { display: inline-block; width: 14px; height: 14px; border-radius: 50%; }
-    .palette-swatch--purple { background: #B97AF9; }
-    .palette-swatch--indigo { background: #6366f1; }
+    .palette-options       { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .palette-option        { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: 1.5px solid var(--stride-border); border-radius: var(--stride-radius-xl); background: var(--stride-surface); font-size: 0.875rem; cursor: pointer; transition: border-color 120ms, background 120ms; }
+    .palette-option:hover  { border-color: var(--stride-primary); background: var(--stride-primary-subtle); }
+    .palette-option--active{ border-color: var(--stride-primary); background: var(--stride-primary-subtle); font-weight: 600; }
+    .palette-swatch        { display: inline-block; width: 14px; height: 14px; border-radius: 50%; }
+    .palette-swatch--purple{ background: #B97AF9; }
+    .palette-swatch--indigo{ background: #6366f1; }
+
+    /* Preview mode banner */
+    .preview-banner {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
+      background: var(--stride-warning-bg); border: 1px solid var(--stride-warning-border);
+      border-radius: var(--stride-radius-lg); padding: 0.625rem 1rem;
+      font-size: 0.8125rem; color: var(--stride-warning);
+      margin-bottom: 1.25rem;
+    }
+    .preview-banner__left  { display: flex; align-items: center; gap: 0.5rem; }
+    .preview-banner__actions{ display: flex; gap: 0.5rem; }
+    .btn-sm { padding: 0.3rem 0.75rem !important; font-size: 0.8125rem !important; }
 
     /* BYOT section */
-    .byot-header       { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
-    .byot-upload-row   { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
-    .byot-file-label   { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.4rem 0.875rem; border: 1.5px solid var(--stride-border); border-radius: var(--stride-radius-xl); font-size: 0.8125rem; font-weight: 500; cursor: pointer; background: var(--stride-surface); color: var(--stride-text-primary); transition: border-color 120ms, background 120ms; }
+    .byot-header      { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+    .byot-upload-row  { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .byot-file-label  { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.4rem 0.875rem; border: 1.5px solid var(--stride-border); border-radius: var(--stride-radius-xl); font-size: 0.8125rem; font-weight: 500; cursor: pointer; background: var(--stride-surface); color: var(--stride-text-primary); transition: border-color 120ms, background 120ms; }
     .byot-file-label:hover { border-color: var(--stride-primary); background: var(--stride-primary-subtle); }
-    .byot-or           { font-size: 0.8125rem; color: var(--stride-text-muted); }
-    .byot-textarea     { width: 100%; font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: 0.8125rem; background: var(--stride-surface-secondary); border: 1.5px solid var(--stride-border); border-radius: var(--stride-radius-md); padding: 0.75rem; color: var(--stride-text-primary); resize: vertical; box-sizing: border-box; line-height: 1.6; transition: border-color 120ms; }
+    .byot-or          { font-size: 0.8125rem; color: var(--stride-text-muted); }
+    .byot-textarea    { width: 100%; font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: 0.8125rem; background: var(--stride-surface-secondary); border: 1.5px solid var(--stride-border); border-radius: var(--stride-radius-md); padding: 0.75rem; color: var(--stride-text-primary); resize: vertical; box-sizing: border-box; line-height: 1.6; transition: border-color 120ms; }
     .byot-textarea:focus { outline: none; border-color: var(--stride-border-focus); box-shadow: 0 0 0 3px var(--stride-primary-ring); }
-    .byot-submit-row   { display: flex; gap: 0.625rem; margin-top: 0.75rem; }
+    .byot-submit-row  { display: flex; gap: 0.625rem; margin-top: 0.75rem; flex-wrap: wrap; }
 
-    /* Feedback */
+    /* Save feedback */
     .byot-feedback               { margin-top: 1.25rem; border-top: 1px solid var(--stride-border-soft); padding-top: 1rem; }
-    .byot-feedback-section       { }
     .byot-feedback-title         { font-size: 0.8125rem; font-weight: 600; margin: 0 0 0.5rem; }
     .byot-feedback-title--success{ color: var(--stride-success); }
     .byot-feedback-title--warn   { color: var(--stride-warning); }
@@ -282,30 +287,29 @@ import { SanitisedCssResult } from '../../models/tenant-settings.models';
     .byot-chip--rejected         { background: var(--stride-warning-bg); border: 1px solid var(--stride-warning-border); color: var(--stride-warning); }
   `],
 })
-export class SettingsPageComponent implements OnInit {
+export class SettingsPageComponent implements OnInit, OnDestroy {
   protected readonly svc = inject(TenantSettingsService);
 
-  // ── Branding form state ────────────────────────────────────────────────────
+  // ── Branding form ──────────────────────────────────────────────────────────
   protected displayName    = '';
   protected defaultPalette = 'purple';
   protected timezone       = 'UTC';
+  protected saving         = signal(false);
+  protected saveSuccess    = signal(false);
+  protected saveError      = signal<string | null>(null);
 
-  protected saving      = signal(false);
-  protected saveSuccess = signal(false);
-  protected saveError   = signal<string | null>(null);
-
-  // ── BYOT CSS state ─────────────────────────────────────────────────────────
-  protected rawCss        = '';
-  protected uploading     = signal(false);
-  protected uploadError   = signal<string | null>(null);
+  // ── BYOT CSS ───────────────────────────────────────────────────────────────
+  protected rawCss         = '';
+  protected uploadError    = signal<string | null>(null);
   protected sanitiseResult = signal<SanitisedCssResult | null>(null);
+  protected isPreviewing   = signal(false);
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
   protected readonly objectKeys = Object.keys;
+
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
     this.svc.loadSettings();
-    // Sync form fields once settings arrive
     const poll = setInterval(() => {
       const s = this.svc.settings();
       if (s) {
@@ -317,7 +321,12 @@ export class SettingsPageComponent implements OnInit {
     }, 50);
   }
 
-  // ── Branding save ──────────────────────────────────────────────────────────
+  ngOnDestroy(): void {
+    // Always clear the preview style tag on navigation away.
+    this.removePreviewStyle();
+  }
+
+  // ── Branding ───────────────────────────────────────────────────────────────
 
   protected saveSettings(): void {
     this.saving.set(true);
@@ -333,7 +342,6 @@ export class SettingsPageComponent implements OnInit {
         this.saving.set(false);
         this.saveSuccess.set(true);
         setTimeout(() => this.saveSuccess.set(false), 3000);
-        // Refresh the local settings cache
         this.svc.loadSettings();
       },
       error: () => {
@@ -343,32 +351,33 @@ export class SettingsPageComponent implements OnInit {
     });
   }
 
-  // ── BYOT CSS ───────────────────────────────────────────────────────────────
+  // ── BYOT: Preview (client-side, no API call) ───────────────────────────────
 
-  protected downloadTemplate(): void {
-    this.svc.downloadCssTemplate();
-  }
-
-  protected onFileSelected(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => { this.rawCss = (e.target?.result as string) ?? ''; };
-    reader.readAsText(file);
-    // Reset the input so the same file can be re-selected
-    (event.target as HTMLInputElement).value = '';
-  }
-
-  protected clearCss(): void {
-    this.rawCss = '';
-    this.sanitiseResult.set(null);
-    this.uploadError.set(null);
-  }
-
-  protected uploadCss(): void {
+  protected previewCss(): void {
     if (!this.rawCss.trim()) return;
 
-    this.uploading.set(true);
+    const tokens = this.extractTokensClientSide(this.rawCss);
+    if (Object.keys(tokens).length === 0) return;
+
+    const cssBody = Object.entries(tokens)
+      .map(([k, v]) => `  ${k}: ${v};`)
+      .join('\n');
+
+    this.injectPreviewStyle(`:root {\n${cssBody}\n}`);
+    this.isPreviewing.set(true);
+  }
+
+  protected resetPreview(): void {
+    this.removePreviewStyle();
+    this.isPreviewing.set(false);
+  }
+
+  // ── BYOT: Save (calls API, sanitises server-side, persists) ───────────────
+
+  protected saveCss(): void {
+    if (!this.rawCss.trim()) return;
+
+    this.saving.set(true);
     this.uploadError.set(null);
     this.sanitiseResult.set(null);
 
@@ -379,14 +388,91 @@ export class SettingsPageComponent implements OnInit {
       customCss:      this.rawCss,
     }).subscribe({
       next: result => {
-        this.uploading.set(false);
+        this.saving.set(false);
         this.sanitiseResult.set(result);
+        // Preview is now superseded by the persisted tokens — clear it.
+        this.removePreviewStyle();
+        this.isPreviewing.set(false);
         this.svc.loadSettings();
       },
       error: () => {
-        this.uploading.set(false);
-        this.uploadError.set('Failed to upload CSS. Please try again.');
+        this.saving.set(false);
+        this.uploadError.set('Failed to save CSS. Please try again.');
       },
     });
+  }
+
+  // ── BYOT: helpers ──────────────────────────────────────────────────────────
+
+  protected downloadTemplate(): void { this.svc.downloadCssTemplate(); }
+
+  protected onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      this.rawCss = (e.target?.result as string) ?? '';
+      // Auto-preview on file select for instant feedback.
+      this.previewCss();
+    };
+    reader.readAsText(file);
+    (event.target as HTMLInputElement).value = '';
+  }
+
+  protected clearCss(): void {
+    this.rawCss = '';
+    this.sanitiseResult.set(null);
+    this.uploadError.set(null);
+    this.resetPreview();
+  }
+
+  // ── Private preview helpers ────────────────────────────────────────────────
+
+  /**
+   * Lightweight client-side extractor — mirrors the server's deny-by-default
+   * rules just enough to give a clean live preview. Does NOT replace server
+   * sanitisation: the Save action always re-validates server-side.
+   *
+   * Accepts: --stride-* inside :root {}
+   * Rejects: url(), expression(), @import, <script>, non-:root selectors
+   */
+  private extractTokensClientSide(css: string): Record<string, string> {
+    const tokens: Record<string, string> = {};
+
+    // Strip comments.
+    const cleaned = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\r\n]*/g, '');
+
+    // Extract :root { ... } blocks.
+    const rootBlocks = [...cleaned.matchAll(/:root\s*\{([^}]*)\}/gi)];
+    if (rootBlocks.length === 0) return tokens;
+
+    const dangerousPattern = /url\s*\(|expression\s*\(|@import|<\s*script/i;
+
+    for (const block of rootBlocks) {
+      const body = block[1];
+      for (const m of body.matchAll(/(--[a-zA-Z0-9-]+)\s*:\s*([^;]+?)\s*;/gs)) {
+        const name  = m[1].trim();
+        const value = m[2].trim();
+        if (!name.startsWith('--stride-'))       continue;
+        if (dangerousPattern.test(value))         continue;
+        tokens[name] = value;
+      }
+    }
+
+    return tokens;
+  }
+
+  private injectPreviewStyle(cssText: string): void {
+    let el = document.getElementById(PREVIEW_STYLE_ID) as HTMLStyleElement | null;
+    if (!el) {
+      el = document.createElement('style');
+      el.id = PREVIEW_STYLE_ID;
+      document.head.appendChild(el);
+    }
+    el.textContent = cssText;
+  }
+
+  private removePreviewStyle(): void {
+    document.getElementById(PREVIEW_STYLE_ID)?.remove();
   }
 }
