@@ -10,7 +10,7 @@ SELECT
     u.Id,
     u.DisplayName,
     u.Email,
-    COALESCE(r.Name, 'Member')  AS Role,
+    COALESCE(r.Name, 'FieldWorker')  AS Role,
     u.IsActive,
     u.IsPending,
     u.CreatedAt

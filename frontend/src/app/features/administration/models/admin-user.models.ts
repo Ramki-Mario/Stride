@@ -1,4 +1,4 @@
-export type UserRole   = 'Admin' | 'Member' | 'Viewer';
+export type UserRole   = 'Admin' | 'OperationsManager' | 'FinanceUser' | 'FieldWorker' | 'Supervisor';
 export type UserStatus = 'Active' | 'Pending' | 'Inactive';
 
 export interface AdminUserDto {

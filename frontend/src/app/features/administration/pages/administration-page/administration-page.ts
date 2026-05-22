@@ -620,9 +620,11 @@ import { AdminUserDto, UserRole, UserStatus } from '../../models/admin-user.mode
       text-transform: uppercase;
     }
 
-    .admin-avatar--admin  { background: color-mix(in srgb, var(--stride-primary) 15%, transparent); color: var(--stride-primary); }
-    .admin-avatar--member { background: color-mix(in srgb, #10B981 15%, transparent); color: #059669; }
-    .admin-avatar--viewer { background: color-mix(in srgb, #F59E0B 15%, transparent); color: #D97706; }
+    .admin-avatar--admin              { background: color-mix(in srgb, var(--stride-primary) 15%, transparent); color: var(--stride-primary); }
+    .admin-avatar--operationsmanager  { background: color-mix(in srgb, #3B82F6 15%, transparent); color: #2563EB; }
+    .admin-avatar--financeuser        { background: color-mix(in srgb, #10B981 15%, transparent); color: #059669; }
+    .admin-avatar--fieldworker        { background: color-mix(in srgb, #0891B2 15%, transparent); color: #0E7490; }
+    .admin-avatar--supervisor         { background: color-mix(in srgb, #F59E0B 15%, transparent); color: #D97706; }
 
     .admin-user-name  { font-weight: 600; color: var(--stride-text-primary); }
     .admin-user-email { font-size: 0.8125rem; color: var(--stride-text-muted); margin-top: 0.125rem; }
@@ -639,9 +641,11 @@ import { AdminUserDto, UserRole, UserStatus } from '../../models/admin-user.mode
       white-space: nowrap;
     }
 
-    .badge-role--admin  { background: color-mix(in srgb, var(--stride-primary) 12%, transparent); color: var(--stride-primary); }
-    .badge-role--member { background: color-mix(in srgb, #10B981 12%, transparent); color: #059669; }
-    .badge-role--viewer { background: color-mix(in srgb, #F59E0B 12%, transparent); color: #D97706; }
+    .badge-role--admin              { background: color-mix(in srgb, var(--stride-primary) 12%, transparent); color: var(--stride-primary); }
+    .badge-role--operationsmanager  { background: color-mix(in srgb, #3B82F6 12%, transparent); color: #2563EB; }
+    .badge-role--financeuser        { background: color-mix(in srgb, #10B981 12%, transparent); color: #059669; }
+    .badge-role--fieldworker        { background: color-mix(in srgb, #0891B2 12%, transparent); color: #0E7490; }
+    .badge-role--supervisor         { background: color-mix(in srgb, #F59E0B 12%, transparent); color: #D97706; }
 
     .badge-status--active   { background: color-mix(in srgb, #10B981 12%, transparent); color: #059669; }
     .badge-status--pending  { background: color-mix(in srgb, #F59E0B 12%, transparent); color: #D97706; }
@@ -964,16 +968,20 @@ export class AdministrationPageComponent implements OnInit {
 
   // ── Dropdown options ──────────────────────────────────────────────────────
   readonly roleOptions = [
-    { label: 'All Roles',  value: '' as UserRole | '' },
-    { label: 'Admin',      value: 'Admin'  as UserRole },
-    { label: 'Member',     value: 'Member' as UserRole },
-    { label: 'Viewer',     value: 'Viewer' as UserRole },
+    { label: 'All Roles',          value: '' as UserRole | '' },
+    { label: 'Admin',              value: 'Admin'              as UserRole },
+    { label: 'Operations Manager', value: 'OperationsManager'  as UserRole },
+    { label: 'Finance User',       value: 'FinanceUser'        as UserRole },
+    { label: 'Field Worker',       value: 'FieldWorker'        as UserRole },
+    { label: 'Supervisor',         value: 'Supervisor'         as UserRole },
   ];
 
   readonly roleInviteOptions = [
-    { label: 'Admin',  value: 'Admin'  as UserRole },
-    { label: 'Member', value: 'Member' as UserRole },
-    { label: 'Viewer', value: 'Viewer' as UserRole },
+    { label: 'Admin',              value: 'Admin'              as UserRole },
+    { label: 'Operations Manager', value: 'OperationsManager'  as UserRole },
+    { label: 'Finance User',       value: 'FinanceUser'        as UserRole },
+    { label: 'Field Worker',       value: 'FieldWorker'        as UserRole },
+    { label: 'Supervisor',         value: 'Supervisor'         as UserRole },
   ];
 
   readonly statusOptions = [
@@ -996,7 +1004,7 @@ export class AdministrationPageComponent implements OnInit {
   readonly inviteForm = this.fb.group({
     email:       ['', [Validators.required, Validators.email]],
     displayName: ['', Validators.required],
-    role:        ['Member' as UserRole, Validators.required],
+    role:        ['FieldWorker' as UserRole, Validators.required],
   });
 
   // ── Change Role modal ─────────────────────────────────────────────────────
@@ -1004,7 +1012,7 @@ export class AdministrationPageComponent implements OnInit {
   readonly changingRole    = signal(false);
   readonly roleError       = signal<string | null>(null);
   readonly roleTargetUser  = signal<AdminUserDto | null>(null);
-  selectedNewRole: UserRole = 'Member';
+  selectedNewRole: UserRole = 'FieldWorker';
 
   // ── Derived ───────────────────────────────────────────────────────────────
   readonly pageRange = computed(() => {
@@ -1059,7 +1067,7 @@ export class AdministrationPageComponent implements OnInit {
   // ── Invite modal ───────────────────────────────────────────────────────────
 
   openInviteModal(): void {
-    this.inviteForm.reset({ email: '', displayName: '', role: 'Member' });
+    this.inviteForm.reset({ email: '', displayName: '', role: 'FieldWorker' });
     this.inviteError.set(null);
     this.showInviteModal.set(true);
   }

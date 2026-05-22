@@ -63,21 +63,41 @@ public static class DevDataSeeder
 
         var tenantId = tenant.Id;
 
-        // ── 2. Admin Role ─────────────────────────────────────────────────────
-        var adminRole = await db.Roles
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(r =>
-                r.TenantId == tenantId &&
-                r.NormalizedName == DefaultRoles.Admin.ToUpperInvariant());
-
-        if (adminRole is null)
+        // ── 2. Seed all default roles ─────────────────────────────────────────
+        var roleDescriptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            adminRole = Role.Create(tenantId, DefaultRoles.Admin,
-                                    "Full administrative access", SystemActorId);
-            db.Roles.Add(adminRole);
-            await db.SaveChangesAsync();
-            logger.LogInformation("[DevSeed] Role 'Admin' created ({Id})", adminRole.Id);
+            [DefaultRoles.Admin]             = "Full administrative access",
+            [DefaultRoles.OperationsManager] = "Manages workflows and scheduling",
+            [DefaultRoles.FinanceUser]       = "Manages invoices and financial reports",
+            [DefaultRoles.FieldWorker]       = "Executes assigned field work orders",
+            [DefaultRoles.Supervisor]        = "Oversees field workers and approves work",
+        };
+
+        Role? adminRole = null;
+        foreach (var (roleName, description) in roleDescriptions)
+        {
+            var existing = await db.Roles
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(r =>
+                    r.TenantId == tenantId &&
+                    r.NormalizedName == roleName.ToUpperInvariant());
+
+            if (existing is null)
+            {
+                existing = Role.Create(tenantId, roleName, description, SystemActorId);
+                db.Roles.Add(existing);
+                await db.SaveChangesAsync();
+                logger.LogInformation("[DevSeed] Role '{Role}' created ({Id})", roleName, existing.Id);
+            }
+
+            if (roleName.Equals(DefaultRoles.Admin, StringComparison.OrdinalIgnoreCase))
+                adminRole = existing;
         }
+
+        adminRole ??= await db.Roles
+            .IgnoreQueryFilters()
+            .FirstAsync(r => r.TenantId == tenantId &&
+                             r.NormalizedName == DefaultRoles.Admin.ToUpperInvariant());
 
         // ── 3. User ───────────────────────────────────────────────────────────
         var user = await db.Users
