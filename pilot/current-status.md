@@ -190,8 +190,8 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - [x] US-082 #150 ✅ — Workflow domain event handlers: WorkflowStarted/Completed/Failed, StepAssigned/Completed → auto-create notifications (PR #159, 2026-05-22)
 
 ### Pending
-- [ ] US-083 #151 — NotificationsController (GET list, POST mark-read, DELETE soft-delete)
-- [ ] US-084 #152 — BFF proxy routes `/bff/notifications/*` + NotificationsApiClient
+- [x] US-083 #151 ✅ — NotificationsController: GET list, GET unread-count, POST read, DELETE (PR #160, 2026-05-22)
+- [x] US-084 #152 ✅ — NotificationsApiClient + BFF NotificationsController proxy `/bff/notifications/*` (PR #160, 2026-05-22)
 - [ ] US-085 #153 — Angular NotificationBellComponent (icon + unread count badge + dropdown)
 - [ ] US-086 #154 — Angular Notifications page (full list + read/dismiss)
 - [ ] US-087 #155 — Serilog structured logging + correlation ID enrichment
