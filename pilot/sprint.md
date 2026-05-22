@@ -689,7 +689,158 @@ These stories are not phase-specific — they run alongside regular sprints at d
 
 ## Sprint 5 — Notifications & Observability (PLANNED)
 
-**Phase:** Phase 5 — not started
+**Phase:** Phase 5
+**Status:** 🔵 Planning — stories defined, GitHub issues pending.
+**Goal:** Deliver the Notifications module end-to-end (domain → API → Angular) and harden observability (Serilog enrichers, SQL/Redis health checks, Angular health dashboard).
+
+**Already in place (no rework needed):**
+- `CorrelationIdMiddleware` + `X-Correlation-Id` header ✅
+- `LoggingBehaviour` (MediatR pipeline, logs command/query name + duration) ✅
+- Basic Serilog config (Console sink, Development level=Debug) ✅
+- Basic health endpoints `/health`, `/health/live`, `/health/ready` ✅
+- `Notifications` module scaffold (4-layer skeleton) ✅
+
+**Phase 5 scope gaps:**
+- Notification aggregate + repository + notifications schema migration
+- CreateNotification / MarkAsRead / Dismiss commands + GetNotifications / UnreadCount queries
+- Domain event → notification bridge (workflow events → auto-created notifications)
+- NotificationsController + BFF proxy
+- Angular topbar bell with unread badge + dropdown + `/notifications` page
+- Serilog context enrichers (TenantId, UserId on every log line)
+- SQL Server + Redis health checks for `/health/ready`
+- Angular Health dashboard page at `/administration/health`
+
+| Epic | GitHub # | Stories | Status |
+|---|---|---|---|
+| EP-030 Notifications Domain | #141 | US-078 #146, US-079 #147 | [ ] Pending |
+| EP-031 Notifications Application Layer | #142 | US-080 #148, US-081 #149, US-082 #150 | [ ] Pending |
+| EP-032 Notifications API + BFF | #143 | US-083 #151, US-084 #152 | [ ] Pending |
+| EP-033 Angular Notifications UI | #144 | US-085 #153, US-086 #154 | [ ] Pending |
+| EP-034 Observability | #145 | US-087 #155, US-088 #156, US-089 #157 | [ ] Pending |
+
+### Phase 5 Story Summary
+| Story | Description | GitHub # | Size | Status |
+|---|---|---|---|---|
+| US-078 | Notification aggregate — entity, NotificationType enum, domain events | #146 | S | [ ] |
+| US-079 | NotificationRepository + EF Core config + notifications schema migration | #147 | S | [ ] |
+| US-080 | CreateNotification / MarkAsRead / DismissNotification commands + handlers | #148 | M | [ ] |
+| US-081 | GetNotificationsQuery (paginated, unread filter) + GetUnreadCountQuery | #149 | S | [ ] |
+| US-082 | Domain event → notification bridge (workflow events → notifications) | #150 | M | [ ] |
+| US-083 | NotificationsController: GET /notifications, PATCH /{id}/read, DELETE /{id}, GET /unread-count | #151 | S | [ ] |
+| US-084 | BFF NotificationsApiClient + BFF NotificationsController proxy (/bff/notifications/*) | #152 | XS | [ ] |
+| US-085 | Angular topbar bell: unread count badge, dropdown, mark-as-read | #153 | M | [ ] |
+| US-086 | Angular /notifications page: full list, read/unread filter, dismiss, empty state | #154 | M | [ ] |
+| US-087 | Serilog enrichers: TenantId + UserId on every structured log line | #155 | S | [ ] |
+| US-088 | SQL Server + Redis health checks tagged "ready"; detailed health response body | #156 | S | [ ] |
+| US-089 | Angular /administration/health page: module status cards, auto-refresh | #157 | M | [ ] |
+
+---
+
+### EP-030 — Notifications Domain Model
+
+**Goal:** Define the `Notification` aggregate that captures who received what event and their read state.
+
+**Acceptance Criteria:**
+- `Notification` extends `AuditableEntity` — has `RecipientId` (UserId), `TenantId`, `Type`, `Title`, `Body`, `IsRead`, `IsDeleted`, `CreatedAt`
+- `NotificationType` enum: `WorkflowStarted`, `WorkflowCompleted`, `WorkflowFailed`, `StepAssigned`, `StepCompleted`, `SystemAlert`
+- `Notification.Create(tenantId, recipientId, type, title, body)` factory
+- `Notification.MarkAsRead()` — sets `IsRead = true`, `UpdatedAt`
+- Domain event: `NotificationCreatedEvent`
+- `INotificationRepository` in Application layer
+
+| ID | Story | Size | Status |
+|---|---|---|---|
+| US-078 | Notification aggregate entity + NotificationType enum + domain events + INotificationRepository | S | [ ] |
+| US-079 | NotificationConfiguration (EF Core) + InitialCreate migration (notifications schema) + NotificationRepository | S | [ ] |
+
+**Dependencies:** BuildingBlocks.Domain, EF Core patterns from Identity/Workflows
+
+---
+
+### EP-031 — Notifications Application Layer
+
+**Goal:** MediatR commands/queries for notification lifecycle + domain event handlers that auto-create notifications from workflow events.
+
+**Acceptance Criteria:**
+- `CreateNotificationCommand(tenantId, recipientId, type, title, body)` + handler
+- `MarkAsReadCommand(notificationId, userId)` + handler — validates recipient ownership
+- `DismissNotificationCommand(notificationId, userId)` + handler — soft-deletes
+- `GetNotificationsQuery(userId, page, pageSize, unreadOnly)` → paged `NotificationDto` list
+- `GetUnreadCountQuery(userId)` → `int`
+- `WorkflowEventNotificationHandler` — handles `WorkflowStartedEvent`, `WorkflowCompletedEvent`, `WorkflowFailedEvent`, `StepAssignedEvent` domain events → dispatches `CreateNotificationCommand`
+- All commands/queries have FluentValidation validators
+
+| ID | Story | Size | Status |
+|---|---|---|---|
+| US-080 | CreateNotification + MarkAsRead + DismissNotification commands + handlers + validators | M | [ ] |
+| US-081 | GetNotificationsQuery (paginated, unread filter) + GetUnreadCountQuery + NotificationDto | S | [ ] |
+| US-082 | WorkflowEventNotificationHandler: bridge workflow domain events → CreateNotificationCommand | M | [ ] |
+
+**Dependencies:** EP-030, Workflow domain events
+
+---
+
+### EP-032 — Notifications API + BFF Proxy
+
+**Goal:** Thin NotificationsController + BFF forwarding layer.
+
+**Acceptance Criteria:**
+- `GET /api/notifications?page=1&pageSize=20&unreadOnly=false` → paged list
+- `GET /api/notifications/unread-count` → `{ count: N }`
+- `PATCH /api/notifications/{id}/read` → 204
+- `DELETE /api/notifications/{id}` → 204 (dismiss/soft-delete)
+- All endpoints `[Authorize]`, tenant-scoped via `ITenantContext`
+- BFF `NotificationsApiClient` + BFF `NotificationsController` at `/bff/notifications/*`
+
+| ID | Story | Size | Status |
+|---|---|---|---|
+| US-083 | NotificationsController (4 endpoints) + request DTOs | S | [ ] |
+| US-084 | NotificationsApiClient typed HttpClient + BFF NotificationsController proxy | XS | [ ] |
+
+**Dependencies:** EP-031
+
+---
+
+### EP-033 — Angular Notifications UI
+
+**Goal:** Topbar bell with badge + dropdown, plus full notifications list page.
+
+**Acceptance Criteria:**
+- Bell icon in topbar shows unread count badge (0 = hidden, 1–9 = digit, 10+ = "9+")
+- Clicking bell opens dropdown: 5 most recent notifications, "Mark all read" button, "View all" link
+- Polling every 30 seconds for unread count (or on page focus)
+- `/notifications` page: full list, unread/all toggle filter, mark single as read, dismiss, skeleton loader, empty state
+- `NotificationsService` at `/bff/notifications` — uses `HttpClient`
+- `NotificationDto` Angular interface matches backend camelCase names
+
+| ID | Story | Size | Status |
+|---|---|---|---|
+| US-085 | TopbarComponent: bell icon, unread badge, dropdown panel, mark-all-read | M | [ ] |
+| US-086 | `/notifications` page: list, read/unread filter, mark-as-read, dismiss, skeleton, empty state | M | [ ] |
+
+**Dependencies:** EP-032
+
+---
+
+### EP-034 — Observability
+
+**Goal:** Enrich every structured log with TenantId + UserId; add SQL Server + Redis health checks; Angular health dashboard.
+
+**Acceptance Criteria:**
+- `TenantEnricher` + `UserEnricher` Serilog enrichers — pull from `ITenantContext` + `ICurrentUser`, add `TenantId` + `UserId` to every log event scope
+- Registered in `UseSerilog` lambda in Host `Program.cs`
+- SQL Server health check (database ping, tagged `"ready"`) via `AddSqlServer`
+- Redis health check (PING command, tagged `"ready"`) via `AddRedis`
+- `/health/ready` returns 200 + full JSON body listing each check name + status + duration
+- Angular `/administration/health` page: cards per module (Host DB, Redis, BFF), colour-coded status, last-checked timestamp, manual refresh button, auto-refresh every 60 seconds
+
+| ID | Story | Size | Status |
+|---|---|---|---|
+| US-087 | Serilog TenantId + UserId enrichers registered in Host Program.cs | S | [ ] |
+| US-088 | SQL Server + Redis health checks tagged "ready"; verbose health response body | S | [ ] |
+| US-089 | Angular /administration/health page: module status cards, auto/manual refresh | M | [ ] |
+
+**Dependencies:** Serilog already wired; `AspNetCore.HealthChecks.SqlServer` + `AspNetCore.HealthChecks.Redis` NuGet packages needed
 
 ---
 
