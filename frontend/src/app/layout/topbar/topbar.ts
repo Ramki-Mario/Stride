@@ -12,6 +12,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs/operators';
 import { AuthService } from '../../core/auth/auth.service';
 import { ThemeService, ThemePalette } from '../../core/theme/theme.service';
+import { NotificationBellComponent } from '../../features/notifications/components/notification-bell/notification-bell';
 
 /** Map URL first-segment → human-readable section label. */
 const ROUTE_LABELS: Record<string, string> = {
@@ -27,6 +28,7 @@ const ROUTE_LABELS: Record<string, string> = {
   selector: 'app-topbar',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NotificationBellComponent],
   // Apply the structural class to the host element so styles.scss rules apply.
   host: { class: 'stride-topbar' },
   template: `
@@ -80,13 +82,7 @@ const ROUTE_LABELS: Record<string, string> = {
     </div>
 
     <!-- ── Notification bell ────────────────────────────── -->
-    <button class="tb-action" title="Notifications" aria-label="Notifications">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"
-              stroke="currentColor" stroke-width="1.8"
-              stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
+    <app-notification-bell />
 
     <!-- ── User menu ─────────────────────────────────────── -->
     <div class="tb-user-wrap">
