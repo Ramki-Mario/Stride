@@ -68,14 +68,21 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var redisConnStr     = builder.Configuration["Redis:ConnectionString"]!;
 
 // Register IConnectionMultiplexer with the same TLS cert bypass used by the BFF.
-// Redis Cloud's certificate CN does not match the public hostname — without the
-// bypass, TLS handshake throws AuthenticationException ("Cannot determine frame size").
-// The health check uses this singleton instead of creating its own raw connection.
+//
+// Redis Cloud's cert CN does not match its public hostname.  The bypass only
+// works when SSL is enabled *exclusively* via SslProtocols — NOT via ssl=True
+// in the connection string.  If the connection string contains ssl=True,
+// ConfigurationOptions.Parse sets opts.Ssl = true, which activates a separate
+// TLS negotiate path that runs before our CertificateValidation event fires.
+//
+// Fix: parse the string first, then force opts.Ssl = false so SSL is owned
+// entirely by SslProtocols = Tls12 — identical to the BFF which works.
 builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
 {
     var opts = ConfigurationOptions.Parse(redisConnStr);
-    opts.SslProtocols         = SslProtocols.Tls12;
-    opts.CertificateValidation += (_, _, _, _) => true;
+    opts.Ssl               = false;            // clear ssl=True if present in conn string
+    opts.SslProtocols      = SslProtocols.Tls12; // re-enable SSL via protocol (BFF code path)
+    opts.CertificateValidation += (_, _, _, _) => true; // bypass CN mismatch
     return ConnectionMultiplexer.Connect(opts);
 });
 

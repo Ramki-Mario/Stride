@@ -118,7 +118,7 @@ import { NOTIFICATION_TYPE_CONFIG, NotificationDto } from '../../models/notifica
     </div>
   `,
   styles: [`
-    .bell-wrap { position: relative; }
+    .bell-wrap { position: relative; display: flex; align-items: center; }
 
     /* Re-use .tb-action from topbar — bell button */
     .bell-btn { position: relative; }

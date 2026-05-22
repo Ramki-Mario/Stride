@@ -5,6 +5,7 @@ import {
   OnInit,
   computed,
   inject,
+  signal,
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -35,7 +36,7 @@ const AUTO_REFRESH_MS = 30_000; // 30 seconds
           <p class="hp-subtitle">
             @if (service.lastChecked()) {
               Last checked {{ formatTime(service.lastChecked()!) }}
-              <span class="hp-auto-badge">auto-refresh 30s</span>
+              <span class="hp-auto-badge">next refresh in {{ countdown() }}s</span>
             } @else {
               Checking status…
             }
@@ -43,7 +44,7 @@ const AUTO_REFRESH_MS = 30_000; // 30 seconds
         </div>
 
         <button class="stride-btn stride-btn-secondary"
-                (click)="service.loadHealth()"
+                (click)="refresh()"
                 [disabled]="service.isLoading()">
           @if (service.isLoading()) { Refreshing… } @else { Refresh now }
         </button>
@@ -181,14 +182,12 @@ const AUTO_REFRESH_MS = 30_000; // 30 seconds
     }
 
     .hp-auto-badge {
-      font-size: 0.6875rem;
-      font-weight: 600;
-      padding: 0.1rem 0.45rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.1rem 0.5rem;
       border-radius: 99px;
       background: var(--stride-surface-secondary);
       color: var(--stride-text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
     }
 
     /* Banner */
@@ -375,6 +374,10 @@ export class HealthPageComponent implements OnInit {
   readonly service    = inject(HealthService);
   private readonly destroyRef = inject(DestroyRef);
 
+  /** Counts down from 30 → 1 between auto-refreshes. */
+  readonly countdown = signal(AUTO_REFRESH_MS / 1000);
+  private _tick = 0;
+
   /** Flattened entry list for *ngFor */
   readonly reportEntries = computed(() => {
     const report = this.service.report();
@@ -389,10 +392,27 @@ export class HealthPageComponent implements OnInit {
   ngOnInit(): void {
     this.service.loadHealth();
 
-    // Auto-refresh every 30 seconds
-    interval(AUTO_REFRESH_MS)
+    // Single 1-second interval drives both the visible countdown and the
+    // auto-refresh trigger, keeping them perfectly in sync.
+    interval(1000)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.service.loadHealth());
+      .subscribe(() => {
+        this._tick++;
+        const period = AUTO_REFRESH_MS / 1000; // 30
+        const mod    = this._tick % period;
+        // After a refresh (mod === 0) reset to 30; otherwise count down.
+        this.countdown.set(mod === 0 ? period : period - mod);
+        if (mod === 0) {
+          this.service.loadHealth();
+        }
+      });
+  }
+
+  /** Manual refresh — also resets the countdown so the timer restarts from 30. */
+  refresh(): void {
+    this._tick = 0;
+    this.countdown.set(AUTO_REFRESH_MS / 1000);
+    this.service.loadHealth();
   }
 
   // ── Style helpers ─────────────────────────────────────────────────────────
