@@ -185,11 +185,11 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 ### Completed
 - [x] US-078 #146 ✅ — Notification entity + NotificationType enum + NotificationCreatedEvent + INotificationRepository (PR #158, 2026-05-22)
 - [x] US-079 #147 ✅ — EF Core config + notifications schema migration + NotificationRepository (PR #158, 2026-05-22)
+- [x] US-080 #148 ✅ — CreateNotificationCommand + MarkAsRead + Delete commands + handlers + validators (PR #159, 2026-05-22)
+- [x] US-081 #149 ✅ — GetNotificationsQuery + GetUnreadCountQuery + handlers + validators (PR #159, 2026-05-22)
+- [x] US-082 #150 ✅ — Workflow domain event handlers: WorkflowStarted/Completed/Failed, StepAssigned/Completed → auto-create notifications (PR #159, 2026-05-22)
 
 ### Pending
-- [ ] US-080 #148 — CreateNotificationCommand + handler + validator
-- [ ] US-081 #149 — MarkNotificationAsReadCommand + GetNotificationsQuery + handlers
-- [ ] US-082 #150 — NotificationCreatedEvent handler (triggered by workflow domain events)
 - [ ] US-083 #151 — NotificationsController (GET list, POST mark-read, DELETE soft-delete)
 - [ ] US-084 #152 — BFF proxy routes `/bff/notifications/*` + NotificationsApiClient
 - [ ] US-085 #153 — Angular NotificationBellComponent (icon + unread count badge + dropdown)
