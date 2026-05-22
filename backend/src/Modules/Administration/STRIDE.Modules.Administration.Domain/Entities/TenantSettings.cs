@@ -32,6 +32,17 @@ public sealed class TenantSettings : AuditableEntity
         };
     }
 
+    /// <summary>
+    /// One-time backfill: sets DisplayName from the identity schema when the row
+    /// was originally created before name-resolution was introduced.
+    /// Only call when DisplayName is currently empty.
+    /// </summary>
+    public void BackfillDisplayName(string displayName, Guid updatedBy)
+    {
+        DisplayName = displayName;
+        UpdatedAt   = DateTime.UtcNow;
+    }
+
     public void Update(
         string  displayName,
         string  defaultPalette,

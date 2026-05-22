@@ -37,6 +37,17 @@ internal sealed class GetTenantSettingsQueryHandler
             await _repo.AddAsync(settings, ct);
             await _repo.SaveChangesAsync(ct);
         }
+        else if (string.IsNullOrEmpty(settings.DisplayName))
+        {
+            // Row exists but DisplayName was never populated (created before name-resolution
+            // was introduced).  Backfill it now so existing tenants get their org name.
+            var tenantName = await _tenantNameResolver.ResolveAsync(request.TenantId, ct);
+            if (!string.IsNullOrEmpty(tenantName))
+            {
+                settings.BackfillDisplayName(tenantName, request.TenantId);
+                await _repo.SaveChangesAsync(ct);
+            }
+        }
 
         return Result<TenantSettingsDto>.Success(ToDto(settings));
     }
