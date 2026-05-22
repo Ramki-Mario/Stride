@@ -10,6 +10,14 @@ export const appRoutes: Routes = [
       ),
   },
   {
+    // Public route — no authGuard. New customers complete the 4-step wizard here.
+    path: 'onboarding',
+    loadComponent: () =>
+      import('./features/onboarding/pages/onboarding-page/onboarding-page').then(
+        (m) => m.OnboardingPageComponent
+      ),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
