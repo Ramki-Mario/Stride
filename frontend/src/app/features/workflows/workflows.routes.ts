@@ -7,7 +7,14 @@ export const workflowRoutes: Routes = [
       import('./pages/workflows-page/workflows-page').then((m) => m.WorkflowsPageComponent),
   },
   {
-    // 'new' MUST appear before ':id' — static segments match before dynamic ones
+    // 'instances' and 'new' MUST appear before ':id' — static before dynamic
+    path: 'instances',
+    loadComponent: () =>
+      import('./pages/workflow-instances-page/workflow-instances-page').then(
+        (m) => m.WorkflowInstancesPageComponent,
+      ),
+  },
+  {
     path: 'new',
     loadComponent: () =>
       import('./pages/workflow-form-page/workflow-form-page').then(

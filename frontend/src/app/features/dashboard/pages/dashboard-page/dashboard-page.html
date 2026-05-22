@@ -45,7 +45,15 @@
     <!-- KPI cards -->
     <div class="kpi-grid">
       @for (card of kpiCards(); track card.label) {
-        <div class="kpi-card" [ngClass]="'kpi-card--' + card.accentClass">
+        <div
+          class="kpi-card kpi-card--clickable"
+          [ngClass]="'kpi-card--' + card.accentClass"
+          (click)="navigateCard(card)"
+          (keydown.enter)="navigateCard(card)"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="'View ' + card.label"
+        >
           <div class="kpi-card__top">
             <div class="kpi-card__icon"
                  [style.background]="card.bgToken"

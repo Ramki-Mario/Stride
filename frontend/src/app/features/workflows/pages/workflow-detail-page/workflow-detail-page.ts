@@ -125,6 +125,11 @@ export class WorkflowDetailPageComponent implements OnInit {
 
   readonly hasActiveInstance = computed(() => this.instance() !== null);
 
+  readonly canCancel = computed(() => {
+    const s = this.instance()?.status;
+    return s === 'Running' || s === 'Paused';
+  });
+
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
@@ -222,6 +227,26 @@ export class WorkflowDetailPageComponent implements OnInit {
           });
         },
         error: () => this.actionError.set('Could not start workflow instance. Please try again.'),
+      });
+  }
+
+  cancelInstance(): void {
+    const inst = this.instance();
+    if (!inst) return;
+    if (!confirm('Cancel this running instance? This cannot be undone.')) return;
+
+    this.actionPending.set('Cancelling…');
+    this.actionError.set(null);
+
+    this.wfService
+      .cancelInstance(inst.id)
+      .pipe(
+        finalize(() => this.actionPending.set(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next:  () => this.loadInstance(inst.id),
+        error: () => this.actionError.set('Could not cancel instance. Please try again.'),
       });
   }
 

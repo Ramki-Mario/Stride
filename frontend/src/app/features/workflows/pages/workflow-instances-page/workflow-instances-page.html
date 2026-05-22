@@ -1,0 +1,147 @@
+<div class="wi-page">
+
+  <!-- ── Page header ──────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header__left">
+      <a routerLink="/workflows" class="wi-back-link">
+        <i class="pi pi-arrow-left"></i>
+      </a>
+      <div class="page-header__title-group">
+        <h1 class="page-title">Workflow Instances</h1>
+        <p class="page-subtitle">All workflow runs across your organisation</p>
+      </div>
+    </div>
+    <button class="stride-btn stride-btn-secondary stride-btn-sm" (click)="loadInstances()">
+      <i class="pi pi-refresh"></i> Refresh
+    </button>
+  </div>
+
+  <!-- ── Error banner ─────────────────────────────────────────────────────── -->
+  @if (errorMessage()) {
+    <div class="wi-error-banner" role="alert">
+      <i class="pi pi-exclamation-triangle"></i>
+      <span>{{ errorMessage() }}</span>
+      <button class="wi-retry" (click)="loadInstances()">Retry</button>
+    </div>
+  }
+
+  <!-- ── Status tabs ──────────────────────────────────────────────────────── -->
+  <div class="wi-tabs" role="tablist" aria-label="Filter by status">
+    @for (tab of statusTabs; track tab.value) {
+      <button
+        class="wi-tab"
+        [class.wi-tab--active]="statusFilter() === tab.value"
+        (click)="setStatus(tab.value)"
+        role="tab"
+        [attr.aria-selected]="statusFilter() === tab.value"
+      >
+        <i class="pi {{ tab.icon }}"></i>
+        {{ tab.label }}
+        <span class="wi-tab-count">{{ tabCounts()[tab.value] || 0 }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- ── Loading skeleton ─────────────────────────────────────────────────── -->
+  @if (isLoading()) {
+    <div class="wi-list">
+      @for (n of [1,2,3,4,5]; track n) {
+        <div class="wi-row wi-row--skeleton">
+          <div class="wi-sk wi-sk--icon"></div>
+          <div class="wi-sk-body">
+            <div class="wi-sk wi-sk--title"></div>
+            <div class="wi-sk wi-sk--sub"></div>
+          </div>
+          <div class="wi-sk wi-sk--badge"></div>
+          <div class="wi-sk wi-sk--bar"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Empty state ──────────────────────────────────────────────────────── -->
+  @else if (filteredInstances().length === 0) {
+    <div class="wi-empty">
+      <i class="pi pi-inbox wi-empty-icon"></i>
+      <h3>No instances found</h3>
+      <p>
+        @if (statusFilter()) {
+          No <strong>{{ statusFilter() }}</strong> instances yet.
+        } @else {
+          No workflow instances have been started yet.
+        }
+      </p>
+      @if (statusFilter()) {
+        <button class="stride-btn stride-btn-secondary stride-btn-sm" (click)="setStatus('')">
+          Clear filter
+        </button>
+      }
+    </div>
+  }
+
+  <!-- ── Instances list ───────────────────────────────────────────────────── -->
+  @else {
+    <div class="wi-list" role="list">
+      @for (inst of filteredInstances(); track trackById($index, inst)) {
+        <div
+          class="wi-row"
+          role="listitem"
+          (click)="openInstance(inst)"
+          (keydown.enter)="openInstance(inst)"
+          tabindex="0"
+          [attr.aria-label]="inst.workflowName + ' instance'"
+        >
+          <!-- Status dot -->
+          <div class="wi-row-icon" [ngClass]="'wi-icon--' + inst.status.toLowerCase()">
+            @switch (inst.status) {
+              @case ('Running')   { <i class="pi pi-spin pi-spinner"></i> }
+              @case ('Completed') { <i class="pi pi-check-circle"></i>    }
+              @case ('Failed')    { <i class="pi pi-times-circle"></i>    }
+              @case ('Cancelled') { <i class="pi pi-ban"></i>             }
+              @default            { <i class="pi pi-clock"></i>           }
+            }
+          </div>
+
+          <!-- Name + metadata -->
+          <div class="wi-row-body">
+            <div class="wi-row-name">{{ inst.workflowName }}</div>
+            <div class="wi-row-meta">
+              <span class="wi-row-id">{{ inst.id.substring(0, 8).toUpperCase() }}</span>
+              <span class="wi-row-sep">·</span>
+              <span>Started {{ relativeDate(inst.createdAt) }}</span>
+              @if (inst.completedAt) {
+                <span class="wi-row-sep">·</span>
+                <span>Ended {{ relativeDate(inst.completedAt) }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Status badge -->
+          <div class="wi-row-badge">
+            <span class="wi-badge" [ngClass]="statusClass(inst.status)">
+              {{ statusLabel(inst.status) }}
+            </span>
+          </div>
+
+          <!-- Progress -->
+          <div class="wi-row-progress">
+            <div class="wi-progress-bar">
+              <div
+                class="wi-progress-fill"
+                [ngClass]="'wi-fill--' + inst.status.toLowerCase()"
+                [style.width.%]="progressPct(inst)"
+              ></div>
+            </div>
+            <span class="wi-progress-label">{{ inst.completedSteps }}/{{ inst.totalSteps }}</span>
+          </div>
+
+          <!-- Arrow -->
+          <i class="pi pi-chevron-right wi-row-arrow"></i>
+        </div>
+      }
+    </div>
+
+    <p class="wi-count-hint">{{ filteredInstances().length }} instance{{ filteredInstances().length === 1 ? '' : 's' }}</p>
+  }
+
+</div>

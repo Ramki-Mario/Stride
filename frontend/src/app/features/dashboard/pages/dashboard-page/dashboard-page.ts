@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
@@ -34,6 +35,7 @@ export class DashboardPageComponent implements OnInit {
   private readonly reportingService = inject(ReportingService);
   private readonly chartTheme       = inject(ChartThemeService);
   private readonly destroyRef       = inject(DestroyRef);
+  private readonly router           = inject(Router);
 
   // ── Server state ─────────────────────────────────────────────────────────
 
@@ -66,6 +68,8 @@ export class DashboardPageComponent implements OnInit {
         colorToken:  'var(--stride-primary)',
         bgToken:     'var(--stride-primary-subtle)',
         accentClass: 'primary',
+        route:       ['/workflows'],
+        queryParams: {},
       },
       {
         label:       'Running Instances',
@@ -75,6 +79,8 @@ export class DashboardPageComponent implements OnInit {
         colorToken:  'var(--stride-info)',
         bgToken:     'var(--stride-info-bg)',
         accentClass: 'info',
+        route:       ['/workflows', 'instances'],
+        queryParams: { status: 'Running' },
       },
       {
         label:       'Completed',
@@ -84,6 +90,8 @@ export class DashboardPageComponent implements OnInit {
         colorToken:  'var(--stride-success)',
         bgToken:     'var(--stride-success-bg)',
         accentClass: 'success',
+        route:       ['/workflows', 'instances'],
+        queryParams: { status: 'Completed' },
       },
       {
         label:       'Failed',
@@ -93,6 +101,8 @@ export class DashboardPageComponent implements OnInit {
         colorToken:  'var(--stride-support)',
         bgToken:     'var(--stride-support-bg)',
         accentClass: 'danger',
+        route:       ['/workflows', 'instances'],
+        queryParams: { status: 'Failed' },
       },
     ];
   });
@@ -249,6 +259,10 @@ export class DashboardPageComponent implements OnInit {
   }
 
   // ── Actions ───────────────────────────────────────────────────────────────
+
+  navigateCard(card: ReturnType<typeof this.kpiCards>[number]): void {
+    this.router.navigate(card.route, { queryParams: card.queryParams });
+  }
 
   selectTrendWindow(days: number): void {
     if (this.selectedDays() === days) return;

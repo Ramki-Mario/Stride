@@ -1,0 +1,358 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Workflow Instances Page
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.wi-page {
+  padding: 1.5rem;
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Page header ──────────────────────────────────────────────────────────── */
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.page-header__left {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.wi-back-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--stride-radius-md);
+  color: var(--stride-text-secondary);
+  text-decoration: none;
+  transition: background var(--stride-transition), color var(--stride-transition);
+
+  &:hover {
+    background: var(--stride-surface-hover);
+    color: var(--stride-text-primary);
+  }
+}
+
+.page-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--stride-text-primary);
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: 0.875rem;
+  color: var(--stride-text-muted);
+  margin: 0;
+}
+
+/* ── Error banner ─────────────────────────────────────────────────────────── */
+
+.wi-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--stride-error-bg);
+  border: 1px solid var(--stride-error-border);
+  border-radius: var(--stride-radius-xl);
+  color: var(--stride-error);
+  font-size: 0.875rem;
+}
+
+.wi-retry {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--stride-error);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 0.875rem;
+}
+
+/* ── Status tabs ──────────────────────────────────────────────────────────── */
+
+.wi-tabs {
+  display: flex;
+  gap: 0.375rem;
+  overflow-x: auto;
+  padding-bottom: 0.125rem;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+}
+
+.wi-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.4375rem 0.875rem;
+  border-radius: var(--stride-radius-lg);
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--stride-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--stride-transition), color var(--stride-transition),
+              border-color var(--stride-transition);
+
+  &:hover {
+    background: var(--stride-surface-hover);
+    color: var(--stride-text-primary);
+  }
+
+  &.wi-tab--active {
+    background: var(--stride-primary-subtle);
+    border-color: var(--stride-primary);
+    color: var(--stride-primary);
+    font-weight: 600;
+  }
+}
+
+.wi-tab-count {
+  background: var(--stride-surface-hover);
+  color: var(--stride-text-muted);
+  border-radius: var(--stride-radius-full);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.0625rem 0.375rem;
+  min-width: 1.25rem;
+  text-align: center;
+
+  .wi-tab--active & {
+    background: var(--stride-primary-subtle);
+    color: var(--stride-primary);
+  }
+}
+
+/* ── List ─────────────────────────────────────────────────────────────────── */
+
+.wi-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── Row ──────────────────────────────────────────────────────────────────── */
+
+.wi-row {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  background: var(--stride-surface);
+  border: 1px solid var(--stride-border-soft);
+  border-radius: var(--stride-radius-xl);
+  cursor: pointer;
+  transition: background var(--stride-transition), box-shadow var(--stride-transition),
+              border-color var(--stride-transition);
+
+  &:hover {
+    background: var(--stride-surface-hover);
+    border-color: var(--stride-border);
+    box-shadow: var(--stride-shadow-sm);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--stride-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* Status icon column */
+.wi-row-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--stride-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+
+  &.wi-icon--running   { background: var(--stride-info-bg);    color: var(--stride-info);    }
+  &.wi-icon--completed { background: var(--stride-success-bg); color: var(--stride-success); }
+  &.wi-icon--failed    { background: var(--stride-error-bg);   color: var(--stride-error);   }
+  &.wi-icon--cancelled { background: var(--stride-surface-secondary); color: var(--stride-text-muted); }
+  &.wi-icon--paused    { background: var(--stride-warning-bg); color: var(--stride-warning); }
+}
+
+/* Name + metadata */
+.wi-row-body {
+  min-width: 0;
+}
+
+.wi-row-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--stride-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wi-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--stride-text-muted);
+  margin-top: 0.1875rem;
+}
+
+.wi-row-id {
+  font-family: monospace;
+  font-size: 0.6875rem;
+  background: var(--stride-surface-secondary);
+  padding: 0.0625rem 0.3rem;
+  border-radius: var(--stride-radius-xs);
+  color: var(--stride-text-secondary);
+}
+
+.wi-row-sep { color: var(--stride-border); }
+
+/* Status badge */
+.wi-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.625rem;
+  border-radius: var(--stride-radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &.badge-running   { background: var(--stride-info-bg);    color: var(--stride-info);    }
+  &.badge-completed { background: var(--stride-success-bg); color: var(--stride-success); }
+  &.badge-failed    { background: var(--stride-error-bg);   color: var(--stride-error);   }
+  &.badge-cancelled { background: var(--stride-surface-secondary); color: var(--stride-text-muted); }
+  &.badge-paused    { background: var(--stride-warning-bg); color: var(--stride-warning); }
+  &.badge-draft     { background: var(--stride-surface-secondary); color: var(--stride-text-secondary); }
+  &.badge-active    { background: var(--stride-primary-subtle); color: var(--stride-primary); }
+}
+
+/* Progress */
+.wi-row-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 7rem;
+}
+
+.wi-progress-bar {
+  flex: 1;
+  height: 0.3rem;
+  background: var(--stride-border);
+  border-radius: var(--stride-radius-full);
+  overflow: hidden;
+}
+
+.wi-progress-fill {
+  height: 100%;
+  border-radius: var(--stride-radius-full);
+  transition: width 300ms ease;
+
+  &.wi-fill--running   { background: var(--stride-info);    }
+  &.wi-fill--completed { background: var(--stride-success); }
+  &.wi-fill--failed    { background: var(--stride-error);   }
+  &.wi-fill--cancelled { background: var(--stride-text-muted); }
+  &.wi-fill--paused    { background: var(--stride-warning); }
+}
+
+.wi-progress-label {
+  font-size: 0.6875rem;
+  color: var(--stride-text-muted);
+  white-space: nowrap;
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.wi-row-arrow {
+  color: var(--stride-text-muted);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* ── Skeleton rows ────────────────────────────────────────────────────────── */
+
+.wi-row--skeleton {
+  pointer-events: none;
+  cursor: default;
+  grid-template-columns: 2.5rem 1fr auto auto auto;
+}
+
+.wi-sk {
+  background: var(--stride-surface-hover);
+  border-radius: var(--stride-radius-sm);
+  animation: shimmer 1.4s ease-in-out infinite;
+  background-size: 200% 100%;
+  background-image: linear-gradient(
+    90deg,
+    var(--stride-surface-hover) 25%,
+    color-mix(in srgb, var(--stride-surface) 60%, var(--stride-border) 40%) 50%,
+    var(--stride-surface-hover) 75%
+  );
+
+  &.wi-sk--icon  { width: 2.25rem; height: 2.25rem; border-radius: var(--stride-radius-lg); }
+  &.wi-sk--title { width: 60%;  height: 0.875rem; }
+  &.wi-sk--sub   { width: 40%;  height: 0.625rem; margin-top: 0.375rem; }
+  &.wi-sk--badge { width: 4.5rem; height: 1.5rem; border-radius: var(--stride-radius-full); }
+  &.wi-sk--bar   { width: 7rem; height: 0.5rem; border-radius: var(--stride-radius-full); }
+}
+
+.wi-sk-body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Empty state ──────────────────────────────────────────────────────────── */
+
+.wi-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  gap: 0.75rem;
+
+  h3 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--stride-text-primary);
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: var(--stride-text-muted);
+    max-width: 22rem;
+  }
+}
+
+.wi-empty-icon {
+  font-size: 2.5rem;
+  color: var(--stride-border);
+  margin-bottom: 0.5rem;
+}
+
+/* ── Footer count hint ────────────────────────────────────────────────────── */
+
+.wi-count-hint {
+  font-size: 0.8125rem;
+  color: var(--stride-text-muted);
+  text-align: right;
+}

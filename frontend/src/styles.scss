@@ -676,13 +676,16 @@ body {
 
 /* ── Select / Dropdown ── */
 .p-select,
-.p-select-panel {
+.p-select-panel,
+.p-select-overlay {
   border-radius: var(--stride-radius-xl) !important;
 }
 .p-select {
   background: var(--stride-surface);
   border: 1.5px solid var(--stride-border);
   color: var(--stride-text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
 }
 .p-select:hover:not(.p-disabled) { border-color: var(--stride-text-muted); }
 .p-select.p-focus,
@@ -691,20 +694,51 @@ body {
   box-shadow: 0 0 0 3px var(--stride-primary-ring);
   outline: none;
 }
-.p-select-panel {
-  background: var(--stride-surface);
-  border: 1px solid var(--stride-border);
-  box-shadow: var(--stride-shadow-lg);
+
+/* Overlay panel — PrimeNG 19+/21 uses .p-select-overlay; older uses .p-select-panel */
+.p-select-panel,
+.p-select-overlay {
+  background: var(--stride-surface) !important;
+  border: 1px solid var(--stride-border) !important;
+  box-shadow: var(--stride-shadow-lg) !important;
+  padding: 0.25rem !important;
+  margin-top: 0.25rem;
+}
+.p-select-list-container {
+  border-radius: var(--stride-radius-lg);
+  overflow: hidden;
+}
+.p-select-list {
+  padding: 0;
+}
+.p-select-option,
+.p-select-option-group {
+  border-radius: var(--stride-radius-md);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: var(--font-sans);
+  color: var(--stride-text-primary);
+  cursor: pointer;
+  transition: background var(--stride-transition);
 }
 .p-select-option:hover,
-.p-select-option.p-focus {
-  background: var(--stride-surface-hover);
-  color: var(--stride-text-primary);
+.p-select-option.p-focus,
+.p-select-option[data-p-focused="true"] {
+  background: var(--stride-surface-hover) !important;
+  color: var(--stride-text-primary) !important;
 }
-.p-select-option.p-selected {
-  background: var(--stride-primary-subtle);
-  color: var(--stride-primary);
+.p-select-option.p-selected,
+.p-select-option[data-p-selected="true"] {
+  background: var(--stride-primary-subtle) !important;
+  color: var(--stride-primary) !important;
   font-weight: 500;
+}
+.p-select-label {
+  color: var(--stride-text-primary);
+  font-size: 0.875rem;
+}
+.p-select-dropdown {
+  color: var(--stride-text-muted);
 }
 
 

@@ -285,6 +285,16 @@
                     <span class="wfd-inst-started">Started {{ formatDateTime(inst.createdAt) }}</span>
                   </div>
 
+                  @if (canCancel()) {
+                    <button
+                      class="wfd-btn wfd-btn-danger wfd-btn-sm"
+                      (click)="cancelInstance()"
+                      aria-label="Cancel this running instance"
+                    >
+                      <span class="pi pi-ban"></span> Cancel Instance
+                    </button>
+                  }
+
                   <!-- Progress bar -->
                   <div class="wfd-progress-wrap">
                     <div class="wfd-progress-bar">
