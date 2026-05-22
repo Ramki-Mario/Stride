@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using StackExchange.Redis;
+using System.Security.Authentication;
 using STRIDE.Host.ErrorHandling;
 using STRIDE.BuildingBlocks.Infrastructure.Correlation;
 using STRIDE.BuildingBlocks.Infrastructure.Extensions;
@@ -65,6 +67,18 @@ builder.Services
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 var redisConnStr     = builder.Configuration["Redis:ConnectionString"]!;
 
+// Register IConnectionMultiplexer with the same TLS cert bypass used by the BFF.
+// Redis Cloud's certificate CN does not match the public hostname — without the
+// bypass, TLS handshake throws AuthenticationException ("Cannot determine frame size").
+// The health check uses this singleton instead of creating its own raw connection.
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+{
+    var opts = ConfigurationOptions.Parse(redisConnStr);
+    opts.SslProtocols         = SslProtocols.Tls12;
+    opts.CertificateValidation += (_, _, _, _) => true;
+    return ConnectionMultiplexer.Connect(opts);
+});
+
 builder.Services
     .AddHealthChecks()
     .AddSqlServer(
@@ -72,9 +86,11 @@ builder.Services
         name:             "sql-server",
         tags:             ["ready", "db"])
     .AddRedis(
-        redisConnectionString: redisConnStr,
-        name:                  "redis",
-        tags:                  ["ready", "cache"]);
+        // Use the pre-configured singleton — NOT a raw connection string — so the
+        // TLS cert bypass above applies. Passing a raw string here bypasses the fix.
+        connectionMultiplexerFactory: sp => sp.GetRequiredService<IConnectionMultiplexer>(),
+        name:                         "redis",
+        tags:                         ["ready", "cache"]);
 
 // ── Global Exception Handler ───────────────────────────────────────────────
 // Converts ValidationException → 400 (RFC 7807) and unhandled → 500.
