@@ -32,4 +32,5 @@ public sealed record MeResponse(
     string Email,
     string DisplayName,
     IReadOnlyList<string> Roles,
-    string DefaultPalette = "purple");
+    string DefaultPalette = "purple",
+    string TenantName     = "");

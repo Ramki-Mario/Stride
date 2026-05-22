@@ -9,6 +9,7 @@ export interface AuthUser {
   tenantId: string;
   roles: string[];
   defaultPalette: string;
+  tenantName: string;
 }
 
 @Injectable({ providedIn: 'root' })

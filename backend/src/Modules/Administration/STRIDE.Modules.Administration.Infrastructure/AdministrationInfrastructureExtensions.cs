@@ -26,6 +26,9 @@ public static class AdministrationInfrastructureExtensions
         // TenantSettings EF repository.
         services.AddScoped<ITenantSettingsRepository, TenantSettingsRepository>();
 
+        // Cross-schema resolver: reads Tenant.Name from identity.Tenants.
+        services.AddScoped<ITenantNameResolver, TenantNameResolver>();
+
         // CSS sanitiser — stateless, safe as singleton.
         services.AddSingleton<ICssSanitiser, CssSanitiser>();
 

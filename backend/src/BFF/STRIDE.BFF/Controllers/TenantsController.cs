@@ -119,35 +119,20 @@ public sealed class TenantsController : ControllerBase
             principal,
             properties);
 
-        // Fetch defaultPalette — new tenant defaults to "purple"; ignore any error
-        string defaultPalette = "purple";
-        try
-        {
-            var settingsResp = await _tenantSettings.GetSettingsAsync(hostResponse.AccessToken, ct);
-            if (settingsResp.IsSuccessStatusCode)
-            {
-                var json = await settingsResp.Content.ReadAsStringAsync(ct);
-                using var doc = System.Text.Json.JsonDocument.Parse(json);
-                if (doc.RootElement.TryGetProperty("defaultPalette", out var p))
-                    defaultPalette = p.GetString() ?? "purple";
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Could not fetch defaultPalette after tenant registration.");
-        }
-
         _logger.LogInformation(
             "[BFF] Tenant registration complete — userId={UserId} tenantId={TenantId}",
             hostResponse.UserId, hostResponse.TenantId);
 
+        // TenantSettings are auto-created on first GET; use OrgName directly so the
+        // sidebar shows the correct name immediately without a second round-trip.
         return Ok(new MeResponse(
             hostResponse.UserId,
             hostResponse.TenantId,
             hostResponse.Email,
             hostResponse.DisplayName,
             hostResponse.Roles,
-            defaultPalette));
+            DefaultPalette: "purple",
+            TenantName:     request.OrgName.Trim()));
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

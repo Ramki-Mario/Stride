@@ -10,8 +10,15 @@ internal sealed class GetTenantSettingsQueryHandler
     : IRequestHandler<GetTenantSettingsQuery, Result<TenantSettingsDto>>
 {
     private readonly ITenantSettingsRepository _repo;
+    private readonly ITenantNameResolver       _tenantNameResolver;
 
-    public GetTenantSettingsQueryHandler(ITenantSettingsRepository repo) => _repo = repo;
+    public GetTenantSettingsQueryHandler(
+        ITenantSettingsRepository repo,
+        ITenantNameResolver       tenantNameResolver)
+    {
+        _repo               = repo;
+        _tenantNameResolver = tenantNameResolver;
+    }
 
     public async Task<Result<TenantSettingsDto>> Handle(
         GetTenantSettingsQuery request, CancellationToken ct)
@@ -20,8 +27,13 @@ internal sealed class GetTenantSettingsQueryHandler
 
         if (settings is null)
         {
-            // Create defaults on first access — every tenant has settings.
-            settings = TenantSettings.CreateDefaults(request.TenantId, request.TenantId);
+            // First access — resolve the tenant's registered name from the identity schema
+            // so the sidebar shows the correct org name immediately after onboarding.
+            var tenantName = await _tenantNameResolver.ResolveAsync(request.TenantId, ct);
+
+            settings = TenantSettings.CreateDefaults(
+                request.TenantId, request.TenantId, displayName: tenantName);
+
             await _repo.AddAsync(settings, ct);
             await _repo.SaveChangesAsync(ct);
         }

@@ -83,10 +83,10 @@ public sealed class AuthController : ControllerBase
             principal,
             properties);
 
-        // Fetch defaultPalette immediately after login so the login response is complete.
-        var defaultPalette = await GetDefaultPaletteAsync(hostResponse.AccessToken, ct);
+        // Fetch tenant settings immediately after login so the login response is complete.
+        var (defaultPalette, tenantName) = await GetTenantSettingsAsync(hostResponse.AccessToken, ct);
 
-        return Ok(ToMeResponse(hostResponse, defaultPalette));
+        return Ok(ToMeResponse(hostResponse, defaultPalette, tenantName));
     }
 
     /// <summary>
@@ -119,33 +119,46 @@ public sealed class AuthController : ControllerBase
         var roles       = user.FindAll(ClaimTypes.Role).Select(c => c.Value).ToArray();
         var tenantId    = GetTenantIdFromClaims(user);
 
-        var token          = await HttpContext.GetTokenAsync("access_token");
-        var defaultPalette = token is not null
-            ? await GetDefaultPaletteAsync(token, ct)
-            : "purple";
+        var token = await HttpContext.GetTokenAsync("access_token");
+        var (defaultPalette, tenantName) = token is not null
+            ? await GetTenantSettingsAsync(token, ct)
+            : ("purple", "");
 
-        return Ok(new MeResponse(userId, tenantId, email, displayName, roles, defaultPalette));
+        return Ok(new MeResponse(userId, tenantId, email, displayName, roles, defaultPalette, tenantName));
     }
 
     // ── helpers ────────────────────────────────────────────────────────────────
 
-    private async Task<string> GetDefaultPaletteAsync(string token, CancellationToken ct)
+    /// <summary>
+    /// Fetches TenantSettings and extracts defaultPalette + displayName in a single call.
+    /// Returns safe defaults on any failure so auth never breaks due to a settings fault.
+    /// </summary>
+    private async Task<(string Palette, string TenantName)> GetTenantSettingsAsync(
+        string token, CancellationToken ct)
     {
         try
         {
             var response = await _tenantSettings.GetSettingsAsync(token, ct);
-            if (!response.IsSuccessStatusCode) return "purple";
+            if (!response.IsSuccessStatusCode) return ("purple", "");
 
             var json = await response.Content.ReadAsStringAsync(ct);
             using var doc = JsonDocument.Parse(json);
-            return doc.RootElement.TryGetProperty("defaultPalette", out var prop)
-                ? prop.GetString() ?? "purple"
+            var root = doc.RootElement;
+
+            var palette = root.TryGetProperty("defaultPalette", out var paletteProp)
+                ? paletteProp.GetString() ?? "purple"
                 : "purple";
+
+            var name = root.TryGetProperty("displayName", out var nameProp)
+                ? nameProp.GetString() ?? ""
+                : "";
+
+            return (palette, name);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to fetch defaultPalette for /auth/me — using default.");
-            return "purple";
+            _logger.LogWarning(ex, "Failed to fetch tenant settings for /auth/me — using defaults.");
+            return ("purple", "");
         }
     }
 
@@ -171,8 +184,8 @@ public sealed class AuthController : ControllerBase
         return new ClaimsPrincipal(identity);
     }
 
-    private static MeResponse ToMeResponse(HostLoginResponse r, string defaultPalette) =>
-        new(r.UserId, r.TenantId, r.Email, r.DisplayName, r.Roles, defaultPalette);
+    private static MeResponse ToMeResponse(HostLoginResponse r, string defaultPalette, string tenantName) =>
+        new(r.UserId, r.TenantId, r.Email, r.DisplayName, r.Roles, defaultPalette, tenantName);
 
     private static bool TryParseGuidClaim(ClaimsPrincipal user, string claimType, out Guid value)
     {

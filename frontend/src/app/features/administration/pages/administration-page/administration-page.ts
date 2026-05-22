@@ -82,7 +82,7 @@ import { AdminUserDto, UserRole, UserStatus } from '../../models/admin-user.mode
           (onChange)="onFilterChange()"
           optionLabel="label"
           optionValue="value"
-          styleClass="admin-filter-select"
+          class="admin-filter-select"
           placeholder="All Roles"
         />
 

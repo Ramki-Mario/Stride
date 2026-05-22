@@ -63,7 +63,7 @@ interface NavGroup {
     <!-- ── Tenant badge ──────────────────────────────────── -->
     <div class="sb-tenant">
       <span class="sb-tenant-dot" aria-hidden="true"></span>
-      <span class="sb-tenant-name">STRIDE Demo</span>
+      <span class="sb-tenant-name">{{ auth.user()?.tenantName || 'STRIDE' }}</span>
     </div>
 
     <!-- ── Navigation ───────────────────────────────────── -->
@@ -365,7 +365,7 @@ interface NavGroup {
   `],
 })
 export class SidebarComponent {
-  private readonly auth = inject(AuthService);
+  protected readonly auth = inject(AuthService);
 
   /** Drives the collapsed CSS modifier on the host element. */
   protected readonly collapsed = signal(false);

@@ -15,14 +15,14 @@ public sealed class TenantSettings : AuditableEntity
 
     private TenantSettings() { }   // EF
 
-    public static TenantSettings CreateDefaults(Guid tenantId, Guid createdBy)
+    public static TenantSettings CreateDefaults(Guid tenantId, Guid createdBy, string displayName = "")
     {
         var now = DateTime.UtcNow;
         return new TenantSettings
         {
             Id                  = Guid.NewGuid(),
             TenantId            = tenantId,
-            DisplayName         = string.Empty,
+            DisplayName         = displayName,
             DefaultPalette      = "purple",
             Timezone            = "UTC",
             CustomCssTokensJson = null,
