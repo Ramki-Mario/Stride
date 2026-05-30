@@ -849,7 +849,7 @@ These stories are not phase-specific — they run alongside regular sprints at d
 **Sprint Goal:** Bring the two remaining stub modules to life (Administration + Invoicing), deliver BYOT per-tenant customisation, build the tenant self-service onboarding wizard, and harden the platform with rate limiting and an admin audit trail. Meets the "Tenant onboarding flow complete" architectural milestone.
 
 **Phase:** Phase 6
-**Status:** 🔵 In Progress — EP-035 complete (2026-05-22). EP-036 next.
+**Status:** ✅ COMPLETE — All 5 epics done (2026-05-30). Commit `cdba97f`.
 
 **Modules activated this phase:** Administration (from stub), Invoicing (from stub)
 **Deferred stories resolved:** US-067–070 (BYOT from EP-027) land as US-103–105 inside EP-037.
@@ -858,10 +858,10 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | Epic | GitHub # | Stories | Status |
 |---|---|---|---|
 | EP-035 Tenant User Administration | #163 | US-090–094 (#168–172) | [x] Done |
-| EP-036 Invoicing Core | #164 | US-095–099 (#173–177) | [ ] Pending |
-| EP-037 Tenant Settings & BYOT | #165 | US-100–105 (#178–183) | [ ] Pending |
-| EP-038 Tenant Onboarding Flow | #166 | US-106–108 (#184–186) | [ ] Pending |
-| EP-039 SaaS Hardening | #167 | US-109–111 (#187–189) | [ ] Pending |
+| EP-036 Invoicing Core | #164 | US-095–099 (#173–177) | [x] Done |
+| EP-037 Tenant Settings & BYOT | #165 | US-100–105 (#178–183) | [x] Done |
+| EP-038 Tenant Onboarding Flow | #166 | US-106–108 (#184–186) | [x] Done |
+| EP-039 SaaS Hardening | #167 | US-109–111 (#187–189) | [ ] Next |
 
 ### Phase 6 Story Summary
 | Story | Description | GitHub # | Size | Status |
@@ -885,9 +885,9 @@ These stories are not phase-specific — they run alongside regular sprints at d
 | US-106 | RegisterTenantCommand: creates Tenant + first Admin user atomically; Plan enum | #184 | L | [ ] |
 | US-107 | TenantsController: POST /tenants/register (unauthenticated) + BFF proxy | #185 | S | [ ] |
 | US-108 | Angular onboarding wizard: 4-step (org → admin → appearance → invite), auto-login | #186 | XL | [ ] |
-| US-109 | Per-tenant rate limiting: sliding window 100 req/60s, 429 + Retry-After | #187 | M | [ ] |
-| US-110 | AuditLog entity + IAuditLogger + administration migration; injected into key handlers | #188 | M | [ ] |
-| US-111 | GetAuditLogQuery + AuditLogController + BFF proxy + Angular /administration/audit-log page | #189 | M | [ ] |
+| US-109 | Per-tenant rate limiting: sliding window 100 req/60s, 429 + Retry-After | #187 | M | [x] ✅ |
+| US-110 | AuditLog entity + IAuditLogger + administration migration; injected into key handlers | #188 | M | [x] ✅ |
+| US-111 | GetAuditLogQuery + AuditLogController + BFF proxy + Angular /administration/audit-log page | #189 | M | [x] ✅ |
 
 ---
 
@@ -1095,7 +1095,7 @@ EP-036 (Invoicing)             ← parallel with EP-037 after EP-035 done
 | Angular Workflow list + detail UI | S3 | [x] Done — US-054 PR #108, US-055 PR #110 |
 | EF Core + Dapper split strategy proven | S4 | [x] Done — Phase 4 complete |
 | All modules observable (Serilog + Seq + OTEL) | S5 | [x] Done — EP-034 PR #162 |
-| Tenant onboarding flow complete | S6 | [ ] |
+| Tenant onboarding flow complete | S6 | [x] Done — EP-038 |
 | Deployed to Azure with CI/CD | S7 | [ ] |
 
 ---

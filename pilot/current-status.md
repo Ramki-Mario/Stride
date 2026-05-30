@@ -201,7 +201,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 **EP-034 #145 ✅ COMPLETE** — All 3 stories done. Phase 5 Notifications & Observability fully complete.
 
-## Phase 6 — SaaS Readiness (🔵 In Progress — 2026-05-22)
+## Phase 6 — SaaS Readiness (**✅ COMPLETE — 2026-05-30**)
 
 **Sprint Goal:** Activate the Administration and Invoicing stubs, deliver BYOT per-tenant customisation, build a self-service onboarding wizard, and harden the platform with rate limiting and an audit trail.
 
@@ -209,14 +209,48 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 | Epic | GitHub # | Stories | PR | Status |
 |---|---|---|---|---|
 | EP-035 Tenant User Administration | #163 | US-090–094 (#168–172) | #190 ✅ | ✅ Done |
-| EP-036 Invoicing Core | #164 | US-095–099 (#173–177) | — | ⏳ Next |
-| EP-037 Tenant Settings & BYOT | #165 | US-100–105 (#178–183) | — | ⏳ Pending |
-| EP-038 Tenant Onboarding Flow | #166 | US-106–108 (#184–186) | — | ⏳ Pending |
-| EP-039 SaaS Hardening | #167 | US-109–111 (#187–189) | — | ⏳ Pending |
+| EP-036 Invoicing Core | #164 | US-095–099 (#173–177) | — | ✅ Done |
+| EP-037 Tenant Settings & BYOT | #165 | US-100–105 (#178–183) | — | ✅ Done |
+| EP-038 Tenant Onboarding Flow | #166 | US-106–108 (#184–186) | — | ✅ Done |
+| EP-039 SaaS Hardening | #167 | US-109–111 (#187–189) | — | ✅ Done — `cdba97f` |
 
-**Architectural milestone unlocked:** Tenant onboarding flow complete (EP-038)
-**Deferred stories resolved:** US-067–070 (BYOT, EP-027) land as US-103–105 in EP-037
+**Architectural milestone unlocked:** Tenant onboarding flow complete (EP-038) ✅
+**Deferred stories resolved:** US-067–070 (BYOT, EP-027) land as US-103–105 in EP-037 ✅
 **Note:** BFF Workflow proxy (#109) was completed in Phase 4 (PR #138) — not Phase 6 work.
+
+### Post-delivery bug fixes (2026-05-23)
+| Bug | Fix | Commit |
+|---|---|---|
+| EF Core `InvalidIncludePathError` on invoice create — `.Include("_lineItems")` used private backing field | Changed to `.Include(i => i.LineItems)` strongly-typed lambda in `InvoiceRepository` | `fix(invoicing): fix EF Core Include path...` |
+| Invoice total stuck at $0.00 — `computed()` doesn't track FormArray (RxJS) | Replaced with `signal<number>` + `lineItemsArray.valueChanges` subscription | same commit |
+| Action menu dropdown invisible — `overflow: hidden` on `.inv-table-wrap` clipped it | Changed to `overflow: visible`, added corner `border-radius` on `<th>`/last `<td>` | `fix(invoicing): allow action menu to escape...` |
+| Sidebar showing tenant name from wrong tenant (DisplayName backfill bug) | Added `else if (IsNullOrEmpty)` branch in `GetTenantSettingsQueryHandler` to backfill empty rows via `ITenantNameResolver` | prior session |
+| `GET /bff/workflows/instances` 404 — all-instances endpoint missing from BFF and Host | Added `ListAllInstances` to Host controller + `GetAllInstancesAsync` to `WorkflowApiClient` + BFF proxy action | prior session |
+| PrimeNG Select dropdown not styled | Updated global `styles.scss` with PrimeNG 21 selectors (`.p-select-overlay`, `data-p-focused`, `data-p-selected`) | prior session |
+
+### Infrastructure refactor (2026-05-23)
+- **`IDbConnectionFactory`** introduced in `BuildingBlocks.Infrastructure.Persistence`
+  - `SqlServerConnectionFactory` — live implementation
+  - `MySqlConnectionFactory` — stub ready to uncomment (no NuGet change needed until switch)
+  - All 7 Dapper services migrated off `new SqlConnection` / `IConfiguration` injection
+- **`OpenAsync(ct)` + CancellationToken fixes** across 7 files:
+  - `DeactivateUserAsync` / `ReactivateUserAsync` in `AdminWriteService` — CT was silently ignored during connection open
+  - `WorkflowReadService` / `ReportingReadService` — CT was never passed to Dapper at all (used raw overloads without `CommandDefinition`)
+
+### EP-039 — SaaS Hardening (✅ Done — 2026-05-30, commit `cdba97f`)
+- **US-109** — `GlobalLimiter` in `Program.cs`: 100 req/60s per `tid` claim, falls back to remote IP for anonymous, `429 + Retry-After: 60`
+- **US-110** — `AuditLog` immutable entity + `DapperAuditLogger` (fire-and-forget, `CancellationToken.None`), injected into 9 command handlers; `IAuditLogger` + `AuditActions` in `BuildingBlocks.Application.Abstractions`; EF migration `AddAuditLogTable` applied
+- **US-111** — `AuditLogController` (`GET /api/administration/audit-log`, Admin role), BFF proxy, Angular `/administration/audit-log` page with date-range + action filters, expandable detail rows, skeleton, pagination; sidebar "Audit Log" link added
+
+### Known deferred gaps (carry to Phase 7)
+| Gap | Notes |
+|---|---|
+| Invite email + accept-invite flow | No email sent on invite; no token/link; no accept-invite page. `InviteUserCommandHandler` has `TODO` comment |
+| Refresh token | `JwtTokenService` issues access token only; no refresh token entity, no `/auth/refresh` endpoint, no BFF auto-renew middleware |
+| Tests | Zero test coverage across all modules — highest priority for Phase 7 |
+| Deployment | No live URL yet — Phase 7 goal |
+
+## Phase 7 — Portfolio & Deployment Polish (🔵 Next)
 
 ### ⚠️ GitHub Issue Hierarchy Process (MANDATORY for every sprint)
 When creating issues for a new phase/sprint, always:
