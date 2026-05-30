@@ -1,4 +1,5 @@
-using MediatR;
+﻿using MediatR;
+using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Administration.Application.Abstractions;
 
@@ -8,13 +9,32 @@ internal sealed class ReactivateUserCommandHandler
     : IRequestHandler<ReactivateUserCommand, Result>
 {
     private readonly IAdminWriteService _writeService;
+    private readonly IAuditLogger       _audit;
+    private readonly ICurrentUser       _currentUser;
 
-    public ReactivateUserCommandHandler(IAdminWriteService writeService)
-        => _writeService = writeService;
+    public ReactivateUserCommandHandler(
+        IAdminWriteService writeService,
+        IAuditLogger       audit,
+        ICurrentUser       currentUser)
+    {
+        _writeService = writeService;
+        _audit        = audit;
+        _currentUser  = currentUser;
+    }
 
     public async Task<Result> Handle(ReactivateUserCommand request, CancellationToken ct)
     {
         await _writeService.ReactivateUserAsync(request.TenantId, request.UserId, ct);
+
+        await _audit.LogAsync(
+            tenantId:     request.TenantId,
+            actorId:      _currentUser.UserId,
+            actorEmail:   _currentUser.Email,
+            action:       AuditActions.UserReactivated,
+            resourceType: "User",
+            resourceId:   request.UserId);
+
         return Result.Success();
     }
 }
+

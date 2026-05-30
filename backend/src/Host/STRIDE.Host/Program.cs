@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -99,6 +100,41 @@ builder.Services
         name:                         "redis",
         tags:                         ["ready", "cache"]);
 
+// ── Rate Limiting ──────────────────────────────────────────────────────────
+// Per-tenant sliding window: 100 req / 60 s, keyed on the JWT "tid" claim.
+// Anonymous requests (no "tid") share a single global bucket.
+// Rejected requests receive 429 Too Many Requests + Retry-After: 60 header.
+builder.Services.AddRateLimiter(options =>
+{
+    options.OnRejected = async (ctx, ct) =>
+    {
+        ctx.HttpContext.Response.StatusCode  = StatusCodes.Status429TooManyRequests;
+        ctx.HttpContext.Response.Headers["Retry-After"] = "60";
+        ctx.HttpContext.Response.ContentType = "application/json";
+        await ctx.HttpContext.Response.WriteAsync(
+            "{\"error\":\"Too many requests. Please retry after 60 seconds.\"}", ct);
+    };
+
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
+    {
+        // Authenticated requests are partitioned per tenant; anonymous by IP.
+        var partitionKey = ctx.User.FindFirst("tid")?.Value
+            ?? ctx.Connection.RemoteIpAddress?.ToString()
+            ?? "anonymous";
+
+        return RateLimitPartition.GetSlidingWindowLimiter(
+            partitionKey,
+            _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit          = 100,
+                Window               = TimeSpan.FromSeconds(60),
+                SegmentsPerWindow    = 6,   // 10-second resolution
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit           = 0,
+            });
+    });
+});
+
 // ── Global Exception Handler ───────────────────────────────────────────────
 // Converts ValidationException → 400 (RFC 7807) and unhandled → 500.
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -160,6 +196,7 @@ if (identitySeed is var (seedTenantId, seedUserId))
 
 // ── Middleware Pipeline ────────────────────────────────────────────────────
 app.UseExceptionHandler();   // Must be first so it wraps all downstream middleware.
+app.UseRateLimiter();        // Apply global tenant rate limit before auth.
 app.UseSerilogRequestLogging();
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseAuthentication();                     // Must run before TenantMiddleware — populates context.User from JWT.

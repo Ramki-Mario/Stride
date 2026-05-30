@@ -1,4 +1,5 @@
-using MediatR;
+﻿using MediatR;
+using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Administration.Application.Abstractions;
 using STRIDE.Modules.Administration.Application.DTOs;
@@ -11,13 +12,19 @@ internal sealed class UpdateTenantSettingsCommandHandler
 {
     private readonly ITenantSettingsRepository _repo;
     private readonly ICssSanitiser             _sanitiser;
+    private readonly IAuditLogger              _audit;
+    private readonly ICurrentUser              _currentUser;
 
     public UpdateTenantSettingsCommandHandler(
         ITenantSettingsRepository repo,
-        ICssSanitiser             sanitiser)
+        ICssSanitiser             sanitiser,
+        IAuditLogger              audit,
+        ICurrentUser              currentUser)
     {
-        _repo      = repo;
-        _sanitiser = sanitiser;
+        _repo        = repo;
+        _sanitiser   = sanitiser;
+        _audit       = audit;
+        _currentUser = currentUser;
     }
 
     public async Task<Result<SanitisedCssResult?>> Handle(
@@ -51,6 +58,16 @@ internal sealed class UpdateTenantSettingsCommandHandler
             request.UpdatedBy);
 
         await _repo.SaveChangesAsync(ct);
+
+        await _audit.LogAsync(
+            tenantId:     request.TenantId,
+            actorId:      request.UpdatedBy,
+            actorEmail:   _currentUser.Email,
+            action:       AuditActions.TenantSettingsUpdated,
+            resourceType: "TenantSettings",
+            resourceId:   request.TenantId);
+
         return Result<SanitisedCssResult?>.Success(sanitisedResult);
     }
 }
+

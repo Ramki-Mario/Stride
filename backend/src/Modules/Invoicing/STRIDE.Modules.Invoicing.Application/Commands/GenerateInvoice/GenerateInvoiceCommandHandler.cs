@@ -1,4 +1,5 @@
-using MediatR;
+﻿using MediatR;
+using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Invoicing.Domain.Entities;
 using STRIDE.Modules.Invoicing.Domain.Exceptions;
@@ -10,8 +11,18 @@ internal sealed class GenerateInvoiceCommandHandler
     : IRequestHandler<GenerateInvoiceCommand, Result<Guid>>
 {
     private readonly IInvoiceRepository _repo;
+    private readonly IAuditLogger       _audit;
+    private readonly ICurrentUser       _currentUser;
 
-    public GenerateInvoiceCommandHandler(IInvoiceRepository repo) => _repo = repo;
+    public GenerateInvoiceCommandHandler(
+        IInvoiceRepository repo,
+        IAuditLogger       audit,
+        ICurrentUser       currentUser)
+    {
+        _repo        = repo;
+        _audit       = audit;
+        _currentUser = currentUser;
+    }
 
     public async Task<Result<Guid>> Handle(GenerateInvoiceCommand request, CancellationToken ct)
     {
@@ -38,6 +49,15 @@ internal sealed class GenerateInvoiceCommandHandler
             await _repo.AddAsync(invoice, ct);
             await _repo.SaveChangesAsync(ct);
 
+            await _audit.LogAsync(
+                tenantId:     request.TenantId,
+                actorId:      request.CreatedBy,
+                actorEmail:   _currentUser.Email,
+                action:       AuditActions.InvoiceGenerated,
+                resourceType: "Invoice",
+                resourceId:   invoice.Id,
+                newValueJson: $"{{\"invoiceNumber\":\"{request.InvoiceNumber}\",\"clientName\":\"{request.ClientName}\"}}");
+
             return Result<Guid>.Success(invoice.Id);
         }
         catch (InvoiceDomainException ex)
@@ -46,3 +66,4 @@ internal sealed class GenerateInvoiceCommandHandler
         }
     }
 }
+

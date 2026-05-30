@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Administration.Application.Abstractions;
 using STRIDE.Modules.Administration.Infrastructure.Persistence;
 using STRIDE.Modules.Administration.Infrastructure.ReadModels;
@@ -20,8 +21,12 @@ public static class AdministrationInfrastructureExtensions
                 sql => sql.MigrationsAssembly(typeof(AdministrationDbContext).Assembly.FullName)));
 
         // Dapper read and write services for the Administration module.
-        services.AddScoped<IAdminReadService,  AdminReadService>();
-        services.AddScoped<IAdminWriteService, AdminWriteService>();
+        services.AddScoped<IAdminReadService,     AdminReadService>();
+        services.AddScoped<IAdminWriteService,    AdminWriteService>();
+        services.AddScoped<IAuditLogReadService,  AuditLogReadService>();
+
+        // Audit logger — fire-and-forget safe, Dapper-backed, cross-cutting.
+        services.AddScoped<IAuditLogger, DapperAuditLogger>();
 
         // TenantSettings EF repository.
         services.AddScoped<ITenantSettingsRepository, TenantSettingsRepository>();

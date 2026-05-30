@@ -1,0 +1,183 @@
+<div class="al-page">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header__left">
+      <a routerLink="/administration" class="al-back-link">
+        <i class="pi pi-arrow-left"></i>
+      </a>
+      <div class="page-header__title-group">
+        <h1 class="page-title">Audit Log</h1>
+        <p class="page-subtitle">Sensitive actions performed within your organisation</p>
+      </div>
+    </div>
+    <button class="stride-btn stride-btn-secondary stride-btn-sm" (click)="load()">
+      <i class="pi pi-refresh"></i> Refresh
+    </button>
+  </div>
+
+  <!-- ── Filters ─────────────────────────────────────────────────────────── -->
+  <div class="al-filters">
+    <div class="al-filter-row">
+      <div class="al-filter-field">
+        <label class="al-filter-label">From</label>
+        <input class="al-date-input" type="datetime-local"
+               [value]="fromDate()" (change)="fromDate.set($any($event.target).value)"/>
+      </div>
+      <div class="al-filter-field">
+        <label class="al-filter-label">To</label>
+        <input class="al-date-input" type="datetime-local"
+               [value]="toDate()" (change)="toDate.set($any($event.target).value)"/>
+      </div>
+      <div class="al-filter-field al-filter-field--action">
+        <label class="al-filter-label">Action</label>
+        <p-select [options]="actionOptions" [(ngModel)]="selectedAction"
+                  optionLabel="label" optionValue="value"
+                  styleClass="al-action-select" placeholder="All Actions"/>
+      </div>
+      <div class="al-filter-actions">
+        <button class="stride-btn stride-btn-primary stride-btn-sm" (click)="applyFilters()">
+          Apply
+        </button>
+        <button class="stride-btn stride-btn-secondary stride-btn-sm" (click)="clearFilters()">
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Error ───────────────────────────────────────────────────────────── -->
+  @if (svc.error()) {
+    <div class="al-error" role="alert">
+      <i class="pi pi-exclamation-triangle"></i>
+      <span>{{ svc.error() }}</span>
+      <button class="al-retry" (click)="load()">Retry</button>
+    </div>
+  }
+
+  <!-- ── Loading skeleton ────────────────────────────────────────────────── -->
+  @if (svc.isLoading()) {
+    <div class="al-table-wrap">
+      <table class="al-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th><th>Actor</th><th>Action</th>
+            <th>Resource</th><th>Resource ID</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (n of skeletons; track n) {
+            <tr class="al-sk-row">
+              <td><div class="al-sk al-sk--date"></div></td>
+              <td><div class="al-sk al-sk--email"></div></td>
+              <td><div class="al-sk al-sk--badge"></div></td>
+              <td><div class="al-sk al-sk--type"></div></td>
+              <td><div class="al-sk al-sk--id"></div></td>
+              <td></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  <!-- ── Empty ──────────────────────────────────────────────────────────── -->
+  } @else if (svc.entries().length === 0) {
+    <div class="al-empty">
+      <i class="pi pi-shield al-empty-icon"></i>
+      <h3>No audit entries found</h3>
+      <p>No actions matching the current filters have been recorded.</p>
+    </div>
+
+  <!-- ── Table ──────────────────────────────────────────────────────────── -->
+  } @else {
+    <div class="al-table-wrap">
+      <table class="al-table" aria-label="Audit log">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Actor</th>
+            <th>Action</th>
+            <th>Resource</th>
+            <th>Resource ID</th>
+            <th class="al-th-detail"><span class="sr-only">Details</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of svc.entries(); track entry.id) {
+            <tr class="al-row" [class.al-row--expanded]="expandedId() === entry.id">
+              <td class="al-td-time">
+                {{ entry.timestamp | date:'dd MMM yyyy, HH:mm:ss' }}
+              </td>
+              <td class="al-td-actor">{{ entry.actorEmail }}</td>
+              <td>
+                <span class="al-badge" [ngClass]="actionBadgeClass(entry.action)">
+                  {{ actionLabel(entry.action) }}
+                </span>
+              </td>
+              <td class="al-td-type">{{ entry.resourceType }}</td>
+              <td class="al-td-id">{{ shortId(entry.resourceId) }}</td>
+              <td class="al-td-expand">
+                @if (hasDetails(entry)) {
+                  <button class="al-expand-btn"
+                          [class.al-expand-btn--open]="expandedId() === entry.id"
+                          (click)="toggleExpand(entry.id)"
+                          [attr.aria-label]="expandedId() === entry.id ? 'Collapse' : 'Expand'">
+                    <i class="pi pi-chevron-down"></i>
+                  </button>
+                }
+              </td>
+            </tr>
+
+            <!-- ── Expandable detail row ─────────────────────────────── -->
+            @if (expandedId() === entry.id && hasDetails(entry)) {
+              <tr class="al-detail-row">
+                <td colspan="6">
+                  <div class="al-detail">
+                    @if (entry.oldValueJson) {
+                      <div class="al-detail-block">
+                        <span class="al-detail-label">Before</span>
+                        <pre class="al-detail-json">{{ entry.oldValueJson }}</pre>
+                      </div>
+                    }
+                    @if (entry.newValueJson) {
+                      <div class="al-detail-block">
+                        <span class="al-detail-label">After</span>
+                        <pre class="al-detail-json">{{ entry.newValueJson }}</pre>
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Pagination ───────────────────────────────────────────────────── -->
+    @if (svc.totalPages() > 1) {
+      <div class="al-pagination">
+        <span class="al-page-info">
+          Page {{ svc.page() }} of {{ svc.totalPages() }} · {{ svc.totalCount() }} entries
+        </span>
+        <div class="al-page-controls">
+          <button class="al-page-btn" [disabled]="!svc.hasPrevious()"
+                  (click)="goToPage(svc.page() - 1)">
+            <i class="pi pi-chevron-left"></i>
+          </button>
+          @for (p of pageRange(); track p) {
+            <button class="al-page-btn" [class.al-page-btn--active]="p === svc.page()"
+                    (click)="goToPage(p)">{{ p }}</button>
+          }
+          <button class="al-page-btn" [disabled]="!svc.hasNext()"
+                  (click)="goToPage(svc.page() + 1)">
+            <i class="pi pi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    }
+
+    <p class="al-count-hint">{{ svc.totalCount() }} total entr{{ svc.totalCount() === 1 ? 'y' : 'ies' }}</p>
+  }
+
+</div>

@@ -13,6 +13,7 @@ namespace STRIDE.BFF.HttpClients;
 ///   PUT    /bff/administration/users/{id}/role    → PUT    /api/administration/users/{id}/role
 ///   PUT    /bff/administration/users/{id}/deactivate  → PUT /api/administration/users/{id}/deactivate
 ///   PUT    /bff/administration/users/{id}/reactivate  → PUT /api/administration/users/{id}/reactivate
+///   GET    /bff/administration/audit-log          → GET    /api/administration/audit-log
 /// </summary>
 public sealed class AdminApiClient
 {
@@ -41,7 +42,26 @@ public sealed class AdminApiClient
     public Task<HttpResponseMessage> ReactivateUserAsync(Guid userId, string token, CancellationToken ct = default)
         => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/administration/users/{userId}/reactivate", null, token), ct);
 
+    public Task<HttpResponseMessage> GetAuditLogAsync(
+        string token,
+        int page, int pageSize,
+        string? from, string? to, string? action,
+        CancellationToken ct = default)
+    {
+        var qs = BuildAuditQs(page, pageSize, from, to, action);
+        return _client.SendAsync(Build(HttpMethod.Get, $"/api/administration/audit-log{qs}", token), ct);
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────────
+
+    private static string BuildAuditQs(int page, int pageSize, string? from, string? to, string? action)
+    {
+        var parts = new List<string> { $"page={page}", $"pageSize={pageSize}" };
+        if (!string.IsNullOrEmpty(from))   parts.Add($"from={Uri.EscapeDataString(from)}");
+        if (!string.IsNullOrEmpty(to))     parts.Add($"to={Uri.EscapeDataString(to)}");
+        if (!string.IsNullOrEmpty(action)) parts.Add($"action={Uri.EscapeDataString(action)}");
+        return "?" + string.Join("&", parts);
+    }
 
     private static string BuildQs(int page, int pageSize, string? search, string? role, string? status)
     {

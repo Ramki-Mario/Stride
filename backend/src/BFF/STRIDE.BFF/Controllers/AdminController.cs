@@ -13,6 +13,7 @@ namespace STRIDE.BFF.Controllers;
 ///   PUT    /bff/administration/users/{id}/role    — change user role
 ///   PUT    /bff/administration/users/{id}/deactivate  — deactivate user
 ///   PUT    /bff/administration/users/{id}/reactivate  — reactivate user
+///   GET    /bff/administration/audit-log          — paged audit log (Admin only)
 /// </summary>
 [ApiController]
 [Authorize]
@@ -79,6 +80,21 @@ public sealed class AdminController : ControllerBase
         if (token is null) return Unauthorized();
         var response = await _admin.ReactivateUserAsync(id, token, ct);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
+    }
+
+    [HttpGet("audit-log")]
+    public async Task<IActionResult> GetAuditLog(
+        [FromQuery] int     page     = 1,
+        [FromQuery] int     pageSize = 50,
+        [FromQuery] string? from     = null,
+        [FromQuery] string? to       = null,
+        [FromQuery] string? action   = null,
+        CancellationToken ct = default)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(
+            await _admin.GetAuditLogAsync(token, page, pageSize, from, to, action, ct));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

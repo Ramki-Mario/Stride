@@ -8,6 +8,7 @@ public sealed class AdministrationDbContext : DbContext
     public AdministrationDbContext(DbContextOptions<AdministrationDbContext> options) : base(options) { }
 
     public DbSet<TenantSettings> TenantSettings => Set<TenantSettings>();
+    public DbSet<AuditLog>       AuditLogs       => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

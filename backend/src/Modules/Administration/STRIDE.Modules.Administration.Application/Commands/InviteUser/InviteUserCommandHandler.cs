@@ -1,4 +1,5 @@
-using MediatR;
+﻿using MediatR;
+using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Administration.Application.Abstractions;
 
@@ -8,9 +9,18 @@ internal sealed class InviteUserCommandHandler
     : IRequestHandler<InviteUserCommand, Result<Guid>>
 {
     private readonly IAdminWriteService _writeService;
+    private readonly IAuditLogger       _audit;
+    private readonly ICurrentUser       _currentUser;
 
-    public InviteUserCommandHandler(IAdminWriteService writeService)
-        => _writeService = writeService;
+    public InviteUserCommandHandler(
+        IAdminWriteService writeService,
+        IAuditLogger       audit,
+        ICurrentUser       currentUser)
+    {
+        _writeService = writeService;
+        _audit        = audit;
+        _currentUser  = currentUser;
+    }
 
     public async Task<Result<Guid>> Handle(InviteUserCommand request, CancellationToken ct)
     {
@@ -22,9 +32,17 @@ internal sealed class InviteUserCommandHandler
             request.InvitedBy,
             ct);
 
-        // TODO (Phase 6 follow-up): dispatch a cross-module CreateNotificationCommand
-        // to notify the invitee via in-app notification when email delivery is wired up.
+        // Fire-and-forget audit â€” never throws
+        await _audit.LogAsync(
+            tenantId:     request.TenantId,
+            actorId:      request.InvitedBy,
+            actorEmail:   _currentUser.Email,
+            action:       AuditActions.UserInvited,
+            resourceType: "User",
+            resourceId:   userId,
+            newValueJson: $"{{\"email\":\"{request.Email}\",\"role\":\"{request.Role}\"}}");
 
         return Result.Success(userId);
     }
 }
+

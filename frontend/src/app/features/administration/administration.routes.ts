@@ -16,4 +16,9 @@ export const administrationRoutes: Routes = [
     loadComponent: () =>
       import('./pages/settings-page/settings-page').then((m) => m.SettingsPageComponent),
   },
+  {
+    path: 'audit-log',
+    loadComponent: () =>
+      import('./pages/audit-log-page/audit-log-page').then((m) => m.AuditLogPageComponent),
+  },
 ];
