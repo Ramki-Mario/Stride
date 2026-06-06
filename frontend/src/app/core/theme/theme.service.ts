@@ -65,7 +65,7 @@ export class ThemeService {
 
   private _applyMode(mode: ThemeMode): void {
     if (!this.isBrowser) return;
-    document.documentElement.setAttribute('data-theme', mode);
+    document.documentElement.dataset['theme'] = mode;
     try { localStorage.setItem(MODE_STORAGE_KEY, mode); } catch { /* private mode */ }
   }
 
@@ -74,9 +74,9 @@ export class ThemeService {
     // Purple is the root default — no attribute needed.
     // Indigo is the alternative — requires data-palette="indigo".
     if (palette === 'purple') {
-      document.documentElement.removeAttribute('data-palette');
+      delete document.documentElement.dataset['palette'];
     } else {
-      document.documentElement.setAttribute('data-palette', palette);
+      document.documentElement.dataset['palette'] = palette;
     }
     try { localStorage.setItem(PALETTE_STORAGE_KEY, palette); } catch { /* private mode */ }
   }
