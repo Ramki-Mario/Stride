@@ -20,17 +20,17 @@ internal sealed class FailStepCommandHandler
         _logger    = logger;
     }
 
-    public async Task<Result> Handle(FailStepCommand request, CancellationToken ct)
+    public async Task<Result> Handle(FailStepCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var instance = await _instances.GetByIdAsync(request.WorkflowInstanceId, ct);
+            var instance = await _instances.GetByIdAsync(request.WorkflowInstanceId, cancellationToken);
             if (instance is null)
                 return Result.Failure($"Workflow instance '{request.WorkflowInstanceId}' not found.");
 
             instance.FailStep(request.StepInstanceId, request.Reason, request.FailedBy);
             _instances.Update(instance);
-            await _instances.SaveChangesAsync(ct);
+            await _instances.SaveChangesAsync(cancellationToken);
 
             _logger.LogWarning(
                 "Step {StepId} in instance {InstanceId} failed by {UserId}: {Reason}",

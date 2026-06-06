@@ -28,15 +28,15 @@ public sealed class MySqlConnectionFactory : IDbConnectionFactory
     // public MySqlConnectionFactory(string connectionString)
     //     => _connectionString = connectionString;
     //
-    // public async Task<DbConnection> OpenConnectionAsync(CancellationToken ct = default)
+    // public async Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default)
     // {
     //     var conn = new MySqlConnector.MySqlConnection(_connectionString);  // Pomelo
     //     // OR: var conn = new MySql.Data.MySqlClient.MySqlConnection(_connectionString);
-    //     await conn.OpenAsync(ct);
+    //     await conn.OpenAsync(cancellationToken);
     //     return conn;
     // }
 
-    public Task<DbConnection> OpenConnectionAsync(CancellationToken ct = default)
+    public Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default)
         => throw new NotSupportedException(
             "MySqlConnectionFactory is a placeholder. " +
             "Install Pomelo.EntityFrameworkCore.MySql and uncomment the implementation.");

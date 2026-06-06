@@ -36,49 +36,49 @@ public sealed class AdminController : ControllerBase
         [FromQuery] string? search   = null,
         [FromQuery] string? role     = null,
         [FromQuery] string? status   = null,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         return await ProxyAsync(
-            await _admin.GetUsersAsync(token, page, pageSize, search, role, status, ct));
+            await _admin.GetUsersAsync(token, page, pageSize, search, role, status, cancellationToken));
     }
 
     [HttpPost("users/invite")]
-    public async Task<IActionResult> InviteUser([FromBody] object body, CancellationToken ct)
+    public async Task<IActionResult> InviteUser([FromBody] object body, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _admin.InviteUserAsync(body, token, ct);
+        var response = await _admin.InviteUserAsync(body, token, cancellationToken);
         return response.IsSuccessStatusCode
             ? StatusCode(StatusCodes.Status201Created, await response.Content.ReadAsStringAsync())
             : await ProxyAsync(response);
     }
 
     [HttpPut("users/{id:guid}/role")]
-    public async Task<IActionResult> UpdateUserRole(Guid id, [FromBody] object body, CancellationToken ct)
+    public async Task<IActionResult> UpdateUserRole(Guid id, [FromBody] object body, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _admin.UpdateUserRoleAsync(id, body, token, ct);
+        var response = await _admin.UpdateUserRoleAsync(id, body, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
     }
 
     [HttpPut("users/{id:guid}/deactivate")]
-    public async Task<IActionResult> DeactivateUser(Guid id, CancellationToken ct)
+    public async Task<IActionResult> DeactivateUser(Guid id, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _admin.DeactivateUserAsync(id, token, ct);
+        var response = await _admin.DeactivateUserAsync(id, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
     }
 
     [HttpPut("users/{id:guid}/reactivate")]
-    public async Task<IActionResult> ReactivateUser(Guid id, CancellationToken ct)
+    public async Task<IActionResult> ReactivateUser(Guid id, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _admin.ReactivateUserAsync(id, token, ct);
+        var response = await _admin.ReactivateUserAsync(id, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
     }
 
@@ -89,12 +89,12 @@ public sealed class AdminController : ControllerBase
         [FromQuery] string? from     = null,
         [FromQuery] string? to       = null,
         [FromQuery] string? action   = null,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         return await ProxyAsync(
-            await _admin.GetAuditLogAsync(token, page, pageSize, from, to, action, ct));
+            await _admin.GetAuditLogAsync(token, page, pageSize, from, to, action, cancellationToken));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

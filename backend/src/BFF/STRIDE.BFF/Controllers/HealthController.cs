@@ -30,12 +30,12 @@ public sealed class HealthController : ControllerBase
 
     /// <summary>Returns the verbose health JSON from the Host.</summary>
     [HttpGet]
-    public async Task<IActionResult> GetHealth(CancellationToken ct)
+    public async Task<IActionResult> GetHealth(CancellationToken cancellationToken)
     {
         try
         {
-            var response = await _health.GetHealthAsync(ct);
-            var json     = await response.Content.ReadAsStringAsync(ct);
+            var response = await _health.GetHealthAsync(cancellationToken);
+            var json     = await response.Content.ReadAsStringAsync(cancellationToken);
 
             return new ContentResult
             {

@@ -38,14 +38,14 @@ public sealed class AuthController : ControllerBase
     /// </summary>
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
         HostLoginResponse? hostResponse;
         try
         {
-            hostResponse = await _identity.LoginAsync(request, ct);
+            hostResponse = await _identity.LoginAsync(request, cancellationToken);
         }
         catch (HttpRequestException ex)
         {
@@ -84,7 +84,7 @@ public sealed class AuthController : ControllerBase
             properties);
 
         // Fetch tenant settings immediately after login so the login response is complete.
-        var (defaultPalette, tenantName) = await GetTenantSettingsAsync(hostResponse.AccessToken, ct);
+        var (defaultPalette, tenantName) = await GetTenantSettingsAsync(hostResponse.AccessToken, cancellationToken);
 
         return Ok(ToMeResponse(hostResponse, defaultPalette, tenantName));
     }
@@ -105,7 +105,7 @@ public sealed class AuthController : ControllerBase
     /// </summary>
     [HttpGet("me")]
     [Authorize]
-    public async Task<IActionResult> Me(CancellationToken ct)
+    public async Task<IActionResult> Me(CancellationToken cancellationToken)
     {
         var user = HttpContext.User;
         if (!TryParseGuidClaim(user, "sub", out var userId) ||
@@ -121,7 +121,7 @@ public sealed class AuthController : ControllerBase
 
         var token = await HttpContext.GetTokenAsync("access_token");
         var (defaultPalette, tenantName) = token is not null
-            ? await GetTenantSettingsAsync(token, ct)
+            ? await GetTenantSettingsAsync(token, cancellationToken)
             : ("purple", "");
 
         return Ok(new MeResponse(userId, tenantId, email, displayName, roles, defaultPalette, tenantName));
@@ -134,14 +134,14 @@ public sealed class AuthController : ControllerBase
     /// Returns safe defaults on any failure so auth never breaks due to a settings fault.
     /// </summary>
     private async Task<(string Palette, string TenantName)> GetTenantSettingsAsync(
-        string token, CancellationToken ct)
+        string token, CancellationToken cancellationToken)
     {
         try
         {
-            var response = await _tenantSettings.GetSettingsAsync(token, ct);
+            var response = await _tenantSettings.GetSettingsAsync(token, cancellationToken);
             if (!response.IsSuccessStatusCode) return ("purple", "");
 
-            var json = await response.Content.ReadAsStringAsync(ct);
+            var json = await response.Content.ReadAsStringAsync(cancellationToken);
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
 

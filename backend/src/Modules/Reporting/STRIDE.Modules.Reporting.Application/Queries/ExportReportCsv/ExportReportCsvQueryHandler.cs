@@ -32,9 +32,9 @@ internal sealed class ExportReportCsvQueryHandler
 
     public async Task<Result<ExportReportCsvResult>> Handle(
         ExportReportCsvQuery request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
-        var report = await _reports.GetByIdAsync(request.ReportId, ct);
+        var report = await _reports.GetByIdAsync(request.ReportId, cancellationToken);
         if (report is null)
         {
             _logger.LogWarning(
@@ -51,11 +51,11 @@ internal sealed class ExportReportCsvQueryHandler
         var csv = report.ReportType switch
         {
             ReportType.DashboardKpi =>
-                await BuildDashboardKpiCsvAsync(request.TenantId, ct),
+                await BuildDashboardKpiCsvAsync(request.TenantId, cancellationToken),
             ReportType.WorkflowTrend =>
-                await BuildWorkflowTrendCsvAsync(request.TenantId, ct),
+                await BuildWorkflowTrendCsvAsync(request.TenantId, cancellationToken),
             ReportType.WorkflowSummary =>
-                await BuildWorkflowSummaryCsvAsync(request.TenantId, ct),
+                await BuildWorkflowSummaryCsvAsync(request.TenantId, cancellationToken),
             _ => throw new InvalidOperationException($"No CSV exporter for report type: {report.ReportType}")
         };
 
@@ -67,9 +67,9 @@ internal sealed class ExportReportCsvQueryHandler
 
     // ── CSV builders ──────────────────────────────────────────────────────────
 
-    private async Task<string> BuildDashboardKpiCsvAsync(Guid tenantId, CancellationToken ct)
+    private async Task<string> BuildDashboardKpiCsvAsync(Guid tenantId, CancellationToken cancellationToken)
     {
-        var kpi = await _readService.GetDashboardKpisAsync(tenantId, ct);
+        var kpi = await _readService.GetDashboardKpisAsync(tenantId, cancellationToken);
         var sb  = new StringBuilder();
 
         sb.AppendLine("TotalDefinitions,ActiveDefinitions,RunningInstances,CompletedInstances,FailedInstances,CancelledInstances");
@@ -78,9 +78,9 @@ internal sealed class ExportReportCsvQueryHandler
         return sb.ToString();
     }
 
-    private async Task<string> BuildWorkflowTrendCsvAsync(Guid tenantId, CancellationToken ct)
+    private async Task<string> BuildWorkflowTrendCsvAsync(Guid tenantId, CancellationToken cancellationToken)
     {
-        var trends = await _readService.GetWorkflowTrendsAsync(tenantId, ct: ct);
+        var trends = await _readService.GetWorkflowTrendsAsync(tenantId, cancellationToken: cancellationToken);
         var sb     = new StringBuilder();
 
         sb.AppendLine("TrendDate,Started,Completed,Failed");
@@ -90,9 +90,9 @@ internal sealed class ExportReportCsvQueryHandler
         return sb.ToString();
     }
 
-    private async Task<string> BuildWorkflowSummaryCsvAsync(Guid tenantId, CancellationToken ct)
+    private async Task<string> BuildWorkflowSummaryCsvAsync(Guid tenantId, CancellationToken cancellationToken)
     {
-        var rows = await _readService.GetWorkflowSummaryAsync(tenantId, ct);
+        var rows = await _readService.GetWorkflowSummaryAsync(tenantId, cancellationToken);
         var sb   = new StringBuilder();
 
         sb.AppendLine("WorkflowName,Status,TotalInstances,RunningInstances,CompletedInstances,FailedInstances");

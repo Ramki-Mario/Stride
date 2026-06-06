@@ -48,7 +48,7 @@ public sealed class StepsController : ControllerBase
         Guid instanceId,
         Guid stepId,
         [FromBody] AssignStepRequest request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new AssignStepCommand(
@@ -56,7 +56,7 @@ public sealed class StepsController : ControllerBase
                 StepInstanceId:     stepId,
                 AssigneeId:         request.AssigneeId,
                 AssignedBy:         _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
         {
@@ -80,14 +80,14 @@ public sealed class StepsController : ControllerBase
     public async Task<IActionResult> Complete(
         Guid instanceId,
         Guid stepId,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new CompleteStepCommand(
                 WorkflowInstanceId: instanceId,
                 StepInstanceId:     stepId,
                 CompletedBy:        _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
         {
@@ -113,7 +113,7 @@ public sealed class StepsController : ControllerBase
         Guid instanceId,
         Guid stepId,
         [FromBody] FailStepRequest request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new FailStepCommand(
@@ -121,7 +121,7 @@ public sealed class StepsController : ControllerBase
                 StepInstanceId:     stepId,
                 Reason:             request.Reason,
                 FailedBy:           _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
         {
@@ -145,14 +145,14 @@ public sealed class StepsController : ControllerBase
     public async Task<IActionResult> Skip(
         Guid instanceId,
         Guid stepId,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new SkipStepCommand(
                 WorkflowInstanceId: instanceId,
                 StepInstanceId:     stepId,
                 SkippedBy:          _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
         {

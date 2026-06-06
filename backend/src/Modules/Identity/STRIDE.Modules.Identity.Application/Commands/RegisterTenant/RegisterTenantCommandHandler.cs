@@ -52,7 +52,7 @@ internal sealed class RegisterTenantCommandHandler
 
     public async Task<Result<LoginResult>> Handle(
         RegisterTenantCommand request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         // ── 1. Create Tenant ──────────────────────────────────────────────────
         var tenant = Tenant.Create(
@@ -61,7 +61,7 @@ internal sealed class RegisterTenantCommandHandler
             plan:      request.Plan.Trim(),
             createdBy: SystemActorId);
 
-        await _tenants.AddAsync(tenant, ct);
+        await _tenants.AddAsync(tenant, cancellationToken);
 
         // ── 2. Establish tenant scope for all downstream repositories ─────────
         _tenantSetter.SetTenantId(tenant.Id);
@@ -73,7 +73,7 @@ internal sealed class RegisterTenantCommandHandler
             description: "Full administrative access",
             createdBy:   SystemActorId);
 
-        await _roles.AddAsync(adminRole, ct);
+        await _roles.AddAsync(adminRole, cancellationToken);
 
         // ── 4. Create first admin user ────────────────────────────────────────
         var passwordHash = _hasher.Hash(request.AdminPassword);
@@ -89,7 +89,7 @@ internal sealed class RegisterTenantCommandHandler
         // ── 5. Assign Admin role via domain aggregate ─────────────────────────
         user.AssignRole(adminRole, SystemActorId);
 
-        await _users.AddAsync(user, ct);
+        await _users.AddAsync(user, cancellationToken);
 
         // ── 6. UserTenantMapping (TenantResolver fallback for generic email domains) ──
         var mapping = UserTenantMapping.Create(
@@ -98,10 +98,10 @@ internal sealed class RegisterTenantCommandHandler
             roleName:  AdminRoleName,
             createdBy: SystemActorId);
 
-        await _users.AddTenantMappingAsync(mapping, ct);
+        await _users.AddTenantMappingAsync(mapping, cancellationToken);
 
         // ── 7. Flush — all entities saved in one EF transaction ───────────────
-        await _users.SaveChangesAsync(ct);
+        await _users.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
             "[RegisterTenant] Tenant {TenantId} ('{Slug}') created with admin user {UserId}",

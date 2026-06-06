@@ -27,7 +27,7 @@ internal sealed class AuditLogReadService : IAuditLogReadService
         DateTime? from   = null,
         DateTime? to     = null,
         string?   action = null,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var param = new
         {
@@ -39,16 +39,16 @@ internal sealed class AuditLogReadService : IAuditLogReadService
             PageSize = pageSize,
         };
 
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
 
         var total = await conn.ExecuteScalarAsync<int>(
-            new CommandDefinition(SqlCount, param, cancellationToken: ct));
+            new CommandDefinition(SqlCount, param, cancellationToken: cancellationToken));
 
         if (total == 0)
             return PagedResult<AuditLogEntryDto>.Empty(page, pageSize);
 
         var items = await conn.QueryAsync<AuditLogEntryDto>(
-            new CommandDefinition(SqlGet, param, cancellationToken: ct));
+            new CommandDefinition(SqlGet, param, cancellationToken: cancellationToken));
 
         return new PagedResult<AuditLogEntryDto>(items.AsList(), total, page, pageSize);
     }

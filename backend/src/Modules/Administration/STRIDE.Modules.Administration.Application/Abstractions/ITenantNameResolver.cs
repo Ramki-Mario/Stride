@@ -10,5 +10,5 @@ public interface ITenantNameResolver
     /// <summary>
     /// Returns the tenant's <c>Name</c> column value, or an empty string if not found.
     /// </summary>
-    Task<string> ResolveAsync(Guid tenantId, CancellationToken ct = default);
+    Task<string> ResolveAsync(Guid tenantId, CancellationToken cancellationToken = default);
 }

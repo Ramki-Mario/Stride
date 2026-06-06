@@ -22,18 +22,18 @@ internal sealed class AssignRoleCommandHandler
         _logger = logger;
     }
 
-    public async Task<Result> Handle(AssignRoleCommand request, CancellationToken ct)
+    public async Task<Result> Handle(AssignRoleCommand request, CancellationToken cancellationToken)
     {
         // ITenantContext is already set by TenantMiddleware for authenticated requests.
 
-        var user = await _users.GetByIdAsync(request.UserId, ct);
+        var user = await _users.GetByIdAsync(request.UserId, cancellationToken);
         if (user is null)
         {
             _logger.LogWarning("AssignRole failed: user {UserId} not found", request.UserId);
             return Result.Failure($"User '{request.UserId}' not found.");
         }
 
-        var role = await _roles.GetByIdAsync(request.RoleId, ct);
+        var role = await _roles.GetByIdAsync(request.RoleId, cancellationToken);
         if (role is null)
         {
             _logger.LogWarning("AssignRole failed: role {RoleId} not found", request.RoleId);
@@ -42,7 +42,7 @@ internal sealed class AssignRoleCommandHandler
 
         user.AssignRole(role, request.AssignedBy);
         _users.Update(user);
-        await _users.SaveChangesAsync(ct);
+        await _users.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
             "Role {RoleName} assigned to user {UserId} by {AssignedBy}",

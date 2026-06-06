@@ -43,10 +43,10 @@ public sealed class ReportsController : ControllerBase
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<ReportSummaryDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> ListReports(CancellationToken ct)
+    public async Task<IActionResult> ListReports(CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new GetReportListQuery(_tenantContext.TenantId), ct);
+            new GetReportListQuery(_tenantContext.TenantId), cancellationToken);
 
         return Ok(result.Value);
     }
@@ -61,7 +61,7 @@ public sealed class ReportsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GenerateReport(
         [FromBody] GenerateReportRequest request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new GenerateReportCommand(
@@ -69,7 +69,7 @@ public sealed class ReportsController : ControllerBase
                 RequestedBy: _currentUser.UserId,
                 ReportType:  request.ReportType,
                 TrendDays:   request.TrendDays),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
             return BadRequest(new { error = result.Error });
@@ -85,10 +85,10 @@ public sealed class ReportsController : ControllerBase
     [HttpGet("{id:guid}/export")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> ExportCsv(Guid id, CancellationToken ct)
+    public async Task<IActionResult> ExportCsv(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new ExportReportCsvQuery(_tenantContext.TenantId, id), ct);
+            new ExportReportCsvQuery(_tenantContext.TenantId, id), cancellationToken);
 
         if (result.IsFailure)
             return NotFound(new { error = result.Error });

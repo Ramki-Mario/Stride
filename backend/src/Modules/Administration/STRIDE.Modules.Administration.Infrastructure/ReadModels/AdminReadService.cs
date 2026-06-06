@@ -31,7 +31,7 @@ internal sealed class AdminReadService : IAdminReadService
         string? status,
         int page,
         int pageSize,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var offset = (page - 1) * pageSize;
         var param  = new
@@ -44,16 +44,16 @@ internal sealed class AdminReadService : IAdminReadService
             PageSize = pageSize,
         };
 
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
 
         var total = await conn.ExecuteScalarAsync<int>(
-            new CommandDefinition(SqlCountUsers, param, cancellationToken: ct));
+            new CommandDefinition(SqlCountUsers, param, cancellationToken: cancellationToken));
 
         if (total == 0)
             return PagedResult<AdminUserDto>.Empty(page, pageSize);
 
         var items = await conn.QueryAsync<AdminUserDto>(
-            new CommandDefinition(SqlGetUsers, param, cancellationToken: ct));
+            new CommandDefinition(SqlGetUsers, param, cancellationToken: cancellationToken));
 
         return new PagedResult<AdminUserDto>(items.AsList(), total, page, pageSize);
     }

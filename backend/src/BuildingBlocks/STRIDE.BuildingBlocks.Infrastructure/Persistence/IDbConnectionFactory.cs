@@ -21,5 +21,5 @@ public interface IDbConnectionFactory
     /// Creates and opens a new database connection.
     /// Caller is responsible for disposal (use <c>await using</c>).
     /// </summary>
-    Task<DbConnection> OpenConnectionAsync(CancellationToken ct = default);
+    Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default);
 }

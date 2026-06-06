@@ -18,7 +18,7 @@ internal sealed class RegisterTenantCommandValidator : AbstractValidator<Registe
             .MaximumLength(100)
             .Matches(@"^[a-z0-9]+(?:-[a-z0-9]+)*$")
                 .WithMessage("Slug must be lowercase letters, numbers, and hyphens only (e.g. 'acme-corp').")
-            .MustAsync(async (slug, ct) => !await tenants.ExistsBySlugAsync(slug, ct))
+            .MustAsync(async (slug, cancellationToken) => !await tenants.ExistsBySlugAsync(slug, cancellationToken))
                 .WithMessage("This organisation slug is already taken.");
 
         RuleFor(x => x.Plan)

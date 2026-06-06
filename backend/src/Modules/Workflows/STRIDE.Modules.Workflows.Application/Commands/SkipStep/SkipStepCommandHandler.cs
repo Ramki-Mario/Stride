@@ -20,17 +20,17 @@ internal sealed class SkipStepCommandHandler
         _logger    = logger;
     }
 
-    public async Task<Result> Handle(SkipStepCommand request, CancellationToken ct)
+    public async Task<Result> Handle(SkipStepCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var instance = await _instances.GetByIdAsync(request.WorkflowInstanceId, ct);
+            var instance = await _instances.GetByIdAsync(request.WorkflowInstanceId, cancellationToken);
             if (instance is null)
                 return Result.Failure($"Workflow instance '{request.WorkflowInstanceId}' not found.");
 
             instance.SkipStep(request.StepInstanceId, request.SkippedBy);
             _instances.Update(instance);
-            await _instances.SaveChangesAsync(ct);
+            await _instances.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Step {StepId} in instance {InstanceId} skipped by {UserId}",

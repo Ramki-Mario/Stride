@@ -18,10 +18,10 @@ public sealed class SqlServerConnectionFactory : IDbConnectionFactory
     public SqlServerConnectionFactory(string connectionString)
         => _connectionString = connectionString;
 
-    public async Task<DbConnection> OpenConnectionAsync(CancellationToken ct = default)
+    public async Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default)
     {
         var conn = new SqlConnection(_connectionString);
-        await conn.OpenAsync(ct);
+        await conn.OpenAsync(cancellationToken);
         return conn;
     }
 }

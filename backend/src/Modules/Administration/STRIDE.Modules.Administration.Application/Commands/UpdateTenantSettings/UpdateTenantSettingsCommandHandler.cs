@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Administration.Application.Abstractions;
@@ -28,14 +28,14 @@ internal sealed class UpdateTenantSettingsCommandHandler
     }
 
     public async Task<Result<SanitisedCssResult?>> Handle(
-        UpdateTenantSettingsCommand request, CancellationToken ct)
+        UpdateTenantSettingsCommand request, CancellationToken cancellationToken)
     {
-        var settings = await _repo.GetByTenantIdAsync(request.TenantId, ct);
+        var settings = await _repo.GetByTenantIdAsync(request.TenantId, cancellationToken);
 
         if (settings is null)
         {
             settings = TenantSettings.CreateDefaults(request.TenantId, request.UpdatedBy);
-            await _repo.AddAsync(settings, ct);
+            await _repo.AddAsync(settings, cancellationToken);
         }
 
         // Sanitise CSS if provided; otherwise preserve existing tokens.
@@ -57,7 +57,7 @@ internal sealed class UpdateTenantSettingsCommandHandler
             request.CustomCss is not null ? cssTokensJson : settings.CustomCssTokensJson,
             request.UpdatedBy);
 
-        await _repo.SaveChangesAsync(ct);
+        await _repo.SaveChangesAsync(cancellationToken);
 
         await _audit.LogAsync(
             tenantId:     request.TenantId,

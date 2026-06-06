@@ -35,9 +35,9 @@ public sealed class UsersController : ControllerBase
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetUserQuery(id), ct);
+        var result = await _mediator.Send(new GetUserQuery(id), cancellationToken);
 
         if (result.IsFailure)
             return NotFound(new { error = result.Error });
@@ -58,14 +58,14 @@ public sealed class UsersController : ControllerBase
     public async Task<IActionResult> AssignRole(
         Guid userId,
         [FromBody] AssignRoleRequest request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new AssignRoleCommand(
                 UserId:     userId,
                 RoleId:     request.RoleId,
                 AssignedBy: _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
         {

@@ -8,5 +8,5 @@ namespace STRIDE.BuildingBlocks.Infrastructure.Tenant;
 /// </summary>
 public interface ITenantResolver
 {
-    Task<Guid?> ResolveAsync(string email, CancellationToken ct = default);
+    Task<Guid?> ResolveAsync(string email, CancellationToken cancellationToken = default);
 }

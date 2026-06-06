@@ -16,10 +16,10 @@ internal sealed class GetNotificationsQueryHandler
 
     public async Task<Result<IReadOnlyList<NotificationDto>>> Handle(
         GetNotificationsQuery request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var notifications = await _notifications.GetByRecipientAsync(
-            request.TenantId, request.RecipientId, ct);
+            request.TenantId, request.RecipientId, cancellationToken);
 
         var dtos = notifications
             .Select(n => new NotificationDto(

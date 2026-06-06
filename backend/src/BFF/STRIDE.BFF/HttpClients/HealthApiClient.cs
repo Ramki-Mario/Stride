@@ -16,6 +16,6 @@ public sealed class HealthApiClient
     public HealthApiClient(HttpClient client) => _client = client;
 
     /// <summary>Returns the raw verbose health JSON from the Host's /health/ready endpoint.</summary>
-    public Task<HttpResponseMessage> GetHealthAsync(CancellationToken ct = default)
-        => _client.GetAsync("/health/ready", ct);
+    public Task<HttpResponseMessage> GetHealthAsync(CancellationToken cancellationToken = default)
+        => _client.GetAsync("/health/ready", cancellationToken);
 }

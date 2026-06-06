@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Administration.Application.Abstractions;
@@ -22,10 +22,10 @@ internal sealed class UpdateUserRoleCommandHandler
         _currentUser  = currentUser;
     }
 
-    public async Task<Result> Handle(UpdateUserRoleCommand request, CancellationToken ct)
+    public async Task<Result> Handle(UpdateUserRoleCommand request, CancellationToken cancellationToken)
     {
         await _writeService.UpdateUserRoleAsync(
-            request.TenantId, request.UserId, request.NewRole, request.UpdatedBy, ct);
+            request.TenantId, request.UserId, request.NewRole, request.UpdatedBy, cancellationToken);
 
         await _audit.LogAsync(
             tenantId:     request.TenantId,

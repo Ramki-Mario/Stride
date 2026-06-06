@@ -13,7 +13,7 @@ internal sealed class GetAuditLogQueryHandler
         => _readService = readService;
 
     public Task<PagedResult<AuditLogEntryDto>> Handle(
-        GetAuditLogQuery request, CancellationToken ct)
+        GetAuditLogQuery request, CancellationToken cancellationToken)
         => _readService.GetAuditLogAsync(
             request.TenantId,
             request.Page,
@@ -21,5 +21,5 @@ internal sealed class GetAuditLogQueryHandler
             request.From,
             request.To,
             request.Action,
-            ct);
+            cancellationToken);
 }

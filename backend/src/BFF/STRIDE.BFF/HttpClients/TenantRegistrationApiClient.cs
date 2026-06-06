@@ -17,19 +17,19 @@ public sealed class TenantRegistrationApiClient
 
     public async Task<HostLoginResponse?> RegisterAsync(
         object request,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var response = await _client.PostAsJsonAsync(
-            "/api/identity/tenants/register", request, ct);
+            "/api/identity/tenants/register", request, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
-            var body = await response.Content.ReadAsStringAsync(ct);
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
             throw new HttpRequestException(
                 $"Tenant registration failed ({(int)response.StatusCode}): {body}",
                 null, response.StatusCode);
         }
 
-        return await response.Content.ReadFromJsonAsync<HostLoginResponse>(cancellationToken: ct);
+        return await response.Content.ReadFromJsonAsync<HostLoginResponse>(cancellationToken: cancellationToken);
     }
 }

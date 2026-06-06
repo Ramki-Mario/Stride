@@ -25,8 +25,8 @@ internal sealed class NotificationsDbContextFactory : IDesignTimeDbContextFactor
     /// <summary>Stub publisher used only at design time when running EF Core migration commands.</summary>
     private sealed class NoOpPublisher : IPublisher
     {
-        public Task Publish(object notification, CancellationToken ct = default) => Task.CompletedTask;
-        public Task Publish<TNotification>(TNotification notification, CancellationToken ct = default)
+        public Task Publish(object notification, CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
             where TNotification : INotification => Task.CompletedTask;
     }
 }

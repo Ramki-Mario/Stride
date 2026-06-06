@@ -17,32 +17,32 @@ internal sealed class WorkflowInstanceRepository
     /// Always eagerly loads step instances — required for all step-level operations
     /// performed through the WorkflowInstance aggregate root.
     /// </summary>
-    public async Task<WorkflowInstance?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    public async Task<WorkflowInstance?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => await Query
             .Include(i => i.Steps)
-            .FirstOrDefaultAsync(i => i.Id == id, ct);
+            .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
 
     public async Task<IReadOnlyList<WorkflowInstance>> GetByDefinitionIdAsync(
         Guid definitionId,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
         => await Query
             .Include(i => i.Steps)
             .Where(i => i.WorkflowDefinitionId == definitionId)
             .OrderByDescending(i => i.CreatedAt)
-            .ToListAsync(ct);
+            .ToListAsync(cancellationToken);
 
-    public async Task<IReadOnlyList<WorkflowInstance>> GetAllAsync(CancellationToken ct = default)
+    public async Task<IReadOnlyList<WorkflowInstance>> GetAllAsync(CancellationToken cancellationToken = default)
         => await Query
             .Include(i => i.Steps)
             .OrderByDescending(i => i.UpdatedAt)
-            .ToListAsync(ct);
+            .ToListAsync(cancellationToken);
 
-    public async Task AddAsync(WorkflowInstance instance, CancellationToken ct = default)
-        => await Context.WorkflowInstances.AddAsync(instance, ct);
+    public async Task AddAsync(WorkflowInstance instance, CancellationToken cancellationToken = default)
+        => await Context.WorkflowInstances.AddAsync(instance, cancellationToken);
 
     public void Update(WorkflowInstance instance)
         => Context.WorkflowInstances.Update(instance);
 
-    public Task<int> SaveChangesAsync(CancellationToken ct = default)
-        => Context.SaveChangesAsync(ct);
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        => Context.SaveChangesAsync(cancellationToken);
 }

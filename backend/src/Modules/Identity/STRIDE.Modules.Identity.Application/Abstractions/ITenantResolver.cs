@@ -8,5 +8,5 @@ public interface ITenantResolver
     /// Generic domain emails (gmail, outlook, etc.) fall back to UserTenantMapping.
     /// Returns null if no tenant can be resolved.
     /// </summary>
-    Task<Guid?> ResolveFromEmailAsync(string email, CancellationToken ct = default);
+    Task<Guid?> ResolveFromEmailAsync(string email, CancellationToken cancellationToken = default);
 }

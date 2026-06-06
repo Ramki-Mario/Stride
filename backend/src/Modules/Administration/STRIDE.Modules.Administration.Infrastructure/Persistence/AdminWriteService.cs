@@ -22,10 +22,10 @@ internal sealed class AdminWriteService : IAdminWriteService
         string displayName,
         string roleName,
         Guid invitedBy,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
-        await using var conn = await _db.OpenConnectionAsync(ct);
-        await using var tx   = await conn.BeginTransactionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
+        await using var tx   = await conn.BeginTransactionAsync(cancellationToken);
 
         var userId = Guid.NewGuid();
         var now    = DateTime.UtcNow;
@@ -35,7 +35,7 @@ internal sealed class AdminWriteService : IAdminWriteService
             new CommandDefinition(
                 "SELECT TOP 1 Id FROM [identity].Roles WHERE TenantId = @TenantId AND NormalizedName = @Name AND IsDeleted = 0",
                 new { TenantId = tenantId, Name = roleName.ToUpperInvariant() },
-                transaction: tx, cancellationToken: ct));
+                transaction: tx, cancellationToken: cancellationToken));
 
         if (roleId is null)
             throw new InvalidOperationException($"Role '{roleName}' not found for tenant {tenantId}.");
@@ -45,7 +45,7 @@ internal sealed class AdminWriteService : IAdminWriteService
             new CommandDefinition(
                 "SELECT CAST(1 AS BIT) FROM [identity].Users WHERE TenantId = @TenantId AND NormalizedEmail = @Email AND IsDeleted = 0",
                 new { TenantId = tenantId, Email = email.ToUpperInvariant() },
-                transaction: tx, cancellationToken: ct));
+                transaction: tx, cancellationToken: cancellationToken));
 
         if (exists)
             throw new InvalidOperationException($"A user with email '{email}' already exists in this tenant.");
@@ -72,7 +72,7 @@ internal sealed class AdminWriteService : IAdminWriteService
                     Now             = now,
                     CreatedBy       = invitedBy
                 },
-                transaction: tx, cancellationToken: ct));
+                transaction: tx, cancellationToken: cancellationToken));
 
         // 4. Assign role
         await conn.ExecuteAsync(
@@ -92,7 +92,7 @@ internal sealed class AdminWriteService : IAdminWriteService
                     Now       = now,
                     CreatedBy = invitedBy
                 },
-                transaction: tx, cancellationToken: ct));
+                transaction: tx, cancellationToken: cancellationToken));
 
         // 5. Create UserTenantMapping (required for TenantResolver fallback on login)
         await conn.ExecuteAsync(
@@ -112,25 +112,25 @@ internal sealed class AdminWriteService : IAdminWriteService
                     Now       = now,
                     CreatedBy = invitedBy
                 },
-                transaction: tx, cancellationToken: ct));
+                transaction: tx, cancellationToken: cancellationToken));
 
-        await tx.CommitAsync(ct);
+        await tx.CommitAsync(cancellationToken);
         return userId;
     }
 
     // ── Update Role ───────────────────────────────────────────────────────────
 
     public async Task UpdateUserRoleAsync(
-        Guid tenantId, Guid userId, string newRoleName, Guid updatedBy, CancellationToken ct = default)
+        Guid tenantId, Guid userId, string newRoleName, Guid updatedBy, CancellationToken cancellationToken = default)
     {
-        await using var conn = await _db.OpenConnectionAsync(ct);
-        await using var tx   = await conn.BeginTransactionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
+        await using var tx   = await conn.BeginTransactionAsync(cancellationToken);
 
         var roleId = await conn.ExecuteScalarAsync<Guid?>(
             new CommandDefinition(
                 "SELECT TOP 1 Id FROM [identity].Roles WHERE TenantId = @TenantId AND NormalizedName = @Name AND IsDeleted = 0",
                 new { TenantId = tenantId, Name = newRoleName.ToUpperInvariant() },
-                transaction: tx, cancellationToken: ct));
+                transaction: tx, cancellationToken: cancellationToken));
 
         if (roleId is null)
             throw new InvalidOperationException($"Role '{newRoleName}' not found.");
@@ -140,7 +140,7 @@ internal sealed class AdminWriteService : IAdminWriteService
             new CommandDefinition(
                 "UPDATE [identity].UserRoles SET IsDeleted = 1, UpdatedAt = @Now WHERE TenantId = @TenantId AND UserId = @UserId AND IsDeleted = 0",
                 new { TenantId = tenantId, UserId = userId, Now = DateTime.UtcNow },
-                transaction: tx, cancellationToken: ct));
+                transaction: tx, cancellationToken: cancellationToken));
 
         // Insert new role assignment
         await conn.ExecuteAsync(
@@ -160,32 +160,32 @@ internal sealed class AdminWriteService : IAdminWriteService
                     Now       = DateTime.UtcNow,
                     CreatedBy = updatedBy
                 },
-                transaction: tx, cancellationToken: ct));
+                transaction: tx, cancellationToken: cancellationToken));
 
-        await tx.CommitAsync(ct);
+        await tx.CommitAsync(cancellationToken);
     }
 
     // ── Deactivate ────────────────────────────────────────────────────────────
 
-    public async Task DeactivateUserAsync(Guid tenantId, Guid userId, CancellationToken ct = default)
+    public async Task DeactivateUserAsync(Guid tenantId, Guid userId, CancellationToken cancellationToken = default)
     {
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
         await conn.ExecuteAsync(
             new CommandDefinition(
                 "UPDATE [identity].Users SET IsActive = 0, UpdatedAt = @Now WHERE TenantId = @TenantId AND Id = @UserId AND IsDeleted = 0",
                 new { TenantId = tenantId, UserId = userId, Now = DateTime.UtcNow },
-                cancellationToken: ct));
+                cancellationToken: cancellationToken));
     }
 
     // ── Reactivate ────────────────────────────────────────────────────────────
 
-    public async Task ReactivateUserAsync(Guid tenantId, Guid userId, CancellationToken ct = default)
+    public async Task ReactivateUserAsync(Guid tenantId, Guid userId, CancellationToken cancellationToken = default)
     {
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
         await conn.ExecuteAsync(
             new CommandDefinition(
                 "UPDATE [identity].Users SET IsActive = 1, IsPending = 0, UpdatedAt = @Now WHERE TenantId = @TenantId AND Id = @UserId AND IsDeleted = 0",
                 new { TenantId = tenantId, UserId = userId, Now = DateTime.UtcNow },
-                cancellationToken: ct));
+                cancellationToken: cancellationToken));
     }
 }

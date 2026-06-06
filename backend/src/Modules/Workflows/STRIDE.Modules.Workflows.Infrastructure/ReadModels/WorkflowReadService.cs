@@ -33,15 +33,15 @@ internal sealed class WorkflowReadService : IWorkflowReadService
 
     public async Task<IReadOnlyList<WorkflowDefinitionReadModel>> GetWorkflowDefinitionSummariesAsync(
         Guid tenantId,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
         var results = await conn.QueryAsync<WorkflowDefinitionReadModel>(
             new CommandDefinition(
                 SqlGetDefinitionSummaries,
                 new { TenantId = tenantId },
                 commandTimeout: 30,
-                cancellationToken: ct));
+                cancellationToken: cancellationToken));
 
         return results.ToList().AsReadOnly();
     }
@@ -49,34 +49,34 @@ internal sealed class WorkflowReadService : IWorkflowReadService
     public async Task<IReadOnlyList<WorkflowInstanceReadModel>> GetWorkflowInstanceSummariesAsync(
         Guid tenantId,
         Guid? definitionId = null,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var sql = definitionId.HasValue
             ? SqlGetInstanceSummariesByDefinition
             : SqlGetInstanceSummaries;
 
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
         var results = await conn.QueryAsync<WorkflowInstanceReadModel>(
             new CommandDefinition(
                 sql,
                 new { TenantId = tenantId, DefinitionId = definitionId },
                 commandTimeout: 30,
-                cancellationToken: ct));
+                cancellationToken: cancellationToken));
 
         return results.ToList().AsReadOnly();
     }
 
     public async Task<WorkflowDashboardStats> GetDashboardStatsAsync(
         Guid tenantId,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
         var stats = await conn.QuerySingleOrDefaultAsync<WorkflowDashboardStats>(
             new CommandDefinition(
                 SqlGetDashboardStats,
                 new { TenantId = tenantId },
                 commandTimeout: 30,
-                cancellationToken: ct));
+                cancellationToken: cancellationToken));
 
         return stats ?? new WorkflowDashboardStats(0, 0, 0, 0, 0, 0);
     }

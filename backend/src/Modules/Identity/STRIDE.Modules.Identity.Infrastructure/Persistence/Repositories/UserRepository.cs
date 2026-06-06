@@ -11,34 +11,34 @@ internal sealed class UserRepository : TenantAwareRepository<User, IdentityDbCon
     public UserRepository(IdentityDbContext context, ITenantContext tenant)
         : base(context, tenant) { }
 
-    public async Task<User?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => await Query
             .Include(u => u.Roles)
-            .FirstOrDefaultAsync(u => u.Id == id, ct);
+            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
-    public async Task<User?> GetByNormalizedEmailAsync(string normalizedEmail, CancellationToken ct = default)
+    public async Task<User?> GetByNormalizedEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default)
         => await Query
             .Include(u => u.Roles)
-            .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail, ct);
+            .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail, cancellationToken);
 
-    public async Task<bool> ExistsByEmailAsync(string normalizedEmail, CancellationToken ct = default)
-        => await Query.AnyAsync(u => u.NormalizedEmail == normalizedEmail, ct);
+    public async Task<bool> ExistsByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default)
+        => await Query.AnyAsync(u => u.NormalizedEmail == normalizedEmail, cancellationToken);
 
-    public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken ct = default)
+    public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
         => await Query
             .Include(u => u.Roles)
             .OrderBy(u => u.DisplayName)
-            .ToListAsync(ct);
+            .ToListAsync(cancellationToken);
 
-    public async Task AddAsync(User user, CancellationToken ct = default)
-        => await Context.Users.AddAsync(user, ct);
+    public async Task AddAsync(User user, CancellationToken cancellationToken = default)
+        => await Context.Users.AddAsync(user, cancellationToken);
 
-    public async Task AddTenantMappingAsync(UserTenantMapping mapping, CancellationToken ct = default)
-        => await Context.UserTenantMappings.AddAsync(mapping, ct);
+    public async Task AddTenantMappingAsync(UserTenantMapping mapping, CancellationToken cancellationToken = default)
+        => await Context.UserTenantMappings.AddAsync(mapping, cancellationToken);
 
     public void Update(User user)
         => Context.Users.Update(user);
 
-    public Task<int> SaveChangesAsync(CancellationToken ct = default)
-        => Context.SaveChangesAsync(ct);
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        => Context.SaveChangesAsync(cancellationToken);
 }

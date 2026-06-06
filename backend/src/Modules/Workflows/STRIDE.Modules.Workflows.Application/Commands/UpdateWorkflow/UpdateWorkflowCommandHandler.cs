@@ -20,11 +20,11 @@ internal sealed class UpdateWorkflowCommandHandler
         _logger      = logger;
     }
 
-    public async Task<Result> Handle(UpdateWorkflowCommand request, CancellationToken ct)
+    public async Task<Result> Handle(UpdateWorkflowCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var definition = await _definitions.GetByIdAsync(request.WorkflowDefinitionId, ct);
+            var definition = await _definitions.GetByIdAsync(request.WorkflowDefinitionId, cancellationToken);
             if (definition is null)
             {
                 return Result.Failure(
@@ -33,7 +33,7 @@ internal sealed class UpdateWorkflowCommandHandler
 
             definition.Update(request.Name, request.Description);
             _definitions.Update(definition);
-            await _definitions.SaveChangesAsync(ct);
+            await _definitions.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "WorkflowDefinition {Id} updated by {UserId}",

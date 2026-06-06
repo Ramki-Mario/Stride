@@ -13,26 +13,26 @@ internal sealed class WorkflowDefinitionRepository
     public WorkflowDefinitionRepository(WorkflowsDbContext context, ITenantContext tenant)
         : base(context, tenant) { }
 
-    public async Task<WorkflowDefinition?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    public async Task<WorkflowDefinition?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => await Query
             .Include(d => d.Steps)
-            .FirstOrDefaultAsync(d => d.Id == id, ct);
+            .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
 
-    public async Task<IReadOnlyList<WorkflowDefinition>> GetAllAsync(CancellationToken ct = default)
+    public async Task<IReadOnlyList<WorkflowDefinition>> GetAllAsync(CancellationToken cancellationToken = default)
         => await Query
             .Include(d => d.Steps)
             .OrderByDescending(d => d.UpdatedAt)
-            .ToListAsync(ct);
+            .ToListAsync(cancellationToken);
 
-    public async Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default)
-        => await Query.AnyAsync(d => d.Name == name, ct);
+    public async Task<bool> ExistsByNameAsync(string name, CancellationToken cancellationToken = default)
+        => await Query.AnyAsync(d => d.Name == name, cancellationToken);
 
-    public async Task AddAsync(WorkflowDefinition definition, CancellationToken ct = default)
-        => await Context.WorkflowDefinitions.AddAsync(definition, ct);
+    public async Task AddAsync(WorkflowDefinition definition, CancellationToken cancellationToken = default)
+        => await Context.WorkflowDefinitions.AddAsync(definition, cancellationToken);
 
     public void Update(WorkflowDefinition definition)
         => Context.WorkflowDefinitions.Update(definition);
 
-    public Task<int> SaveChangesAsync(CancellationToken ct = default)
-        => Context.SaveChangesAsync(ct);
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        => Context.SaveChangesAsync(cancellationToken);
 }

@@ -23,26 +23,26 @@ public sealed class InvoicingApiClient
 
     public Task<HttpResponseMessage> GetInvoicesAsync(
         string token, int page, int pageSize, string? search, int? status,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var qs = BuildQs(page, pageSize, search, status);
-        return _client.SendAsync(Build(HttpMethod.Get, $"/api/invoicing/invoices{qs}", token), ct);
+        return _client.SendAsync(Build(HttpMethod.Get, $"/api/invoicing/invoices{qs}", token), cancellationToken);
     }
 
-    public Task<HttpResponseMessage> GetInvoiceByIdAsync(Guid id, string token, CancellationToken ct = default)
-        => _client.SendAsync(Build(HttpMethod.Get, $"/api/invoicing/invoices/{id}", token), ct);
+    public Task<HttpResponseMessage> GetInvoiceByIdAsync(Guid id, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, $"/api/invoicing/invoices/{id}", token), cancellationToken);
 
-    public Task<HttpResponseMessage> GenerateInvoiceAsync(object body, string token, CancellationToken ct = default)
-        => _client.SendAsync(BuildWithBody(HttpMethod.Post, "/api/invoicing/invoices", body, token), ct);
+    public Task<HttpResponseMessage> GenerateInvoiceAsync(object body, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Post, "/api/invoicing/invoices", body, token), cancellationToken);
 
-    public Task<HttpResponseMessage> SendInvoiceAsync(Guid id, string token, CancellationToken ct = default)
-        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/invoicing/invoices/{id}/send", null, token), ct);
+    public Task<HttpResponseMessage> SendInvoiceAsync(Guid id, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/invoicing/invoices/{id}/send", null, token), cancellationToken);
 
-    public Task<HttpResponseMessage> MarkPaidAsync(Guid id, string token, CancellationToken ct = default)
-        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/invoicing/invoices/{id}/paid", null, token), ct);
+    public Task<HttpResponseMessage> MarkPaidAsync(Guid id, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/invoicing/invoices/{id}/paid", null, token), cancellationToken);
 
-    public Task<HttpResponseMessage> VoidInvoiceAsync(Guid id, string token, CancellationToken ct = default)
-        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/invoicing/invoices/{id}/void", null, token), ct);
+    public Task<HttpResponseMessage> VoidInvoiceAsync(Guid id, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/invoicing/invoices/{id}/void", null, token), cancellationToken);
 
     // ── helpers ──────────────────────────────────────────────────────────────
 

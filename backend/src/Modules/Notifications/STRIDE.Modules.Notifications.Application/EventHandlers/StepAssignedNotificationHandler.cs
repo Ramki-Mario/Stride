@@ -27,7 +27,7 @@ internal sealed class StepAssignedNotificationHandler
 
     public async Task Handle(
         DomainEventNotification<StepAssignedEvent> notification,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var e = notification.DomainEvent;
 
@@ -39,7 +39,7 @@ internal sealed class StepAssignedNotificationHandler
             Body:        "You have been assigned a workflow step. Please review and complete it.",
             CreatedBy:   e.AssignedBy);
 
-        var result = await _sender.Send(command, ct);
+        var result = await _sender.Send(command, cancellationToken);
 
         if (!result.IsSuccess)
             _logger.LogWarning(

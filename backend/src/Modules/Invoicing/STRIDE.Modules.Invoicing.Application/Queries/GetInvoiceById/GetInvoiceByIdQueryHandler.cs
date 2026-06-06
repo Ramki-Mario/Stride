@@ -13,9 +13,9 @@ internal sealed class GetInvoiceByIdQueryHandler
     public GetInvoiceByIdQueryHandler(IInvoiceReadService read) => _read = read;
 
     public async Task<Result<InvoiceDetailDto>> Handle(
-        GetInvoiceByIdQuery request, CancellationToken ct)
+        GetInvoiceByIdQuery request, CancellationToken cancellationToken)
     {
-        var dto = await _read.GetInvoiceByIdAsync(request.TenantId, request.InvoiceId, ct);
+        var dto = await _read.GetInvoiceByIdAsync(request.TenantId, request.InvoiceId, cancellationToken);
 
         return dto is null
             ? Result<InvoiceDetailDto>.Failure($"Invoice '{request.InvoiceId}' not found.")

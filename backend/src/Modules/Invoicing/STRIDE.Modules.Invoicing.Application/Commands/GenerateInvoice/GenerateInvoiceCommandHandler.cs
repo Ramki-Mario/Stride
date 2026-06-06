@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Invoicing.Domain.Entities;
@@ -24,10 +24,10 @@ internal sealed class GenerateInvoiceCommandHandler
         _currentUser = currentUser;
     }
 
-    public async Task<Result<Guid>> Handle(GenerateInvoiceCommand request, CancellationToken ct)
+    public async Task<Result<Guid>> Handle(GenerateInvoiceCommand request, CancellationToken cancellationToken)
     {
         // Enforce unique invoice number within tenant
-        var existing = await _repo.GetByNumberAsync(request.TenantId, request.InvoiceNumber, ct);
+        var existing = await _repo.GetByNumberAsync(request.TenantId, request.InvoiceNumber, cancellationToken);
         if (existing is not null)
             return Result<Guid>.Failure($"Invoice number '{request.InvoiceNumber}' already exists.");
 
@@ -46,8 +46,8 @@ internal sealed class GenerateInvoiceCommandHandler
             foreach (var item in request.LineItems)
                 invoice.AddLineItem(item.Description, item.UnitPrice, item.Quantity);
 
-            await _repo.AddAsync(invoice, ct);
-            await _repo.SaveChangesAsync(ct);
+            await _repo.AddAsync(invoice, cancellationToken);
+            await _repo.SaveChangesAsync(cancellationToken);
 
             await _audit.LogAsync(
                 tenantId:     request.TenantId,

@@ -20,17 +20,17 @@ internal sealed class ResumeWorkflowCommandHandler
         _logger    = logger;
     }
 
-    public async Task<Result> Handle(ResumeWorkflowCommand request, CancellationToken ct)
+    public async Task<Result> Handle(ResumeWorkflowCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var instance = await _instances.GetByIdAsync(request.WorkflowInstanceId, ct);
+            var instance = await _instances.GetByIdAsync(request.WorkflowInstanceId, cancellationToken);
             if (instance is null)
                 return Result.Failure($"Workflow instance '{request.WorkflowInstanceId}' not found.");
 
             instance.Resume(request.ResumedBy);
             _instances.Update(instance);
-            await _instances.SaveChangesAsync(ct);
+            await _instances.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "WorkflowInstance {Id} resumed by {UserId}", instance.Id, request.ResumedBy);

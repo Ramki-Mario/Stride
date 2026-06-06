@@ -35,7 +35,7 @@ public sealed class TenantsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register(
         [FromBody] RegisterTenantRequest request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
@@ -45,7 +45,7 @@ public sealed class TenantsController : ControllerBase
             Plan:             request.Plan,
             AdminEmail:       request.AdminEmail,
             AdminPassword:    request.AdminPassword,
-            AdminDisplayName: request.AdminDisplayName), ct);
+            AdminDisplayName: request.AdminDisplayName), cancellationToken);
 
         if (result.IsFailure)
         {

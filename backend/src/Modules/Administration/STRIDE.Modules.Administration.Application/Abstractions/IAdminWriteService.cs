@@ -9,14 +9,14 @@ public interface IAdminWriteService
         string displayName,
         string roleName,
         Guid invitedBy,
-        CancellationToken ct = default);
+        CancellationToken cancellationToken = default);
 
     /// <summary>Changes the primary role for a user within a tenant.</summary>
-    Task UpdateUserRoleAsync(Guid tenantId, Guid userId, string newRoleName, Guid updatedBy, CancellationToken ct = default);
+    Task UpdateUserRoleAsync(Guid tenantId, Guid userId, string newRoleName, Guid updatedBy, CancellationToken cancellationToken = default);
 
     /// <summary>Sets IsActive = false on a user.</summary>
-    Task DeactivateUserAsync(Guid tenantId, Guid userId, CancellationToken ct = default);
+    Task DeactivateUserAsync(Guid tenantId, Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>Sets IsActive = true, IsPending = false on a user.</summary>
-    Task ReactivateUserAsync(Guid tenantId, Guid userId, CancellationToken ct = default);
+    Task ReactivateUserAsync(Guid tenantId, Guid userId, CancellationToken cancellationToken = default);
 }

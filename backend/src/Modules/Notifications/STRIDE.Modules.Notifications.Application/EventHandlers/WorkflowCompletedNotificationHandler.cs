@@ -27,7 +27,7 @@ internal sealed class WorkflowCompletedNotificationHandler
 
     public async Task Handle(
         DomainEventNotification<WorkflowCompletedEvent> notification,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var e = notification.DomainEvent;
 
@@ -39,7 +39,7 @@ internal sealed class WorkflowCompletedNotificationHandler
             Body:        "Your workflow has been completed successfully. All steps are done.",
             CreatedBy:   e.StartedBy);
 
-        var result = await _sender.Send(command, ct);
+        var result = await _sender.Send(command, cancellationToken);
 
         if (!result.IsSuccess)
             _logger.LogWarning(

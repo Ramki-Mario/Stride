@@ -26,12 +26,12 @@ internal sealed class GetDashboardKpisQueryHandler
 
     public async Task<Result<DashboardKpiDto>> Handle(
         GetDashboardKpisQuery request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         _logger.LogInformation(
             "GetDashboardKpis: fetching KPI snapshot for tenant {TenantId}", request.TenantId);
 
-        var kpis = await _readService.GetDashboardKpisAsync(request.TenantId, ct);
+        var kpis = await _readService.GetDashboardKpisAsync(request.TenantId, cancellationToken);
         return Result.Success(kpis);
     }
 }

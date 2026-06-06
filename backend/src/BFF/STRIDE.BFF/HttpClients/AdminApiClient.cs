@@ -24,32 +24,32 @@ public sealed class AdminApiClient
     public Task<HttpResponseMessage> GetUsersAsync(
         string token, int page, int pageSize,
         string? search, string? role, string? status,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var qs = BuildQs(page, pageSize, search, role, status);
-        return _client.SendAsync(Build(HttpMethod.Get, $"/api/administration/users{qs}", token), ct);
+        return _client.SendAsync(Build(HttpMethod.Get, $"/api/administration/users{qs}", token), cancellationToken);
     }
 
-    public Task<HttpResponseMessage> InviteUserAsync(object body, string token, CancellationToken ct = default)
-        => _client.SendAsync(BuildWithBody(HttpMethod.Post, "/api/administration/users/invite", body, token), ct);
+    public Task<HttpResponseMessage> InviteUserAsync(object body, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Post, "/api/administration/users/invite", body, token), cancellationToken);
 
-    public Task<HttpResponseMessage> UpdateUserRoleAsync(Guid userId, object body, string token, CancellationToken ct = default)
-        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/administration/users/{userId}/role", body, token), ct);
+    public Task<HttpResponseMessage> UpdateUserRoleAsync(Guid userId, object body, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/administration/users/{userId}/role", body, token), cancellationToken);
 
-    public Task<HttpResponseMessage> DeactivateUserAsync(Guid userId, string token, CancellationToken ct = default)
-        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/administration/users/{userId}/deactivate", null, token), ct);
+    public Task<HttpResponseMessage> DeactivateUserAsync(Guid userId, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/administration/users/{userId}/deactivate", null, token), cancellationToken);
 
-    public Task<HttpResponseMessage> ReactivateUserAsync(Guid userId, string token, CancellationToken ct = default)
-        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/administration/users/{userId}/reactivate", null, token), ct);
+    public Task<HttpResponseMessage> ReactivateUserAsync(Guid userId, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/administration/users/{userId}/reactivate", null, token), cancellationToken);
 
     public Task<HttpResponseMessage> GetAuditLogAsync(
         string token,
         int page, int pageSize,
         string? from, string? to, string? action,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var qs = BuildAuditQs(page, pageSize, from, to, action);
-        return _client.SendAsync(Build(HttpMethod.Get, $"/api/administration/audit-log{qs}", token), ct);
+        return _client.SendAsync(Build(HttpMethod.Get, $"/api/administration/audit-log{qs}", token), cancellationToken);
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────

@@ -22,18 +22,18 @@ internal sealed class GetUserQueryHandler
         _logger = logger;
     }
 
-    public async Task<Result<UserDto>> Handle(GetUserQuery request, CancellationToken ct)
+    public async Task<Result<UserDto>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
         // ITenantContext is already set by TenantMiddleware for authenticated requests.
 
-        var user = await _users.GetByIdAsync(request.UserId, ct);
+        var user = await _users.GetByIdAsync(request.UserId, cancellationToken);
         if (user is null)
         {
             _logger.LogWarning("GetUser: user {UserId} not found", request.UserId);
             return Result.Failure<UserDto>($"User '{request.UserId}' not found.");
         }
 
-        var allRoles  = await _roles.GetAllAsync(ct);
+        var allRoles  = await _roles.GetAllAsync(cancellationToken);
         var roleIndex = allRoles.ToDictionary(r => r.Id, r => r.Name);
         var roleNames = user.Roles
             .Where(ur => !ur.IsDeleted && roleIndex.ContainsKey(ur.RoleId))

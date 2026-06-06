@@ -15,14 +15,14 @@ internal sealed class TenantNameResolver : ITenantNameResolver
 
     public TenantNameResolver(IDbConnectionFactory db) => _db = db;
 
-    public async Task<string> ResolveAsync(Guid tenantId, CancellationToken ct = default)
+    public async Task<string> ResolveAsync(Guid tenantId, CancellationToken cancellationToken = default)
     {
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
         var name = await conn.ExecuteScalarAsync<string?>(
             new CommandDefinition(
                 "SELECT TOP 1 Name FROM [identity].Tenants WHERE Id = @TenantId AND IsDeleted = 0",
                 new { TenantId = tenantId },
-                cancellationToken: ct));
+                cancellationToken: cancellationToken));
 
         return name ?? string.Empty;
     }

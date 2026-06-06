@@ -10,12 +10,12 @@ internal sealed class TenantSettingsRepository : ITenantSettingsRepository
 
     public TenantSettingsRepository(AdministrationDbContext db) => _db = db;
 
-    public Task<TenantSettings?> GetByTenantIdAsync(Guid tenantId, CancellationToken ct = default)
-        => _db.TenantSettings.FirstOrDefaultAsync(s => s.TenantId == tenantId, ct);
+    public Task<TenantSettings?> GetByTenantIdAsync(Guid tenantId, CancellationToken cancellationToken = default)
+        => _db.TenantSettings.FirstOrDefaultAsync(s => s.TenantId == tenantId, cancellationToken);
 
-    public async Task AddAsync(TenantSettings settings, CancellationToken ct = default)
-        => await _db.TenantSettings.AddAsync(settings, ct);
+    public async Task AddAsync(TenantSettings settings, CancellationToken cancellationToken = default)
+        => await _db.TenantSettings.AddAsync(settings, cancellationToken);
 
-    public Task SaveChangesAsync(CancellationToken ct = default)
-        => _db.SaveChangesAsync(ct);
+    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
+        => _db.SaveChangesAsync(cancellationToken);
 }

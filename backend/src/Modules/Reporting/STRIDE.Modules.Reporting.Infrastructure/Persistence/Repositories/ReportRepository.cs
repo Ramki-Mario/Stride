@@ -16,12 +16,12 @@ internal sealed class ReportRepository
     public ReportRepository(ReportingDbContext context, ITenantContext tenant)
         : base(context, tenant) { }
 
-    public async Task<Report?> GetByIdAsync(Guid id, CancellationToken ct = default)
-        => await Query.FirstOrDefaultAsync(r => r.Id == id, ct);
+    public async Task<Report?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        => await Query.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
 
-    public async Task AddAsync(Report report, CancellationToken ct = default)
-        => await Context.Set<Report>().AddAsync(report, ct);
+    public async Task AddAsync(Report report, CancellationToken cancellationToken = default)
+        => await Context.Set<Report>().AddAsync(report, cancellationToken);
 
-    public Task<int> SaveChangesAsync(CancellationToken ct = default)
-        => Context.SaveChangesAsync(ct);
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        => Context.SaveChangesAsync(cancellationToken);
 }

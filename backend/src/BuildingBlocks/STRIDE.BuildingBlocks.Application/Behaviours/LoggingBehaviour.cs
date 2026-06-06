@@ -15,7 +15,7 @@ public sealed class LoggingBehaviour<TRequest, TResponse>
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var requestName = typeof(TRequest).Name;
         _logger.LogInformation("Handling {RequestName}", requestName);

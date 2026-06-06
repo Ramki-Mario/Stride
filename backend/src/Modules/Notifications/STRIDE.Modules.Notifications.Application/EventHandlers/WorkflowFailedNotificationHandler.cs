@@ -27,7 +27,7 @@ internal sealed class WorkflowFailedNotificationHandler
 
     public async Task Handle(
         DomainEventNotification<WorkflowFailedEvent> notification,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var e = notification.DomainEvent;
 
@@ -39,7 +39,7 @@ internal sealed class WorkflowFailedNotificationHandler
             Body:        $"A workflow has failed. Reason: {e.Reason}",
             CreatedBy:   e.FailedBy);
 
-        var result = await _sender.Send(command, ct);
+        var result = await _sender.Send(command, cancellationToken);
 
         if (!result.IsSuccess)
             _logger.LogWarning(

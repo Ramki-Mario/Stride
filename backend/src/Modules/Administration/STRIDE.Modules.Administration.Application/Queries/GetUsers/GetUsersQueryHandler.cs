@@ -14,7 +14,7 @@ internal sealed class GetUsersQueryHandler
 
     public async Task<Result<PagedResult<AdminUserDto>>> Handle(
         GetUsersQuery request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var page = await _readService.GetUsersAsync(
             request.TenantId,
@@ -23,7 +23,7 @@ internal sealed class GetUsersQueryHandler
             request.Status,
             request.Page,
             request.PageSize,
-            ct);
+            cancellationToken);
 
         return Result.Success(page);
     }

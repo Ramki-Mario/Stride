@@ -12,19 +12,19 @@ namespace STRIDE.Modules.Identity.Application.Abstractions;
 public interface ITenantRepository
 {
     /// <summary>Returns a tenant by its primary key. No tenant-context filter applied.</summary>
-    Task<Tenant?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<Tenant?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>Returns a tenant by its unique slug. No tenant-context filter applied.</summary>
-    Task<Tenant?> GetBySlugAsync(string slug, CancellationToken ct = default);
+    Task<Tenant?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default);
 
     /// <summary>Returns true if an active tenant with this slug already exists.</summary>
-    Task<bool> ExistsBySlugAsync(string slug, CancellationToken ct = default);
+    Task<bool> ExistsBySlugAsync(string slug, CancellationToken cancellationToken = default);
 
     /// <summary>Stages a new tenant for insertion. Caller must call SaveChangesAsync.</summary>
-    Task AddAsync(Tenant tenant, CancellationToken ct = default);
+    Task AddAsync(Tenant tenant, CancellationToken cancellationToken = default);
 
     /// <summary>Marks an existing tenant as modified. Caller must call SaveChangesAsync.</summary>
     void Update(Tenant tenant);
 
-    Task<int> SaveChangesAsync(CancellationToken ct = default);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -21,9 +21,9 @@ internal sealed class GetWorkflowDefinitionQueryHandler
 
     public async Task<Result<WorkflowDefinitionDto>> Handle(
         GetWorkflowDefinitionQuery request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
-        var definition = await _definitions.GetByIdAsync(request.WorkflowDefinitionId, ct);
+        var definition = await _definitions.GetByIdAsync(request.WorkflowDefinitionId, cancellationToken);
         if (definition is null)
         {
             _logger.LogWarning(

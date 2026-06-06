@@ -26,11 +26,11 @@ internal sealed class StartWorkflowCommandHandler
 
     public async Task<Result<StartWorkflowResult>> Handle(
         StartWorkflowCommand request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         try
         {
-            var definition = await _definitions.GetByIdAsync(request.WorkflowDefinitionId, ct);
+            var definition = await _definitions.GetByIdAsync(request.WorkflowDefinitionId, cancellationToken);
             if (definition is null)
             {
                 return Result.Failure<StartWorkflowResult>(
@@ -39,8 +39,8 @@ internal sealed class StartWorkflowCommandHandler
 
             var instance = WorkflowInstance.Start(definition, request.StartedBy);
 
-            await _instances.AddAsync(instance, ct);
-            await _instances.SaveChangesAsync(ct);
+            await _instances.AddAsync(instance, cancellationToken);
+            await _instances.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "WorkflowInstance {InstanceId} started from definition {DefinitionId} by {UserId}",

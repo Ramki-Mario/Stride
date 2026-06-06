@@ -31,15 +31,15 @@ internal sealed class ReportingReadService : IReportingReadService
 
     public ReportingReadService(IDbConnectionFactory db) => _db = db;
 
-    public async Task<DashboardKpiDto> GetDashboardKpisAsync(Guid tenantId, CancellationToken ct = default)
+    public async Task<DashboardKpiDto> GetDashboardKpisAsync(Guid tenantId, CancellationToken cancellationToken = default)
     {
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
         var result = await conn.QuerySingleOrDefaultAsync<DashboardKpiDto>(
             new CommandDefinition(
                 SqlGetDashboardKpis,
                 new { TenantId = tenantId },
                 commandTimeout: 30,
-                cancellationToken: ct));
+                cancellationToken: cancellationToken));
 
         return result ?? new DashboardKpiDto(0, 0, 0, 0, 0, 0);
     }
@@ -47,45 +47,45 @@ internal sealed class ReportingReadService : IReportingReadService
     public async Task<IReadOnlyList<WorkflowTrendDto>> GetWorkflowTrendsAsync(
         Guid tenantId,
         int days = 30,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
         var results = await conn.QueryAsync<WorkflowTrendDto>(
             new CommandDefinition(
                 SqlGetWorkflowTrends,
                 new { TenantId = tenantId, Days = days },
                 commandTimeout: 30,
-                cancellationToken: ct));
+                cancellationToken: cancellationToken));
 
         return results.ToList().AsReadOnly();
     }
 
     public async Task<IReadOnlyList<ReportSummaryDto>> GetReportSummariesAsync(
         Guid tenantId,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
         var results = await conn.QueryAsync<ReportSummaryDto>(
             new CommandDefinition(
                 SqlGetReportSummaries,
                 new { TenantId = tenantId },
                 commandTimeout: 30,
-                cancellationToken: ct));
+                cancellationToken: cancellationToken));
 
         return results.ToList().AsReadOnly();
     }
 
     public async Task<IReadOnlyList<WorkflowSummaryReportRowDto>> GetWorkflowSummaryAsync(
         Guid tenantId,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
         var results = await conn.QueryAsync<WorkflowSummaryReportRowDto>(
             new CommandDefinition(
                 SqlGetWorkflowSummary,
                 new { TenantId = tenantId },
                 commandTimeout: 30,
-                cancellationToken: ct));
+                cancellationToken: cancellationToken));
 
         return results.ToList().AsReadOnly();
     }

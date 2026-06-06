@@ -22,7 +22,7 @@ internal sealed class CreateNotificationCommandHandler
 
     public async Task<Result<CreateNotificationResult>> Handle(
         CreateNotificationCommand request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var notification = Notification.Create(
             request.TenantId,
@@ -32,8 +32,8 @@ internal sealed class CreateNotificationCommandHandler
             request.Body,
             request.CreatedBy);
 
-        await _notifications.AddAsync(notification, ct);
-        await _notifications.SaveChangesAsync(ct);
+        await _notifications.AddAsync(notification, cancellationToken);
+        await _notifications.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
             "Notification {Id} ({Type}) created for recipient {RecipientId} in tenant {TenantId}",

@@ -11,10 +11,10 @@ public interface IInvoiceReadService
         int?    status,
         int     page,
         int     pageSize,
-        CancellationToken ct = default);
+        CancellationToken cancellationToken = default);
 
     Task<InvoiceDetailDto?> GetInvoiceByIdAsync(
         Guid tenantId,
         Guid invoiceId,
-        CancellationToken ct = default);
+        CancellationToken cancellationToken = default);
 }

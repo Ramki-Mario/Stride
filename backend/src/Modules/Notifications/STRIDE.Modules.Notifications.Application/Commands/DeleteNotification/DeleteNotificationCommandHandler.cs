@@ -19,10 +19,10 @@ internal sealed class DeleteNotificationCommandHandler
         _logger        = logger;
     }
 
-    public async Task<Result> Handle(DeleteNotificationCommand request, CancellationToken ct)
+    public async Task<Result> Handle(DeleteNotificationCommand request, CancellationToken cancellationToken)
     {
         var notification = await _notifications.GetByIdAsync(
-            request.TenantId, request.NotificationId, ct);
+            request.TenantId, request.NotificationId, cancellationToken);
 
         if (notification is null)
         {
@@ -41,8 +41,8 @@ internal sealed class DeleteNotificationCommandHandler
         }
 
         notification.Delete();
-        await _notifications.UpdateAsync(notification, ct);
-        await _notifications.SaveChangesAsync(ct);
+        await _notifications.UpdateAsync(notification, cancellationToken);
+        await _notifications.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
             "Notification {Id} soft-deleted by {RecipientId}", request.NotificationId, request.RecipientId);

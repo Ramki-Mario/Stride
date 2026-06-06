@@ -12,5 +12,5 @@ public interface IAdminReadService
         string? status,
         int page,
         int pageSize,
-        CancellationToken ct = default);
+        CancellationToken cancellationToken = default);
 }

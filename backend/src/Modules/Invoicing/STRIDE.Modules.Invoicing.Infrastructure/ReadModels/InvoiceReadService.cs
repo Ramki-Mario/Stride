@@ -28,7 +28,7 @@ internal sealed class InvoiceReadService : IInvoiceReadService
 
     public async Task<PagedResult<InvoiceSummaryDto>> GetInvoicesAsync(
         Guid tenantId, string? search, int? status,
-        int page, int pageSize, CancellationToken ct = default)
+        int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var param = new
         {
@@ -39,16 +39,16 @@ internal sealed class InvoiceReadService : IInvoiceReadService
             PageSize = pageSize,
         };
 
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
 
         var total = await conn.ExecuteScalarAsync<int>(
-            new CommandDefinition(SqlCountInvoices, param, cancellationToken: ct));
+            new CommandDefinition(SqlCountInvoices, param, cancellationToken: cancellationToken));
 
         if (total == 0)
             return PagedResult<InvoiceSummaryDto>.Empty(page, pageSize);
 
         var rows = await conn.QueryAsync<dynamic>(
-            new CommandDefinition(SqlGetInvoices, param, cancellationToken: ct));
+            new CommandDefinition(SqlGetInvoices, param, cancellationToken: cancellationToken));
 
         var items = rows.Select(r => new InvoiceSummaryDto(
             Id:            (Guid)r.Id,
@@ -69,14 +69,14 @@ internal sealed class InvoiceReadService : IInvoiceReadService
     }
 
     public async Task<InvoiceDetailDto?> GetInvoiceByIdAsync(
-        Guid tenantId, Guid invoiceId, CancellationToken ct = default)
+        Guid tenantId, Guid invoiceId, CancellationToken cancellationToken = default)
     {
         var param = new { TenantId = tenantId, InvoiceId = invoiceId };
 
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
 
         var rows = (await conn.QueryAsync<dynamic>(
-            new CommandDefinition(SqlGetById, param, cancellationToken: ct))).ToList();
+            new CommandDefinition(SqlGetById, param, cancellationToken: cancellationToken))).ToList();
 
         if (rows.Count == 0) return null;
 

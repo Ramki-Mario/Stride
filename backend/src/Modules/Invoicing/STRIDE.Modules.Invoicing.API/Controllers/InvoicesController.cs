@@ -46,10 +46,10 @@ public sealed class InvoicesController : ControllerBase
         [FromQuery] int     pageSize = 20,
         [FromQuery] string? search   = null,
         [FromQuery] int?    status   = null,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var result = await _mediator.Send(
-            new GetInvoicesQuery(_tenantContext.TenantId, search, status, page, pageSize), ct);
+            new GetInvoicesQuery(_tenantContext.TenantId, search, status, page, pageSize), cancellationToken);
 
         return Ok(result.Value);
     }
@@ -58,7 +58,7 @@ public sealed class InvoicesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GenerateInvoice(
-        [FromBody] GenerateInvoiceRequest request, CancellationToken ct)
+        [FromBody] GenerateInvoiceRequest request, CancellationToken cancellationToken)
     {
         var lineItems = request.LineItems
             .Select(l => new GenerateInvoiceLineItem(l.Description, l.UnitPrice, l.Quantity))
@@ -75,7 +75,7 @@ public sealed class InvoicesController : ControllerBase
                 request.Notes,
                 lineItems,
                 _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
             return BadRequest(new { error = result.Error });
@@ -86,10 +86,10 @@ public sealed class InvoicesController : ControllerBase
     [HttpGet("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetInvoice(Guid id, CancellationToken ct)
+    public async Task<IActionResult> GetInvoice(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new GetInvoiceByIdQuery(_tenantContext.TenantId, id), ct);
+            new GetInvoiceByIdQuery(_tenantContext.TenantId, id), cancellationToken);
 
         if (result.IsFailure)
             return NotFound(new { error = result.Error });
@@ -100,10 +100,10 @@ public sealed class InvoicesController : ControllerBase
     [HttpPut("{id:guid}/send")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> SendInvoice(Guid id, CancellationToken ct)
+    public async Task<IActionResult> SendInvoice(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new SendInvoiceCommand(_tenantContext.TenantId, id, _currentUser.UserId), ct);
+            new SendInvoiceCommand(_tenantContext.TenantId, id, _currentUser.UserId), cancellationToken);
 
         if (result.IsFailure)
             return BadRequest(new { error = result.Error });
@@ -114,10 +114,10 @@ public sealed class InvoicesController : ControllerBase
     [HttpPut("{id:guid}/paid")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> MarkPaid(Guid id, CancellationToken ct)
+    public async Task<IActionResult> MarkPaid(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new MarkInvoicePaidCommand(_tenantContext.TenantId, id, _currentUser.UserId), ct);
+            new MarkInvoicePaidCommand(_tenantContext.TenantId, id, _currentUser.UserId), cancellationToken);
 
         if (result.IsFailure)
             return BadRequest(new { error = result.Error });
@@ -128,10 +128,10 @@ public sealed class InvoicesController : ControllerBase
     [HttpPut("{id:guid}/void")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> VoidInvoice(Guid id, CancellationToken ct)
+    public async Task<IActionResult> VoidInvoice(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new VoidInvoiceCommand(_tenantContext.TenantId, id, _currentUser.UserId), ct);
+            new VoidInvoiceCommand(_tenantContext.TenantId, id, _currentUser.UserId), cancellationToken);
 
         if (result.IsFailure)
             return BadRequest(new { error = result.Error });

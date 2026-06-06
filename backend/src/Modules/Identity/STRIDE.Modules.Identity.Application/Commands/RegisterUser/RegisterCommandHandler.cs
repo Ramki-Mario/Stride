@@ -36,10 +36,10 @@ internal sealed class RegisterCommandHandler
 
     public async Task<Result<RegisterResult>> Handle(
         RegisterCommand request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         // ── 1. Resolve tenant ─────────────────────────────────────────────
-        var tenantId = await _tenantResolver.ResolveFromEmailAsync(request.Email, ct);
+        var tenantId = await _tenantResolver.ResolveFromEmailAsync(request.Email, cancellationToken);
         if (tenantId is null)
         {
             _logger.LogWarning(
@@ -53,7 +53,7 @@ internal sealed class RegisterCommandHandler
 
         // ── 2. Duplicate-email guard ──────────────────────────────────────
         var normalizedEmail = request.Email.Trim().ToUpperInvariant();
-        if (await _users.ExistsByEmailAsync(normalizedEmail, ct))
+        if (await _users.ExistsByEmailAsync(normalizedEmail, cancellationToken))
         {
             _logger.LogWarning(
                 "Registration failed: email {Email} already exists in tenant {TenantId}",
@@ -70,8 +70,8 @@ internal sealed class RegisterCommandHandler
             passwordHash: passwordHash,
             createdBy:   SystemActorId);
 
-        await _users.AddAsync(user, ct);
-        await _users.SaveChangesAsync(ct);
+        await _users.AddAsync(user, cancellationToken);
+        await _users.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
             "User {UserId} registered in tenant {TenantId}", user.Id, tenantId.Value);

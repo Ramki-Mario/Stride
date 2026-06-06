@@ -29,7 +29,7 @@ internal sealed class GenerateReportCommandHandler
 
     public async Task<Result<GenerateReportResult>> Handle(
         GenerateReportCommand request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         _logger.LogInformation(
             "GenerateReport: generating {ReportType} for tenant {TenantId} by user {UserId}",
@@ -38,9 +38,9 @@ internal sealed class GenerateReportCommandHandler
         // ── Strategy: compute record count per report type ─────────────────
         var (reportName, recordCount) = request.ReportType switch
         {
-            ReportType.DashboardKpi => await GenerateDashboardKpiAsync(request, ct),
-            ReportType.WorkflowTrend => await GenerateWorkflowTrendAsync(request, ct),
-            ReportType.WorkflowSummary => await GenerateWorkflowSummaryAsync(request, ct),
+            ReportType.DashboardKpi => await GenerateDashboardKpiAsync(request, cancellationToken),
+            ReportType.WorkflowTrend => await GenerateWorkflowTrendAsync(request, cancellationToken),
+            ReportType.WorkflowSummary => await GenerateWorkflowSummaryAsync(request, cancellationToken),
             _ => throw new InvalidOperationException($"Unsupported report type: {request.ReportType}")
         };
 
@@ -52,8 +52,8 @@ internal sealed class GenerateReportCommandHandler
             reportType:  request.ReportType,
             recordCount: recordCount);
 
-        await _reports.AddAsync(report, ct);
-        await _reports.SaveChangesAsync(ct);
+        await _reports.AddAsync(report, cancellationToken);
+        await _reports.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
             "GenerateReport: report {ReportId} ({Name}) saved with {Count} records",
@@ -70,26 +70,26 @@ internal sealed class GenerateReportCommandHandler
     // ── Private helpers ────────────────────────────────────────────────────────
 
     private async Task<(string Name, int RecordCount)> GenerateDashboardKpiAsync(
-        GenerateReportCommand request, CancellationToken ct)
+        GenerateReportCommand request, CancellationToken cancellationToken)
     {
         // KPI is always a single row of aggregate counts.
-        await _readService.GetDashboardKpisAsync(request.TenantId, ct);
+        await _readService.GetDashboardKpisAsync(request.TenantId, cancellationToken);
         var name = $"KPI Snapshot — {DateTime.UtcNow:yyyy-MM-dd}";
         return (name, 1);
     }
 
     private async Task<(string Name, int RecordCount)> GenerateWorkflowTrendAsync(
-        GenerateReportCommand request, CancellationToken ct)
+        GenerateReportCommand request, CancellationToken cancellationToken)
     {
-        var trends = await _readService.GetWorkflowTrendsAsync(request.TenantId, request.TrendDays, ct);
+        var trends = await _readService.GetWorkflowTrendsAsync(request.TenantId, request.TrendDays, cancellationToken);
         var name = $"Workflow Trend ({request.TrendDays}d) — {DateTime.UtcNow:yyyy-MM-dd}";
         return (name, trends.Count);
     }
 
     private async Task<(string Name, int RecordCount)> GenerateWorkflowSummaryAsync(
-        GenerateReportCommand request, CancellationToken ct)
+        GenerateReportCommand request, CancellationToken cancellationToken)
     {
-        var rows = await _readService.GetWorkflowSummaryAsync(request.TenantId, ct);
+        var rows = await _readService.GetWorkflowSummaryAsync(request.TenantId, cancellationToken);
         var name = $"Workflow Summary — {DateTime.UtcNow:yyyy-MM-dd}";
         return (name, rows.Count);
     }

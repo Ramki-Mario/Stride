@@ -25,7 +25,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
     public async ValueTask<bool> TryHandleAsync(
         HttpContext       httpContext,
         Exception         exception,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         if (exception is ValidationException validationException)
         {
@@ -43,7 +43,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
             };
 
             httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await httpContext.Response.WriteAsJsonAsync(problem, ct);
+            await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
             return true;
         }
 
@@ -61,7 +61,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
         };
 
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-        await httpContext.Response.WriteAsJsonAsync(serverError, ct);
+        await httpContext.Response.WriteAsJsonAsync(serverError, cancellationToken);
         return true;
     }
 }

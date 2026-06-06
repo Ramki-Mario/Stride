@@ -28,19 +28,19 @@ public sealed class TenantSettingsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetSettings(CancellationToken ct)
+    public async Task<IActionResult> GetSettings(CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _settings.GetSettingsAsync(token, ct));
+        return await ProxyAsync(await _settings.GetSettingsAsync(token, cancellationToken));
     }
 
     [HttpPut]
-    public async Task<IActionResult> UpdateSettings([FromBody] object body, CancellationToken ct)
+    public async Task<IActionResult> UpdateSettings([FromBody] object body, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _settings.UpdateSettingsAsync(body, token, ct);
+        var response = await _settings.UpdateSettingsAsync(body, token, cancellationToken);
 
         if (!response.IsSuccessStatusCode) return await ProxyAsync(response);
 
@@ -53,15 +53,15 @@ public sealed class TenantSettingsController : ControllerBase
 
     /// <summary>GET /bff/administration/settings/css-template — proxies the CSS file download.</summary>
     [HttpGet("css-template")]
-    public async Task<IActionResult> GetCssTemplate(CancellationToken ct)
+    public async Task<IActionResult> GetCssTemplate(CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
 
-        var response = await _settings.GetCssTemplateAsync(token, ct);
+        var response = await _settings.GetCssTemplateAsync(token, cancellationToken);
         if (!response.IsSuccessStatusCode) return await ProxyAsync(response);
 
-        var css = await response.Content.ReadAsByteArrayAsync(ct);
+        var css = await response.Content.ReadAsByteArrayAsync(cancellationToken);
         return File(css, "text/css", "stride-theme-template.css");
     }
 

@@ -9,7 +9,7 @@ internal sealed class MediatREventBus : IEventBus
 
     public MediatREventBus(IPublisher publisher) => _publisher = publisher;
 
-    public Task PublishAsync<T>(T integrationEvent, CancellationToken ct = default)
+    public Task PublishAsync<T>(T integrationEvent, CancellationToken cancellationToken = default)
         where T : IIntegrationEvent
-        => _publisher.Publish(integrationEvent, ct);
+        => _publisher.Publish(integrationEvent, cancellationToken);
 }

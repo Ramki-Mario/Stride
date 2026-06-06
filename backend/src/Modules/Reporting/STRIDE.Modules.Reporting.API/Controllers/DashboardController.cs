@@ -37,10 +37,10 @@ public sealed class DashboardController : ControllerBase
     /// </summary>
     [HttpGet("kpis")]
     [ProducesResponseType(typeof(DashboardKpiDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetKpis(CancellationToken ct)
+    public async Task<IActionResult> GetKpis(CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new GetDashboardKpisQuery(_tenantContext.TenantId), ct);
+            new GetDashboardKpisQuery(_tenantContext.TenantId), cancellationToken);
 
         return Ok(result.Value);
     }
@@ -55,10 +55,10 @@ public sealed class DashboardController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetTrends(
         [FromQuery] int days = 30,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var result = await _mediator.Send(
-            new GetWorkflowTrendsQuery(_tenantContext.TenantId, days), ct);
+            new GetWorkflowTrendsQuery(_tenantContext.TenantId, days), cancellationToken);
 
         if (result.IsFailure)
             return BadRequest(new { error = result.Error });

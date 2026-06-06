@@ -9,10 +9,10 @@ namespace STRIDE.Modules.Reporting.Application.Abstractions;
 public interface IReportRepository
 {
     /// <summary>Returns a report by primary key within the current tenant, or null if not found.</summary>
-    Task<Report?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<Report?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>Stages a new report for insertion. Caller must invoke <see cref="SaveChangesAsync"/>.</summary>
-    Task AddAsync(Report report, CancellationToken ct = default);
+    Task AddAsync(Report report, CancellationToken cancellationToken = default);
 
-    Task<int> SaveChangesAsync(CancellationToken ct = default);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

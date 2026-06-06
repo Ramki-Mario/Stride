@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Administration.Application.Abstractions;
@@ -22,7 +22,7 @@ internal sealed class InviteUserCommandHandler
         _currentUser  = currentUser;
     }
 
-    public async Task<Result<Guid>> Handle(InviteUserCommand request, CancellationToken ct)
+    public async Task<Result<Guid>> Handle(InviteUserCommand request, CancellationToken cancellationToken)
     {
         var userId = await _writeService.InviteUserAsync(
             request.TenantId,
@@ -30,9 +30,9 @@ internal sealed class InviteUserCommandHandler
             request.DisplayName,
             request.Role,
             request.InvitedBy,
-            ct);
+            cancellationToken);
 
-        // Fire-and-forget audit â€” never throws
+        // Fire-and-forget audit — never throws
         await _audit.LogAsync(
             tenantId:     request.TenantId,
             actorId:      request.InvitedBy,

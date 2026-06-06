@@ -11,31 +11,31 @@ internal sealed class RoleRepository : TenantAwareRepository<Role, IdentityDbCon
     public RoleRepository(IdentityDbContext context, ITenantContext tenant)
         : base(context, tenant) { }
 
-    public async Task<Role?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    public async Task<Role?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => await Query
             .Include(r => r.Permissions)
-            .FirstOrDefaultAsync(r => r.Id == id, ct);
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
 
-    public async Task<Role?> GetByNormalizedNameAsync(string normalizedName, CancellationToken ct = default)
+    public async Task<Role?> GetByNormalizedNameAsync(string normalizedName, CancellationToken cancellationToken = default)
         => await Query
             .Include(r => r.Permissions)
-            .FirstOrDefaultAsync(r => r.NormalizedName == normalizedName, ct);
+            .FirstOrDefaultAsync(r => r.NormalizedName == normalizedName, cancellationToken);
 
-    public async Task<IReadOnlyList<Role>> GetAllAsync(CancellationToken ct = default)
+    public async Task<IReadOnlyList<Role>> GetAllAsync(CancellationToken cancellationToken = default)
         => await Query
             .Include(r => r.Permissions)
             .OrderBy(r => r.Name)
-            .ToListAsync(ct);
+            .ToListAsync(cancellationToken);
 
-    public async Task<bool> ExistsByNameAsync(string normalizedName, CancellationToken ct = default)
-        => await Query.AnyAsync(r => r.NormalizedName == normalizedName, ct);
+    public async Task<bool> ExistsByNameAsync(string normalizedName, CancellationToken cancellationToken = default)
+        => await Query.AnyAsync(r => r.NormalizedName == normalizedName, cancellationToken);
 
-    public async Task AddAsync(Role role, CancellationToken ct = default)
-        => await Context.Roles.AddAsync(role, ct);
+    public async Task AddAsync(Role role, CancellationToken cancellationToken = default)
+        => await Context.Roles.AddAsync(role, cancellationToken);
 
     public void Update(Role role)
         => Context.Roles.Update(role);
 
-    public Task<int> SaveChangesAsync(CancellationToken ct = default)
-        => Context.SaveChangesAsync(ct);
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        => Context.SaveChangesAsync(cancellationToken);
 }

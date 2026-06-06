@@ -23,12 +23,12 @@ internal sealed class CreateWorkflowCommandHandler
 
     public async Task<Result<CreateWorkflowResult>> Handle(
         CreateWorkflowCommand request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         try
         {
             // ── 1. Duplicate name guard ────────────────────────────────────────
-            if (await _definitions.ExistsByNameAsync(request.Name.Trim(), ct))
+            if (await _definitions.ExistsByNameAsync(request.Name.Trim(), cancellationToken))
             {
                 _logger.LogWarning(
                     "CreateWorkflow failed: name '{Name}' already exists in tenant {TenantId}",
@@ -50,8 +50,8 @@ internal sealed class CreateWorkflowCommandHandler
                 definition.AddStep(step.Name, step.Description, step.IsRequired);
             }
 
-            await _definitions.AddAsync(definition, ct);
-            await _definitions.SaveChangesAsync(ct);
+            await _definitions.AddAsync(definition, cancellationToken);
+            await _definitions.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "WorkflowDefinition {Id} '{Name}' created by {UserId} in tenant {TenantId}",

@@ -34,103 +34,103 @@ public sealed class WorkflowApiClient
 
     // ── Definitions ───────────────────────────────────────────────────────
 
-    public Task<HttpResponseMessage> GetDefinitionsAsync(string token, CancellationToken ct = default)
-        => _client.SendAsync(Build(HttpMethod.Get, "/api/workflows", token), ct);
+    public Task<HttpResponseMessage> GetDefinitionsAsync(string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, "/api/workflows", token), cancellationToken);
 
-    public Task<HttpResponseMessage> GetDefinitionAsync(Guid id, string token, CancellationToken ct = default)
-        => _client.SendAsync(Build(HttpMethod.Get, $"/api/workflows/{id}", token), ct);
+    public Task<HttpResponseMessage> GetDefinitionAsync(Guid id, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, $"/api/workflows/{id}", token), cancellationToken);
 
-    public Task<HttpResponseMessage> CreateDefinitionAsync(HttpContent body, string token, CancellationToken ct = default)
+    public Task<HttpResponseMessage> CreateDefinitionAsync(HttpContent body, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, "/api/workflows", token);
         req.Content = body;
-        return _client.SendAsync(req, ct);
+        return _client.SendAsync(req, cancellationToken);
     }
 
-    public Task<HttpResponseMessage> UpdateDefinitionAsync(Guid id, HttpContent body, string token, CancellationToken ct = default)
+    public Task<HttpResponseMessage> UpdateDefinitionAsync(Guid id, HttpContent body, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Put, $"/api/workflows/{id}", token);
         req.Content = body;
-        return _client.SendAsync(req, ct);
+        return _client.SendAsync(req, cancellationToken);
     }
 
-    public Task<HttpResponseMessage> DeleteDefinitionAsync(Guid id, string token, CancellationToken ct = default)
-        => _client.SendAsync(Build(HttpMethod.Delete, $"/api/workflows/{id}", token), ct);
+    public Task<HttpResponseMessage> DeleteDefinitionAsync(Guid id, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Delete, $"/api/workflows/{id}", token), cancellationToken);
 
-    public Task<HttpResponseMessage> ActivateDefinitionAsync(Guid id, string token, CancellationToken ct = default)
+    public Task<HttpResponseMessage> ActivateDefinitionAsync(Guid id, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/{id}/activate", token);
         req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
-        return _client.SendAsync(req, ct);
+        return _client.SendAsync(req, cancellationToken);
     }
 
-    public Task<HttpResponseMessage> StartInstanceAsync(Guid definitionId, string token, CancellationToken ct = default)
+    public Task<HttpResponseMessage> StartInstanceAsync(Guid definitionId, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/{definitionId}/start", token);
         req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
-        return _client.SendAsync(req, ct);
+        return _client.SendAsync(req, cancellationToken);
     }
 
-    public Task<HttpResponseMessage> GetInstancesByDefinitionAsync(Guid definitionId, string token, CancellationToken ct = default)
-        => _client.SendAsync(Build(HttpMethod.Get, $"/api/workflows/{definitionId}/instances", token), ct);
+    public Task<HttpResponseMessage> GetInstancesByDefinitionAsync(Guid definitionId, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, $"/api/workflows/{definitionId}/instances", token), cancellationToken);
 
     // ── Instances ─────────────────────────────────────────────────────────
 
-    public Task<HttpResponseMessage> GetAllInstancesAsync(string token, CancellationToken ct = default)
-        => _client.SendAsync(Build(HttpMethod.Get, "/api/workflows/instances", token), ct);
+    public Task<HttpResponseMessage> GetAllInstancesAsync(string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, "/api/workflows/instances", token), cancellationToken);
 
-    public Task<HttpResponseMessage> GetInstanceAsync(Guid instanceId, string token, CancellationToken ct = default)
-        => _client.SendAsync(Build(HttpMethod.Get, $"/api/workflows/instances/{instanceId}", token), ct);
+    public Task<HttpResponseMessage> GetInstanceAsync(Guid instanceId, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, $"/api/workflows/instances/{instanceId}", token), cancellationToken);
 
-    public Task<HttpResponseMessage> PauseInstanceAsync(Guid instanceId, string token, CancellationToken ct = default)
+    public Task<HttpResponseMessage> PauseInstanceAsync(Guid instanceId, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/pause", token);
         req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
-        return _client.SendAsync(req, ct);
+        return _client.SendAsync(req, cancellationToken);
     }
 
-    public Task<HttpResponseMessage> ResumeInstanceAsync(Guid instanceId, string token, CancellationToken ct = default)
+    public Task<HttpResponseMessage> ResumeInstanceAsync(Guid instanceId, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/resume", token);
         req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
-        return _client.SendAsync(req, ct);
+        return _client.SendAsync(req, cancellationToken);
     }
 
-    public Task<HttpResponseMessage> CancelInstanceAsync(Guid instanceId, string token, CancellationToken ct = default)
+    public Task<HttpResponseMessage> CancelInstanceAsync(Guid instanceId, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/cancel", token);
         req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
-        return _client.SendAsync(req, ct);
+        return _client.SendAsync(req, cancellationToken);
     }
 
     // ── Steps ─────────────────────────────────────────────────────────────
 
-    public Task<HttpResponseMessage> AssignStepAsync(Guid instanceId, Guid stepId, HttpContent body, string token, CancellationToken ct = default)
+    public Task<HttpResponseMessage> AssignStepAsync(Guid instanceId, Guid stepId, HttpContent body, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/steps/{stepId}/assign", token);
         req.Content = body;
-        return _client.SendAsync(req, ct);
+        return _client.SendAsync(req, cancellationToken);
     }
 
-    public Task<HttpResponseMessage> CompleteStepAsync(Guid instanceId, Guid stepId, string token, CancellationToken ct = default)
+    public Task<HttpResponseMessage> CompleteStepAsync(Guid instanceId, Guid stepId, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/steps/{stepId}/complete", token);
         req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
-        return _client.SendAsync(req, ct);
+        return _client.SendAsync(req, cancellationToken);
     }
 
-    public Task<HttpResponseMessage> FailStepAsync(Guid instanceId, Guid stepId, HttpContent body, string token, CancellationToken ct = default)
+    public Task<HttpResponseMessage> FailStepAsync(Guid instanceId, Guid stepId, HttpContent body, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/steps/{stepId}/fail", token);
         req.Content = body;
-        return _client.SendAsync(req, ct);
+        return _client.SendAsync(req, cancellationToken);
     }
 
-    public Task<HttpResponseMessage> SkipStepAsync(Guid instanceId, Guid stepId, string token, CancellationToken ct = default)
+    public Task<HttpResponseMessage> SkipStepAsync(Guid instanceId, Guid stepId, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/steps/{stepId}/skip", token);
         req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
-        return _client.SendAsync(req, ct);
+        return _client.SendAsync(req, cancellationToken);
     }
 
     // ── Helper ────────────────────────────────────────────────────────────

@@ -9,19 +9,19 @@ namespace STRIDE.Modules.Workflows.Application.Abstractions;
 public interface IWorkflowInstanceRepository
 {
     /// <summary>Returns a workflow instance by primary key, including its step instances.</summary>
-    Task<WorkflowInstance?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<WorkflowInstance?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>Returns all instances for a given workflow definition (history view).</summary>
-    Task<IReadOnlyList<WorkflowInstance>> GetByDefinitionIdAsync(Guid definitionId, CancellationToken ct = default);
+    Task<IReadOnlyList<WorkflowInstance>> GetByDefinitionIdAsync(Guid definitionId, CancellationToken cancellationToken = default);
 
     /// <summary>Returns all instances in the current tenant (for list/dashboard views).</summary>
-    Task<IReadOnlyList<WorkflowInstance>> GetAllAsync(CancellationToken ct = default);
+    Task<IReadOnlyList<WorkflowInstance>> GetAllAsync(CancellationToken cancellationToken = default);
 
     /// <summary>Stages a new instance for insertion. Caller must call SaveChangesAsync.</summary>
-    Task AddAsync(WorkflowInstance instance, CancellationToken ct = default);
+    Task AddAsync(WorkflowInstance instance, CancellationToken cancellationToken = default);
 
     /// <summary>Marks an existing instance as modified. Caller must call SaveChangesAsync.</summary>
     void Update(WorkflowInstance instance);
 
-    Task<int> SaveChangesAsync(CancellationToken ct = default);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

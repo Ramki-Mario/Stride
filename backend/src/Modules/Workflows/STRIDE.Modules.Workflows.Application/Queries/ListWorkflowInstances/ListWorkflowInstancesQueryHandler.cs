@@ -15,11 +15,11 @@ internal sealed class ListWorkflowInstancesQueryHandler
 
     public async Task<Result<IReadOnlyList<WorkflowInstanceSummaryDto>>> Handle(
         ListWorkflowInstancesQuery request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var instances = request.WorkflowDefinitionId.HasValue
-            ? await _instances.GetByDefinitionIdAsync(request.WorkflowDefinitionId.Value, ct)
-            : await _instances.GetAllAsync(ct);
+            ? await _instances.GetByDefinitionIdAsync(request.WorkflowDefinitionId.Value, cancellationToken)
+            : await _instances.GetAllAsync(cancellationToken);
 
         var summaries = instances
             .OrderByDescending(i => i.UpdatedAt)

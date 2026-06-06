@@ -38,12 +38,12 @@ public sealed class ReportingController : ControllerBase
 
     /// <summary>GET /bff/reporting/dashboard/kpis</summary>
     [HttpGet("dashboard/kpis")]
-    public async Task<IActionResult> GetDashboardKpis(CancellationToken ct)
+    public async Task<IActionResult> GetDashboardKpis(CancellationToken cancellationToken)
     {
         var token = await GetAccessTokenAsync();
         if (token is null) return Unauthorized();
 
-        var response = await _reporting.GetDashboardKpisAsync(token, ct);
+        var response = await _reporting.GetDashboardKpisAsync(token, cancellationToken);
         return await ProxyJsonResponseAsync(response);
     }
 
@@ -51,12 +51,12 @@ public sealed class ReportingController : ControllerBase
     [HttpGet("dashboard/trends")]
     public async Task<IActionResult> GetWorkflowTrends(
         [FromQuery] int days = 30,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var token = await GetAccessTokenAsync();
         if (token is null) return Unauthorized();
 
-        var response = await _reporting.GetWorkflowTrendsAsync(days, token, ct);
+        var response = await _reporting.GetWorkflowTrendsAsync(days, token, cancellationToken);
         return await ProxyJsonResponseAsync(response);
     }
 
@@ -64,18 +64,18 @@ public sealed class ReportingController : ControllerBase
 
     /// <summary>GET /bff/reporting/reports</summary>
     [HttpGet("reports")]
-    public async Task<IActionResult> GetReports(CancellationToken ct)
+    public async Task<IActionResult> GetReports(CancellationToken cancellationToken)
     {
         var token = await GetAccessTokenAsync();
         if (token is null) return Unauthorized();
 
-        var response = await _reporting.GetReportsAsync(token, ct);
+        var response = await _reporting.GetReportsAsync(token, cancellationToken);
         return await ProxyJsonResponseAsync(response);
     }
 
     /// <summary>POST /bff/reporting/reports/generate</summary>
     [HttpPost("reports/generate")]
-    public async Task<IActionResult> GenerateReport(CancellationToken ct)
+    public async Task<IActionResult> GenerateReport(CancellationToken cancellationToken)
     {
         var token = await GetAccessTokenAsync();
         if (token is null) return Unauthorized();
@@ -84,23 +84,23 @@ public sealed class ReportingController : ControllerBase
         using var body = new StreamContent(Request.Body);
         body.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
-        var response = await _reporting.GenerateReportAsync(body, token, ct);
+        var response = await _reporting.GenerateReportAsync(body, token, cancellationToken);
         return await ProxyJsonResponseAsync(response, forwardStatusCode: true);
     }
 
     /// <summary>GET /bff/reporting/reports/{id}/export — streams CSV to browser.</summary>
     [HttpGet("reports/{id:guid}/export")]
-    public async Task<IActionResult> ExportReportCsv(Guid id, CancellationToken ct)
+    public async Task<IActionResult> ExportReportCsv(Guid id, CancellationToken cancellationToken)
     {
         var token = await GetAccessTokenAsync();
         if (token is null) return Unauthorized();
 
-        var response = await _reporting.ExportReportCsvAsync(id, token, ct);
+        var response = await _reporting.ExportReportCsvAsync(id, token, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
             return StatusCode((int)response.StatusCode);
 
-        var content     = await response.Content.ReadAsByteArrayAsync(ct);
+        var content     = await response.Content.ReadAsByteArrayAsync(cancellationToken);
         var contentType = response.Content.Headers.ContentType?.ToString() ?? "text/csv; charset=utf-8";
         var fileName    = response.Content.Headers.ContentDisposition?.FileName
                           ?? $"report-{id}.csv";

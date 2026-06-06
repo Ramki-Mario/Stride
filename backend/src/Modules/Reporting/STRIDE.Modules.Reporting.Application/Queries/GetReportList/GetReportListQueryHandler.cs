@@ -26,12 +26,12 @@ internal sealed class GetReportListQueryHandler
 
     public async Task<Result<IReadOnlyList<ReportSummaryDto>>> Handle(
         GetReportListQuery request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         _logger.LogInformation(
             "GetReportList: listing saved reports for tenant {TenantId}", request.TenantId);
 
-        var reports = await _readService.GetReportSummariesAsync(request.TenantId, ct);
+        var reports = await _readService.GetReportSummariesAsync(request.TenantId, cancellationToken);
         return Result.Success(reports);
     }
 }

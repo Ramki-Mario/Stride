@@ -15,7 +15,7 @@ public sealed class ValidationBehaviour<TRequest, TResponse>
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         if (!_validators.Any()) return await next();
 

@@ -32,7 +32,7 @@ public sealed class WorkflowsDbContext : DbContext
     /// Saves changes then dispatches all domain events collected by aggregate roots.
     /// Events are dispatched AFTER the database commit so handlers see consistent state.
     /// </summary>
-    public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         // Collect and clear domain events before saving
         var aggregates = ChangeTracker
@@ -48,7 +48,7 @@ public sealed class WorkflowsDbContext : DbContext
         foreach (var aggregate in aggregates)
             aggregate.ClearDomainEvents();
 
-        var result = await base.SaveChangesAsync(ct);
+        var result = await base.SaveChangesAsync(cancellationToken);
 
         // Dispatch events after successful save
         foreach (var domainEvent in events)
@@ -57,7 +57,7 @@ public sealed class WorkflowsDbContext : DbContext
                 typeof(DomainEventNotification<>).MakeGenericType(domainEvent.GetType()),
                 domainEvent)!;
 
-            await _publisher.Publish(notification, ct);
+            await _publisher.Publish(notification, cancellationToken);
         }
 
         return result;

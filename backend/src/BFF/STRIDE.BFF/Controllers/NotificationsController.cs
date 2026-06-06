@@ -33,36 +33,36 @@ public sealed class NotificationsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetNotifications(CancellationToken ct)
+    public async Task<IActionResult> GetNotifications(CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _notifications.GetNotificationsAsync(token, ct));
+        return await ProxyAsync(await _notifications.GetNotificationsAsync(token, cancellationToken));
     }
 
     [HttpGet("unread-count")]
-    public async Task<IActionResult> GetUnreadCount(CancellationToken ct)
+    public async Task<IActionResult> GetUnreadCount(CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _notifications.GetUnreadCountAsync(token, ct));
+        return await ProxyAsync(await _notifications.GetUnreadCountAsync(token, cancellationToken));
     }
 
     [HttpPost("{id:guid}/read")]
-    public async Task<IActionResult> MarkAsRead(Guid id, CancellationToken ct)
+    public async Task<IActionResult> MarkAsRead(Guid id, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _notifications.MarkAsReadAsync(id, token, ct);
+        var response = await _notifications.MarkAsReadAsync(id, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> DeleteNotification(Guid id, CancellationToken ct)
+    public async Task<IActionResult> DeleteNotification(Guid id, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _notifications.DeleteNotificationAsync(id, token, ct);
+        var response = await _notifications.DeleteNotificationAsync(id, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
     }
 

@@ -36,10 +36,10 @@ public sealed class TenantSettingsController : ControllerBase
 
     /// <summary>GET /api/administration/settings</summary>
     [HttpGet]
-    public async Task<IActionResult> Get(CancellationToken ct)
+    public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new GetTenantSettingsQuery(_tenantContext.TenantId), ct);
+            new GetTenantSettingsQuery(_tenantContext.TenantId), cancellationToken);
 
         return result.IsSuccess
             ? Ok(result.Value)
@@ -55,7 +55,7 @@ public sealed class TenantSettingsController : ControllerBase
     /// </summary>
     [HttpPut]
     public async Task<IActionResult> Update(
-        [FromBody] UpdateTenantSettingsRequest body, CancellationToken ct)
+        [FromBody] UpdateTenantSettingsRequest body, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new UpdateTenantSettingsCommand(
             _tenantContext.TenantId,
@@ -63,7 +63,7 @@ public sealed class TenantSettingsController : ControllerBase
             body.DefaultPalette,
             body.Timezone,
             body.CustomCss,
-            _currentUser.UserId), ct);
+            _currentUser.UserId), cancellationToken);
 
         if (result.IsFailure)
             return Problem(result.Error);

@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Invoicing.Domain.Exceptions;
@@ -22,16 +22,16 @@ internal sealed class MarkInvoicePaidCommandHandler : IRequestHandler<MarkInvoic
         _currentUser = currentUser;
     }
 
-    public async Task<Result> Handle(MarkInvoicePaidCommand request, CancellationToken ct)
+    public async Task<Result> Handle(MarkInvoicePaidCommand request, CancellationToken cancellationToken)
     {
-        var invoice = await _repo.GetByIdAsync(request.TenantId, request.InvoiceId, ct);
+        var invoice = await _repo.GetByIdAsync(request.TenantId, request.InvoiceId, cancellationToken);
         if (invoice is null)
             return Result.Failure($"Invoice '{request.InvoiceId}' not found.");
 
         try
         {
             invoice.MarkPaid(request.MarkedBy);
-            await _repo.SaveChangesAsync(ct);
+            await _repo.SaveChangesAsync(cancellationToken);
 
             await _audit.LogAsync(
                 tenantId:     request.TenantId,

@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Administration.Application.Abstractions;
@@ -22,12 +22,12 @@ internal sealed class DeactivateUserCommandHandler
         _currentUser  = currentUser;
     }
 
-    public async Task<Result> Handle(DeactivateUserCommand request, CancellationToken ct)
+    public async Task<Result> Handle(DeactivateUserCommand request, CancellationToken cancellationToken)
     {
         if (request.UserId == request.CallerUserId)
             return Result.Failure("You cannot deactivate your own account.");
 
-        await _writeService.DeactivateUserAsync(request.TenantId, request.UserId, ct);
+        await _writeService.DeactivateUserAsync(request.TenantId, request.UserId, cancellationToken);
 
         await _audit.LogAsync(
             tenantId:     request.TenantId,

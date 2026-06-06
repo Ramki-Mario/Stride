@@ -21,9 +21,9 @@ internal sealed class GetWorkflowInstanceQueryHandler
 
     public async Task<Result<WorkflowInstanceDto>> Handle(
         GetWorkflowInstanceQuery request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
-        var instance = await _instances.GetByIdAsync(request.WorkflowInstanceId, ct);
+        var instance = await _instances.GetByIdAsync(request.WorkflowInstanceId, cancellationToken);
         if (instance is null)
         {
             _logger.LogWarning(

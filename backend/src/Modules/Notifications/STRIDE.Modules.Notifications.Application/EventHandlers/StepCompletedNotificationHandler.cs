@@ -27,7 +27,7 @@ internal sealed class StepCompletedNotificationHandler
 
     public async Task Handle(
         DomainEventNotification<StepCompletedEvent> notification,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var e = notification.DomainEvent;
 
@@ -39,7 +39,7 @@ internal sealed class StepCompletedNotificationHandler
             Body:        "A workflow step has been marked as completed.",
             CreatedBy:   e.CompletedBy);
 
-        var result = await _sender.Send(command, ct);
+        var result = await _sender.Send(command, cancellationToken);
 
         if (!result.IsSuccess)
             _logger.LogWarning(

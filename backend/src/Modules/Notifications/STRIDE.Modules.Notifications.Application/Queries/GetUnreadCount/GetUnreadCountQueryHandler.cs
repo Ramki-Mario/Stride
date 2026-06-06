@@ -14,10 +14,10 @@ internal sealed class GetUnreadCountQueryHandler
         _notifications = notifications;
     }
 
-    public async Task<Result<int>> Handle(GetUnreadCountQuery request, CancellationToken ct)
+    public async Task<Result<int>> Handle(GetUnreadCountQuery request, CancellationToken cancellationToken)
     {
         var count = await _notifications.GetUnreadCountAsync(
-            request.TenantId, request.RecipientId, ct);
+            request.TenantId, request.RecipientId, cancellationToken);
 
         return Result.Success(count);
     }

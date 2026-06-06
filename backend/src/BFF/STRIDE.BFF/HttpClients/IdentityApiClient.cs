@@ -24,17 +24,17 @@ public sealed class IdentityApiClient
     /// </summary>
     public async Task<HostLoginResponse?> LoginAsync(
         LoginRequest request,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var response = await _client.PostAsJsonAsync(
             "/api/identity/auth/login",
             new { request.Email, request.Password },
-            ct);
+            cancellationToken);
 
         if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.BadRequest)
             return null;
 
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<HostLoginResponse>(cancellationToken: ct);
+        return await response.Content.ReadFromJsonAsync<HostLoginResponse>(cancellationToken: cancellationToken);
     }
 }

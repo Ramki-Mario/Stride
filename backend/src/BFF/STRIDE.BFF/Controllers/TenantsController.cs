@@ -54,7 +54,7 @@ public sealed class TenantsController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(
         [FromBody] RegisterTenantBffRequest request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
@@ -69,7 +69,7 @@ public sealed class TenantsController : ControllerBase
                 request.AdminEmail,
                 request.AdminPassword,
                 request.AdminDisplayName,
-            }, ct);
+            }, cancellationToken);
         }
         catch (HttpRequestException ex) when ((int?)ex.StatusCode is 400 or 409)
         {

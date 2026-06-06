@@ -19,34 +19,34 @@ internal sealed class TenantResolver : ITenantResolver
 
     public TenantResolver(IDbConnectionFactory db) => _db = db;
 
-    public async Task<Guid?> ResolveFromEmailAsync(string email, CancellationToken ct = default)
+    public async Task<Guid?> ResolveFromEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         var normalizedEmail = email.Trim().ToLowerInvariant();
         var domain          = ExtractDomain(normalizedEmail);
 
-        await using var conn = await _db.OpenConnectionAsync(ct);
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
 
         if (!GenericEmailDomains.IsGeneric(domain))
         {
-            var tenantId = await ResolveByCorporateDomainAsync(conn, domain, ct);
+            var tenantId = await ResolveByCorporateDomainAsync(conn, domain, cancellationToken);
             if (tenantId.HasValue)
                 return tenantId;
         }
 
-        return await ResolveByUserTenantMappingAsync(conn, normalizedEmail, ct);
+        return await ResolveByUserTenantMappingAsync(conn, normalizedEmail, cancellationToken);
     }
 
     private static Task<Guid?> ResolveByCorporateDomainAsync(
-        DbConnection conn, string domain, CancellationToken ct)
+        DbConnection conn, string domain, CancellationToken cancellationToken)
         => conn.QuerySingleOrDefaultAsync<Guid?>(
-            new CommandDefinition(SqlResolveByCorporateDomain, new { Domain = domain }, cancellationToken: ct));
+            new CommandDefinition(SqlResolveByCorporateDomain, new { Domain = domain }, cancellationToken: cancellationToken));
 
     private static Task<Guid?> ResolveByUserTenantMappingAsync(
-        DbConnection conn, string normalizedEmail, CancellationToken ct)
+        DbConnection conn, string normalizedEmail, CancellationToken cancellationToken)
         => conn.QuerySingleOrDefaultAsync<Guid?>(
             new CommandDefinition(SqlResolveByUserMapping,
                 new { NormalizedEmail = normalizedEmail.ToUpperInvariant() },
-                cancellationToken: ct));
+                cancellationToken: cancellationToken));
 
     private static string ExtractDomain(string email)
     {

@@ -20,21 +20,21 @@ public sealed class NotificationsApiClient
 
     public NotificationsApiClient(HttpClient client) => _client = client;
 
-    public Task<HttpResponseMessage> GetNotificationsAsync(string token, CancellationToken ct = default)
-        => _client.SendAsync(Build(HttpMethod.Get, "/api/notifications", token), ct);
+    public Task<HttpResponseMessage> GetNotificationsAsync(string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, "/api/notifications", token), cancellationToken);
 
-    public Task<HttpResponseMessage> GetUnreadCountAsync(string token, CancellationToken ct = default)
-        => _client.SendAsync(Build(HttpMethod.Get, "/api/notifications/unread-count", token), ct);
+    public Task<HttpResponseMessage> GetUnreadCountAsync(string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, "/api/notifications/unread-count", token), cancellationToken);
 
-    public Task<HttpResponseMessage> MarkAsReadAsync(Guid id, string token, CancellationToken ct = default)
+    public Task<HttpResponseMessage> MarkAsReadAsync(Guid id, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/notifications/{id}/read", token);
         req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
-        return _client.SendAsync(req, ct);
+        return _client.SendAsync(req, cancellationToken);
     }
 
-    public Task<HttpResponseMessage> DeleteNotificationAsync(Guid id, string token, CancellationToken ct = default)
-        => _client.SendAsync(Build(HttpMethod.Delete, $"/api/notifications/{id}", token), ct);
+    public Task<HttpResponseMessage> DeleteNotificationAsync(Guid id, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Delete, $"/api/notifications/{id}", token), cancellationToken);
 
     private static HttpRequestMessage Build(HttpMethod method, string uri, string token)
     {

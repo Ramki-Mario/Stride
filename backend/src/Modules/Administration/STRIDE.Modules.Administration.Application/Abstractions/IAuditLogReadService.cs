@@ -12,5 +12,5 @@ public interface IAuditLogReadService
         DateTime? from   = null,
         DateTime? to     = null,
         string?   action = null,
-        CancellationToken ct = default);
+        CancellationToken cancellationToken = default);
 }

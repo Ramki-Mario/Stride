@@ -23,25 +23,25 @@ internal sealed class TenantRepository : TenantAwareRepository<Tenant, IdentityD
     public TenantRepository(IdentityDbContext context, ITenantContext tenant)
         : base(context, tenant) { }
 
-    public async Task<Tenant?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    public async Task<Tenant?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => await TenantQuery
             .Include(t => t.DomainMappings)
-            .FirstOrDefaultAsync(t => t.Id == id, ct);
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
-    public async Task<Tenant?> GetBySlugAsync(string slug, CancellationToken ct = default)
+    public async Task<Tenant?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
         => await TenantQuery
             .Include(t => t.DomainMappings)
-            .FirstOrDefaultAsync(t => t.Slug == slug, ct);
+            .FirstOrDefaultAsync(t => t.Slug == slug, cancellationToken);
 
-    public async Task<bool> ExistsBySlugAsync(string slug, CancellationToken ct = default)
-        => await TenantQuery.AnyAsync(t => t.Slug == slug, ct);
+    public async Task<bool> ExistsBySlugAsync(string slug, CancellationToken cancellationToken = default)
+        => await TenantQuery.AnyAsync(t => t.Slug == slug, cancellationToken);
 
-    public async Task AddAsync(Tenant tenant, CancellationToken ct = default)
-        => await Context.Tenants.AddAsync(tenant, ct);
+    public async Task AddAsync(Tenant tenant, CancellationToken cancellationToken = default)
+        => await Context.Tenants.AddAsync(tenant, cancellationToken);
 
     public void Update(Tenant tenant)
         => Context.Tenants.Update(tenant);
 
-    public Task<int> SaveChangesAsync(CancellationToken ct = default)
-        => Context.SaveChangesAsync(ct);
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        => Context.SaveChangesAsync(cancellationToken);
 }

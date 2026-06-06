@@ -49,10 +49,10 @@ public sealed class UsersController : ControllerBase
         [FromQuery] string? search  = null,
         [FromQuery] string? role    = null,
         [FromQuery] string? status  = null,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var result = await _mediator.Send(
-            new GetUsersQuery(_tenantContext.TenantId, search, role, status, page, pageSize), ct);
+            new GetUsersQuery(_tenantContext.TenantId, search, role, status, page, pageSize), cancellationToken);
 
         return Ok(result.Value);
     }
@@ -65,7 +65,7 @@ public sealed class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> InviteUser(
-        [FromBody] InviteUserRequest request, CancellationToken ct)
+        [FromBody] InviteUserRequest request, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new InviteUserCommand(
@@ -74,7 +74,7 @@ public sealed class UsersController : ControllerBase
                 request.DisplayName,
                 request.Role,
                 _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
             return BadRequest(new { error = result.Error });
@@ -90,10 +90,10 @@ public sealed class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateUserRole(
-        Guid id, [FromBody] UpdateUserRoleRequest request, CancellationToken ct)
+        Guid id, [FromBody] UpdateUserRoleRequest request, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new UpdateUserRoleCommand(_tenantContext.TenantId, id, request.Role, _currentUser.UserId), ct);
+            new UpdateUserRoleCommand(_tenantContext.TenantId, id, request.Role, _currentUser.UserId), cancellationToken);
 
         if (result.IsFailure)
             return BadRequest(new { error = result.Error });
@@ -108,10 +108,10 @@ public sealed class UsersController : ControllerBase
     [HttpPut("{id:guid}/deactivate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeactivateUser(Guid id, CancellationToken ct)
+    public async Task<IActionResult> DeactivateUser(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new DeactivateUserCommand(_tenantContext.TenantId, id, _currentUser.UserId), ct);
+            new DeactivateUserCommand(_tenantContext.TenantId, id, _currentUser.UserId), cancellationToken);
 
         if (result.IsFailure)
             return BadRequest(new { error = result.Error });
@@ -125,10 +125,10 @@ public sealed class UsersController : ControllerBase
     /// </summary>
     [HttpPut("{id:guid}/reactivate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> ReactivateUser(Guid id, CancellationToken ct)
+    public async Task<IActionResult> ReactivateUser(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new ReactivateUserCommand(_tenantContext.TenantId, id), ct);
+            new ReactivateUserCommand(_tenantContext.TenantId, id), cancellationToken);
 
         return NoContent();
     }

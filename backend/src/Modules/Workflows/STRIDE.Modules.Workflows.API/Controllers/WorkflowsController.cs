@@ -62,9 +62,9 @@ public sealed class WorkflowsController : ControllerBase
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<WorkflowDefinitionSummaryDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> ListDefinitions(CancellationToken ct)
+    public async Task<IActionResult> ListDefinitions(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new ListWorkflowDefinitionsQuery(), ct);
+        var result = await _mediator.Send(new ListWorkflowDefinitionsQuery(), cancellationToken);
         return Ok(result.Value);
     }
 
@@ -75,9 +75,9 @@ public sealed class WorkflowsController : ControllerBase
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(WorkflowDefinitionDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetDefinition(Guid id, CancellationToken ct)
+    public async Task<IActionResult> GetDefinition(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetWorkflowDefinitionQuery(id), ct);
+        var result = await _mediator.Send(new GetWorkflowDefinitionQuery(id), cancellationToken);
 
         if (result.IsFailure)
             return NotFound(new { error = result.Error });
@@ -95,7 +95,7 @@ public sealed class WorkflowsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreateDefinition(
         [FromBody] CreateWorkflowRequest request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var steps = request.Steps
             .Select(s => new StepRequest(s.Name, s.Description, s.IsRequired))
@@ -109,7 +109,7 @@ public sealed class WorkflowsController : ControllerBase
                 Description: request.Description,
                 CreatedBy: _currentUser.UserId,
                 Steps:     steps),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
         {
@@ -133,7 +133,7 @@ public sealed class WorkflowsController : ControllerBase
     public async Task<IActionResult> UpdateDefinition(
         Guid id,
         [FromBody] UpdateWorkflowRequest request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new UpdateWorkflowCommand(
@@ -141,7 +141,7 @@ public sealed class WorkflowsController : ControllerBase
                 Name:       request.Name,
                 Description: request.Description,
                 UpdatedBy:  _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
         {
@@ -162,13 +162,13 @@ public sealed class WorkflowsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteDefinition(Guid id, CancellationToken ct)
+    public async Task<IActionResult> DeleteDefinition(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new DeleteWorkflowCommand(
                 WorkflowDefinitionId: id,
                 DeletedBy: _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
         {
@@ -189,13 +189,13 @@ public sealed class WorkflowsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> ActivateDefinition(Guid id, CancellationToken ct)
+    public async Task<IActionResult> ActivateDefinition(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new ActivateWorkflowCommand(
                 WorkflowDefinitionId: id,
                 ActivatedBy: _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
         {
@@ -218,13 +218,13 @@ public sealed class WorkflowsController : ControllerBase
     [ProducesResponseType(typeof(StartWorkflowResult), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> StartInstance(Guid id, CancellationToken ct)
+    public async Task<IActionResult> StartInstance(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new StartWorkflowCommand(
                 WorkflowDefinitionId: id,
                 StartedBy: _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
         {
@@ -243,9 +243,9 @@ public sealed class WorkflowsController : ControllerBase
     /// </summary>
     [HttpGet("instances")]
     [ProducesResponseType(typeof(IReadOnlyList<WorkflowInstanceSummaryDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> ListAllInstances(CancellationToken ct)
+    public async Task<IActionResult> ListAllInstances(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new ListWorkflowInstancesQuery(), ct);
+        var result = await _mediator.Send(new ListWorkflowInstancesQuery(), cancellationToken);
         return Ok(result.Value);
     }
 
@@ -255,9 +255,9 @@ public sealed class WorkflowsController : ControllerBase
     /// </summary>
     [HttpGet("{id:guid}/instances")]
     [ProducesResponseType(typeof(IReadOnlyList<WorkflowInstanceSummaryDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> ListInstances(Guid id, CancellationToken ct)
+    public async Task<IActionResult> ListInstances(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new ListWorkflowInstancesQuery(id), ct);
+        var result = await _mediator.Send(new ListWorkflowInstancesQuery(id), cancellationToken);
         return Ok(result.Value);
     }
 
@@ -268,9 +268,9 @@ public sealed class WorkflowsController : ControllerBase
     [HttpGet("instances/{instanceId:guid}")]
     [ProducesResponseType(typeof(WorkflowInstanceDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetInstance(Guid instanceId, CancellationToken ct)
+    public async Task<IActionResult> GetInstance(Guid instanceId, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetWorkflowInstanceQuery(instanceId), ct);
+        var result = await _mediator.Send(new GetWorkflowInstanceQuery(instanceId), cancellationToken);
 
         if (result.IsFailure)
             return NotFound(new { error = result.Error });
@@ -286,13 +286,13 @@ public sealed class WorkflowsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> PauseInstance(Guid instanceId, CancellationToken ct)
+    public async Task<IActionResult> PauseInstance(Guid instanceId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new PauseWorkflowCommand(
                 WorkflowInstanceId: instanceId,
                 PausedBy: _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
         {
@@ -313,13 +313,13 @@ public sealed class WorkflowsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> ResumeInstance(Guid instanceId, CancellationToken ct)
+    public async Task<IActionResult> ResumeInstance(Guid instanceId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new ResumeWorkflowCommand(
                 WorkflowInstanceId: instanceId,
                 ResumedBy: _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
         {
@@ -340,13 +340,13 @@ public sealed class WorkflowsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> CancelInstance(Guid instanceId, CancellationToken ct)
+    public async Task<IActionResult> CancelInstance(Guid instanceId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new CancelWorkflowCommand(
                 WorkflowInstanceId: instanceId,
                 CancelledBy: _currentUser.UserId),
-            ct);
+            cancellationToken);
 
         if (result.IsFailure)
         {

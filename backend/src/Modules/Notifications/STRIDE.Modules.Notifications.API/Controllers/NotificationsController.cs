@@ -43,10 +43,10 @@ public sealed class NotificationsController : ControllerBase
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<NotificationDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetNotifications(CancellationToken ct)
+    public async Task<IActionResult> GetNotifications(CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new GetNotificationsQuery(_tenantContext.TenantId, _currentUser.UserId), ct);
+            new GetNotificationsQuery(_tenantContext.TenantId, _currentUser.UserId), cancellationToken);
 
         return Ok(result.Value);
     }
@@ -57,10 +57,10 @@ public sealed class NotificationsController : ControllerBase
     /// </summary>
     [HttpGet("unread-count")]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetUnreadCount(CancellationToken ct)
+    public async Task<IActionResult> GetUnreadCount(CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new GetUnreadCountQuery(_tenantContext.TenantId, _currentUser.UserId), ct);
+            new GetUnreadCountQuery(_tenantContext.TenantId, _currentUser.UserId), cancellationToken);
 
         return Ok(result.Value);
     }
@@ -73,10 +73,10 @@ public sealed class NotificationsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> MarkAsRead(Guid id, CancellationToken ct)
+    public async Task<IActionResult> MarkAsRead(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new MarkNotificationAsReadCommand(_tenantContext.TenantId, id, _currentUser.UserId), ct);
+            new MarkNotificationAsReadCommand(_tenantContext.TenantId, id, _currentUser.UserId), cancellationToken);
 
         if (result.IsFailure)
         {
@@ -100,10 +100,10 @@ public sealed class NotificationsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> DeleteNotification(Guid id, CancellationToken ct)
+    public async Task<IActionResult> DeleteNotification(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new DeleteNotificationCommand(_tenantContext.TenantId, id, _currentUser.UserId), ct);
+            new DeleteNotificationCommand(_tenantContext.TenantId, id, _currentUser.UserId), cancellationToken);
 
         if (result.IsFailure)
         {

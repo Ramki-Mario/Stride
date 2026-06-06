@@ -37,10 +37,10 @@ internal sealed class LoginCommandHandler
 
     public async Task<Result<LoginResult>> Handle(
         LoginCommand request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         // ── 1. Resolve tenant ─────────────────────────────────────────────
-        var tenantId = await _tenantResolver.ResolveFromEmailAsync(request.Email, ct);
+        var tenantId = await _tenantResolver.ResolveFromEmailAsync(request.Email, cancellationToken);
         if (tenantId is null)
         {
             _logger.LogWarning("Login failed: tenant not found for {Email}", request.Email);
@@ -52,7 +52,7 @@ internal sealed class LoginCommandHandler
 
         // ── 2. Load user ──────────────────────────────────────────────────
         var normalizedEmail = request.Email.Trim().ToUpperInvariant();
-        var user = await _users.GetByNormalizedEmailAsync(normalizedEmail, ct);
+        var user = await _users.GetByNormalizedEmailAsync(normalizedEmail, cancellationToken);
 
         if (user is null || !user.IsActive)
         {
@@ -68,7 +68,7 @@ internal sealed class LoginCommandHandler
         }
 
         // ── 4. Resolve role names ─────────────────────────────────────────
-        var allRoles    = await _roles.GetAllAsync(ct);
+        var allRoles    = await _roles.GetAllAsync(cancellationToken);
         var roleIndex   = allRoles.ToDictionary(r => r.Id, r => r.Name);
         var roleNames   = user.Roles
             .Where(ur => !ur.IsDeleted && roleIndex.ContainsKey(ur.RoleId))

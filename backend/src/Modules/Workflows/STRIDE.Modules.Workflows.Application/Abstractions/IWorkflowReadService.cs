@@ -16,7 +16,7 @@ public interface IWorkflowReadService
     /// </summary>
     Task<IReadOnlyList<WorkflowDefinitionReadModel>> GetWorkflowDefinitionSummariesAsync(
         Guid tenantId,
-        CancellationToken ct = default);
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Returns a summary list of workflow instances for the current tenant.
@@ -25,12 +25,12 @@ public interface IWorkflowReadService
     Task<IReadOnlyList<WorkflowInstanceReadModel>> GetWorkflowInstanceSummariesAsync(
         Guid tenantId,
         Guid? definitionId = null,
-        CancellationToken ct = default);
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Returns aggregate KPI counts for the dashboard for the current tenant.
     /// </summary>
-    Task<WorkflowDashboardStats> GetDashboardStatsAsync(Guid tenantId, CancellationToken ct = default);
+    Task<WorkflowDashboardStats> GetDashboardStatsAsync(Guid tenantId, CancellationToken cancellationToken = default);
 }
 
 // ── Read models (Dapper DTOs — flat, no navigation properties) ────────────────

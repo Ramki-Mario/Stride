@@ -13,11 +13,11 @@ internal sealed class GetInvoicesQueryHandler
     public GetInvoicesQueryHandler(IInvoiceReadService read) => _read = read;
 
     public async Task<Result<PagedResult<InvoiceSummaryDto>>> Handle(
-        GetInvoicesQuery request, CancellationToken ct)
+        GetInvoicesQuery request, CancellationToken cancellationToken)
     {
         var result = await _read.GetInvoicesAsync(
             request.TenantId, request.Search, request.Status,
-            request.Page, request.PageSize, ct);
+            request.Page, request.PageSize, cancellationToken);
 
         return Result<PagedResult<InvoiceSummaryDto>>.Success(result);
     }

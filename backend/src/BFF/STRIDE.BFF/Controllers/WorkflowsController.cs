@@ -53,155 +53,155 @@ public sealed class WorkflowsController : ControllerBase
     // ── Definitions ───────────────────────────────────────────────────────
 
     [HttpGet("definitions")]
-    public async Task<IActionResult> GetDefinitions(CancellationToken ct)
+    public async Task<IActionResult> GetDefinitions(CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _workflows.GetDefinitionsAsync(token, ct));
+        return await ProxyAsync(await _workflows.GetDefinitionsAsync(token, cancellationToken));
     }
 
     [HttpGet("definitions/{id:guid}")]
-    public async Task<IActionResult> GetDefinition(Guid id, CancellationToken ct)
+    public async Task<IActionResult> GetDefinition(Guid id, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _workflows.GetDefinitionAsync(id, token, ct));
+        return await ProxyAsync(await _workflows.GetDefinitionAsync(id, token, cancellationToken));
     }
 
     [HttpPost("definitions")]
-    public async Task<IActionResult> CreateDefinition(CancellationToken ct)
+    public async Task<IActionResult> CreateDefinition(CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         using var body = JsonBody();
-        return await ProxyAsync(await _workflows.CreateDefinitionAsync(body, token, ct), forwardStatusCode: true);
+        return await ProxyAsync(await _workflows.CreateDefinitionAsync(body, token, cancellationToken), forwardStatusCode: true);
     }
 
     [HttpPut("definitions/{id:guid}")]
-    public async Task<IActionResult> UpdateDefinition(Guid id, CancellationToken ct)
+    public async Task<IActionResult> UpdateDefinition(Guid id, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         using var body = JsonBody();
-        return await ProxyAsync(await _workflows.UpdateDefinitionAsync(id, body, token, ct));
+        return await ProxyAsync(await _workflows.UpdateDefinitionAsync(id, body, token, cancellationToken));
     }
 
     [HttpDelete("definitions/{id:guid}")]
-    public async Task<IActionResult> DeleteDefinition(Guid id, CancellationToken ct)
+    public async Task<IActionResult> DeleteDefinition(Guid id, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _workflows.DeleteDefinitionAsync(id, token, ct);
+        var response = await _workflows.DeleteDefinitionAsync(id, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : StatusCode((int)response.StatusCode);
     }
 
     [HttpPost("definitions/{id:guid}/activate")]
-    public async Task<IActionResult> ActivateDefinition(Guid id, CancellationToken ct)
+    public async Task<IActionResult> ActivateDefinition(Guid id, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _workflows.ActivateDefinitionAsync(id, token, ct);
+        var response = await _workflows.ActivateDefinitionAsync(id, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
     }
 
     [HttpPost("definitions/{id:guid}/start")]
-    public async Task<IActionResult> StartInstance(Guid id, CancellationToken ct)
+    public async Task<IActionResult> StartInstance(Guid id, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _workflows.StartInstanceAsync(id, token, ct), forwardStatusCode: true);
+        return await ProxyAsync(await _workflows.StartInstanceAsync(id, token, cancellationToken), forwardStatusCode: true);
     }
 
     [HttpGet("definitions/{id:guid}/instances")]
-    public async Task<IActionResult> GetInstancesByDefinition(Guid id, CancellationToken ct)
+    public async Task<IActionResult> GetInstancesByDefinition(Guid id, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _workflows.GetInstancesByDefinitionAsync(id, token, ct));
+        return await ProxyAsync(await _workflows.GetInstancesByDefinitionAsync(id, token, cancellationToken));
     }
 
     // ── Instances ─────────────────────────────────────────────────────────
 
     [HttpGet("instances")]
-    public async Task<IActionResult> GetAllInstances(CancellationToken ct)
+    public async Task<IActionResult> GetAllInstances(CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _workflows.GetAllInstancesAsync(token, ct));
+        return await ProxyAsync(await _workflows.GetAllInstancesAsync(token, cancellationToken));
     }
 
     [HttpGet("instances/{instanceId:guid}")]
-    public async Task<IActionResult> GetInstance(Guid instanceId, CancellationToken ct)
+    public async Task<IActionResult> GetInstance(Guid instanceId, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _workflows.GetInstanceAsync(instanceId, token, ct));
+        return await ProxyAsync(await _workflows.GetInstanceAsync(instanceId, token, cancellationToken));
     }
 
     [HttpPost("instances/{instanceId:guid}/pause")]
-    public async Task<IActionResult> PauseInstance(Guid instanceId, CancellationToken ct)
+    public async Task<IActionResult> PauseInstance(Guid instanceId, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _workflows.PauseInstanceAsync(instanceId, token, ct);
+        var response = await _workflows.PauseInstanceAsync(instanceId, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
     }
 
     [HttpPost("instances/{instanceId:guid}/resume")]
-    public async Task<IActionResult> ResumeInstance(Guid instanceId, CancellationToken ct)
+    public async Task<IActionResult> ResumeInstance(Guid instanceId, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _workflows.ResumeInstanceAsync(instanceId, token, ct);
+        var response = await _workflows.ResumeInstanceAsync(instanceId, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
     }
 
     [HttpPost("instances/{instanceId:guid}/cancel")]
-    public async Task<IActionResult> CancelInstance(Guid instanceId, CancellationToken ct)
+    public async Task<IActionResult> CancelInstance(Guid instanceId, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _workflows.CancelInstanceAsync(instanceId, token, ct);
+        var response = await _workflows.CancelInstanceAsync(instanceId, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
     }
 
     // ── Steps ─────────────────────────────────────────────────────────────
 
     [HttpPost("instances/{instanceId:guid}/steps/{stepId:guid}/assign")]
-    public async Task<IActionResult> AssignStep(Guid instanceId, Guid stepId, CancellationToken ct)
+    public async Task<IActionResult> AssignStep(Guid instanceId, Guid stepId, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         using var body = JsonBody();
-        var response = await _workflows.AssignStepAsync(instanceId, stepId, body, token, ct);
+        var response = await _workflows.AssignStepAsync(instanceId, stepId, body, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
     }
 
     [HttpPost("instances/{instanceId:guid}/steps/{stepId:guid}/complete")]
-    public async Task<IActionResult> CompleteStep(Guid instanceId, Guid stepId, CancellationToken ct)
+    public async Task<IActionResult> CompleteStep(Guid instanceId, Guid stepId, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _workflows.CompleteStepAsync(instanceId, stepId, token, ct);
+        var response = await _workflows.CompleteStepAsync(instanceId, stepId, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
     }
 
     [HttpPost("instances/{instanceId:guid}/steps/{stepId:guid}/fail")]
-    public async Task<IActionResult> FailStep(Guid instanceId, Guid stepId, CancellationToken ct)
+    public async Task<IActionResult> FailStep(Guid instanceId, Guid stepId, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         using var body = JsonBody();
-        var response = await _workflows.FailStepAsync(instanceId, stepId, body, token, ct);
+        var response = await _workflows.FailStepAsync(instanceId, stepId, body, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
     }
 
     [HttpPost("instances/{instanceId:guid}/steps/{stepId:guid}/skip")]
-    public async Task<IActionResult> SkipStep(Guid instanceId, Guid stepId, CancellationToken ct)
+    public async Task<IActionResult> SkipStep(Guid instanceId, Guid stepId, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _workflows.SkipStepAsync(instanceId, stepId, token, ct);
+        var response = await _workflows.SkipStepAsync(instanceId, stepId, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
     }
 

@@ -37,10 +37,10 @@ public sealed class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)] // wrong credentials / unknown tenant
     public async Task<IActionResult> Login(
         [FromBody] LoginRequest request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new LoginCommand(request.Email, request.Password), ct);
+            new LoginCommand(request.Email, request.Password), cancellationToken);
 
         if (result.IsFailure)
             return Unauthorized(new { error = result.Error });
@@ -59,10 +59,10 @@ public sealed class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Register(
         [FromBody] RegisterRequest request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new RegisterCommand(request.Email, request.Password, request.DisplayName), ct);
+            new RegisterCommand(request.Email, request.Password, request.DisplayName), cancellationToken);
 
         if (result.IsFailure)
         {

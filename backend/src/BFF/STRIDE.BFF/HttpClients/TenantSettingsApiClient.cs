@@ -17,14 +17,14 @@ public sealed class TenantSettingsApiClient
 
     public TenantSettingsApiClient(HttpClient client) => _client = client;
 
-    public Task<HttpResponseMessage> GetSettingsAsync(string token, CancellationToken ct = default)
-        => _client.SendAsync(Build(HttpMethod.Get, "/api/administration/settings", token), ct);
+    public Task<HttpResponseMessage> GetSettingsAsync(string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, "/api/administration/settings", token), cancellationToken);
 
-    public Task<HttpResponseMessage> UpdateSettingsAsync(object body, string token, CancellationToken ct = default)
-        => _client.SendAsync(BuildWithBody(HttpMethod.Put, "/api/administration/settings", body, token), ct);
+    public Task<HttpResponseMessage> UpdateSettingsAsync(object body, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Put, "/api/administration/settings", body, token), cancellationToken);
 
-    public Task<HttpResponseMessage> GetCssTemplateAsync(string token, CancellationToken ct = default)
-        => _client.SendAsync(Build(HttpMethod.Get, "/api/administration/settings/css-template", token), ct);
+    public Task<HttpResponseMessage> GetCssTemplateAsync(string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, "/api/administration/settings/css-template", token), cancellationToken);
 
     // ── helpers ───────────────────────────────────────────────────────────────
 

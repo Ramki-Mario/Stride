@@ -14,9 +14,9 @@ internal sealed class ListWorkflowDefinitionsQueryHandler
 
     public async Task<Result<IReadOnlyList<WorkflowDefinitionSummaryDto>>> Handle(
         ListWorkflowDefinitionsQuery request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
-        var definitions = await _definitions.GetAllAsync(ct);
+        var definitions = await _definitions.GetAllAsync(cancellationToken);
 
         var summaries = definitions
             .OrderByDescending(d => d.UpdatedAt)

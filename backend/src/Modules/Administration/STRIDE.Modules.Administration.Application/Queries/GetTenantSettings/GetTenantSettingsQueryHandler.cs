@@ -21,31 +21,31 @@ internal sealed class GetTenantSettingsQueryHandler
     }
 
     public async Task<Result<TenantSettingsDto>> Handle(
-        GetTenantSettingsQuery request, CancellationToken ct)
+        GetTenantSettingsQuery request, CancellationToken cancellationToken)
     {
-        var settings = await _repo.GetByTenantIdAsync(request.TenantId, ct);
+        var settings = await _repo.GetByTenantIdAsync(request.TenantId, cancellationToken);
 
         if (settings is null)
         {
             // First access — resolve the tenant's registered name from the identity schema
             // so the sidebar shows the correct org name immediately after onboarding.
-            var tenantName = await _tenantNameResolver.ResolveAsync(request.TenantId, ct);
+            var tenantName = await _tenantNameResolver.ResolveAsync(request.TenantId, cancellationToken);
 
             settings = TenantSettings.CreateDefaults(
                 request.TenantId, request.TenantId, displayName: tenantName);
 
-            await _repo.AddAsync(settings, ct);
-            await _repo.SaveChangesAsync(ct);
+            await _repo.AddAsync(settings, cancellationToken);
+            await _repo.SaveChangesAsync(cancellationToken);
         }
         else if (string.IsNullOrEmpty(settings.DisplayName))
         {
             // Row exists but DisplayName was never populated (created before name-resolution
             // was introduced).  Backfill it now so existing tenants get their org name.
-            var tenantName = await _tenantNameResolver.ResolveAsync(request.TenantId, ct);
+            var tenantName = await _tenantNameResolver.ResolveAsync(request.TenantId, cancellationToken);
             if (!string.IsNullOrEmpty(tenantName))
             {
                 settings.BackfillDisplayName(tenantName, request.TenantId);
-                await _repo.SaveChangesAsync(ct);
+                await _repo.SaveChangesAsync(cancellationToken);
             }
         }
 

@@ -27,7 +27,7 @@ internal sealed class WorkflowStartedNotificationHandler
 
     public async Task Handle(
         DomainEventNotification<WorkflowStartedEvent> notification,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var e = notification.DomainEvent;
 
@@ -39,7 +39,7 @@ internal sealed class WorkflowStartedNotificationHandler
             Body:        $"Workflow '{e.WorkflowName}' has been started successfully.",
             CreatedBy:   e.StartedBy);
 
-        var result = await _sender.Send(command, ct);
+        var result = await _sender.Send(command, cancellationToken);
 
         if (!result.IsSuccess)
             _logger.LogWarning(

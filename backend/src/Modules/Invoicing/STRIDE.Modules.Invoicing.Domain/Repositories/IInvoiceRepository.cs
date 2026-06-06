@@ -4,8 +4,8 @@ namespace STRIDE.Modules.Invoicing.Domain.Repositories;
 
 public interface IInvoiceRepository
 {
-    Task<Invoice?> GetByIdAsync(Guid tenantId, Guid invoiceId, CancellationToken ct = default);
-    Task<Invoice?> GetByNumberAsync(Guid tenantId, string invoiceNumber, CancellationToken ct = default);
-    Task AddAsync(Invoice invoice, CancellationToken ct = default);
-    Task SaveChangesAsync(CancellationToken ct = default);
+    Task<Invoice?> GetByIdAsync(Guid tenantId, Guid invoiceId, CancellationToken cancellationToken = default);
+    Task<Invoice?> GetByNumberAsync(Guid tenantId, string invoiceNumber, CancellationToken cancellationToken = default);
+    Task AddAsync(Invoice invoice, CancellationToken cancellationToken = default);
+    Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

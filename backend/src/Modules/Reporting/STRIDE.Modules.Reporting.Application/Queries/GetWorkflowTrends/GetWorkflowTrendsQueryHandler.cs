@@ -26,13 +26,13 @@ internal sealed class GetWorkflowTrendsQueryHandler
 
     public async Task<Result<IReadOnlyList<WorkflowTrendDto>>> Handle(
         GetWorkflowTrendsQuery request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         _logger.LogInformation(
             "GetWorkflowTrends: fetching {Days}-day trend for tenant {TenantId}",
             request.Days, request.TenantId);
 
-        var trends = await _readService.GetWorkflowTrendsAsync(request.TenantId, request.Days, ct);
+        var trends = await _readService.GetWorkflowTrendsAsync(request.TenantId, request.Days, cancellationToken);
         return Result.Success(trends);
     }
 }

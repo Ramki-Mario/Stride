@@ -10,20 +10,20 @@ public sealed class InvoiceRepository : IInvoiceRepository
 
     public InvoiceRepository(InvoicingDbContext ctx) => _ctx = ctx;
 
-    public Task<Invoice?> GetByIdAsync(Guid tenantId, Guid invoiceId, CancellationToken ct = default) =>
+    public Task<Invoice?> GetByIdAsync(Guid tenantId, Guid invoiceId, CancellationToken cancellationToken = default) =>
         _ctx.Invoices
             .Include(i => i.LineItems)
-            .FirstOrDefaultAsync(i => i.TenantId == tenantId && i.Id == invoiceId, ct);
+            .FirstOrDefaultAsync(i => i.TenantId == tenantId && i.Id == invoiceId, cancellationToken);
 
-    public Task<Invoice?> GetByNumberAsync(Guid tenantId, string invoiceNumber, CancellationToken ct = default) =>
+    public Task<Invoice?> GetByNumberAsync(Guid tenantId, string invoiceNumber, CancellationToken cancellationToken = default) =>
         _ctx.Invoices
             .Include(i => i.LineItems)
             .FirstOrDefaultAsync(
-                i => i.TenantId == tenantId && i.InvoiceNumber == invoiceNumber, ct);
+                i => i.TenantId == tenantId && i.InvoiceNumber == invoiceNumber, cancellationToken);
 
-    public async Task AddAsync(Invoice invoice, CancellationToken ct = default) =>
-        await _ctx.Invoices.AddAsync(invoice, ct);
+    public async Task AddAsync(Invoice invoice, CancellationToken cancellationToken = default) =>
+        await _ctx.Invoices.AddAsync(invoice, cancellationToken);
 
-    public Task SaveChangesAsync(CancellationToken ct = default) =>
-        _ctx.SaveChangesAsync(ct);
+    public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
+        _ctx.SaveChangesAsync(cancellationToken);
 }

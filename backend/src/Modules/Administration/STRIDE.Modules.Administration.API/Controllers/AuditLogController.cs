@@ -37,7 +37,7 @@ public sealed class AuditLogController : ControllerBase
         [FromQuery] DateTime? from    = null,
         [FromQuery] DateTime? to      = null,
         [FromQuery] string?  action   = null,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var result = await _mediator.Send(
             new GetAuditLogQuery(
@@ -47,7 +47,7 @@ public sealed class AuditLogController : ControllerBase
                 From:     from,
                 To:       to,
                 Action:   action),
-            ct);
+            cancellationToken);
 
         return Ok(result);
     }
