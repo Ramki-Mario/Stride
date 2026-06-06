@@ -26,10 +26,22 @@ public static class InfrastructureServiceExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, CurrentUser>();
 
-        // Database connection factory — all Dapper services inject this instead of
-        // SqlConnection directly. To switch to MySQL: register MySqlConnectionFactory here.
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="IDbConnectionFactory"/> (SQL Server implementation).
+    /// Call this ONLY from STRIDE.Host — the BFF has no database and must NOT call this.
+    /// To switch to MySQL: swap <c>SqlServerConnectionFactory</c> for
+    /// <c>MySqlConnectionFactory</c> here; nothing else in the codebase changes.
+    /// </summary>
+    public static IServiceCollection AddBuildingBlocksDatabase(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("DefaultConnection is not configured.");
+
         services.AddSingleton<IDbConnectionFactory>(
             new SqlServerConnectionFactory(connectionString));
 

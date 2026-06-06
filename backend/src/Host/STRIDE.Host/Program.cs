@@ -33,6 +33,7 @@ builder.Host.UseSerilog((ctx, cfg) =>
 // ── Building Blocks + Modules ──────────────────────────────────────────────
 builder.Services
     .AddBuildingBlocksInfrastructure(builder.Configuration)
+    .AddBuildingBlocksDatabase(builder.Configuration)   // Host-only: BFF has no DB
     .AddIdentityModule(builder.Configuration)
     .AddWorkflowsModule(builder.Configuration)
     .AddSchedulingModule(builder.Configuration)
