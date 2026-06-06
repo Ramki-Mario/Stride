@@ -252,19 +252,19 @@
               aria-label="Select all on this page"
             />
           </th>
-          <th (click)="sortBy.set('name')" class="sortable" aria-sort="{{ sortBy() === 'name' ? 'ascending' : 'none' }}">
+          <th (click)="sortBy.set('name')" (keydown.enter)="sortBy.set('name')" (keydown.space)="sortBy.set('name')" tabindex="0" class="sortable" aria-sort="{{ sortBy() === 'name' ? 'ascending' : 'none' }}">
             Workflow
             @if (sortBy() === 'name') { <span class="pi pi-arrow-up sort-icon"></span> }
           </th>
-          <th (click)="sortBy.set('status')" class="sortable">
+          <th (click)="sortBy.set('status')" (keydown.enter)="sortBy.set('status')" (keydown.space)="sortBy.set('status')" tabindex="0" class="sortable">
             Status
             @if (sortBy() === 'status') { <span class="pi pi-arrow-up sort-icon"></span> }
           </th>
-          <th (click)="sortBy.set('stepCount')" class="sortable col-steps">
+          <th (click)="sortBy.set('stepCount')" (keydown.enter)="sortBy.set('stepCount')" (keydown.space)="sortBy.set('stepCount')" tabindex="0" class="sortable col-steps">
             Steps
             @if (sortBy() === 'stepCount') { <span class="pi pi-arrow-up sort-icon"></span> }
           </th>
-          <th (click)="sortBy.set('updatedAt')" class="sortable col-date">
+          <th (click)="sortBy.set('updatedAt')" (keydown.enter)="sortBy.set('updatedAt')" (keydown.space)="sortBy.set('updatedAt')" tabindex="0" class="sortable col-date">
             Last Updated
             @if (sortBy() === 'updatedAt') { <span class="pi pi-arrow-down sort-icon"></span> }
           </th>
@@ -282,7 +282,7 @@
             [attr.aria-label]="'Open workflow ' + wf.name"
           >
             <!-- Checkbox -->
-            <td class="col-check" (click)="$event.stopPropagation()">
+            <td class="col-check" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
               <input
                 type="checkbox"
                 class="wfl-cb"
@@ -325,7 +325,7 @@
             </td>
 
             <!-- Row actions (visible on hover) -->
-            <td class="col-actions" (click)="$event.stopPropagation()">
+            <td class="col-actions" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
               <div class="wfl-row-actions">
                 <button
                   class="wfl-row-btn"

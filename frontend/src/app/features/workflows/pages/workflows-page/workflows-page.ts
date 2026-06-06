@@ -283,8 +283,8 @@ export class WorkflowsPageComponent implements OnInit {
     return `${Math.floor(days / 365)}y ago`;
   }
 
-  progressPct(w: WorkflowDefinitionSummary): number {
-    return w.stepCount > 0 ? 0 : 0; // definition progress (n/a — shows step count only)
+  progressPct(_w: WorkflowDefinitionSummary): number {
+    return 0; // definition progress (n/a — shows step count only)
   }
 
   trackById(_: number, w: WorkflowDefinitionSummary): string {
