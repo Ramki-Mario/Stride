@@ -79,7 +79,7 @@ jobs:
             /d:sonar.host.url="https://sonarcloud.io" `
             /d:sonar.cs.cobertura.reportsPaths="backend\TestResults\**\coverage.cobertura.xml" `
             /d:sonar.cs.vstest.reportsPaths="backend\TestResults\**\*.trx" `
-            /d:sonar.exclusions="**/obj/**,**/bin/**,**/*.Designer.cs,**/*ModelSnapshot.cs,**/Migrations/**,**/node_modules/**,**/dist/**,pilot/**,docs/**" `
+            /d:sonar.exclusions="**/obj/**,**/bin/**,**/*.Designer.cs,**/*ModelSnapshot.cs,**/Migrations/**,**/node_modules/**,**/dist/**,pilot/**,docs/**,**/*.sql" `
             /d:sonar.test.inclusions="**/*.Tests/**/*.cs" `
             /d:sonar.coverage.exclusions="**/Migrations/**,**/*ModelSnapshot*,**/*DbContextFactory*,**/SeedData/**,**/*Extensions.cs"
 
