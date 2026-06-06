@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\Modules\Administration\STRIDE.Modules.Administration.Domain\STRIDE.Modules.Administration.Domain.csproj" />
+    <ProjectReference Include="..\..\..\..\src\BuildingBlocks\STRIDE.BuildingBlocks.Application\STRIDE.BuildingBlocks.Application.csproj" />
   </ItemGroup>
 
 </Project>

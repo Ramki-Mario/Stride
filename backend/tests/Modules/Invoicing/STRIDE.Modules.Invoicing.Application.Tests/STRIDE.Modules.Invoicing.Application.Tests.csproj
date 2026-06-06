@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\Modules\Invoicing\STRIDE.Modules.Invoicing.Domain\STRIDE.Modules.Invoicing.Domain.csproj" />
     <ProjectReference Include="..\..\..\..\src\Modules\Invoicing\STRIDE.Modules.Invoicing.Application\STRIDE.Modules.Invoicing.Application.csproj" />
+    <ProjectReference Include="..\..\..\..\src\BuildingBlocks\STRIDE.BuildingBlocks.Application\STRIDE.BuildingBlocks.Application.csproj" />
   </ItemGroup>
 
 </Project>
