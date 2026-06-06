@@ -40,7 +40,7 @@ public sealed class InvoicingController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         return await ProxyAsync(
-            await _invoicing.GetInvoicesAsync(token, page, pageSize, search, status, cancellationToken));
+            await _invoicing.GetInvoicesAsync(token, page, pageSize, search, status, cancellationToken), cancellationToken);
     }
 
     [HttpPost("invoices")]
@@ -51,7 +51,7 @@ public sealed class InvoicingController : ControllerBase
         var response = await _invoicing.GenerateInvoiceAsync(body, token, cancellationToken);
         return response.IsSuccessStatusCode
             ? StatusCode(StatusCodes.Status201Created, await response.Content.ReadAsStringAsync(cancellationToken))
-            : await ProxyAsync(response);
+            : await ProxyAsync(response, cancellationToken);
     }
 
     [HttpGet("invoices/{id:guid}")]
@@ -59,7 +59,7 @@ public sealed class InvoicingController : ControllerBase
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _invoicing.GetInvoiceByIdAsync(id, token, cancellationToken));
+        return await ProxyAsync(await _invoicing.GetInvoiceByIdAsync(id, token, cancellationToken), cancellationToken);
     }
 
     [HttpPut("invoices/{id:guid}/send")]
@@ -68,7 +68,7 @@ public sealed class InvoicingController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         var response = await _invoicing.SendInvoiceAsync(id, token, cancellationToken);
-        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
     [HttpPut("invoices/{id:guid}/paid")]
@@ -77,7 +77,7 @@ public sealed class InvoicingController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         var response = await _invoicing.MarkPaidAsync(id, token, cancellationToken);
-        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
     [HttpPut("invoices/{id:guid}/void")]
@@ -86,16 +86,16 @@ public sealed class InvoicingController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         var response = await _invoicing.VoidInvoiceAsync(id, token, cancellationToken);
-        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");
 
-    private async Task<IActionResult> ProxyAsync(HttpResponseMessage response)
+    private async Task<IActionResult> ProxyAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
     {
-        var json = await response.Content.ReadAsStringAsync();
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {

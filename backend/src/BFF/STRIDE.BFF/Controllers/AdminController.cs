@@ -41,7 +41,7 @@ public sealed class AdminController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         return await ProxyAsync(
-            await _admin.GetUsersAsync(token, page, pageSize, search, role, status, cancellationToken));
+            await _admin.GetUsersAsync(token, page, pageSize, search, role, status, cancellationToken), cancellationToken);
     }
 
     [HttpPost("users/invite")]
@@ -51,8 +51,8 @@ public sealed class AdminController : ControllerBase
         if (token is null) return Unauthorized();
         var response = await _admin.InviteUserAsync(body, token, cancellationToken);
         return response.IsSuccessStatusCode
-            ? StatusCode(StatusCodes.Status201Created, await response.Content.ReadAsStringAsync())
-            : await ProxyAsync(response);
+            ? StatusCode(StatusCodes.Status201Created, await response.Content.ReadAsStringAsync(cancellationToken))
+            : await ProxyAsync(response, cancellationToken);
     }
 
     [HttpPut("users/{id:guid}/role")]
@@ -61,7 +61,7 @@ public sealed class AdminController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         var response = await _admin.UpdateUserRoleAsync(id, body, token, cancellationToken);
-        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
     [HttpPut("users/{id:guid}/deactivate")]
@@ -70,7 +70,7 @@ public sealed class AdminController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         var response = await _admin.DeactivateUserAsync(id, token, cancellationToken);
-        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
     [HttpPut("users/{id:guid}/reactivate")]
@@ -79,7 +79,7 @@ public sealed class AdminController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         var response = await _admin.ReactivateUserAsync(id, token, cancellationToken);
-        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
     [HttpGet("audit-log")]
@@ -94,16 +94,16 @@ public sealed class AdminController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         return await ProxyAsync(
-            await _admin.GetAuditLogAsync(token, page, pageSize, from, to, action, cancellationToken));
+            await _admin.GetAuditLogAsync(token, page, pageSize, from, to, action, cancellationToken), cancellationToken);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");
 
-    private async Task<IActionResult> ProxyAsync(HttpResponseMessage response)
+    private async Task<IActionResult> ProxyAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
     {
-        var json = await response.Content.ReadAsStringAsync();
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {

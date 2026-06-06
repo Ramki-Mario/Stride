@@ -37,7 +37,7 @@ public sealed class NotificationsController : ControllerBase
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _notifications.GetNotificationsAsync(token, cancellationToken));
+        return await ProxyAsync(await _notifications.GetNotificationsAsync(token, cancellationToken), cancellationToken);
     }
 
     [HttpGet("unread-count")]
@@ -45,7 +45,7 @@ public sealed class NotificationsController : ControllerBase
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _notifications.GetUnreadCountAsync(token, cancellationToken));
+        return await ProxyAsync(await _notifications.GetUnreadCountAsync(token, cancellationToken), cancellationToken);
     }
 
     [HttpPost("{id:guid}/read")]
@@ -54,7 +54,7 @@ public sealed class NotificationsController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         var response = await _notifications.MarkAsReadAsync(id, token, cancellationToken);
-        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
     [HttpDelete("{id:guid}")]
@@ -63,16 +63,16 @@ public sealed class NotificationsController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         var response = await _notifications.DeleteNotificationAsync(id, token, cancellationToken);
-        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────
 
     private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");
 
-    private async Task<IActionResult> ProxyAsync(HttpResponseMessage response)
+    private async Task<IActionResult> ProxyAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
     {
-        var json = await response.Content.ReadAsStringAsync();
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {

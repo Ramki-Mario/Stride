@@ -32,7 +32,7 @@ public sealed class TenantSettingsController : ControllerBase
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _settings.GetSettingsAsync(token, cancellationToken));
+        return await ProxyAsync(await _settings.GetSettingsAsync(token, cancellationToken), cancellationToken);
     }
 
     [HttpPut]
@@ -42,13 +42,13 @@ public sealed class TenantSettingsController : ControllerBase
         if (token is null) return Unauthorized();
         var response = await _settings.UpdateSettingsAsync(body, token, cancellationToken);
 
-        if (!response.IsSuccessStatusCode) return await ProxyAsync(response);
+        if (!response.IsSuccessStatusCode) return await ProxyAsync(response, cancellationToken);
 
         // 200 means CSS was included and a sanitisation report was returned; proxy it.
         // 204 means settings-only update with no CSS.
         return response.StatusCode == System.Net.HttpStatusCode.NoContent
             ? NoContent()
-            : await ProxyAsync(response);
+            : await ProxyAsync(response, cancellationToken);
     }
 
     /// <summary>GET /bff/administration/settings/css-template — proxies the CSS file download.</summary>
@@ -59,7 +59,7 @@ public sealed class TenantSettingsController : ControllerBase
         if (token is null) return Unauthorized();
 
         var response = await _settings.GetCssTemplateAsync(token, cancellationToken);
-        if (!response.IsSuccessStatusCode) return await ProxyAsync(response);
+        if (!response.IsSuccessStatusCode) return await ProxyAsync(response, cancellationToken);
 
         var css = await response.Content.ReadAsByteArrayAsync(cancellationToken);
         return File(css, "text/css", "stride-theme-template.css");
@@ -69,9 +69,9 @@ public sealed class TenantSettingsController : ControllerBase
 
     private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");
 
-    private async Task<IActionResult> ProxyAsync(HttpResponseMessage response)
+    private async Task<IActionResult> ProxyAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
     {
-        var json = await response.Content.ReadAsStringAsync();
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {

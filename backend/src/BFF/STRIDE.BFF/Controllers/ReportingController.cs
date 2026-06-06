@@ -44,7 +44,7 @@ public sealed class ReportingController : ControllerBase
         if (token is null) return Unauthorized();
 
         var response = await _reporting.GetDashboardKpisAsync(token, cancellationToken);
-        return await ProxyJsonResponseAsync(response);
+        return await ProxyJsonResponseAsync(response, cancellationToken: cancellationToken);
     }
 
     /// <summary>GET /bff/reporting/dashboard/trends?days=N</summary>
@@ -57,7 +57,7 @@ public sealed class ReportingController : ControllerBase
         if (token is null) return Unauthorized();
 
         var response = await _reporting.GetWorkflowTrendsAsync(days, token, cancellationToken);
-        return await ProxyJsonResponseAsync(response);
+        return await ProxyJsonResponseAsync(response, cancellationToken: cancellationToken);
     }
 
     // ── Reports ───────────────────────────────────────────────────────────
@@ -70,7 +70,7 @@ public sealed class ReportingController : ControllerBase
         if (token is null) return Unauthorized();
 
         var response = await _reporting.GetReportsAsync(token, cancellationToken);
-        return await ProxyJsonResponseAsync(response);
+        return await ProxyJsonResponseAsync(response, cancellationToken: cancellationToken);
     }
 
     /// <summary>POST /bff/reporting/reports/generate</summary>
@@ -85,7 +85,7 @@ public sealed class ReportingController : ControllerBase
         body.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
         var response = await _reporting.GenerateReportAsync(body, token, cancellationToken);
-        return await ProxyJsonResponseAsync(response, forwardStatusCode: true);
+        return await ProxyJsonResponseAsync(response, forwardStatusCode: true, cancellationToken: cancellationToken);
     }
 
     /// <summary>GET /bff/reporting/reports/{id}/export — streams CSV to browser.</summary>
@@ -124,9 +124,10 @@ public sealed class ReportingController : ControllerBase
     /// </summary>
     private async Task<IActionResult> ProxyJsonResponseAsync(
         HttpResponseMessage response,
-        bool forwardStatusCode = false)
+        bool forwardStatusCode = false,
+        CancellationToken cancellationToken = default)
     {
-        var json = await response.Content.ReadAsStringAsync();
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
