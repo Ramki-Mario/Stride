@@ -108,6 +108,7 @@
                   [disabled]="exportingId() !== null"
                   (click)="exportCsv(report)"
                   title="Download CSV"
+                  aria-label="Download CSV"
                 >
                   @if (exportingId() === report.reportId) {
                     <span class="pi pi-spin pi-spinner"></span>
