@@ -30,60 +30,48 @@
 <!-- ── Summary Strip ────────────────────────────────────────────────────── -->
 <div class="wfl-summary-strip">
   <!-- All -->
-  <div
+  <button
+    type="button"
     class="wfl-summary-card"
     [class.active]="statusFilter() === ''"
     (click)="setStatusFilter('')"
-    (keydown.enter)="setStatusFilter('')"
-    tabindex="0"
-    role="button"
-    aria-label="Show all workflows"
   >
     <div class="wfl-summary-label">All Workflows</div>
     <div class="wfl-summary-count primary">{{ statusCounts().all }}</div>
-  </div>
+  </button>
 
   <!-- Draft -->
-  <div
+  <button
+    type="button"
     class="wfl-summary-card"
     [class.active]="statusFilter() === 'Draft'"
     (click)="setStatusFilter('Draft')"
-    (keydown.enter)="setStatusFilter('Draft')"
-    tabindex="0"
-    role="button"
-    aria-label="Show Draft workflows"
   >
     <div class="wfl-summary-label">Draft</div>
     <div class="wfl-summary-count muted">{{ statusCounts().draft }}</div>
-  </div>
+  </button>
 
   <!-- Active -->
-  <div
+  <button
+    type="button"
     class="wfl-summary-card"
     [class.active]="statusFilter() === 'Active'"
     (click)="setStatusFilter('Active')"
-    (keydown.enter)="setStatusFilter('Active')"
-    tabindex="0"
-    role="button"
-    aria-label="Show Active workflows"
   >
     <div class="wfl-summary-label">Active</div>
     <div class="wfl-summary-count running">{{ statusCounts().active }}</div>
-  </div>
+  </button>
 
   <!-- Archived -->
-  <div
+  <button
+    type="button"
     class="wfl-summary-card"
     [class.active]="statusFilter() === 'Archived'"
     (click)="setStatusFilter('Archived')"
-    (keydown.enter)="setStatusFilter('Archived')"
-    tabindex="0"
-    role="button"
-    aria-label="Show Archived workflows"
   >
     <div class="wfl-summary-label">Archived</div>
     <div class="wfl-summary-count muted">{{ statusCounts().archived }}</div>
-  </div>
+  </button>
 </div>
 
 <!-- ── Toolbar ──────────────────────────────────────────────────────────── -->
