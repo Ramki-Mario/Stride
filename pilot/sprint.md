@@ -1074,9 +1074,33 @@ EP-036 (Invoicing)             ← parallel with EP-037 after EP-035 done
 
 ---
 
-## Sprint 7 — Portfolio & Deployment Polish (PLANNED)
+## Sprint 7 — Portfolio & Deployment Polish (🔵 PLANNED)
 
-**Phase:** Phase 7 — not started
+**Phase:** Phase 7
+**Status:** Issues created, board populated — ready to start
+**GitHub milestone:** #7 — Phase 7 — Portfolio & Deployment Polish
+
+### Test stack decision
+**Backend:** xUnit (existing) + FluentAssertions v7 + NSubstitute v5 + Bogus v35 + TestContainers
+**Angular:** jest-preset-angular (replaces Karma) + @testing-library/angular
+**Why NSubstitute over Moq:** Moq's `Verify()` has known reliability gaps with `async` methods. NSubstitute's `Received()` works correctly for async mocking every time.
+
+| Epic | GitHub # | Stories | Status |
+|---|---|---|---|
+| EP-040 Unit & Integration Tests | #195 | US-112 #200, US-113 #201, US-114 #202 | [ ] Backlog |
+| EP-041 Refresh Token Flow | #196 | US-115 #203, US-116 #204, US-117 #205, US-118 #206 | [ ] Backlog |
+| EP-042 Invite Email Flow | #197 | US-119 #207, US-120 #208, US-121 #209, US-122 #210 | [ ] Backlog |
+| EP-043 Scheduling Module | #198 | US-123 #211, US-124 #212, US-125 #213, US-126 #214, US-127 #215 | [ ] Backlog |
+| EP-044 Live Deployment — Dev Environment | #199 | US-128 #216, US-129 #217, US-130 #218, US-131 #219 | [ ] Backlog |
+
+### Dependency order
+```
+EP-040 (Tests)         — unblocked, start first
+EP-041 (Refresh Token) — unblocked, parallel with tests
+EP-042 (Invite Email)  — depends on IEmailSender (US-119) first
+EP-043 (Scheduling)    — unblocked, parallel track
+EP-044 (Deployment)    — last, needs everything else stable
+```
 
 ---
 

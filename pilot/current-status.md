@@ -251,7 +251,17 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 | Tests | Zero test coverage across all modules — highest priority for Phase 7 |
 | Deployment | No live URL yet — Phase 7 goal |
 
-## Phase 7 — Portfolio & Deployment Polish (🔵 Next)
+## Phase 7 — Portfolio & Deployment Polish (🔵 In Progress)
+
+**Sprint Goal:** Close the test coverage gap, implement refresh tokens and invite email, build the Scheduling module, and deploy a live dev environment.
+
+| Epic | GitHub # | Stories | Status |
+|---|---|---|---|
+| EP-040 Unit & Integration Tests | #195 | US-112–114 (#200–202) | ⏳ Next |
+| EP-041 Refresh Token Flow | #196 | US-115–118 (#203–206) | ⏳ Pending |
+| EP-042 Invite Email Flow | #197 | US-119–122 (#207–210) | ⏳ Pending |
+| EP-043 Scheduling Module | #198 | US-123–127 (#211–215) | ⏳ Pending |
+| EP-044 Live Deployment | #199 | US-128–131 (#216–219) | ⏳ Pending |
 
 ### ⚠️ GitHub Issue Hierarchy Process (MANDATORY for every sprint)
 When creating issues for a new phase/sprint, always:
