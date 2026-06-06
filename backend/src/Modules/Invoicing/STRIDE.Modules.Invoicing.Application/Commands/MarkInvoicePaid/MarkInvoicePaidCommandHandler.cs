@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Invoicing.Domain.Exceptions;
@@ -33,13 +33,13 @@ internal sealed class MarkInvoicePaidCommandHandler : IRequestHandler<MarkInvoic
             invoice.MarkPaid(request.MarkedBy);
             await _repo.SaveChangesAsync(cancellationToken);
 
-            await _audit.LogAsync(
-                tenantId:     request.TenantId,
-                actorId:      request.MarkedBy,
-                actorEmail:   _currentUser.Email,
-                action:       AuditActions.InvoicePaid,
-                resourceType: "Invoice",
-                resourceId:   request.InvoiceId);
+            await _audit.LogAsync(new AuditLogEntry(
+                TenantId:     request.TenantId,
+                ActorId:      request.MarkedBy,
+                ActorEmail:   _currentUser.Email,
+                Action:       AuditActions.InvoicePaid,
+                ResourceType: "Invoice",
+                ResourceId:   request.InvoiceId));
 
             return Result.Success();
         }

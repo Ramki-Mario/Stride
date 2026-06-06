@@ -25,9 +25,15 @@ internal sealed class InvoiceBuilder
 
     public Invoice Build()
     {
-        var invoice = Invoice.Generate(
-            _tenantId, _number, _clientName, _clientEmail,
-            _currency, _dueDate, _notes, _createdBy);
+        var invoice = Invoice.Generate(new NewInvoice(
+            TenantId:      _tenantId,
+            InvoiceNumber: _number,
+            ClientName:    _clientName,
+            ClientEmail:   _clientEmail,
+            Currency:      _currency,
+            DueDate:       _dueDate,
+            CreatedBy:     _createdBy,
+            Notes:         _notes));
         invoice.ClearDomainEvents();
         return invoice;
     }

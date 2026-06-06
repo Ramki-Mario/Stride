@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Administration.Application.Abstractions;
@@ -59,13 +59,13 @@ internal sealed class UpdateTenantSettingsCommandHandler
 
         await _repo.SaveChangesAsync(cancellationToken);
 
-        await _audit.LogAsync(
-            tenantId:     request.TenantId,
-            actorId:      request.UpdatedBy,
-            actorEmail:   _currentUser.Email,
-            action:       AuditActions.TenantSettingsUpdated,
-            resourceType: "TenantSettings",
-            resourceId:   request.TenantId);
+        await _audit.LogAsync(new AuditLogEntry(
+            TenantId:     request.TenantId,
+            ActorId:      request.UpdatedBy,
+            ActorEmail:   _currentUser.Email,
+            Action:       AuditActions.TenantSettingsUpdated,
+            ResourceType: "TenantSettings",
+            ResourceId:   request.TenantId));
 
         return Result<SanitisedCssResult?>.Success(sanitisedResult);
     }

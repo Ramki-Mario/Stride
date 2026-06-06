@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Administration.Application.Abstractions;
@@ -33,14 +33,14 @@ internal sealed class InviteUserCommandHandler
             cancellationToken);
 
         // Fire-and-forget audit — never throws
-        await _audit.LogAsync(
-            tenantId:     request.TenantId,
-            actorId:      request.InvitedBy,
-            actorEmail:   _currentUser.Email,
-            action:       AuditActions.UserInvited,
-            resourceType: "User",
-            resourceId:   userId,
-            newValueJson: $"{{\"email\":\"{request.Email}\",\"role\":\"{request.Role}\"}}");
+        await _audit.LogAsync(new AuditLogEntry(
+            TenantId:     request.TenantId,
+            ActorId:      request.InvitedBy,
+            ActorEmail:   _currentUser.Email,
+            Action:       AuditActions.UserInvited,
+            ResourceType: "User",
+            ResourceId:   userId,
+            NewValueJson: $"{{\"email\":\"{request.Email}\",\"role\":\"{request.Role}\"}}"));
 
         return Result.Success(userId);
     }

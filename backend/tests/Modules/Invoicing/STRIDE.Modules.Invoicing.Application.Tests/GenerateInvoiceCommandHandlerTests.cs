@@ -101,14 +101,9 @@ public sealed class GenerateInvoiceCommandHandlerTests
 
         // Assert
         await _audit.Received(1).LogAsync(
-            tenantId:     Arg.Any<Guid>(),
-            actorId:      Arg.Any<Guid>(),
-            actorEmail:   Arg.Any<string>(),
-            action:       AuditActions.InvoiceGenerated,
-            resourceType: "Invoice",
-            resourceId:   Arg.Any<Guid?>(),
-            oldValueJson: Arg.Any<string?>(),
-            newValueJson: Arg.Any<string?>());
+            Arg.Is<AuditLogEntry>(e =>
+                e.Action       == AuditActions.InvoiceGenerated &&
+                e.ResourceType == "Invoice"));
     }
 
     [Fact]
@@ -122,9 +117,7 @@ public sealed class GenerateInvoiceCommandHandlerTests
         await _sut.Handle(BuildCommand("INV-001"), CancellationToken.None);
 
         // Assert — audit must not fire on failed commands
-        await _audit.DidNotReceive().LogAsync(
-            Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<string?>(), Arg.Any<string?>());
+        await _audit.DidNotReceive().LogAsync(Arg.Any<AuditLogEntry>());
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -143,9 +136,14 @@ public sealed class GenerateInvoiceCommandHandlerTests
 
     private static Invoice BuildExistingInvoice(string number)
     {
-        var inv = Invoice.Generate(
-            Guid.NewGuid(), number, "Acme", "billing@acme.com",
-            "USD", FutureDueDate, null, Guid.NewGuid());
+        var inv = Invoice.Generate(new NewInvoice(
+            TenantId:      Guid.NewGuid(),
+            InvoiceNumber: number,
+            ClientName:    "Acme",
+            ClientEmail:   "billing@acme.com",
+            Currency:      "USD",
+            DueDate:       FutureDueDate,
+            CreatedBy:     Guid.NewGuid()));
         inv.ClearDomainEvents();
         return inv;
     }

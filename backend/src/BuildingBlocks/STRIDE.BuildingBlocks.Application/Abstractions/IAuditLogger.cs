@@ -15,13 +15,5 @@ public interface IAuditLogger
     /// Persists a single audit log entry asynchronously.
     /// Guaranteed non-throwing — all exceptions are swallowed and logged.
     /// </summary>
-    Task LogAsync(
-        Guid    tenantId,
-        Guid    actorId,
-        string  actorEmail,
-        string  action,
-        string  resourceType,
-        Guid?   resourceId   = null,
-        string? oldValueJson = null,
-        string? newValueJson = null);
+    Task LogAsync(AuditLogEntry entry);
 }

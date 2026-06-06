@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Administration.Application.Abstractions;
@@ -29,13 +29,13 @@ internal sealed class DeactivateUserCommandHandler
 
         await _writeService.DeactivateUserAsync(request.TenantId, request.UserId, cancellationToken);
 
-        await _audit.LogAsync(
-            tenantId:     request.TenantId,
-            actorId:      request.CallerUserId,
-            actorEmail:   _currentUser.Email,
-            action:       AuditActions.UserDeactivated,
-            resourceType: "User",
-            resourceId:   request.UserId);
+        await _audit.LogAsync(new AuditLogEntry(
+            TenantId:     request.TenantId,
+            ActorId:      request.CallerUserId,
+            ActorEmail:   _currentUser.Email,
+            Action:       AuditActions.UserDeactivated,
+            ResourceType: "User",
+            ResourceId:   request.UserId));
 
         return Result.Success();
     }

@@ -20,9 +20,14 @@ public sealed class InvoiceTests
         var dueDate   = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30));
 
         // Act
-        var invoice = Invoice.Generate(
-            tenantId, "INV-001", "Acme Corp", "billing@acme.com",
-            "USD", dueDate, null, createdBy);
+        var invoice = Invoice.Generate(new NewInvoice(
+            TenantId:      tenantId,
+            InvoiceNumber: "INV-001",
+            ClientName:    "Acme Corp",
+            ClientEmail:   "billing@acme.com",
+            Currency:      "USD",
+            DueDate:       dueDate,
+            CreatedBy:     createdBy));
 
         // Assert
         invoice.Id.Should().NotBeEmpty();
@@ -49,9 +54,14 @@ public sealed class InvoiceTests
         var dueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30));
 
         // Act
-        var act = () => Invoice.Generate(
-            Guid.NewGuid(), number, clientName, clientEmail,
-            "USD", dueDate, null, Guid.NewGuid());
+        var act = () => Invoice.Generate(new NewInvoice(
+            TenantId:      Guid.NewGuid(),
+            InvoiceNumber: number,
+            ClientName:    clientName,
+            ClientEmail:   clientEmail,
+            Currency:      "USD",
+            DueDate:       dueDate,
+            CreatedBy:     Guid.NewGuid()));
 
         // Assert
         act.Should().Throw<InvoiceDomainException>();
@@ -64,9 +74,14 @@ public sealed class InvoiceTests
         var pastDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
 
         // Act
-        var act = () => Invoice.Generate(
-            Guid.NewGuid(), "INV-001", "Acme", "billing@acme.com",
-            "USD", pastDate, null, Guid.NewGuid());
+        var act = () => Invoice.Generate(new NewInvoice(
+            TenantId:      Guid.NewGuid(),
+            InvoiceNumber: "INV-001",
+            ClientName:    "Acme",
+            ClientEmail:   "billing@acme.com",
+            Currency:      "USD",
+            DueDate:       pastDate,
+            CreatedBy:     Guid.NewGuid()));
 
         // Assert
         act.Should().Throw<InvoiceDomainException>()
@@ -90,9 +105,14 @@ public sealed class InvoiceTests
         var dueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30));
 
         // Act
-        var invoice = Invoice.Generate(
-            Guid.NewGuid(), "INV-001", "Acme", "billing@acme.com",
-            "USD", dueDate, null, Guid.NewGuid());
+        var invoice = Invoice.Generate(new NewInvoice(
+            TenantId:      Guid.NewGuid(),
+            InvoiceNumber: "INV-001",
+            ClientName:    "Acme",
+            ClientEmail:   "billing@acme.com",
+            Currency:      "USD",
+            DueDate:       dueDate,
+            CreatedBy:     Guid.NewGuid()));
 
         // Assert
         invoice.DomainEvents.Should().ContainSingle()

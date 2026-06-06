@@ -81,14 +81,11 @@ public sealed class DeactivateUserCommandHandlerTests
 
         // Assert
         await _audit.Received(1).LogAsync(
-            tenantId:     tenantId,
-            actorId:      Arg.Any<Guid>(),
-            actorEmail:   Arg.Any<string>(),
-            action:       AuditActions.UserDeactivated,
-            resourceType: "User",
-            resourceId:   userId,
-            oldValueJson: Arg.Any<string?>(),
-            newValueJson: Arg.Any<string?>());
+            Arg.Is<AuditLogEntry>(e =>
+                e.TenantId     == tenantId              &&
+                e.Action       == AuditActions.UserDeactivated &&
+                e.ResourceType == "User"                &&
+                e.ResourceId   == userId));
     }
 
     [Fact]
@@ -102,8 +99,6 @@ public sealed class DeactivateUserCommandHandlerTests
         await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        await _audit.DidNotReceive().LogAsync(
-            Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<string?>(), Arg.Any<string?>());
+        await _audit.DidNotReceive().LogAsync(Arg.Any<AuditLogEntry>());
     }
 }

@@ -1,5 +1,15 @@
 namespace STRIDE.Modules.Administration.Domain.Entities;
 
+public sealed record AuditLogData(
+    Guid    TenantId,
+    Guid    ActorId,
+    string  ActorEmail,
+    string  Action,
+    string  ResourceType,
+    Guid?   ResourceId   = null,
+    string? OldValueJson = null,
+    string? NewValueJson = null);
+
 /// <summary>
 /// Immutable audit trail record — never updated or soft-deleted.
 /// Captures who did what to which resource and when, within a tenant.
@@ -19,26 +29,18 @@ public sealed class AuditLog
     public string? NewValueJson { get; private set; }
     public DateTime Timestamp   { get; private set; }
 
-    public static AuditLog Create(
-        Guid    tenantId,
-        Guid    actorId,
-        string  actorEmail,
-        string  action,
-        string  resourceType,
-        Guid?   resourceId   = null,
-        string? oldValueJson = null,
-        string? newValueJson = null)
+    public static AuditLog Create(AuditLogData data)
         => new()
         {
             Id           = Guid.NewGuid(),
-            TenantId     = tenantId,
-            ActorId      = actorId,
-            ActorEmail   = actorEmail,
-            Action       = action,
-            ResourceType = resourceType,
-            ResourceId   = resourceId,
-            OldValueJson = oldValueJson,
-            NewValueJson = newValueJson,
+            TenantId     = data.TenantId,
+            ActorId      = data.ActorId,
+            ActorEmail   = data.ActorEmail,
+            Action       = data.Action,
+            ResourceType = data.ResourceType,
+            ResourceId   = data.ResourceId,
+            OldValueJson = data.OldValueJson,
+            NewValueJson = data.NewValueJson,
             Timestamp    = DateTime.UtcNow,
         };
 }

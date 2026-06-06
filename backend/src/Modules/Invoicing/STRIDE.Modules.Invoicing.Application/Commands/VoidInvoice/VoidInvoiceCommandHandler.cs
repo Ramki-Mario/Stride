@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Invoicing.Domain.Exceptions;
@@ -33,13 +33,13 @@ internal sealed class VoidInvoiceCommandHandler : IRequestHandler<VoidInvoiceCom
             invoice.Void(request.VoidedBy);
             await _repo.SaveChangesAsync(cancellationToken);
 
-            await _audit.LogAsync(
-                tenantId:     request.TenantId,
-                actorId:      request.VoidedBy,
-                actorEmail:   _currentUser.Email,
-                action:       AuditActions.InvoiceVoided,
-                resourceType: "Invoice",
-                resourceId:   request.InvoiceId);
+            await _audit.LogAsync(new AuditLogEntry(
+                TenantId:     request.TenantId,
+                ActorId:      request.VoidedBy,
+                ActorEmail:   _currentUser.Email,
+                Action:       AuditActions.InvoiceVoided,
+                ResourceType: "Invoice",
+                ResourceId:   request.InvoiceId));
 
             return Result.Success();
         }

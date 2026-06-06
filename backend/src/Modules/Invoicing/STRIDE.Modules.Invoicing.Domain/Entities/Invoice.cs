@@ -5,6 +5,16 @@ using STRIDE.Modules.Invoicing.Domain.Exceptions;
 
 namespace STRIDE.Modules.Invoicing.Domain.Entities;
 
+public sealed record NewInvoice(
+    Guid     TenantId,
+    string   InvoiceNumber,
+    string   ClientName,
+    string   ClientEmail,
+    string   Currency,
+    DateOnly DueDate,
+    Guid     CreatedBy,
+    string?  Notes = null);
+
 /// <summary>
 /// Invoice aggregate root.
 ///
@@ -38,43 +48,35 @@ public sealed class Invoice : AuditableEntity
 
     // ── Factory ───────────────────────────────────────────────────────────────
 
-    public static Invoice Generate(
-        Guid   tenantId,
-        string invoiceNumber,
-        string clientName,
-        string clientEmail,
-        string currency,
-        DateOnly dueDate,
-        string? notes,
-        Guid    createdBy)
+    public static Invoice Generate(NewInvoice data)
     {
-        if (string.IsNullOrWhiteSpace(invoiceNumber))
+        if (string.IsNullOrWhiteSpace(data.InvoiceNumber))
             throw new InvoiceDomainException("Invoice number is required.");
-        if (string.IsNullOrWhiteSpace(clientName))
+        if (string.IsNullOrWhiteSpace(data.ClientName))
             throw new InvoiceDomainException("Client name is required.");
-        if (string.IsNullOrWhiteSpace(clientEmail))
+        if (string.IsNullOrWhiteSpace(data.ClientEmail))
             throw new InvoiceDomainException("Client email is required.");
-        if (dueDate < DateOnly.FromDateTime(DateTime.UtcNow))
+        if (data.DueDate < DateOnly.FromDateTime(DateTime.UtcNow))
             throw new InvoiceDomainException("Due date cannot be in the past.");
 
         var invoice = new Invoice
         {
             Id            = Guid.NewGuid(),
-            TenantId      = tenantId,
-            InvoiceNumber = invoiceNumber.Trim(),
-            ClientName    = clientName.Trim(),
-            ClientEmail   = clientEmail.Trim().ToLowerInvariant(),
-            Currency      = currency.Trim().ToUpperInvariant(),
+            TenantId      = data.TenantId,
+            InvoiceNumber = data.InvoiceNumber.Trim(),
+            ClientName    = data.ClientName.Trim(),
+            ClientEmail   = data.ClientEmail.Trim().ToLowerInvariant(),
+            Currency      = data.Currency.Trim().ToUpperInvariant(),
             Status        = InvoiceStatus.Draft,
-            DueDate       = dueDate,
-            Notes         = notes?.Trim(),
+            DueDate       = data.DueDate,
+            Notes         = data.Notes?.Trim(),
             CreatedAt     = DateTime.UtcNow,
             UpdatedAt     = DateTime.UtcNow,
-            CreatedBy     = createdBy,
+            CreatedBy     = data.CreatedBy,
         };
 
         invoice.RaiseDomainEvent(new InvoiceGeneratedEvent(
-            invoice.Id, tenantId, invoice.InvoiceNumber, createdBy));
+            invoice.Id, data.TenantId, invoice.InvoiceNumber, data.CreatedBy));
 
         return invoice;
     }

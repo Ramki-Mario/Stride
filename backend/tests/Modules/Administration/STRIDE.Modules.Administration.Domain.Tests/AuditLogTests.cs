@@ -21,8 +21,15 @@ public sealed class AuditLogTests
 
         // Act
         var before = DateTime.UtcNow;
-        var log    = AuditLog.Create(tenantId, actorId, email, action, resourceType,
-                                     resourceId, oldJson, newJson);
+        var log    = AuditLog.Create(new AuditLogData(
+                         TenantId:     tenantId,
+                         ActorId:      actorId,
+                         ActorEmail:   email,
+                         Action:       action,
+                         ResourceType: resourceType,
+                         ResourceId:   resourceId,
+                         OldValueJson: oldJson,
+                         NewValueJson: newJson));
         var after  = DateTime.UtcNow;
 
         // Assert
@@ -42,9 +49,12 @@ public sealed class AuditLogTests
     public void Create_WithOptionalFieldsOmitted_SetsThemToNull()
     {
         // Act
-        var log = AuditLog.Create(
-            Guid.NewGuid(), Guid.NewGuid(), "user@test.com",
-            AuditActions.UserDeactivated, "User");
+        var log = AuditLog.Create(new AuditLogData(
+            TenantId:     Guid.NewGuid(),
+            ActorId:      Guid.NewGuid(),
+            ActorEmail:   "user@test.com",
+            Action:       AuditActions.UserDeactivated,
+            ResourceType: "User"));
 
         // Assert
         log.ResourceId.Should().BeNull();
@@ -56,8 +66,8 @@ public sealed class AuditLogTests
     public void Create_EachCall_GeneratesUniqueId()
     {
         // Act
-        var log1 = AuditLog.Create(Guid.NewGuid(), Guid.NewGuid(), "a@b.com", "action", "Type");
-        var log2 = AuditLog.Create(Guid.NewGuid(), Guid.NewGuid(), "a@b.com", "action", "Type");
+        var log1 = AuditLog.Create(new AuditLogData(Guid.NewGuid(), Guid.NewGuid(), "a@b.com", "action", "Type"));
+        var log2 = AuditLog.Create(new AuditLogData(Guid.NewGuid(), Guid.NewGuid(), "a@b.com", "action", "Type"));
 
         // Assert
         log1.Id.Should().NotBe(log2.Id);
@@ -67,7 +77,7 @@ public sealed class AuditLogTests
     public void Create_Timestamp_IsUtc()
     {
         // Act
-        var log = AuditLog.Create(Guid.NewGuid(), Guid.NewGuid(), "a@b.com", "action", "Type");
+        var log = AuditLog.Create(new AuditLogData(Guid.NewGuid(), Guid.NewGuid(), "a@b.com", "action", "Type"));
 
         // Assert
         log.Timestamp.Kind.Should().Be(DateTimeKind.Utc);

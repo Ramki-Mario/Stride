@@ -25,15 +25,7 @@ internal sealed class DapperAuditLogger : IAuditLogger
         _logger = logger;
     }
 
-    public async Task LogAsync(
-        Guid    tenantId,
-        Guid    actorId,
-        string  actorEmail,
-        string  action,
-        string  resourceType,
-        Guid?   resourceId   = null,
-        string? oldValueJson = null,
-        string? newValueJson = null)
+    public async Task LogAsync(AuditLogEntry entry)
     {
         try
         {
@@ -54,14 +46,14 @@ internal sealed class DapperAuditLogger : IAuditLogger
                     new
                     {
                         Id           = Guid.NewGuid(),
-                        TenantId     = tenantId,
-                        ActorId      = actorId,
-                        ActorEmail   = actorEmail,
-                        Action       = action,
-                        ResourceType = resourceType,
-                        ResourceId   = resourceId,
-                        OldValueJson = oldValueJson,
-                        NewValueJson = newValueJson,
+                        TenantId     = entry.TenantId,
+                        ActorId      = entry.ActorId,
+                        ActorEmail   = entry.ActorEmail,
+                        Action       = entry.Action,
+                        ResourceType = entry.ResourceType,
+                        ResourceId   = entry.ResourceId,
+                        OldValueJson = entry.OldValueJson,
+                        NewValueJson = entry.NewValueJson,
                         Timestamp    = DateTime.UtcNow,
                     },
                     cancellationToken: CancellationToken.None));
@@ -71,7 +63,7 @@ internal sealed class DapperAuditLogger : IAuditLogger
             // Fire-and-forget: audit failures must never surface as command failures.
             _logger.LogWarning(ex,
                 "Audit log write failed for action {Action} by actor {ActorId}",
-                action, actorId);
+                entry.Action, entry.ActorId);
         }
     }
 }

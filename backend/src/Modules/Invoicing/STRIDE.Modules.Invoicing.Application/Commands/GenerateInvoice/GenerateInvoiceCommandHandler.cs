@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Invoicing.Domain.Entities;
@@ -33,15 +33,15 @@ internal sealed class GenerateInvoiceCommandHandler
 
         try
         {
-            var invoice = Invoice.Generate(
-                request.TenantId,
-                request.InvoiceNumber,
-                request.ClientName,
-                request.ClientEmail,
-                request.Currency,
-                request.DueDate,
-                request.Notes,
-                request.CreatedBy);
+            var invoice = Invoice.Generate(new NewInvoice(
+                TenantId:      request.TenantId,
+                InvoiceNumber: request.InvoiceNumber,
+                ClientName:    request.ClientName,
+                ClientEmail:   request.ClientEmail,
+                Currency:      request.Currency,
+                DueDate:       request.DueDate,
+                CreatedBy:     request.CreatedBy,
+                Notes:         request.Notes));
 
             foreach (var item in request.LineItems)
                 invoice.AddLineItem(item.Description, item.UnitPrice, item.Quantity);
@@ -49,14 +49,14 @@ internal sealed class GenerateInvoiceCommandHandler
             await _repo.AddAsync(invoice, cancellationToken);
             await _repo.SaveChangesAsync(cancellationToken);
 
-            await _audit.LogAsync(
-                tenantId:     request.TenantId,
-                actorId:      request.CreatedBy,
-                actorEmail:   _currentUser.Email,
-                action:       AuditActions.InvoiceGenerated,
-                resourceType: "Invoice",
-                resourceId:   invoice.Id,
-                newValueJson: $"{{\"invoiceNumber\":\"{request.InvoiceNumber}\",\"clientName\":\"{request.ClientName}\"}}");
+            await _audit.LogAsync(new AuditLogEntry(
+                TenantId:     request.TenantId,
+                ActorId:      request.CreatedBy,
+                ActorEmail:   _currentUser.Email,
+                Action:       AuditActions.InvoiceGenerated,
+                ResourceType: "Invoice",
+                ResourceId:   invoice.Id,
+                NewValueJson: $"{{\"invoiceNumber\":\"{request.InvoiceNumber}\",\"clientName\":\"{request.ClientName}\"}}"));
 
             return Result<Guid>.Success(invoice.Id);
         }
