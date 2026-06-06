@@ -37,32 +37,32 @@ internal sealed class RedisTicketStore : ITicketStore
         return key.Render();
     }
 
-    public async Task RenewAsync(string cookieValue, AuthenticationTicket ticket)
+    public async Task RenewAsync(string key, AuthenticationTicket ticket)
     {
-        if (!SessionCookieKey.TryParse(cookieValue, out var key))
+        if (!SessionCookieKey.TryParse(key, out var sessionKey))
             return;
 
-        await PersistAsync(key, ticket);
+        await PersistAsync(sessionKey, ticket);
     }
 
-    public async Task<AuthenticationTicket?> RetrieveAsync(string cookieValue)
+    public async Task<AuthenticationTicket?> RetrieveAsync(string key)
     {
-        if (!SessionCookieKey.TryParse(cookieValue, out var key))
+        if (!SessionCookieKey.TryParse(key, out var sessionKey))
             return null;
 
         var db = _redis.GetDatabase();
-        var bytes = (byte[]?)await db.StringGetAsync(key.ToRedisKey(_options.KeyPrefix));
+        var bytes = (byte[]?)await db.StringGetAsync(sessionKey.ToRedisKey(_options.KeyPrefix));
         if (bytes is null || bytes.Length == 0) return null;
 
         return TicketSerializer.Default.Deserialize(bytes);
     }
 
-    public async Task RemoveAsync(string cookieValue)
+    public async Task RemoveAsync(string key)
     {
-        if (!SessionCookieKey.TryParse(cookieValue, out var key))
+        if (!SessionCookieKey.TryParse(key, out var sessionKey))
             return;
 
-        await _redis.GetDatabase().KeyDeleteAsync(key.ToRedisKey(_options.KeyPrefix));
+        await _redis.GetDatabase().KeyDeleteAsync(sessionKey.ToRedisKey(_options.KeyPrefix));
     }
 
     private async Task PersistAsync(SessionCookieKey key, AuthenticationTicket ticket)
