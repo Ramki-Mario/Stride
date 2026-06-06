@@ -1,4 +1,5 @@
 using System.Data;
+using System.Globalization;
 using Dapper;
 
 namespace STRIDE.Modules.Reporting.Infrastructure.ReadModels;
@@ -21,7 +22,7 @@ internal sealed class DateOnlyTypeHandler : SqlMapper.TypeHandler<DateOnly>
         {
             DateTime dt  => DateOnly.FromDateTime(dt),
             DateOnly d   => d,
-            string s     => DateOnly.Parse(s),
+            string s     => DateOnly.Parse(s, CultureInfo.InvariantCulture),
             _            => throw new InvalidCastException(
                 $"Cannot convert {value.GetType().Name} to DateOnly.")
         };
