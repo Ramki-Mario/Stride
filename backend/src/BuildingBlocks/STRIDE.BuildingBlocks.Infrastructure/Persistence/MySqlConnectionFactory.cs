@@ -21,21 +21,6 @@ namespace STRIDE.BuildingBlocks.Infrastructure.Persistence;
 /// </summary>
 public sealed class MySqlConnectionFactory : IDbConnectionFactory
 {
-    // Uncomment when Pomelo / MySql.Data is installed:
-    //
-    // private readonly string _connectionString;
-    //
-    // public MySqlConnectionFactory(string connectionString)
-    //     => _connectionString = connectionString;
-    //
-    // public async Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default)
-    // {
-    //     var conn = new MySqlConnector.MySqlConnection(_connectionString);  // Pomelo
-    //     // OR: var conn = new MySql.Data.MySqlClient.MySqlConnection(_connectionString);
-    //     await conn.OpenAsync(cancellationToken);
-    //     return conn;
-    // }
-
     public Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default)
         => throw new NotSupportedException(
             "MySqlConnectionFactory is a placeholder. " +
