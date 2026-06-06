@@ -28,6 +28,9 @@ namespace STRIDE.BFF.HttpClients;
 /// </summary>
 public sealed class WorkflowApiClient
 {
+    private const string EmptyJson   = "{}";
+    private const string AppJson     = "application/json";
+
     private readonly HttpClient _client;
 
     public WorkflowApiClient(HttpClient client) => _client = client;
@@ -60,14 +63,14 @@ public sealed class WorkflowApiClient
     public Task<HttpResponseMessage> ActivateDefinitionAsync(Guid id, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/{id}/activate", token);
-        req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+        req.Content = new StringContent(EmptyJson, System.Text.Encoding.UTF8, AppJson);
         return _client.SendAsync(req, cancellationToken);
     }
 
     public Task<HttpResponseMessage> StartInstanceAsync(Guid definitionId, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/{definitionId}/start", token);
-        req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+        req.Content = new StringContent(EmptyJson, System.Text.Encoding.UTF8, AppJson);
         return _client.SendAsync(req, cancellationToken);
     }
 
@@ -85,21 +88,21 @@ public sealed class WorkflowApiClient
     public Task<HttpResponseMessage> PauseInstanceAsync(Guid instanceId, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/pause", token);
-        req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+        req.Content = new StringContent(EmptyJson, System.Text.Encoding.UTF8, AppJson);
         return _client.SendAsync(req, cancellationToken);
     }
 
     public Task<HttpResponseMessage> ResumeInstanceAsync(Guid instanceId, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/resume", token);
-        req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+        req.Content = new StringContent(EmptyJson, System.Text.Encoding.UTF8, AppJson);
         return _client.SendAsync(req, cancellationToken);
     }
 
     public Task<HttpResponseMessage> CancelInstanceAsync(Guid instanceId, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/cancel", token);
-        req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+        req.Content = new StringContent(EmptyJson, System.Text.Encoding.UTF8, AppJson);
         return _client.SendAsync(req, cancellationToken);
     }
 
@@ -115,7 +118,7 @@ public sealed class WorkflowApiClient
     public Task<HttpResponseMessage> CompleteStepAsync(Guid instanceId, Guid stepId, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/steps/{stepId}/complete", token);
-        req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+        req.Content = new StringContent(EmptyJson, System.Text.Encoding.UTF8, AppJson);
         return _client.SendAsync(req, cancellationToken);
     }
 
@@ -129,7 +132,7 @@ public sealed class WorkflowApiClient
     public Task<HttpResponseMessage> SkipStepAsync(Guid instanceId, Guid stepId, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/steps/{stepId}/skip", token);
-        req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+        req.Content = new StringContent(EmptyJson, System.Text.Encoding.UTF8, AppJson);
         return _client.SendAsync(req, cancellationToken);
     }
 

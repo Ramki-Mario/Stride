@@ -18,6 +18,8 @@ namespace STRIDE.BFF.Controllers;
 [Route("bff/auth")]
 public sealed class AuthController : ControllerBase
 {
+    private const string DefaultPalette = "purple";
+
     private readonly IdentityApiClient       _identity;
     private readonly TenantSettingsApiClient _tenantSettings;
     private readonly ILogger<AuthController> _logger;
@@ -122,7 +124,7 @@ public sealed class AuthController : ControllerBase
         var token = await HttpContext.GetTokenAsync("access_token");
         var (defaultPalette, tenantName) = token is not null
             ? await GetTenantSettingsAsync(token, cancellationToken)
-            : ("purple", "");
+            : (DefaultPalette, "");
 
         return Ok(new MeResponse(userId, tenantId, email, displayName, roles, defaultPalette, tenantName));
     }
@@ -139,15 +141,15 @@ public sealed class AuthController : ControllerBase
         try
         {
             var response = await _tenantSettings.GetSettingsAsync(token, cancellationToken);
-            if (!response.IsSuccessStatusCode) return ("purple", "");
+            if (!response.IsSuccessStatusCode) return (DefaultPalette, "");
 
             var json = await response.Content.ReadAsStringAsync(cancellationToken);
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
 
             var palette = root.TryGetProperty("defaultPalette", out var paletteProp)
-                ? paletteProp.GetString() ?? "purple"
-                : "purple";
+                ? paletteProp.GetString() ?? DefaultPalette
+                : DefaultPalette;
 
             var name = root.TryGetProperty("displayName", out var nameProp)
                 ? nameProp.GetString() ?? ""
@@ -158,7 +160,7 @@ public sealed class AuthController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to fetch tenant settings for /auth/me — using defaults.");
-            return ("purple", "");
+            return (DefaultPalette, "");
         }
     }
 
