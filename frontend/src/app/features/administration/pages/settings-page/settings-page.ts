@@ -406,17 +406,14 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
   protected downloadTemplate(): void { this.svc.downloadCssTemplate(); }
 
-  protected onFileSelected(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
+  protected async onFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file  = input.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      this.rawCss = (e.target?.result as string) ?? '';
-      // Auto-preview on file select for instant feedback.
-      this.previewCss();
-    };
-    reader.readAsText(file);
-    (event.target as HTMLInputElement).value = '';
+    this.rawCss = await file.text();
+    // Auto-preview on file select for instant feedback.
+    this.previewCss();
+    input.value = '';
   }
 
   protected clearCss(): void {

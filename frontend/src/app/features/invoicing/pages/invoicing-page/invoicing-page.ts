@@ -15,7 +15,7 @@ import { Subject } from 'rxjs';
 import { SelectModule } from 'primeng/select';
 
 import { InvoiceService } from '../../services/invoice.service';
-import { InvoiceSummaryDto, InvoiceStatus, INVOICE_STATUS_LABELS } from '../../models/invoice.models';
+import { InvoiceSummaryDto, InvoiceStatus } from '../../models/invoice.models';
 
 @Component({
   selector: 'app-invoicing-page',

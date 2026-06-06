@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import {
   FormBuilder,
-  FormGroup,
   Validators,
   ReactiveFormsModule,
   AbstractControl,
@@ -846,7 +845,7 @@ export class OnboardingPageComponent implements OnDestroy {
     let score = 0;
     if (pw.length >= 8)  score++;
     if (/[A-Z]/.test(pw)) score++;
-    if (/[0-9]/.test(pw)) score++;
+    if (/\d/.test(pw)) score++;
     if (/[^A-Za-z0-9]/.test(pw)) score++;
     return score;
   });
