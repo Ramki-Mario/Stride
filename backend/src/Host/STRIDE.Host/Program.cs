@@ -225,4 +225,4 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
 });
 
-app.Run();
+await app.RunAsync();
