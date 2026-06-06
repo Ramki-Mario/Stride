@@ -1,18 +1,12 @@
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 
 namespace STRIDE.BuildingBlocks.Infrastructure.Tenant;
 
 public sealed class TenantMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly ILogger<TenantMiddleware> _logger;
 
-    public TenantMiddleware(RequestDelegate next, ILogger<TenantMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
+    public TenantMiddleware(RequestDelegate next) => _next = next;
 
     public async Task InvokeAsync(HttpContext context, TenantContextProvider tenantProvider)
     {
