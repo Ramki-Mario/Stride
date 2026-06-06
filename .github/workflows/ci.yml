@@ -97,8 +97,8 @@ jobs:
 
       - name: Install dependencies
         working-directory: frontend
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Build
         working-directory: frontend
-        run: npx ng build --configuration=production
+        run: ./node_modules/.bin/ng build --configuration=production

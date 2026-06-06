@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -24,9 +25,8 @@ public static class DevDataSeeder
 {
     private static readonly Guid SystemActorId = new("00000000-0000-0000-0000-000000000001");
 
-    private const string TestEmail    = "test@gmail.com";
-    private const string TestPassword = "1234abcd";
-    private const string TenantSlug   = "stride-demo";
+    private const string TestEmail  = "test@gmail.com";
+    private const string TenantSlug = "stride-demo";
     private const string TenantName   = "STRIDE Demo Tenant";
 
     /// <summary>
@@ -45,8 +45,12 @@ public static class DevDataSeeder
         await using var scope  = host.Services.CreateAsyncScope();
         var db                 = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
         var hasher             = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+        var config             = scope.ServiceProvider.GetRequiredService<IConfiguration>();
         var logger             = scope.ServiceProvider
                                       .GetRequiredService<ILogger<IdentityDbContext>>();
+
+        var testPassword = config["DevSeed:Password"]
+            ?? throw new InvalidOperationException("DevSeed:Password is not configured in appsettings.Development.json");
 
         // ── 1. Tenant ─────────────────────────────────────────────────────────
         var tenant = await db.Tenants
@@ -106,7 +110,7 @@ public static class DevDataSeeder
 
         if (user is null)
         {
-            var passwordHash = hasher.Hash(TestPassword);
+            var passwordHash = hasher.Hash(testPassword);
             user = User.Create(tenantId, TestEmail, "Dev Admin", passwordHash, SystemActorId);
 
             // Clear domain events — no dispatcher is active during seeding.
@@ -149,8 +153,8 @@ public static class DevDataSeeder
         }
 
         logger.LogInformation(
-            "[DevSeed] ✓ Dev seed complete — login: {Email} / {Password}",
-            TestEmail, TestPassword);
+            "[DevSeed] ✓ Dev seed complete — login with: {Email} (password in appsettings.Development.json)",
+            TestEmail);
 
         return (tenantId, userId);
     }

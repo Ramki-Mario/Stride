@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copy manifests first so npm install layer is cached unless deps change.
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci --prefer-offline
+RUN npm ci --prefer-offline --ignore-scripts
 
 COPY frontend/ ./
 RUN npm run build -- --configuration=production
