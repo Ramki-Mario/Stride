@@ -164,7 +164,7 @@ public sealed class LoginCommandHandlerTests
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private User BuildActiveUser()
+    private static User BuildActiveUser()
     {
         var user = User.Create(TenantId, Email, "Alice", PasswordVO.FromHash("hash"), Guid.NewGuid());
         user.ClearDomainEvents();
