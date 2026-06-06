@@ -22,7 +22,7 @@
           : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
           ? 'dark'
           : 'light';
-      document.documentElement.setAttribute('data-theme', mode);
+      document.documentElement.dataset['theme'] = mode;
 
       // ── Colour palette ──────────────────────────────────────────────────
       // Purple is the new official default — no attribute needed.
@@ -30,7 +30,7 @@
       var storedPalette = null;
       try { storedPalette = localStorage.getItem('stride-palette'); } catch (_) {}
       if (storedPalette === 'indigo') {
-        document.documentElement.setAttribute('data-palette', 'indigo');
+        document.documentElement.dataset['palette'] = 'indigo';
       }
     })();
   </script>
