@@ -112,7 +112,6 @@ public static class WorkflowDevDataSeeder
 
         db.WorkflowDefinitions.AddRange(onboarding, invoiceApproval, itAccess, leaveRequest, supplierReg);
         await db.SaveChangesAsync();
-        logger.LogInformation("[WorkflowSeed] 5 definitions created.");
 
         // ── 2. Instances ──────────────────────────────────────────────────────
         // Build a list of (instance, daysAgo) tuples.
@@ -143,7 +142,6 @@ public static class WorkflowDevDataSeeder
 
         db.WorkflowInstances.AddRange(instances.Select(t => t.Instance));
         await db.SaveChangesAsync();
-        logger.LogInformation("[WorkflowSeed] {Count} instances created.", instances.Count);
 
         // ── 3. Backdate CreatedAt via raw SQL ─────────────────────────────────
         // Each instance gets a CreatedAt = UTC now minus its daysAgo value so the
