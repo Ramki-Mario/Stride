@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using STRIDE.Modules.Reporting.Domain.Entities;
 
 namespace STRIDE.Modules.Reporting.API.Dtos;
@@ -11,5 +12,5 @@ namespace STRIDE.Modules.Reporting.API.Dtos;
 /// Must be between 1 and 365. Ignored for other report types.
 /// </param>
 public sealed record GenerateReportRequest(
-    ReportType ReportType,
+    [property: JsonRequired] ReportType ReportType,
     int TrendDays = 30);
