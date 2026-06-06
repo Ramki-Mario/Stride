@@ -27,4 +27,5 @@ RUN dotnet publish "Host/STRIDE.Host/STRIDE.Host.csproj" -c Release -o /app/publ
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+USER $APP_UID
 ENTRYPOINT ["dotnet", "STRIDE.Host.dll"]

@@ -23,6 +23,7 @@ COPY infrastructure/nginx/nginx.conf /etc/nginx/nginx.conf
 # Copy compiled Angular output from Stage 1.
 COPY --from=builder /app/dist/stride-frontend/browser /usr/share/nginx/html
 
-EXPOSE 80
+EXPOSE 8080
 
+USER nginx
 CMD ["nginx", "-g", "daemon off;"]

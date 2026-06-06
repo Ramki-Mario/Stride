@@ -450,7 +450,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
     for (const block of rootBlocks) {
       const body = block[1];
-      for (const m of body.matchAll(/(--[a-zA-Z0-9-]+)\s*:\s*([^;]+?)\s*;/gs)) {
+      for (const m of body.matchAll(/(--[a-zA-Z0-9-]+)\s*:\s*([^;]+);/gs)) {
         const name  = m[1].trim();
         const value = m[2].trim();
         if (!name.startsWith('--stride-'))       continue;

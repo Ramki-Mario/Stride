@@ -75,7 +75,7 @@ jobs:
           ${{ runner.temp }}\scanner\dotnet-sonarscanner begin `
             /k:"Ramki-Mario_Stride" `
             /o:"ramki-mario" `
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
+            /d:sonar.token="$env:SONAR_TOKEN" `
             /d:sonar.host.url="https://sonarcloud.io" `
             /d:sonar.cs.cobertura.reportsPaths="backend\TestResults\**\coverage.cobertura.xml" `
             /d:sonar.cs.vstest.reportsPaths="backend\TestResults\**\*.trx" `
@@ -110,7 +110,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end `
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+            /d:sonar.token="$env:SONAR_TOKEN"
 
       # ── 11. Upload test + coverage artifacts ────────────────────────────────
       - name: Upload test results
