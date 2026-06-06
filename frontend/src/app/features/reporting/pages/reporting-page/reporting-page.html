@@ -107,7 +107,6 @@
                   class="rpt-btn rpt-btn--ghost rpt-btn--sm"
                   [disabled]="exportingId() !== null"
                   (click)="exportCsv(report)"
-                  title="Download CSV"
                   aria-label="Download CSV"
                 >
                   @if (exportingId() === report.reportId) {

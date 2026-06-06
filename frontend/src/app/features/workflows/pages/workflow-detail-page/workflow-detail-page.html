@@ -100,7 +100,6 @@
               <button
                 class="wfd-btn wfd-btn-primary"
                 (click)="activate()"
-                aria-label="Activate this workflow definition"
               >
                 <span class="pi pi-check-circle"></span> Activate
               </button>
@@ -109,7 +108,6 @@
               <button
                 class="wfd-btn wfd-btn-success"
                 (click)="startInstance()"
-                aria-label="Start a new workflow instance"
               >
                 <span class="pi pi-play"></span> Start Instance
               </button>
@@ -117,7 +115,6 @@
             <a
               routerLink="/workflows/{{ wf.id }}/edit"
               class="wfd-btn wfd-btn-ghost"
-              aria-label="Edit workflow definition"
             >
               <span class="pi pi-pencil"></span> Edit
             </a>
@@ -289,7 +286,6 @@
                     <button
                       class="wfd-btn wfd-btn-danger wfd-btn-sm"
                       (click)="cancelInstance()"
-                      aria-label="Cancel this running instance"
                     >
                       <span class="pi pi-ban"></span> Cancel Instance
                     </button>
@@ -345,7 +341,6 @@
                                 <button
                                   class="wfd-step-action-btn assign"
                                   (click)="openModal(step, 'assign')"
-                                  title="Assign to user"
                                   aria-label="Assign to user"
                                 >
                                   <span class="pi pi-user-plus"></span>
@@ -355,7 +350,6 @@
                                 <button
                                   class="wfd-step-action-btn complete"
                                   (click)="openModal(step, 'complete')"
-                                  title="Mark complete"
                                   aria-label="Mark complete"
                                 >
                                   <span class="pi pi-check"></span>
@@ -365,7 +359,6 @@
                                 <button
                                   class="wfd-step-action-btn fail"
                                   (click)="openModal(step, 'fail')"
-                                  title="Mark failed"
                                   aria-label="Mark failed"
                                 >
                                   <span class="pi pi-times"></span>
@@ -375,7 +368,6 @@
                                 <button
                                   class="wfd-step-action-btn skip"
                                   (click)="openModal(step, 'skip')"
-                                  title="Skip step"
                                   aria-label="Skip step"
                                 >
                                   <span class="pi pi-forward"></span>
