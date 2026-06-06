@@ -97,6 +97,7 @@ export class StepActionModalComponent implements OnChanges {
       case 'complete': return 'Complete Step';
       case 'fail':     return 'Fail Step';
       case 'skip':     return 'Skip Step';
+      default:         return '';
     }
   }
 
@@ -106,6 +107,7 @@ export class StepActionModalComponent implements OnChanges {
       case 'complete': return 'pi pi-check-circle modal-icon-success';
       case 'fail':     return 'pi pi-times-circle modal-icon-error';
       case 'skip':     return 'pi pi-forward      modal-icon-warning';
+      default:         return '';
     }
   }
 
@@ -115,6 +117,7 @@ export class StepActionModalComponent implements OnChanges {
       case 'complete': return 'Mark Complete';
       case 'fail':     return 'Mark Failed';
       case 'skip':     return 'Skip Step';
+      default:         return '';
     }
   }
 
@@ -124,6 +127,7 @@ export class StepActionModalComponent implements OnChanges {
       case 'complete': return 'sam-btn-success';
       case 'fail':     return 'sam-btn-danger';
       case 'skip':     return 'sam-btn-warning';
+      default:         return '';
     }
   }
 
