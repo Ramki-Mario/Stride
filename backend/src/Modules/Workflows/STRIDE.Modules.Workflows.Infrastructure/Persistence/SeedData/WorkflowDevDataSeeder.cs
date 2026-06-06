@@ -152,12 +152,14 @@ public static class WorkflowDevDataSeeder
         {
             if (daysAgo <= 0) continue;
 
-            await db.Database.ExecuteSqlRawAsync(
+            var offset = -daysAgo;
+            var id     = inst.Id;
+            await db.Database.ExecuteSqlAsync(
                 $"""
                 UPDATE workflows.WorkflowInstances
-                SET    CreatedAt = DATEADD(DAY, -{daysAgo}, GETUTCDATE()),
-                       UpdatedAt = DATEADD(DAY, -{daysAgo}, GETUTCDATE())
-                WHERE  Id = '{inst.Id:D}'
+                SET    CreatedAt = DATEADD(DAY, {offset}, GETUTCDATE()),
+                       UpdatedAt = DATEADD(DAY, {offset}, GETUTCDATE())
+                WHERE  Id = {id}
                 """);
         }
 
