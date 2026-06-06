@@ -1,0 +1,128 @@
+name: SonarCloud Analysis
+
+# Runs on every push to develop and on all PRs targeting develop.
+# Coverage data (Cobertura XML) is collected between sonarscanner begin and end
+# so SonarCloud receives real line/branch percentages — not just static analysis.
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarcloud:
+    name: Build, Test & Analyze
+    runs-on: windows-latest   # SonarScanner for .NET works best on Windows runner
+
+    steps:
+      # ── 1. Java (required by SonarScanner CLI) ──────────────────────────────
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: zulu
+
+      # ── 2. Checkout (full history for blame annotations) ───────────────────
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── 3. .NET 10 ─────────────────────────────────────────────────────────
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # ── 4. Cache SonarCloud packages ────────────────────────────────────────
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~\sonar\cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      # ── 5. Cache SonarScanner tool ──────────────────────────────────────────
+      - name: Cache SonarScanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}\scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+
+      - name: Install SonarScanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path "${{ runner.temp }}\scanner" -ItemType Directory -Force
+          dotnet tool update dotnet-sonarscanner --tool-path "${{ runner.temp }}\scanner"
+
+      # ── 6. Restore ──────────────────────────────────────────────────────────
+      - name: Restore
+        run: dotnet restore backend/STRIDE.sln
+
+      # ── 7. SonarScanner BEGIN (must come before build + test) ───────────────
+      #
+      # Coverage paths are declared here so the scanner knows where to find
+      # the Cobertura XML files that dotnet test will produce in step 9.
+      # If the files don't exist yet, the scanner waits until END to read them.
+      - name: SonarScanner — Begin
+        shell: powershell
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin `
+            /k:"Ramki-Mario_Stride" `
+            /o:"ramki-mario" `
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
+            /d:sonar.host.url="https://sonarcloud.io" `
+            /d:sonar.cs.cobertura.reportsPaths="backend\TestResults\**\coverage.cobertura.xml" `
+            /d:sonar.cs.vstest.reportsPaths="backend\TestResults\**\*.trx" `
+            /d:sonar.exclusions="**/obj/**,**/bin/**,**/*.Designer.cs,**/*ModelSnapshot.cs,**/Migrations/**,**/node_modules/**,**/dist/**" `
+            /d:sonar.test.inclusions="**/*.Tests/**/*.cs" `
+            /d:sonar.coverage.exclusions="**/Migrations/**,**/*ModelSnapshot*,**/*DbContextFactory*,**/SeedData/**,**/*Extensions.cs"
+
+      # ── 8. Build ────────────────────────────────────────────────────────────
+      - name: Build
+        run: dotnet build backend/STRIDE.sln --no-restore --configuration Release
+
+      # ── 9. Test with coverage (BETWEEN begin and end) ───────────────────────
+      #
+      # Coverage XML must be collected before sonarscanner end so SonarCloud
+      # receives real line/branch numbers and not 0%.
+      - name: Test with coverage
+        shell: powershell
+        run: |
+          dotnet test backend/STRIDE.sln `
+            --no-build `
+            --configuration Release `
+            --verbosity normal `
+            --logger "trx;LogFileName=test-results.trx" `
+            --results-directory backend/TestResults `
+            --collect:"XPlat Code Coverage" `
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+      # ── 10. SonarScanner END ────────────────────────────────────────────────
+      - name: SonarScanner — End
+        shell: powershell
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner end `
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+
+      # ── 11. Upload test + coverage artifacts ────────────────────────────────
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-sonar
+          path: backend/TestResults/**/*.trx
+
+      - name: Upload coverage XML
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-cobertura
+          path: backend/TestResults/**/coverage.cobertura.xml

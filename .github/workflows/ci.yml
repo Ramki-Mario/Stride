@@ -1,5 +1,12 @@
 name: CI
 
+# Fast feedback on every push/PR:
+# - Build + test on Linux (cheaper runner, faster feedback)
+# - Generate HTML coverage report and upload as artifact
+#
+# SonarCloud full analysis runs separately in sonarcloud.yml (windows-latest,
+# requires JDK 17, runs only on develop pushes and PRs).
+
 on:
   push:
     branches: [main, develop]
@@ -7,16 +14,13 @@ on:
     branches: [main, develop]
 
 jobs:
-  # ── Backend: Build → Test → Coverage → SonarCloud ──────────────────────────
+  # ── Backend: Build → Test → Coverage HTML ──────────────────────────────────
   backend:
     name: Backend Build & Test
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          # SonarCloud needs full git history for blame annotations
-          fetch-depth: 0
 
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
@@ -29,7 +33,6 @@ jobs:
       - name: Build
         run: dotnet build backend/STRIDE.sln --no-restore --configuration Release
 
-      # ── Tests + Coverage ────────────────────────────────────────────────────
       - name: Test with coverage
         run: |
           dotnet test backend/STRIDE.sln \
@@ -48,7 +51,7 @@ jobs:
           name: test-results
           path: backend/TestResults/**/*.trx
 
-      # ── ReportGenerator: HTML coverage report ───────────────────────────────
+      # ReportGenerator — HTML coverage report uploaded as a browsable artifact
       - name: Install ReportGenerator
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
@@ -66,7 +69,8 @@ jobs:
         run: |
           if [ -f backend/TestResults/CoverageReport/Summary.txt ]; then
             echo "=== Coverage Summary ==="
-            cat backend/TestResults/CoverageReport/Summary.txt | grep -E "Line coverage|Branch coverage|Method coverage"
+            grep -E "Line coverage|Branch coverage|Method coverage" \
+              backend/TestResults/CoverageReport/Summary.txt
           fi
 
       - name: Upload HTML coverage report
@@ -75,44 +79,6 @@ jobs:
         with:
           name: coverage-html-report
           path: backend/TestResults/CoverageReport/
-
-      # ── SonarCloud analysis (skipped if SONAR_TOKEN not configured) ─────────
-      - name: SonarCloud — Install scanner
-        if: env.SONAR_TOKEN != ''
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          dotnet tool install --global dotnet-sonarscanner
-
-      - name: SonarCloud — Begin analysis
-        if: env.SONAR_TOKEN != ''
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          dotnet sonarscanner begin \
-            /k:"Ramki-Mario_Stride" \
-            /o:"ramki-mario" \
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
-            /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.opencover.reportsPaths="backend/TestResults/**/coverage.opencover.xml" \
-            /d:sonar.cs.cobertura.reportsPaths="backend/TestResults/**/coverage.cobertura.xml" \
-            /d:sonar.cs.vstest.reportsPaths="backend/TestResults/**/*.trx" \
-            /d:sonar.exclusions="**/obj/**,**/bin/**,**/*.Designer.cs,**/*ModelSnapshot.cs,**/Migrations/**"
-        working-directory: backend
-
-      - name: SonarCloud — Build (Sonar needs its own build)
-        if: env.SONAR_TOKEN != ''
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet build backend/STRIDE.sln --configuration Release
-
-      - name: SonarCloud — End analysis
-        if: env.SONAR_TOKEN != ''
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-        working-directory: backend
 
   # ── Frontend: Build ─────────────────────────────────────────────────────────
   frontend:
