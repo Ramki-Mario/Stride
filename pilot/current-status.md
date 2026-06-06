@@ -227,6 +227,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 | Sidebar showing tenant name from wrong tenant (DisplayName backfill bug) | Added `else if (IsNullOrEmpty)` branch in `GetTenantSettingsQueryHandler` to backfill empty rows via `ITenantNameResolver` | prior session |
 | `GET /bff/workflows/instances` 404 — all-instances endpoint missing from BFF and Host | Added `ListAllInstances` to Host controller + `GetAllInstancesAsync` to `WorkflowApiClient` + BFF proxy action | prior session |
 | PrimeNG Select dropdown not styled | Updated global `styles.scss` with PrimeNG 21 selectors (`.p-select-overlay`, `data-p-focused`, `data-p-selected`) | prior session |
+| BFF crash on startup — `InvalidOperationException: DefaultConnection is not configured` | `IDbConnectionFactory` was registered inside `AddBuildingBlocksInfrastructure` (shared by Host + BFF). Extracted to new `AddBuildingBlocksDatabase` extension called only from `STRIDE.Host/Program.cs` | `7c66271` |
 
 ### Infrastructure refactor (2026-05-23)
 - **`IDbConnectionFactory`** introduced in `BuildingBlocks.Infrastructure.Persistence`
