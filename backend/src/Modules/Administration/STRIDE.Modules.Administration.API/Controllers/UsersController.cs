@@ -130,6 +130,9 @@ public sealed class UsersController : ControllerBase
         var result = await _mediator.Send(
             new ReactivateUserCommand(_tenantContext.TenantId, id), cancellationToken);
 
+        if (result.IsFailure)
+            return BadRequest(new { error = result.Error });
+
         return NoContent();
     }
 }
