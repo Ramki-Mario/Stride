@@ -24,17 +24,14 @@ namespace STRIDE.BFF.Controllers;
 public sealed class TenantsController : ControllerBase
 {
     private readonly TenantRegistrationApiClient _registration;
-    private readonly TenantSettingsApiClient     _tenantSettings;
     private readonly ILogger<TenantsController>  _logger;
 
     public TenantsController(
         TenantRegistrationApiClient registration,
-        TenantSettingsApiClient     tenantSettings,
         ILogger<TenantsController>  logger)
     {
-        _registration   = registration;
-        _tenantSettings = tenantSettings;
-        _logger         = logger;
+        _registration = registration;
+        _logger       = logger;
     }
 
     public sealed class RegisterTenantBffRequest
