@@ -20,18 +20,18 @@
   <div class="al-filters">
     <div class="al-filter-row">
       <div class="al-filter-field">
-        <label class="al-filter-label">From</label>
-        <input class="al-date-input" type="datetime-local"
+        <label class="al-filter-label" for="al-from-date">From</label>
+        <input id="al-from-date" class="al-date-input" type="datetime-local"
                [value]="fromDate()" (change)="fromDate.set($any($event.target).value)"/>
       </div>
       <div class="al-filter-field">
-        <label class="al-filter-label">To</label>
-        <input class="al-date-input" type="datetime-local"
+        <label class="al-filter-label" for="al-to-date">To</label>
+        <input id="al-to-date" class="al-date-input" type="datetime-local"
                [value]="toDate()" (change)="toDate.set($any($event.target).value)"/>
       </div>
       <div class="al-filter-field al-filter-field--action">
-        <label class="al-filter-label">Action</label>
-        <p-select [options]="actionOptions" [(ngModel)]="selectedAction"
+        <label class="al-filter-label" for="al-action">Action</label>
+        <p-select inputId="al-action" [options]="actionOptions" [(ngModel)]="selectedAction"
                   optionLabel="label" optionValue="value"
                   styleClass="al-action-select" placeholder="All Actions"/>
       </div>

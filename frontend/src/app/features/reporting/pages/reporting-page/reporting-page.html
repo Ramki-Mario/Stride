@@ -28,8 +28,9 @@
     <div class="rpt__form-panel">
       <h3 class="rpt__form-title">Generate a new report</h3>
       <div class="rpt__form-row">
-        <label class="rpt__form-label">Report type</label>
+        <label class="rpt__form-label" for="rpt-type">Report type</label>
         <p-select
+          inputId="rpt-type"
           [(ngModel)]="selectedType"
           [options]="reportTypeOptions"
           optionLabel="label"
