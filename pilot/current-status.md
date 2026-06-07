@@ -267,12 +267,12 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 ### Milestone #11 — Product Layer Gaps (EP-048–061)
 
-**Board status (2026-06-07):** All 54 issues (#263–316) on board + Backlog ✅. EP-049 items (#264, #280–282) closed + board=Done ✅.
+**Board status (2026-06-07):** All 54 issues (#263–316) on board + Backlog ✅. EP-049 items (#264, #280–282) closed + board=Done ✅. US-153 (#283) closed + board=Done ✅.
 
 **Epic → Issue → Story mapping:**
 - EP-048 #263 → US-147–149 (#277–279) — Search & Filter Improvements
 - EP-049 #264 → US-150–152 (#280–282) — Client/Customer Entity
-- EP-050 #265 → US-153–155 (#283–285) — Configurable Workflow Templates
+- EP-050 #265 → US-153–155 (#283–285) — Workflow ↔ Invoice Integration
 - EP-051 #266 → US-156–158 (#286–288) — Bulk Workflow Operations
 - EP-052 #267 → US-159–161 (#289–291) — Advanced Step Types
 - EP-053 #268 → US-162–164 (#292–294) — SLA & Deadline Tracking
@@ -319,6 +319,22 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - `GET /api/clients/{id}/history` Host endpoint + `ClientsApiClient.GetClientHistoryAsync` + BFF proxy
 - Angular: `ClientHistoryDto`/`ClientWorkflowDto`/`ClientInvoiceDto` models; `getClientHistory()` in service
 - Angular: "View History" action menu item → history modal (workflows table + invoices table, badge statuses, skeleton + error states)
+
+---
+
+### EP-050 — Workflow ↔ Invoice Integration 🔵 In Progress (#265)
+
+#### US-153 — Billable items capture on workflow step completion ✅ Done (commit `fcf4728`)
+- **Domain:** `BillableUnit` enum (Hours/Each/Day/Fixed), `BillableItem` aggregate child entity (validates description, qty > 0, price > 0; `LineTotal` computed); `StepInstance` extended with `TenantId`, `_billableItems` backing field, `BillableItems` read-only list; `StepInstance.Complete()` accepts optional `IReadOnlyList<(Description, Qty, Price, Unit)>`; `WorkflowInstance.CompleteStep()` passes through; `WorkflowInstance.Start()` passes `TenantId` to `StepInstance.Create()`
+- **Infrastructure:** `BillableItemConfiguration` (table `BillableItems`, decimal(18,4), cascade delete); `StepInstanceConfiguration` updated (TenantId required, `HasMany` → `BillableItems` with backing field); `WorkflowsDbContext` registers `DbSet<BillableItem>`; `WorkflowInstanceRepository` eager-loads `.ThenInclude(s => s.BillableItems)`; EF migration `AddBillableItems` (`20260607174757`) applied
+- **Application:** `CompleteStepCommand` extended with `IReadOnlyList<BillableItemInput>?`; handler maps inputs to tuple list and calls `instance.CompleteStep()`; `WorkflowInstanceDto` gets `BillableTotal` (sum across steps); `StepInstanceDto` gets `BillableSubtotal` + `BillableItems` list; `BillableItemDto` record; query handler maps `s.BillableItems`
+- **API + BFF:** `CompleteStepRequest` + `BillableItemRequest` in `StepRequests.cs`; `StepsController.Complete()` accepts body, maps to `BillableItemInput[]`; `WorkflowApiClient.CompleteStepAsync()` forwards nullable body; BFF `WorkflowsController.CompleteStep()` reads and forwards body stream transparently
+- **Angular:** `BillableUnit` type + `BILLABLE_UNIT_LABELS`; `BillableItemDto`/`BillableItemInput` models; `WorkflowService.completeStep()` sends `{ billableItems }` if any; `step-action-modal` billable widget (FormArray, add/remove rows, live running total, validation); `workflow-detail-page` shows per-step subtotal toggle + expandable line-items table, instance-level billable grand total
+- **Tests:** `BillableItemTests.cs` (9 domain tests — valid items, multiple items, empty, empty/zero/negative validation), `CompleteStepCommandHandlerTests.cs` (5 handler tests — not found, no items, with items, persists, domain exception); `InternalsVisibleTo` added to Workflows.Application.csproj; Application.Tests Usings.cs updated (FluentAssertions + NSubstitute)
+- Issue #283 closed; board item → Done
+
+#### US-154 — Auto invoice draft on workflow instance closure ⏳ Next (#284)
+#### US-155 — Invoice status badge on workflow instance detail ⏳ Pending (#285)
 
 ---
 
