@@ -388,9 +388,11 @@
     @for (wf of paginatedWorkflows(); track wf.id) {
       <li
         class="wfl-card"
+        role="button"
         tabindex="0"
         (click)="openWorkflow(wf.id)"
         (keydown.enter)="openWorkflow(wf.id)"
+        (keydown.space)="openWorkflow(wf.id)"
         [attr.aria-label]="wf.name + ' — ' + statusLabel(wf.status)"
       >
         <!-- Card header: title + status badge -->

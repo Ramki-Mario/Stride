@@ -85,8 +85,10 @@
       @for (inst of filteredInstances(); track trackById($index, inst)) {
         <li
           class="wi-row"
+          role="button"
           (click)="openInstance(inst)"
           (keydown.enter)="openInstance(inst)"
+          (keydown.space)="openInstance(inst)"
           tabindex="0"
           [attr.aria-label]="inst.workflowName + ' instance'"
         >
