@@ -8,11 +8,12 @@ namespace STRIDE.BFF.Controllers;
 /// <summary>
 /// BFF proxy for Clients module endpoints.
 ///
-///   GET  /bff/clients              — paged client list
-///   POST /bff/clients              — create client
-///   GET  /bff/clients/{id}         — client detail
-///   PUT  /bff/clients/{id}         — update client
-///   PUT  /bff/clients/{id}/deactivate — deactivate client
+///   GET  /bff/clients                  — paged client list
+///   POST /bff/clients                  — create client
+///   GET  /bff/clients/{id}             — client detail
+///   PUT  /bff/clients/{id}             — update client
+///   PUT  /bff/clients/{id}/deactivate  — deactivate client
+///   PUT  /bff/clients/{id}/reactivate  — reactivate client
 /// </summary>
 [ApiController]
 [Authorize]
@@ -77,6 +78,15 @@ public sealed class ClientsController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         var response = await _clients.DeactivateClientAsync(id, token, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
+    }
+
+    [HttpPut("{id:guid}/reactivate")]
+    public async Task<IActionResult> ReactivateClient(Guid id, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        var response = await _clients.ReactivateClientAsync(id, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 

@@ -418,6 +418,12 @@ export class SidebarComponent {
       ],
     },
     {
+      label: 'Clients',
+      items: [
+        { label: 'Clients', route: '/clients', icon: 'pi-id-card' },
+      ],
+    },
+    {
       label: 'Invoicing',
       items: [
         { label: 'Invoices', route: '/invoicing', icon: 'pi-file-edit' },

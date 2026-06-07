@@ -67,6 +67,13 @@ export const appRoutes: Routes = [
           ),
       },
       {
+        path: 'clients',
+        loadChildren: () =>
+          import('./features/clients/clients.routes').then(
+            (m) => m.clientRoutes
+          ),
+      },
+      {
         path: 'invoicing',
         loadChildren: () =>
           import('./features/invoicing/invoicing.routes').then(

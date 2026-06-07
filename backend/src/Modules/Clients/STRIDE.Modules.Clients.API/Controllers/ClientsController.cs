@@ -6,6 +6,7 @@ using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Clients.API.DTOs;
 using STRIDE.Modules.Clients.Application.Commands.CreateClient;
 using STRIDE.Modules.Clients.Application.Commands.DeactivateClient;
+using STRIDE.Modules.Clients.Application.Commands.ReactivateClient;
 using STRIDE.Modules.Clients.Application.Commands.UpdateClient;
 using STRIDE.Modules.Clients.Application.Queries.GetClientById;
 using STRIDE.Modules.Clients.Application.Queries.GetClients;
@@ -126,6 +127,23 @@ public sealed class ClientsController : ControllerBase
     {
         var result = await _mediator.Send(
             new DeactivateClientCommand(_tenantContext.TenantId, id, _currentUser.UserId), cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error == "Client not found."
+                ? NotFound(new { error = result.Error })
+                : BadRequest(new { error = result.Error });
+
+        return NoContent();
+    }
+
+    [HttpPut("{id:guid}/reactivate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ReactivateClient(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new ReactivateClientCommand(_tenantContext.TenantId, id, _currentUser.UserId), cancellationToken);
 
         if (result.IsFailure)
             return result.Error == "Client not found."

@@ -12,7 +12,8 @@ namespace STRIDE.BFF.HttpClients;
 ///   POST /bff/clients              → POST /api/clients
 ///   GET  /bff/clients/{id}         → GET  /api/clients/{id}
 ///   PUT  /bff/clients/{id}         → PUT  /api/clients/{id}
-///   PUT  /bff/clients/{id}/deactivate → PUT /api/clients/{id}/deactivate
+///   PUT  /bff/clients/{id}/deactivate  → PUT /api/clients/{id}/deactivate
+///   PUT  /bff/clients/{id}/reactivate  → PUT /api/clients/{id}/reactivate
 /// </summary>
 public sealed class ClientsApiClient
 {
@@ -46,6 +47,10 @@ public sealed class ClientsApiClient
     public Task<HttpResponseMessage> DeactivateClientAsync(
         Guid id, string token, CancellationToken cancellationToken = default)
         => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/clients/{id}/deactivate", null, token), cancellationToken);
+
+    public Task<HttpResponseMessage> ReactivateClientAsync(
+        Guid id, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/clients/{id}/reactivate", null, token), cancellationToken);
 
     // ── helpers ──────────────────────────────────────────────────────────────
 

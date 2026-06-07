@@ -253,15 +253,63 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 ## Phase 7 — Portfolio & Deployment Polish (🔵 In Progress)
 
-**Sprint Goal:** Close the test coverage gap, implement refresh tokens and invite email, build the Scheduling module, and deploy a live dev environment.
+**Sprint Goal:** Close the test coverage gap, implement refresh tokens and invite email, build the Scheduling module, deliver the 14 Product Layer Gaps EPICs, and deploy a live dev environment.
+
+### Milestone #10 — Core Hardening Epics (EP-040–044)
 
 | Epic | GitHub # | Stories | Status |
 |---|---|---|---|
-| EP-040 Unit & Integration Tests | #195 | US-112–114 (#200–202) | ⏳ Next |
+| EP-040 Unit & Integration Tests | #195 | US-112–114 (#200–202) | ⏳ Pending |
 | EP-041 Refresh Token Flow | #196 | US-115–118 (#203–206) | ⏳ Pending |
 | EP-042 Invite Email Flow | #197 | US-119–122 (#207–210) | ⏳ Pending |
 | EP-043 Scheduling Module | #198 | US-123–127 (#211–215) | ⏳ Pending |
 | EP-044 Live Deployment | #199 | US-128–131 (#216–219) | ⏳ Pending |
+
+### Milestone #11 — Product Layer Gaps (EP-048–061)
+
+**Board status (2026-06-07):** All 43 stories wired as sub-issues ✅. Issues #263–277 added to board + Backlog ✅. Issues #278–316 board-add pending GraphQL rate-limit reset (21:00 on 2026-06-07).
+
+**Epic → Issue → Story mapping:**
+- EP-048 #263 → US-147–149 (#277–279) — Search & Filter Improvements
+- EP-049 #264 → US-150–152 (#280–282) — Client/Customer Entity
+- EP-050 #265 → US-153–155 (#283–285) — Configurable Workflow Templates
+- EP-051 #266 → US-156–158 (#286–288) — Bulk Workflow Operations
+- EP-052 #267 → US-159–161 (#289–291) — Advanced Step Types
+- EP-053 #268 → US-162–164 (#292–294) — SLA & Deadline Tracking
+- EP-054 #269 → US-165–167 (#295–297) — File Attachments
+- EP-055 #270 → US-168–170 (#298–300) — Comments & Activity Log
+- EP-056 #271 → US-171–173 (#301–303) — Team / Department Entity
+- EP-057 #272 → US-174–176 (#304–306) — Custom Fields
+- EP-058 #273 → US-177–179 (#307–309) — Reporting Enhancements
+- EP-059 #274 → US-180–182 (#310–312) — Public API / Webhooks
+- EP-060 #275 → US-183–185 (#313–315) — Mobile-Responsive Shell
+- EP-061 #276 → US-186 (#316) — Accessibility & i18n
+
+**Implementation order (sequential):** EP-049 → EP-050 → EP-051 → EP-052 → EP-053 → EP-054 → EP-055 → EP-056 → EP-057 → EP-058 → EP-059 → EP-060 → EP-061 → EP-048
+
+### EP-049 — Client/Customer Entity (🔵 In Progress, #264)
+
+#### US-150 — Client domain entity, repository, and CRUD API ✅ Done (commit `381fc14`, 2026-06-07)
+- New `Clients` module: 4 src projects + 2 test projects added to solution
+- `clients` SQL schema; `Client` aggregate (Name, ContactPerson, Email, Phone, Address, Notes, `ClientStatus` enum)
+- `IClientRepository` + `ClientsDbContext` + `ClientConfiguration` (unique index filtered `[IsDeleted]=0`)
+- Commands: CreateClient, UpdateClient, DeactivateClient, ReactivateClient (CQRS + MediatR)
+- Queries: GetClientsQuery (paged, search, status filter), GetClientByIdQuery
+- Embedded SQL: `GetClients.sql`, `GetClientById.sql` via Dapper
+- `ClientsController` (Host) + `ClientsApiClient` (BFF typed HttpClient) + BFF `ClientsController`
+- AuditActions: `client.created`, `client.updated`, `client.deactivated`, `client.reactivated`
+- EF migration `20260607150131_CreateClientsSchema` applied locally
+- 26 tests: 16 domain + 6 CreateClient handler + 4 UpdateClient handler — all green
+
+#### US-151 — Client Management Screen (Angular) ⏳ Next
+- `/clients` list page: data table, search, status filter, create/edit modal, deactivate action
+- BFF route: `/bff/clients/**`
+
+#### US-152 — Link workflow instances and invoices to a client ⏳ Pending
+- Add nullable `ClientId` FK to `WorkflowInstance` + `Invoice` entities
+- Client history view tab: linked workflows + invoices per client
+
+---
 
 ### ⚠️ GitHub Issue Hierarchy Process (MANDATORY for every sprint)
 When creating issues for a new phase/sprint, always:
@@ -274,8 +322,6 @@ gh api --method POST repos/Ramki-Mario/Stride/issues/{epic_number}/sub_issues --
 ```
 4. Add all issues to project board + set Status = Backlog
 API note: uses integer `.id` (not `nodeId`, not issue `number`). 422 = already linked (safe to ignore).
-
-## Phase 7 — Portfolio & Deployment Polish (Pending)
 
 ---
 
