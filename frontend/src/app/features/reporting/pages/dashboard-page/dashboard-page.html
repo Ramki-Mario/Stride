@@ -77,7 +77,7 @@
             <p class="chart-card__subtitle">Daily started / completed / failed counts</p>
           </div>
           <!-- Trend window selector -->
-          <div class="trend-tabs" role="group" aria-label="Trend time window">
+          <fieldset class="trend-tabs" aria-label="Trend time window">
             @for (w of trendWindows; track w.days) {
               <button
                 class="trend-tab"
@@ -87,7 +87,7 @@
                 {{ w.label }}
               </button>
             }
-          </div>
+          </fieldset>
         </div>
 
         <div class="chart-card__body">

@@ -223,9 +223,9 @@
                   </a>
                 </div>
               } @else {
-                <div class="wfd-step-track" role="list">
+                <ul class="wfd-step-track">
                   @for (step of sortedSteps(); track step.id; let last = $last) {
-                    <div class="wfd-step-item" role="listitem">
+                    <li class="wfd-step-item">
                       <div class="wfd-step-connector" aria-hidden="true">
                         <div class="wfd-step-dot step-dot-pending">{{ step.order }}</div>
                         @if (!last) { <div class="wfd-step-line"></div> }
@@ -243,9 +243,9 @@
                           <p class="wfd-step-desc">{{ step.description }}</p>
                         }
                       </div>
-                    </div>
+                    </li>
                   }
-                </div>
+                </ul>
               }
             </div>
           }
@@ -306,12 +306,11 @@
                 </div>
 
                 <!-- Instance step list -->
-                <div class="wfd-inst-steps" role="list">
+                <ul class="wfd-inst-steps">
                   @for (step of sortedInstanceSteps(); track step.id; let last = $last) {
-                    <div
+                    <li
                       class="wfd-inst-step"
                       [ngClass]="stepInstanceStatusClass(step.status)"
-                      role="listitem"
                     >
                       <!-- Status icon column -->
                       <div class="wfd-inst-step-icon-col" aria-hidden="true">
@@ -396,9 +395,9 @@
                           </p>
                         }
                       </div>
-                    </div>
+                    </li>
                   }
-                </div>
+                </ul>
               }
             </div>
           }

@@ -81,11 +81,10 @@
 
   <!-- ── Instances list ───────────────────────────────────────────────────── -->
   @else {
-    <div class="wi-list" role="list">
+    <ul class="wi-list">
       @for (inst of filteredInstances(); track trackById($index, inst)) {
-        <div
+        <li
           class="wi-row"
-          role="listitem"
           (click)="openInstance(inst)"
           (keydown.enter)="openInstance(inst)"
           tabindex="0"
@@ -137,9 +136,9 @@
 
           <!-- Arrow -->
           <i class="pi pi-chevron-right wi-row-arrow"></i>
-        </div>
+        </li>
       }
-    </div>
+    </ul>
 
     <p class="wi-count-hint">{{ filteredInstances().length }} instance{{ filteredInstances().length === 1 ? '' : 's' }}</p>
   }

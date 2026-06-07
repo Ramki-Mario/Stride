@@ -45,13 +45,11 @@
     <!-- KPI cards -->
     <div class="kpi-grid">
       @for (card of kpiCards(); track card.label) {
-        <div
+        <button
+          type="button"
           class="kpi-card kpi-card--clickable"
           [ngClass]="'kpi-card--' + card.accentClass"
           (click)="navigateCard(card)"
-          (keydown.enter)="navigateCard(card)"
-          tabindex="0"
-          role="button"
           [attr.aria-label]="'View ' + card.label"
         >
           <div class="kpi-card__top">
@@ -70,7 +68,7 @@
                  [style.width.%]="totalInstances() > 0 ? (card.value / totalInstances()) * 100 : 0">
             </div>
           </div>
-        </div>
+        </button>
       }
     </div>
 
@@ -85,7 +83,7 @@
             <p class="chart-card__subtitle">Daily started / completed / failed counts</p>
           </div>
           <!-- Trend window selector -->
-          <div class="trend-tabs" role="group" aria-label="Trend time window">
+          <fieldset class="trend-tabs" aria-label="Trend time window">
             @for (w of trendWindows; track w.days) {
               <button
                 class="trend-tab"
@@ -95,7 +93,7 @@
                 {{ w.label }}
               </button>
             }
-          </div>
+          </fieldset>
         </div>
 
         <div class="chart-card__body">
