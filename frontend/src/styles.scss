@@ -116,6 +116,90 @@
 
   /* ── Transitions ────────────────────────────────────────────────────────── */
   --stride-transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── PrimeNG component token overrides ─────────────────────────────────── */
+
+  /* Focus rings */
+  --p-focus-ring-color:                      var(--stride-primary);
+
+  /* InputText */
+  --p-inputtext-focus-border-color:          var(--stride-primary);
+  --p-inputtext-invalid-border-color:        var(--stride-error);
+  --p-inputtext-invalid-placeholder-color:   var(--stride-error);
+
+  /* AutoComplete / Cascadeselect / MultiSelect / Listbox / Select / Textarea */
+  --p-autocomplete-focus-border-color:       var(--stride-primary);
+  --p-autocomplete-invalid-border-color:     var(--stride-error);
+  --p-cascadeselect-invalid-border-color:    var(--stride-error);
+  --p-multiselect-invalid-border-color:      var(--stride-error);
+  --p-listbox-background:                    var(--stride-surface);
+  --p-listbox-invalid-border-color:          var(--stride-error);
+  --p-select-invalid-border-color:           var(--stride-error);
+  --p-select-placeholder-color:              var(--stride-text-muted);
+  --p-selectbutton-invalid-border-color:     var(--stride-error);
+  --p-textarea-invalid-border-color:         var(--stride-error);
+  --p-treeselect-focus-border-color:         var(--stride-primary);
+  --p-treeselect-invalid-border-color:       var(--stride-error);
+  --p-radiobutton-invalid-border-color:      var(--stride-error);
+  --p-checkbox-invalid-border-color:         var(--stride-error);
+  --p-togglebutton-invalid-border-color:     var(--stride-error);
+  --p-toggleswitch-invalid-border-color:     var(--stride-error);
+  --p-rating-invalid-icon-color:             var(--stride-error);
+  --p-floatlabel-invalid-color:              var(--stride-error);
+  --p-iftalabel-invalid-color:               var(--stride-error);
+
+  /* DataTable */
+  --p-datatable-header-cell-background:      var(--stride-surface);
+  --p-datatable-header-cell-color:           var(--stride-text-secondary);
+  --p-datatable-header-cell-border-color:    var(--stride-border);
+  --p-datatable-header-cell-selected-background: var(--stride-primary-subtle);
+  --p-datatable-header-cell-selected-color:  var(--stride-primary);
+  --p-datatable-row-selected-background:     var(--stride-primary-subtle);
+  --p-datatable-row-selected-color:          var(--stride-primary);
+  --p-datatable-row-striped-background:      #FAFAFA;
+  --p-datatable-filter-overlay-select-background: var(--stride-surface);
+  --p-datatable-filter-overlay-select-border-color: var(--stride-border);
+  --p-datatable-filter-rule-border-color:    var(--stride-border);
+
+  /* TreeTable */
+  --p-treetable-header-background:           var(--stride-surface);
+  --p-treetable-header-border-color:         var(--stride-border);
+  --p-treetable-header-cell-background:      var(--stride-surface);
+  --p-treetable-header-cell-border-color:    var(--stride-border);
+  --p-treetable-header-cell-color:           var(--stride-text-secondary);
+  --p-treetable-header-cell-hover-background: var(--stride-surface-hover);
+  --p-treetable-header-cell-selected-background: var(--stride-primary-subtle);
+  --p-treetable-header-cell-selected-color:  var(--stride-primary);
+  --p-treetable-header-cell-focus-ring-color: var(--stride-primary);
+  --p-treetable-body-cell-border-color:      var(--stride-border);
+  --p-treetable-row-background:              var(--stride-surface);
+  --p-treetable-row-color:                   var(--stride-text-primary);
+  --p-treetable-row-hover-background:        var(--stride-surface-hover);
+  --p-treetable-row-selected-background:     var(--stride-primary-subtle);
+  --p-treetable-row-selected-color:          var(--stride-primary);
+  --p-treetable-row-focus-ring-color:        var(--stride-primary);
+  --p-treetable-footer-background:           var(--stride-surface);
+  --p-treetable-footer-border-color:         var(--stride-border);
+  --p-treetable-footer-cell-background:      var(--stride-surface);
+  --p-treetable-footer-cell-border-color:    var(--stride-border);
+  --p-treetable-node-toggle-button-color:    var(--stride-text-secondary);
+  --p-treetable-node-toggle-button-hover-background: var(--stride-surface-hover);
+  --p-treetable-node-toggle-button-focus-ring-color: var(--stride-primary);
+  --p-treetable-sort-icon-color:             var(--stride-text-muted);
+  --p-treetable-sort-icon-hover-color:       var(--stride-primary);
+  --p-treetable-resize-indicator-color:      var(--stride-primary);
+
+  /* Knob / Form */
+  --p-knob-range-background:                 var(--stride-border);
+  --p-knob-value-background:                 var(--stride-primary);
+  --p-knob-text-color:                       var(--stride-text-primary);
+  --p-form-field-icon-color:                 var(--stride-text-muted);
+
+  /* Overlay badge */
+  --p-overlaybadge-outline-color:            var(--stride-surface);
+
+  /* VirtualScroller */
+  --p-virtualscroller-loader-mask-background: rgba(255,255,255,0.85);
 }
 
 [data-theme="dark"] {
@@ -195,6 +279,81 @@
   --stride-topbar-bg:       rgba(22, 27, 43, 0.85);
   --stride-topbar-border:   #2A3447;
   --stride-topbar-backdrop: blur(12px);
+
+  /* ── PrimeNG component token overrides ─────────────────────────────────── */
+
+  /* Focus rings */
+  --p-focus-ring-color:                      var(--stride-primary);
+
+  /* InputText */
+  --p-inputtext-focus-border-color:          var(--stride-primary);
+  --p-inputtext-invalid-border-color:        var(--stride-error);
+  --p-inputtext-invalid-placeholder-color:   var(--stride-error);
+
+  /* Form components */
+  --p-autocomplete-focus-border-color:       var(--stride-primary);
+  --p-autocomplete-invalid-border-color:     var(--stride-error);
+  --p-cascadeselect-invalid-border-color:    var(--stride-error);
+  --p-multiselect-invalid-border-color:      var(--stride-error);
+  --p-listbox-background:                    var(--stride-surface);
+  --p-listbox-invalid-border-color:          var(--stride-error);
+  --p-select-invalid-border-color:           var(--stride-error);
+  --p-select-placeholder-color:              var(--stride-text-muted);
+  --p-selectbutton-invalid-border-color:     var(--stride-error);
+  --p-textarea-invalid-border-color:         var(--stride-error);
+  --p-treeselect-focus-border-color:         var(--stride-primary);
+  --p-treeselect-invalid-border-color:       var(--stride-error);
+  --p-radiobutton-invalid-border-color:      var(--stride-error);
+  --p-checkbox-invalid-border-color:         var(--stride-error);
+  --p-togglebutton-invalid-border-color:     var(--stride-error);
+  --p-toggleswitch-invalid-border-color:     var(--stride-error);
+  --p-floatlabel-invalid-color:              var(--stride-error);
+  --p-iftalabel-invalid-color:               var(--stride-error);
+
+  /* DataTable */
+  --p-datatable-header-cell-background:      var(--stride-surface);
+  --p-datatable-header-cell-color:           var(--stride-text-secondary);
+  --p-datatable-header-cell-border-color:    var(--stride-border);
+  --p-datatable-header-cell-selected-background: var(--stride-primary-subtle);
+  --p-datatable-header-cell-selected-color:  var(--stride-primary);
+  --p-datatable-row-selected-background:     var(--stride-primary-subtle);
+  --p-datatable-row-selected-color:          var(--stride-primary);
+  --p-datatable-row-striped-background:      var(--stride-surface-secondary);
+  --p-datatable-filter-overlay-select-background: var(--stride-surface);
+  --p-datatable-filter-overlay-select-border-color: var(--stride-border);
+  --p-datatable-filter-rule-border-color:    var(--stride-border);
+
+  /* TreeTable */
+  --p-treetable-header-background:           var(--stride-surface);
+  --p-treetable-header-border-color:         var(--stride-border);
+  --p-treetable-header-cell-background:      var(--stride-surface);
+  --p-treetable-header-cell-border-color:    var(--stride-border);
+  --p-treetable-header-cell-color:           var(--stride-text-secondary);
+  --p-treetable-header-cell-hover-background: var(--stride-surface-hover);
+  --p-treetable-header-cell-selected-background: var(--stride-primary-subtle);
+  --p-treetable-header-cell-selected-color:  var(--stride-primary);
+  --p-treetable-header-cell-focus-ring-color: var(--stride-primary);
+  --p-treetable-body-cell-border-color:      var(--stride-border);
+  --p-treetable-row-background:              var(--stride-surface);
+  --p-treetable-row-color:                   var(--stride-text-primary);
+  --p-treetable-row-hover-background:        var(--stride-surface-hover);
+  --p-treetable-row-selected-background:     var(--stride-primary-subtle);
+  --p-treetable-row-selected-color:          var(--stride-primary);
+  --p-treetable-row-focus-ring-color:        var(--stride-primary);
+  --p-treetable-footer-background:           var(--stride-surface);
+  --p-treetable-footer-border-color:         var(--stride-border);
+  --p-treetable-node-toggle-button-color:    var(--stride-text-secondary);
+  --p-treetable-node-toggle-button-hover-background: var(--stride-surface-hover);
+  --p-treetable-node-toggle-button-focus-ring-color: var(--stride-primary);
+  --p-treetable-sort-icon-color:             var(--stride-text-muted);
+  --p-treetable-sort-icon-hover-color:       var(--stride-primary);
+
+  --p-knob-range-background:                 var(--stride-border-soft);
+  --p-knob-value-background:                 var(--stride-primary);
+  --p-knob-text-color:                       var(--stride-text-primary);
+  --p-form-field-icon-color:                 var(--stride-text-muted);
+  --p-overlaybadge-outline-color:            var(--stride-surface);
+  --p-virtualscroller-loader-mask-background: rgba(17,24,39,0.85);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -353,174 +512,7 @@
 
 
 /* ─────────────────────────────────────────────────────────────────────────
-   3. PrimeNG DESIGN TOKEN OVERRIDES
-   Map PrimeNG's dt() CSS variables to our STRIDE palette.
-   Tokens: dt('key.sub.path') → --p-key-sub-path
-   ───────────────────────────────────────────────────────────────────────── */
-
-:root,
-[data-theme="light"] {
-  /* Focus rings */
-  --p-focus-ring-color:                      var(--stride-primary);
-
-  /* InputText */
-  --p-inputtext-focus-border-color:          var(--stride-primary);
-  --p-inputtext-invalid-border-color:        var(--stride-error);
-  --p-inputtext-invalid-placeholder-color:   var(--stride-error);
-
-  /* AutoComplete / Cascadeselect / MultiSelect / Listbox / Select / Textarea */
-  --p-autocomplete-focus-border-color:       var(--stride-primary);
-  --p-autocomplete-invalid-border-color:     var(--stride-error);
-  --p-cascadeselect-invalid-border-color:    var(--stride-error);
-  --p-multiselect-invalid-border-color:      var(--stride-error);
-  --p-listbox-background:                    var(--stride-surface);
-  --p-listbox-invalid-border-color:          var(--stride-error);
-  --p-select-invalid-border-color:           var(--stride-error);
-  --p-select-placeholder-color:              var(--stride-text-muted);
-  --p-selectbutton-invalid-border-color:     var(--stride-error);
-  --p-textarea-invalid-border-color:         var(--stride-error);
-  --p-treeselect-focus-border-color:         var(--stride-primary);
-  --p-treeselect-invalid-border-color:       var(--stride-error);
-  --p-radiobutton-invalid-border-color:      var(--stride-error);
-  --p-checkbox-invalid-border-color:         var(--stride-error);
-  --p-togglebutton-invalid-border-color:     var(--stride-error);
-  --p-toggleswitch-invalid-border-color:     var(--stride-error);
-  --p-rating-invalid-icon-color:             var(--stride-error);
-  --p-floatlabel-invalid-color:              var(--stride-error);
-  --p-iftalabel-invalid-color:               var(--stride-error);
-
-  /* DataTable */
-  --p-datatable-header-cell-background:      var(--stride-surface);
-  --p-datatable-header-cell-color:           var(--stride-text-secondary);
-  --p-datatable-header-cell-border-color:    var(--stride-border);
-  --p-datatable-header-cell-selected-background: var(--stride-primary-subtle);
-  --p-datatable-header-cell-selected-color:  var(--stride-primary);
-  --p-datatable-row-selected-background:     var(--stride-primary-subtle);
-  --p-datatable-row-selected-color:          var(--stride-primary);
-  --p-datatable-row-striped-background:      #FAFAFA;
-  --p-datatable-filter-overlay-select-background: var(--stride-surface);
-  --p-datatable-filter-overlay-select-border-color: var(--stride-border);
-  --p-datatable-filter-rule-border-color:    var(--stride-border);
-
-  /* TreeTable */
-  --p-treetable-header-background:           var(--stride-surface);
-  --p-treetable-header-border-color:         var(--stride-border);
-  --p-treetable-header-cell-background:      var(--stride-surface);
-  --p-treetable-header-cell-border-color:    var(--stride-border);
-  --p-treetable-header-cell-color:           var(--stride-text-secondary);
-  --p-treetable-header-cell-hover-background: var(--stride-surface-hover);
-  --p-treetable-header-cell-selected-background: var(--stride-primary-subtle);
-  --p-treetable-header-cell-selected-color:  var(--stride-primary);
-  --p-treetable-header-cell-focus-ring-color: var(--stride-primary);
-  --p-treetable-body-cell-border-color:      var(--stride-border);
-  --p-treetable-row-background:              var(--stride-surface);
-  --p-treetable-row-color:                   var(--stride-text-primary);
-  --p-treetable-row-hover-background:        var(--stride-surface-hover);
-  --p-treetable-row-selected-background:     var(--stride-primary-subtle);
-  --p-treetable-row-selected-color:          var(--stride-primary);
-  --p-treetable-row-focus-ring-color:        var(--stride-primary);
-  --p-treetable-footer-background:           var(--stride-surface);
-  --p-treetable-footer-border-color:         var(--stride-border);
-  --p-treetable-footer-cell-background:      var(--stride-surface);
-  --p-treetable-footer-cell-border-color:    var(--stride-border);
-  --p-treetable-node-toggle-button-color:    var(--stride-text-secondary);
-  --p-treetable-node-toggle-button-hover-background: var(--stride-surface-hover);
-  --p-treetable-node-toggle-button-focus-ring-color: var(--stride-primary);
-  --p-treetable-sort-icon-color:             var(--stride-text-muted);
-  --p-treetable-sort-icon-hover-color:       var(--stride-primary);
-  --p-treetable-resize-indicator-color:      var(--stride-primary);
-
-  /* Knob / Form */
-  --p-knob-range-background:                 var(--stride-border);
-  --p-knob-value-background:                 var(--stride-primary);
-  --p-knob-text-color:                       var(--stride-text-primary);
-  --p-form-field-icon-color:                 var(--stride-text-muted);
-
-  /* Overlay badge */
-  --p-overlaybadge-outline-color:            var(--stride-surface);
-
-  /* VirtualScroller */
-  --p-virtualscroller-loader-mask-background: rgba(255,255,255,0.85);
-}
-
-[data-theme="dark"] {
-  /* Focus rings */
-  --p-focus-ring-color:                      var(--stride-primary);
-
-  /* InputText */
-  --p-inputtext-focus-border-color:          var(--stride-primary);
-  --p-inputtext-invalid-border-color:        var(--stride-error);
-  --p-inputtext-invalid-placeholder-color:   var(--stride-error);
-
-  /* Form components */
-  --p-autocomplete-focus-border-color:       var(--stride-primary);
-  --p-autocomplete-invalid-border-color:     var(--stride-error);
-  --p-cascadeselect-invalid-border-color:    var(--stride-error);
-  --p-multiselect-invalid-border-color:      var(--stride-error);
-  --p-listbox-background:                    var(--stride-surface);
-  --p-listbox-invalid-border-color:          var(--stride-error);
-  --p-select-invalid-border-color:           var(--stride-error);
-  --p-select-placeholder-color:              var(--stride-text-muted);
-  --p-selectbutton-invalid-border-color:     var(--stride-error);
-  --p-textarea-invalid-border-color:         var(--stride-error);
-  --p-treeselect-focus-border-color:         var(--stride-primary);
-  --p-treeselect-invalid-border-color:       var(--stride-error);
-  --p-radiobutton-invalid-border-color:      var(--stride-error);
-  --p-checkbox-invalid-border-color:         var(--stride-error);
-  --p-togglebutton-invalid-border-color:     var(--stride-error);
-  --p-toggleswitch-invalid-border-color:     var(--stride-error);
-  --p-floatlabel-invalid-color:              var(--stride-error);
-  --p-iftalabel-invalid-color:               var(--stride-error);
-
-  /* DataTable */
-  --p-datatable-header-cell-background:      var(--stride-surface);
-  --p-datatable-header-cell-color:           var(--stride-text-secondary);
-  --p-datatable-header-cell-border-color:    var(--stride-border);
-  --p-datatable-header-cell-selected-background: var(--stride-primary-subtle);
-  --p-datatable-header-cell-selected-color:  var(--stride-primary);
-  --p-datatable-row-selected-background:     var(--stride-primary-subtle);
-  --p-datatable-row-selected-color:          var(--stride-primary);
-  --p-datatable-row-striped-background:      var(--stride-surface-secondary);
-  --p-datatable-filter-overlay-select-background: var(--stride-surface);
-  --p-datatable-filter-overlay-select-border-color: var(--stride-border);
-  --p-datatable-filter-rule-border-color:    var(--stride-border);
-
-  /* TreeTable */
-  --p-treetable-header-background:           var(--stride-surface);
-  --p-treetable-header-border-color:         var(--stride-border);
-  --p-treetable-header-cell-background:      var(--stride-surface);
-  --p-treetable-header-cell-border-color:    var(--stride-border);
-  --p-treetable-header-cell-color:           var(--stride-text-secondary);
-  --p-treetable-header-cell-hover-background: var(--stride-surface-hover);
-  --p-treetable-header-cell-selected-background: var(--stride-primary-subtle);
-  --p-treetable-header-cell-selected-color:  var(--stride-primary);
-  --p-treetable-header-cell-focus-ring-color: var(--stride-primary);
-  --p-treetable-body-cell-border-color:      var(--stride-border);
-  --p-treetable-row-background:              var(--stride-surface);
-  --p-treetable-row-color:                   var(--stride-text-primary);
-  --p-treetable-row-hover-background:        var(--stride-surface-hover);
-  --p-treetable-row-selected-background:     var(--stride-primary-subtle);
-  --p-treetable-row-selected-color:          var(--stride-primary);
-  --p-treetable-row-focus-ring-color:        var(--stride-primary);
-  --p-treetable-footer-background:           var(--stride-surface);
-  --p-treetable-footer-border-color:         var(--stride-border);
-  --p-treetable-node-toggle-button-color:    var(--stride-text-secondary);
-  --p-treetable-node-toggle-button-hover-background: var(--stride-surface-hover);
-  --p-treetable-node-toggle-button-focus-ring-color: var(--stride-primary);
-  --p-treetable-sort-icon-color:             var(--stride-text-muted);
-  --p-treetable-sort-icon-hover-color:       var(--stride-primary);
-
-  --p-knob-range-background:                 var(--stride-border-soft);
-  --p-knob-value-background:                 var(--stride-primary);
-  --p-knob-text-color:                       var(--stride-text-primary);
-  --p-form-field-icon-color:                 var(--stride-text-muted);
-  --p-overlaybadge-outline-color:            var(--stride-surface);
-  --p-virtualscroller-loader-mask-background: rgba(17,24,39,0.85);
-}
-
-
-/* ─────────────────────────────────────────────────────────────────────────
-   4. GLOBAL BASE STYLES
+   3. GLOBAL BASE STYLES
    ───────────────────────────────────────────────────────────────────────── */
 
 *,
