@@ -155,8 +155,11 @@ export class WorkflowFormPageComponent implements OnInit {
     this.saveError.set(null);
 
     if (this.isEditMode()) {
+      const workflowId = this.workflowId();
+
+      if(!workflowId) return;
       this.wfService
-        .updateDefinition(this.workflowId()!, { name, description: descValue })
+        .updateDefinition(workflowId, { name, description: descValue })
         .pipe(
           finalize(() => this.isSaving.set(false)),
           takeUntilDestroyed(this.destroyRef),
