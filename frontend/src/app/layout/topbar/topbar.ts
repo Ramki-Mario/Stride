@@ -366,7 +366,7 @@ export class TopbarComponent {
   /** Human-readable section label derived from the first URL segment. */
   protected readonly currentSection = computed(() => {
     const url = this.currentUrl();
-    const seg  = url.split('/').filter(Boolean)[0] ?? 'dashboard';
+    const seg  = url.split('/').find(Boolean) ?? 'dashboard';
     return ROUTE_LABELS[seg] ?? (seg.charAt(0).toUpperCase() + seg.slice(1));
   });
 
@@ -409,7 +409,7 @@ export class TopbarComponent {
   /** Close the user dropdown when clicking anywhere outside this component. */
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.el.nativeElement.contains(event.target as Node)) {
+    if (!this.el.nativeElement.contains(event.target)) {
       this.dropdownOpen.set(false);
     }
   }
