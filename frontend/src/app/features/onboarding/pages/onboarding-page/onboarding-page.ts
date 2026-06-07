@@ -890,10 +890,6 @@ export class OnboardingPageComponent implements OnDestroy {
     this.serverError.set(null);
     this.submitting.set(true);
 
-    const inviteEmails = this.inviteControls
-      .map(c => c.value?.trim() ?? '')
-      .filter(e => !!e);
-
     try {
       await firstValueFrom(this.http.post('/bff/tenants/register', {
         orgName:          this.orgForm.value.orgName,
