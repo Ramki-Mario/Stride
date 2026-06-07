@@ -13,7 +13,8 @@ public sealed record NewInvoice(
     string   Currency,
     DateOnly DueDate,
     Guid     CreatedBy,
-    string?  Notes = null);
+    string?  Notes    = null,
+    Guid?    ClientId = null);   // optional link to a Clients.Client record
 
 /// <summary>
 /// Invoice aggregate root.
@@ -35,6 +36,7 @@ public sealed class Invoice : AuditableEntity
     public InvoiceStatus Status        { get; private set; }
     public DateOnly      DueDate       { get; private set; }
     public string?       Notes         { get; private set; }
+    public Guid?         ClientId      { get; private set; }   // optional link to Clients.Client
     public DateTime?     SentAt        { get; private set; }
     public DateTime?     PaidAt        { get; private set; }
 
@@ -70,6 +72,7 @@ public sealed class Invoice : AuditableEntity
             Status        = InvoiceStatus.Draft,
             DueDate       = data.DueDate,
             Notes         = data.Notes?.Trim(),
+            ClientId      = data.ClientId,
             CreatedAt     = DateTime.UtcNow,
             UpdatedAt     = DateTime.UtcNow,
             CreatedBy     = data.CreatedBy,

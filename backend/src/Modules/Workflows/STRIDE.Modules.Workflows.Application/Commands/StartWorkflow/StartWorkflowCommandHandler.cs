@@ -38,7 +38,7 @@ internal sealed class StartWorkflowCommandHandler
                     $"Workflow definition '{request.WorkflowDefinitionId}' not found.");
             }
 
-            var instance = WorkflowInstance.Start(definition, request.StartedBy);
+            var instance = WorkflowInstance.Start(definition, request.StartedBy, request.ClientId);
 
             await _instances.AddAsync(instance, cancellationToken);
             await _instances.SaveChangesAsync(cancellationToken);

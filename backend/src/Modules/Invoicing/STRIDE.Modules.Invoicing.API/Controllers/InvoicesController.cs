@@ -74,7 +74,8 @@ public sealed class InvoicesController : ControllerBase
                 request.DueDate,
                 request.Notes,
                 lineItems,
-                _currentUser.UserId),
+                _currentUser.UserId,
+                request.ClientId),
             cancellationToken);
 
         if (result.IsFailure)

@@ -41,7 +41,8 @@ internal sealed class GenerateInvoiceCommandHandler
                 Currency:      request.Currency,
                 DueDate:       request.DueDate,
                 CreatedBy:     request.CreatedBy,
-                Notes:         request.Notes));
+                Notes:         request.Notes,
+                ClientId:      request.ClientId));
 
             foreach (var item in request.LineItems)
                 invoice.AddLineItem(item.Description, item.UnitPrice, item.Quantity);

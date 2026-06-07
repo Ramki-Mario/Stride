@@ -220,12 +220,16 @@ public sealed class WorkflowsController : ControllerBase
     [ProducesResponseType(typeof(StartWorkflowResult), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> StartInstance(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> StartInstance(
+        Guid id,
+        [FromQuery] Guid? clientId = null,
+        CancellationToken cancellationToken = default)
     {
         var result = await _mediator.Send(
             new StartWorkflowCommand(
                 WorkflowDefinitionId: id,
-                StartedBy: _currentUser.UserId),
+                StartedBy: _currentUser.UserId,
+                ClientId:  clientId),
             cancellationToken);
 
         if (result.IsFailure)

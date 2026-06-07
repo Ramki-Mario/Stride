@@ -20,7 +20,16 @@ internal sealed class ClientReadService : IClientReadService
         SqlLoader.Load(typeof(ClientReadService).Assembly,
             "STRIDE.Modules.Clients.Infrastructure.ReadModels.Queries.GetClientById.sql");
 
-    private static readonly string[] StatusLabels = ["Active", "Inactive"];
+    private static readonly string SqlHistoryWorkflows =
+        SqlLoader.Load(typeof(ClientReadService).Assembly,
+            "STRIDE.Modules.Clients.Infrastructure.ReadModels.Queries.GetClientHistory_Workflows.sql");
+
+    private static readonly string SqlHistoryInvoices =
+        SqlLoader.Load(typeof(ClientReadService).Assembly,
+            "STRIDE.Modules.Clients.Infrastructure.ReadModels.Queries.GetClientHistory_Invoices.sql");
+
+    private static readonly string[] StatusLabels        = ["Active", "Inactive"];
+    private static readonly string[] InvoiceStatusLabels = ["Draft", "Sent", "Paid", "Void"];
 
     private readonly IDbConnectionFactory _db;
 
@@ -90,5 +99,54 @@ internal sealed class ClientReadService : IClientReadService
             StatusLabel:   StatusLabels[statusInt],
             CreatedAt:     (DateTime)row.CreatedAt,
             UpdatedAt:     (DateTime)row.UpdatedAt);
+    }
+
+    public async Task<ClientHistoryDto?> GetClientHistoryAsync(
+        Guid tenantId, Guid clientId, CancellationToken cancellationToken = default)
+    {
+        var param = new { TenantId = tenantId, ClientId = clientId };
+
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
+
+        // Verify client exists within this tenant
+        var clientRow = await conn.QueryFirstOrDefaultAsync<dynamic>(
+            new CommandDefinition(SqlGetById, param, cancellationToken: cancellationToken));
+
+        if (clientRow is null) return null;
+
+        // Fetch linked workflow instances (cross-schema, same SQL Server instance)
+        var workflowRows = await conn.QueryAsync<dynamic>(
+            new CommandDefinition(SqlHistoryWorkflows, param, cancellationToken: cancellationToken));
+
+        var workflows = workflowRows.Select(r => new ClientWorkflowDto(
+            Id:           (Guid)r.Id,
+            WorkflowName: (string)r.WorkflowName,
+            Status:       (string)r.Status,
+            CreatedAt:    (DateTime)r.CreatedAt,
+            CompletedAt:  r.CompletedAt is DBNull ? null : (DateTime?)r.CompletedAt
+        )).ToList();
+
+        // Fetch linked invoices (cross-schema, same SQL Server instance)
+        var invoiceRows = await conn.QueryAsync<dynamic>(
+            new CommandDefinition(SqlHistoryInvoices, param, cancellationToken: cancellationToken));
+
+        var invoices = invoiceRows.Select(r =>
+        {
+            int s = (int)r.Status;
+            return new ClientInvoiceDto(
+                Id:            (Guid)r.Id,
+                InvoiceNumber: (string)r.InvoiceNumber,
+                Status:        s,
+                StatusLabel:   InvoiceStatusLabels[s],
+                TotalAmount:   (decimal)r.TotalAmount,
+                Currency:      (string)r.Currency,
+                CreatedAt:     (DateTime)r.CreatedAt);
+        }).ToList();
+
+        return new ClientHistoryDto(
+            ClientId:   clientId,
+            ClientName: (string)clientRow.Name,
+            Workflows:  workflows,
+            Invoices:   invoices);
     }
 }

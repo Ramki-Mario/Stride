@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import {
   ClientSummaryDto,
   ClientDetailDto,
+  ClientHistoryDto,
   PagedResult,
   CreateClientRequest,
   UpdateClientRequest,
@@ -81,5 +82,9 @@ export class ClientService {
 
   reactivateClient(id: string): Observable<void> {
     return this.http.put<void>(`${this.base}/${id}/reactivate`, {});
+  }
+
+  getClientHistory(id: string): Observable<ClientHistoryDto> {
+    return this.http.get<ClientHistoryDto>(`${this.base}/${id}/history`);
   }
 }

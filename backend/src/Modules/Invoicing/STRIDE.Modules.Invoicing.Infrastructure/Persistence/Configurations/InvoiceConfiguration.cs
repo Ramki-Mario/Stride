@@ -19,6 +19,7 @@ public sealed class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
         builder.Property(i => i.Status).IsRequired().HasDefaultValue(InvoiceStatus.Draft);
         builder.Property(i => i.DueDate).IsRequired();
         builder.Property(i => i.Notes).HasMaxLength(2000);
+        builder.Property(i => i.ClientId);   // nullable FK to clients.Clients (cross-module, no EF nav)
         builder.Property(i => i.TenantId).IsRequired();
         builder.Property(i => i.CreatedAt).IsRequired();
         builder.Property(i => i.UpdatedAt).IsRequired();
@@ -42,5 +43,6 @@ public sealed class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
         builder.HasIndex(i => new { i.TenantId, i.IsDeleted });
         builder.HasIndex(i => new { i.TenantId, i.Status });
         builder.HasIndex(i => new { i.TenantId, i.CreatedAt });
+        builder.HasIndex(i => new { i.TenantId, i.ClientId });   // for client history queries
     }
 }

@@ -50,3 +50,30 @@ export interface UpdateClientRequest {
   address:       string | null;
   notes:         string | null;
 }
+
+// ── History DTOs (cross-module read) ──────────────────────────────────────────
+
+export interface ClientWorkflowDto {
+  id:           string;
+  workflowName: string;
+  status:       string;
+  createdAt:    string;
+  completedAt:  string | null;
+}
+
+export interface ClientInvoiceDto {
+  id:            string;
+  invoiceNumber: string;
+  status:        number;
+  statusLabel:   string;
+  totalAmount:   number;
+  currency:      string;
+  createdAt:     string;
+}
+
+export interface ClientHistoryDto {
+  clientId:   string;
+  clientName: string;
+  workflows:  ClientWorkflowDto[];
+  invoices:   ClientInvoiceDto[];
+}

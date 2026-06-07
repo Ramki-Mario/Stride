@@ -9,10 +9,11 @@ public sealed class WorkflowInstance : AuditableEntity
 {
     private readonly List<StepInstance> _steps = new();
 
-    public Guid WorkflowDefinitionId { get; private set; }
+    public Guid  WorkflowDefinitionId { get; private set; }
     public string WorkflowName { get; private set; } = string.Empty;
     public WorkflowStatus Status { get; private set; }
-    public Guid StartedBy { get; private set; }
+    public Guid  StartedBy { get; private set; }
+    public Guid? ClientId  { get; private set; }       // optional link to a Clients.Client
     public DateTime? CompletedAt { get; private set; }
 
     public IReadOnlyList<StepInstance> Steps => _steps.AsReadOnly();
@@ -21,7 +22,8 @@ public sealed class WorkflowInstance : AuditableEntity
 
     public static WorkflowInstance Start(
         WorkflowDefinition definition,
-        Guid startedBy)
+        Guid  startedBy,
+        Guid? clientId = null)
     {
         if (definition.Status != WorkflowStatus.Active)
             throw new WorkflowDomainException("Only Active workflow definitions can be started.");
@@ -37,6 +39,7 @@ public sealed class WorkflowInstance : AuditableEntity
             WorkflowName = definition.Name,
             Status = WorkflowStatus.Running,
             StartedBy = startedBy,
+            ClientId  = clientId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             CreatedBy = startedBy,

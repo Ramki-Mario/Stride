@@ -14,4 +14,5 @@ public sealed record GenerateInvoiceRequest(
     string                        Currency,
     [property: JsonRequired] DateOnly DueDate,
     string?                       Notes,
-    IReadOnlyList<GenerateInvoiceLineItemRequest> LineItems);
+    IReadOnlyList<GenerateInvoiceLineItemRequest> LineItems,
+    Guid?                         ClientId = null);  // optional link to a Clients record

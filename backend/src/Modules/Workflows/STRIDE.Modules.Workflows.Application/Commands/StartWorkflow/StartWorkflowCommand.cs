@@ -8,5 +8,6 @@ namespace STRIDE.Modules.Workflows.Application.Commands.StartWorkflow;
 /// and transitioning the new instance to Running status.
 /// </summary>
 public sealed record StartWorkflowCommand(
-    Guid WorkflowDefinitionId,
-    Guid StartedBy) : IRequest<Result<StartWorkflowResult>>;
+    Guid  WorkflowDefinitionId,
+    Guid  StartedBy,
+    Guid? ClientId = null) : IRequest<Result<StartWorkflowResult>>;

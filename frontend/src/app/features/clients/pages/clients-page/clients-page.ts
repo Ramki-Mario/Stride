@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { NgClass, DecimalPipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -15,13 +15,17 @@ import { Subject } from 'rxjs';
 import { SelectModule } from 'primeng/select';
 
 import { ClientService } from '../../services/client.service';
-import { ClientSummaryDto, ClientStatus } from '../../models/client.models';
+import {
+  ClientSummaryDto,
+  ClientHistoryDto,
+  ClientStatus,
+} from '../../models/client.models';
 
 @Component({
   selector: 'app-clients-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, FormsModule, ReactiveFormsModule, SelectModule],
+  imports: [NgClass, DecimalPipe, FormsModule, ReactiveFormsModule, SelectModule],
   template: `
     <div class="cl-page">
 
@@ -190,6 +194,9 @@ import { ClientSummaryDto, ClientStatus } from '../../models/client.models';
                           <button class="cl-menu-item" role="menuitem" (click)="openEditModal(client)">
                             Edit
                           </button>
+                          <button class="cl-menu-item" role="menuitem" (click)="openHistoryModal(client)">
+                            View History
+                          </button>
                           @if (client.status === 0) {
                             <button class="cl-menu-item cl-menu-item--danger" role="menuitem"
                                     (click)="deactivateClient(client)">
@@ -337,6 +344,122 @@ import { ClientSummaryDto, ClientStatus } from '../../models/client.models';
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    }
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- Client History Modal                                                 -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    @if (showHistoryModal()) {
+      <div class="modal-backdrop" (click)="closeHistoryModal()" role="presentation">
+        <div class="modal modal--wide" role="dialog" aria-modal="true"
+             aria-labelledby="history-modal-title"
+             (click)="$event.stopPropagation()">
+
+          <div class="modal-header">
+            <div>
+              <h2 class="modal-title" id="history-modal-title">Client History</h2>
+              @if (historyClient()) {
+                <p class="modal-subtitle">{{ historyClient()!.name }}</p>
+              }
+            </div>
+            <button class="modal-close" (click)="closeHistoryModal()" aria-label="Close">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <line x1="18" y1="6" x2="6"  y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line x1="6"  y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="modal-body modal-body--history">
+            @if (historyLoading()) {
+              <div class="hist-loading">
+                <div class="sk-line" style="width:60%;height:1rem;margin-bottom:0.5rem"></div>
+                <div class="sk-line" style="width:45%;height:0.75rem"></div>
+              </div>
+            } @else if (historyError()) {
+              <p class="hist-error">{{ historyError() }}</p>
+            } @else if (history()) {
+
+              <!-- ── Workflows ──────────────────────────────────────────── -->
+              <section class="hist-section">
+                <h3 class="hist-section-title">
+                  Workflows
+                  <span class="hist-count">{{ history()!.workflows.length }}</span>
+                </h3>
+                @if (history()!.workflows.length === 0) {
+                  <p class="hist-empty">No linked workflows.</p>
+                } @else {
+                  <div class="hist-table-wrap">
+                    <table class="hist-table" aria-label="Linked workflows">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Status</th>
+                          <th>Started</th>
+                          <th>Completed</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (wf of history()!.workflows; track wf.id) {
+                          <tr>
+                            <td class="hist-td-name">{{ wf.workflowName }}</td>
+                            <td>
+                              <span class="cl-badge" [ngClass]="workflowStatusClass(wf.status)">
+                                {{ wf.status }}
+                              </span>
+                            </td>
+                            <td class="hist-td-date">{{ formatDate(wf.createdAt) }}</td>
+                            <td class="hist-td-date">{{ wf.completedAt ? formatDate(wf.completedAt) : '—' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              </section>
+
+              <!-- ── Invoices ───────────────────────────────────────────── -->
+              <section class="hist-section">
+                <h3 class="hist-section-title">
+                  Invoices
+                  <span class="hist-count">{{ history()!.invoices.length }}</span>
+                </h3>
+                @if (history()!.invoices.length === 0) {
+                  <p class="hist-empty">No linked invoices.</p>
+                } @else {
+                  <div class="hist-table-wrap">
+                    <table class="hist-table" aria-label="Linked invoices">
+                      <thead>
+                        <tr>
+                          <th>Invoice #</th>
+                          <th>Status</th>
+                          <th>Amount</th>
+                          <th>Created</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (inv of history()!.invoices; track inv.id) {
+                          <tr>
+                            <td class="hist-td-name">{{ inv.invoiceNumber }}</td>
+                            <td>
+                              <span class="cl-badge" [ngClass]="invoiceStatusClass(inv.status)">
+                                {{ inv.statusLabel }}
+                              </span>
+                            </td>
+                            <td class="hist-td-amount">{{ inv.currency }} {{ inv.totalAmount | number:'1.2-2' }}</td>
+                            <td class="hist-td-date">{{ formatDate(inv.createdAt) }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              </section>
+
+            }
+          </div>
         </div>
       </div>
     }
@@ -679,6 +802,65 @@ import { ClientSummaryDto, ClientStatus } from '../../models/client.models';
       padding: 0; margin: -1px; overflow: hidden;
       clip: rect(0,0,0,0); white-space: nowrap; border: 0;
     }
+
+    /* ── History modal ─────────────────────────────────────────────────────── */
+    .modal--wide { max-width: 54rem; }
+    .modal-subtitle { font-size: 0.8125rem; color: var(--stride-text-muted); margin: 0.25rem 0 0; }
+    .modal-body--history {
+      padding: 1.25rem 1.5rem 1.5rem;
+      display: flex; flex-direction: column; gap: 1.5rem;
+      max-height: 80vh; overflow-y: auto;
+    }
+    .hist-section {}
+    .hist-section-title {
+      font-size: 0.8125rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--stride-text-muted);
+      margin: 0 0 0.75rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .hist-count {
+      background: var(--stride-surface-secondary);
+      border: 1px solid var(--stride-border-soft);
+      border-radius: 99px; padding: 0.05rem 0.45rem;
+      font-size: 0.75rem; color: var(--stride-text-muted); font-weight: 600;
+    }
+    .hist-empty { font-size: 0.875rem; color: var(--stride-text-muted); margin: 0; }
+    .hist-table-wrap {
+      border: 1px solid var(--stride-border-soft);
+      border-radius: var(--stride-radius-md);
+      overflow: hidden;
+    }
+    .hist-table {
+      width: 100%; border-collapse: collapse; font-size: 0.8125rem;
+    }
+    .hist-table thead tr {
+      background: var(--stride-surface-secondary);
+      border-bottom: 1px solid var(--stride-border-soft);
+    }
+    .hist-table th {
+      padding: 0.5rem 0.875rem; text-align: left;
+      font-size: 0.6875rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--stride-text-muted); white-space: nowrap;
+    }
+    .hist-table td { padding: 0.625rem 0.875rem; vertical-align: middle; color: var(--stride-text-primary); }
+    .hist-table tbody tr { border-bottom: 1px solid var(--stride-border-soft); }
+    .hist-table tbody tr:last-child { border-bottom: none; }
+    .hist-td-name   { font-weight: 500; }
+    .hist-td-date   { color: var(--stride-text-muted); white-space: nowrap; }
+    .hist-td-amount { font-weight: 500; white-space: nowrap; }
+    .hist-loading   { padding: 2rem 0; animation: pulse 1.5s ease-in-out infinite; }
+    .hist-error     { color: #EF4444; font-size: 0.875rem; padding: 1rem 0; }
+
+    /* workflow status badge colours */
+    .badge--wf-active    { background: color-mix(in srgb, #3B82F6 12%, transparent); color: #2563EB; }
+    .badge--wf-completed { background: color-mix(in srgb, #10B981 12%, transparent); color: #059669; }
+    .badge--wf-failed    { background: color-mix(in srgb, #EF4444 12%, transparent); color: #DC2626; }
+    .badge--wf-other     { background: color-mix(in srgb, #6B7280 12%, transparent); color: #6B7280; }
+
+    /* invoice status badge colours */
+    .badge--inv-draft { background: color-mix(in srgb, #6B7280 12%, transparent); color: #6B7280; }
+    .badge--inv-sent  { background: color-mix(in srgb, #3B82F6 12%, transparent); color: #2563EB; }
+    .badge--inv-paid  { background: color-mix(in srgb, #10B981 12%, transparent); color: #059669; }
+    .badge--inv-void  { background: color-mix(in srgb, #EF4444 12%, transparent); color: #DC2626; }
   `],
 })
 export class ClientsPageComponent implements OnInit {
@@ -709,6 +891,13 @@ export class ClientsPageComponent implements OnInit {
   readonly editingClient = signal<ClientSummaryDto | null>(null);
   readonly saving        = signal(false);
   readonly modalError    = signal<string | null>(null);
+
+  // ── History modal ──────────────────────────────────────────────────────────
+  readonly showHistoryModal = signal(false);
+  readonly historyClient    = signal<ClientSummaryDto | null>(null);
+  readonly history          = signal<ClientHistoryDto | null>(null);
+  readonly historyLoading   = signal(false);
+  readonly historyError     = signal<string | null>(null);
 
   readonly clientForm = this.fb.group({
     name:          ['', Validators.required],
@@ -869,6 +1058,33 @@ export class ClientsPageComponent implements OnInit {
     });
   }
 
+  // ── History modal ──────────────────────────────────────────────────────────
+  openHistoryModal(client: ClientSummaryDto): void {
+    this.openMenuId.set(null);
+    this.historyClient.set(client);
+    this.history.set(null);
+    this.historyError.set(null);
+    this.historyLoading.set(true);
+    this.showHistoryModal.set(true);
+
+    this.svc.getClientHistory(client.id).subscribe({
+      next: hist => {
+        this.history.set(hist);
+        this.historyLoading.set(false);
+      },
+      error: () => {
+        this.historyError.set('Failed to load client history.');
+        this.historyLoading.set(false);
+      },
+    });
+  }
+
+  closeHistoryModal(): void {
+    this.showHistoryModal.set(false);
+    this.historyClient.set(null);
+    this.history.set(null);
+  }
+
   // ── Menu toggle ────────────────────────────────────────────────────────────
   toggleMenu(id: string): void {
     this.openMenuId.update(cur => (cur === id ? null : id));
@@ -877,6 +1093,24 @@ export class ClientsPageComponent implements OnInit {
   // ── Display helpers ────────────────────────────────────────────────────────
   statusBadgeClass(status: ClientStatus): string {
     return status === 0 ? 'badge--active' : 'badge--inactive';
+  }
+
+  workflowStatusClass(status: string): string {
+    const s = status.toLowerCase();
+    if (s === 'inprogress' || s === 'running' || s === 'active') return 'badge--wf-active';
+    if (s === 'completed')  return 'badge--wf-completed';
+    if (s === 'failed')     return 'badge--wf-failed';
+    return 'badge--wf-other';
+  }
+
+  invoiceStatusClass(status: number): string {
+    switch (status) {
+      case 0:  return 'badge--inv-draft';
+      case 1:  return 'badge--inv-sent';
+      case 2:  return 'badge--inv-paid';
+      case 3:  return 'badge--inv-void';
+      default: return 'badge--inv-draft';
+    }
   }
 
   formatDate(iso: string): string {

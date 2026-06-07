@@ -11,6 +11,7 @@ namespace STRIDE.BFF.Controllers;
 ///   GET  /bff/clients                  — paged client list
 ///   POST /bff/clients                  — create client
 ///   GET  /bff/clients/{id}             — client detail
+///   GET  /bff/clients/{id}/history     — workflow + invoice history
 ///   PUT  /bff/clients/{id}             — update client
 ///   PUT  /bff/clients/{id}/deactivate  — deactivate client
 ///   PUT  /bff/clients/{id}/reactivate  — reactivate client
@@ -60,6 +61,14 @@ public sealed class ClientsController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         return await ProxyAsync(await _clients.GetClientByIdAsync(id, token, cancellationToken), cancellationToken);
+    }
+
+    [HttpGet("{id:guid}/history")]
+    public async Task<IActionResult> GetClientHistory(Guid id, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(await _clients.GetClientHistoryAsync(id, token, cancellationToken), cancellationToken);
     }
 
     [HttpPut("{id:guid}")]

@@ -17,4 +17,9 @@ public interface IClientReadService
         Guid tenantId,
         Guid clientId,
         CancellationToken cancellationToken = default);
+
+    Task<ClientHistoryDto?> GetClientHistoryAsync(
+        Guid tenantId,
+        Guid clientId,
+        CancellationToken cancellationToken = default);
 }

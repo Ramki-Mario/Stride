@@ -17,4 +17,5 @@ public sealed record GenerateInvoiceCommand(
     DateOnly DueDate,
     string?  Notes,
     IReadOnlyList<GenerateInvoiceLineItem> LineItems,
-    Guid   CreatedBy) : IRequest<Result<Guid>>;
+    Guid   CreatedBy,
+    Guid?  ClientId = null) : IRequest<Result<Guid>>;

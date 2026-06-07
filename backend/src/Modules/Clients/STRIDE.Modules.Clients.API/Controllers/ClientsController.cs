@@ -9,6 +9,7 @@ using STRIDE.Modules.Clients.Application.Commands.DeactivateClient;
 using STRIDE.Modules.Clients.Application.Commands.ReactivateClient;
 using STRIDE.Modules.Clients.Application.Commands.UpdateClient;
 using STRIDE.Modules.Clients.Application.Queries.GetClientById;
+using STRIDE.Modules.Clients.Application.Queries.GetClientHistory;
 using STRIDE.Modules.Clients.Application.Queries.GetClients;
 
 namespace STRIDE.Modules.Clients.API.Controllers;
@@ -19,8 +20,10 @@ namespace STRIDE.Modules.Clients.API.Controllers;
 ///   GET    /api/clients              — paged list
 ///   POST   /api/clients              — create new client
 ///   GET    /api/clients/{id}         — get detail
+///   GET    /api/clients/{id}/history — workflow + invoice history
 ///   PUT    /api/clients/{id}         — update client
 ///   PUT    /api/clients/{id}/deactivate — deactivate client
+///   PUT    /api/clients/{id}/reactivate — reactivate client
 /// </summary>
 [ApiController]
 [Authorize]
@@ -84,6 +87,20 @@ public sealed class ClientsController : ControllerBase
     {
         var result = await _mediator.Send(
             new GetClientByIdQuery(_tenantContext.TenantId, id), cancellationToken);
+
+        if (result.IsFailure)
+            return NotFound(new { error = result.Error });
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet("{id:guid}/history")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetClientHistory(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetClientHistoryQuery(_tenantContext.TenantId, id), cancellationToken);
 
         if (result.IsFailure)
             return NotFound(new { error = result.Error });
