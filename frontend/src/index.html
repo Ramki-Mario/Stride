@@ -20,12 +20,8 @@
       } catch (e) {
         console.warn('Unable to read theme preference from localStorage:', e);
       }
-      var mode =
-        storedMode === 'dark' || storedMode === 'light'
-          ? storedMode
-          : globalThis.matchMedia && globalThis.matchMedia('(prefers-color-scheme: dark)').matches
-          ? 'dark'
-          : 'light';
+      var osTheme = (globalThis.matchMedia && globalThis.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+      var mode = (storedMode === 'dark' || storedMode === 'light') ? storedMode : osTheme;
       document.documentElement.dataset['theme'] = mode;
 
       // ── Colour palette ──────────────────────────────────────────────────

@@ -105,9 +105,10 @@ public static class DevDataSeeder
                              r.NormalizedName.Equals(DefaultRoles.Admin, StringComparison.OrdinalIgnoreCase));
 
         // ── 3. User ───────────────────────────────────────────────────────────
+        var normalizedTestEmail = TestEmail.ToUpperInvariant();
         var user = await db.Users
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(u => u.NormalizedEmail == TestEmail.ToUpperInvariant());
+            .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedTestEmail);
 
         if (user is null)
         {

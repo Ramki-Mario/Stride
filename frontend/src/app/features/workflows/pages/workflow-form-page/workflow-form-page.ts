@@ -166,7 +166,7 @@ export class WorkflowFormPageComponent implements OnInit {
           error: (err) => this.saveError.set(this.mapError(err)),
         });
     } else {
-      const steps = (this.stepsArray.value as Array<{ name: string; description: string; isRequired: boolean }>).map(
+      const steps = this.stepsArray.value.map(
         (s) => ({
           name:        s.name,
           description: s.description?.trim() || null,
