@@ -4,13 +4,14 @@
      ═══════════════════════════════════════════════════════════════════════ -->
 
 <!-- Backdrop -->
-<div class="sam-backdrop" (click)="dismiss()" aria-hidden="true" tabindex="-1"></div>
+<div class="sam-backdrop" (click)="dismiss()" (keydown.escape)="dismiss()" aria-hidden="true" tabindex="-1"></div>
 
 <!-- Dialog -->
 <dialog
   class="sam-dialog"
   [attr.aria-label]="title"
   open
+  (keydown.escape)="dismiss()"
 >
   <!-- Header -->
   <div class="sam-header">
