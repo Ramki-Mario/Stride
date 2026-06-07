@@ -267,7 +267,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 ### Milestone #11 — Product Layer Gaps (EP-048–061)
 
-**Board status (2026-06-07):** All 43 stories wired as sub-issues ✅. Issues #263–277 added to board + Backlog ✅. Issues #278–316 board-add pending GraphQL rate-limit reset (21:00 on 2026-06-07).
+**Board status (2026-06-07):** All 54 issues (#263–316) on board + Backlog ✅. EP-049 items (#264, #280–282) closed + board=Done ✅.
 
 **Epic → Issue → Story mapping:**
 - EP-048 #263 → US-147–149 (#277–279) — Search & Filter Improvements
@@ -287,9 +287,9 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 **Implementation order (sequential):** EP-049 → EP-050 → EP-051 → EP-052 → EP-053 → EP-054 → EP-055 → EP-056 → EP-057 → EP-058 → EP-059 → EP-060 → EP-061 → EP-048
 
-### EP-049 — Client/Customer Entity (🔵 In Progress, #264)
+### EP-049 — Client/Customer Entity ✅ Done (#264, closed 2026-06-07)
 
-#### US-150 — Client domain entity, repository, and CRUD API ✅ Done (commit `381fc14`, 2026-06-07)
+#### US-150 — Client domain entity, repository, and CRUD API ✅ Done (commit `381fc14`)
 - New `Clients` module: 4 src projects + 2 test projects added to solution
 - `clients` SQL schema; `Client` aggregate (Name, ContactPerson, Email, Phone, Address, Notes, `ClientStatus` enum)
 - `IClientRepository` + `ClientsDbContext` + `ClientConfiguration` (unique index filtered `[IsDeleted]=0`)
@@ -301,13 +301,24 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - EF migration `20260607150131_CreateClientsSchema` applied locally
 - 26 tests: 16 domain + 6 CreateClient handler + 4 UpdateClient handler — all green
 
-#### US-151 — Client Management Screen (Angular) ⏳ Next
-- `/clients` list page: data table, search, status filter, create/edit modal, deactivate action
-- BFF route: `/bff/clients/**`
+#### US-151 — Client Management Screen (Angular) ✅ Done (commit `b82d9d0`)
+- `/clients` lazy route + sidebar nav link (`pi-id-card`)
+- KPI cards (total / active / inactive), debounced search, status filter dropdown
+- Paginated data table with skeleton loader + empty + error states
+- Create / Edit modal (pre-fills full detail including address + notes)
+- 3-dot action menu: Edit, View History, Deactivate (Active) / Reactivate (Inactive)
+- Backend: `ReactivateClientCommand` + handler; `PUT /api/clients/{id}/reactivate` on Host + BFF proxy
 
-#### US-152 — Link workflow instances and invoices to a client ⏳ Pending
-- Add nullable `ClientId` FK to `WorkflowInstance` + `Invoice` entities
-- Client history view tab: linked workflows + invoices per client
+#### US-152 — Link workflow instances and invoices to a client ✅ Done (commit `56211b3`)
+- Nullable `Guid? ClientId` FK on `WorkflowInstance` + `Invoice` domain entities (no EF nav property — cross-module)
+- `StartWorkflowCommand` + `GenerateInvoiceCommand` accept optional `ClientId`; threaded through handlers + API
+- EF configs: column + `(TenantId, ClientId)` index on both tables
+- EF migrations `AddClientIdToWorkflowInstances` + `AddClientIdToInvoices` applied
+- Clients module: `ClientHistoryDto`, `GetClientHistoryQuery/Handler`, `IClientReadService.GetClientHistoryAsync`
+- Cross-schema Dapper SQL: `GetClientHistory_Workflows.sql` + `GetClientHistory_Invoices.sql`
+- `GET /api/clients/{id}/history` Host endpoint + `ClientsApiClient.GetClientHistoryAsync` + BFF proxy
+- Angular: `ClientHistoryDto`/`ClientWorkflowDto`/`ClientInvoiceDto` models; `getClientHistory()` in service
+- Angular: "View History" action menu item → history modal (workflows table + invoices table, badge statuses, skeleton + error states)
 
 ---
 
