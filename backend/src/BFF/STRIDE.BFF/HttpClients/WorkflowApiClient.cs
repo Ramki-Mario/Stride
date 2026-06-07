@@ -115,10 +115,10 @@ public sealed class WorkflowApiClient
         return _client.SendAsync(req, cancellationToken);
     }
 
-    public Task<HttpResponseMessage> CompleteStepAsync(Guid instanceId, Guid stepId, string token, CancellationToken cancellationToken = default)
+    public Task<HttpResponseMessage> CompleteStepAsync(Guid instanceId, Guid stepId, HttpContent? body, string token, CancellationToken cancellationToken = default)
     {
         var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/steps/{stepId}/complete", token);
-        req.Content = new StringContent(EmptyJson, System.Text.Encoding.UTF8, AppJson);
+        req.Content = body ?? new StringContent(EmptyJson, System.Text.Encoding.UTF8, AppJson);
         return _client.SendAsync(req, cancellationToken);
     }
 

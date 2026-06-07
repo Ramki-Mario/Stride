@@ -20,6 +20,7 @@ public sealed class WorkflowsDbContext : DbContext
     public DbSet<StepDefinition>     StepDefinitions     => Set<StepDefinition>();
     public DbSet<WorkflowInstance>   WorkflowInstances   => Set<WorkflowInstance>();
     public DbSet<StepInstance>       StepInstances       => Set<StepInstance>();
+    public DbSet<BillableItem>       BillableItems       => Set<BillableItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

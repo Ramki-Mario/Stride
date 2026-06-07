@@ -6,31 +6,39 @@ namespace STRIDE.Modules.Workflows.Domain.Entities;
 
 public sealed class StepInstance : BaseEntity<Guid>
 {
-    public Guid WorkflowInstanceId { get; private set; }
-    public Guid StepDefinitionId { get; private set; }
-    public string StepName { get; private set; } = string.Empty;
-    public int Order { get; private set; }
-    public bool IsRequired { get; private set; }
-    public StepStatus Status { get; private set; }
-    public Guid? AssigneeId { get; private set; }
-    public string? FailureReason { get; private set; }
-    public DateTime? CompletedAt { get; private set; }
+    private readonly List<BillableItem> _billableItems = new();
+
+    public Guid   WorkflowInstanceId { get; private set; }
+    public Guid   TenantId           { get; private set; }
+    public Guid   StepDefinitionId   { get; private set; }
+    public string StepName           { get; private set; } = string.Empty;
+    public int    Order              { get; private set; }
+    public bool   IsRequired         { get; private set; }
+    public StepStatus Status         { get; private set; }
+    public Guid?  AssigneeId         { get; private set; }
+    public string? FailureReason     { get; private set; }
+    public DateTime? CompletedAt     { get; private set; }
+
+    /// <summary>Billable items logged when this step was completed.</summary>
+    public IReadOnlyList<BillableItem> BillableItems => _billableItems.AsReadOnly();
 
     private StepInstance() { }
 
     internal static StepInstance Create(
         Guid workflowInstanceId,
+        Guid tenantId,
         StepDefinition definition)
     {
         return new StepInstance
         {
-            Id = Guid.NewGuid(),
+            Id                 = Guid.NewGuid(),
             WorkflowInstanceId = workflowInstanceId,
-            StepDefinitionId = definition.Id,
-            StepName = definition.Name,
-            Order = definition.Order,
-            IsRequired = definition.IsRequired,
-            Status = StepStatus.Pending,
+            TenantId           = tenantId,
+            StepDefinitionId   = definition.Id,
+            StepName           = definition.Name,
+            Order              = definition.Order,
+            IsRequired         = definition.IsRequired,
+            Status             = StepStatus.Pending,
         };
     }
 
@@ -43,12 +51,24 @@ public sealed class StepInstance : BaseEntity<Guid>
         Status = StepStatus.Assigned;
     }
 
-    internal void Complete()
+    /// <summary>
+    /// Marks the step as completed and optionally records billable items.
+    /// Items with zero quantity or zero price are rejected at the domain level.
+    /// </summary>
+    internal void Complete(IReadOnlyList<(string Description, decimal Quantity, decimal UnitPrice, BillableUnit Unit)>? billableItems = null)
     {
         if (Status is not (StepStatus.Assigned or StepStatus.InProgress or StepStatus.Pending))
             throw new WorkflowDomainException($"Step '{StepName}' cannot be completed in its current state ({Status}).");
 
-        Status = StepStatus.Completed;
+        if (billableItems is not null)
+        {
+            foreach (var (desc, qty, price, unit) in billableItems)
+            {
+                _billableItems.Add(BillableItem.Create(Id, TenantId, desc, qty, price, unit));
+            }
+        }
+
+        Status      = StepStatus.Completed;
         CompletedAt = DateTime.UtcNow;
     }
 
@@ -60,9 +80,9 @@ public sealed class StepInstance : BaseEntity<Guid>
         if (string.IsNullOrWhiteSpace(reason))
             throw new WorkflowDomainException("A failure reason must be provided.");
 
-        Status = StepStatus.Failed;
+        Status        = StepStatus.Failed;
         FailureReason = reason.Trim();
-        CompletedAt = DateTime.UtcNow;
+        CompletedAt   = DateTime.UtcNow;
     }
 
     internal void Skip()
@@ -73,7 +93,7 @@ public sealed class StepInstance : BaseEntity<Guid>
         if (IsRequired)
             throw new WorkflowDomainException($"Required step '{StepName}' cannot be skipped.");
 
-        Status = StepStatus.Skipped;
+        Status      = StepStatus.Skipped;
         CompletedAt = DateTime.UtcNow;
     }
 

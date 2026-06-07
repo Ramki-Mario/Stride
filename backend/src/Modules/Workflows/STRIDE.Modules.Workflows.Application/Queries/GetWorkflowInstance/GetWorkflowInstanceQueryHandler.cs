@@ -53,7 +53,17 @@ internal sealed class GetWorkflowInstanceQueryHandler
                     s.Status,
                     s.AssigneeId,
                     s.FailureReason,
-                    s.CompletedAt))
+                    s.CompletedAt,
+                    s.BillableItems
+                        .Select(b => new BillableItemDto(
+                            b.Id,
+                            b.Description,
+                            b.Quantity,
+                            b.UnitPrice,
+                            b.Unit.ToString(),
+                            b.LineTotal))
+                        .ToList()
+                        .AsReadOnly()))
                 .ToList()
                 .AsReadOnly());
 

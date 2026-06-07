@@ -824,6 +824,82 @@
   gap: 0.3125rem;
 }
 
+// ── Instance billable total banner ─────────────────────────────────────────
+
+.wfd-inst-billable-total {
+  margin-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--stride-text-secondary);
+
+  .pi { color: var(--stride-primary); font-size: 0.875rem; }
+  strong { color: var(--stride-text-primary); }
+}
+
+// ── Per-step billable items ─────────────────────────────────────────────────
+
+.wfd-step-billable {
+  margin-top: 0.5rem;
+}
+
+.wfd-step-billable-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.78125rem;
+  font-weight: 500;
+  color: var(--stride-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.1875rem 0;
+  font-family: inherit;
+  transition: color 0.12s;
+
+  .pi-pound { color: var(--stride-primary); }
+
+  &:hover { color: var(--stride-primary); }
+
+  strong { color: var(--stride-text-primary); }
+}
+
+.wfd-step-billable-caret {
+  font-size: 0.6875rem;
+  color: var(--stride-text-muted);
+}
+
+.wfd-billable-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+
+  th {
+    text-align: left;
+    padding: 0.3125rem 0.5rem;
+    font-weight: 600;
+    color: var(--stride-text-muted);
+    border-bottom: 1px solid var(--stride-border-soft);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.3125rem 0.5rem;
+    color: var(--stride-text-secondary);
+    border-bottom: 1px solid var(--stride-border-soft);
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  .wfd-col-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+}
+
 // ── Skeleton loading ───────────────────────────────────────────────────────
 
 .wfd-skeleton-block {

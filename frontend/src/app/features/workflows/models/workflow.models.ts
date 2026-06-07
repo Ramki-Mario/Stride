@@ -55,6 +55,33 @@ export const STATUS_CONFIG: Record<WorkflowStatus, StatusConfig> = {
 
 export type SortKey = 'name' | 'status' | 'stepCount' | 'updatedAt' | 'createdAt';
 
+// ─── Billable items ───────────────────────────────────────────────────────────
+
+export type BillableUnit = 'Hours' | 'Each' | 'Day' | 'Fixed';
+
+export const BILLABLE_UNIT_LABELS: Record<BillableUnit, string> = {
+  Hours: 'Hours',
+  Each:  'Each',
+  Day:   'Day',
+  Fixed: 'Fixed fee',
+};
+
+export interface BillableItemDto {
+  id:          string;
+  description: string;
+  quantity:    number;
+  unitPrice:   number;
+  unit:        BillableUnit;
+  lineTotal:   number;
+}
+
+export interface BillableItemInput {
+  description: string;
+  quantity:    number;
+  unitPrice:   number;
+  unit:        BillableUnit;
+}
+
 // ─── Step instance ────────────────────────────────────────────────────────────
 
 export type StepInstanceStatus = 'Pending' | 'InProgress' | 'Completed' | 'Failed' | 'Skipped';
@@ -71,6 +98,8 @@ export interface StepInstance {
   assigneeId: string | null;
   completedAt: string | null;
   failureReason: string | null;
+  billableItems:    BillableItemDto[];
+  billableSubtotal: number;
 }
 
 export const STEP_INSTANCE_STATUS_CONFIG: Record<
@@ -95,6 +124,7 @@ export interface WorkflowInstanceDetail {
   createdAt: string;
   completedAt: string | null;
   steps: StepInstance[];
+  billableTotal: number;
   // Note: totalSteps and completedSteps are not in the backend DTO.
   // Compute them from steps.length and steps.filter(s => s.status === 'Completed').length.
 }

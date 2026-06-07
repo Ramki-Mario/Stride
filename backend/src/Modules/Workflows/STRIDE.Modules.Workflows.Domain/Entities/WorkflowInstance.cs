@@ -2,6 +2,7 @@ using STRIDE.BuildingBlocks.Domain.Entities;
 using STRIDE.Modules.Workflows.Domain.Enums;
 using STRIDE.Modules.Workflows.Domain.Events;
 using STRIDE.Modules.Workflows.Domain.Exceptions;
+// BillableUnit referenced via tuple parameter — namespace resolved from Domain.Enums
 
 namespace STRIDE.Modules.Workflows.Domain.Entities;
 
@@ -48,7 +49,7 @@ public sealed class WorkflowInstance : AuditableEntity
         // Snapshot steps from definition at start time (order preserved)
         foreach (var stepDef in definition.Steps.OrderBy(s => s.Order))
         {
-            instance._steps.Add(StepInstance.Create(instance.Id, stepDef));
+            instance._steps.Add(StepInstance.Create(instance.Id, instance.TenantId, stepDef));
         }
 
         instance.RaiseDomainEvent(new WorkflowStartedEvent(
@@ -115,12 +116,15 @@ public sealed class WorkflowInstance : AuditableEntity
         RaiseDomainEvent(new StepAssignedEvent(step.Id, Id, TenantId, assigneeId, assignedBy));
     }
 
-    public void CompleteStep(Guid stepInstanceId, Guid completedBy)
+    public void CompleteStep(
+        Guid stepInstanceId,
+        Guid completedBy,
+        IReadOnlyList<(string Description, decimal Quantity, decimal UnitPrice, BillableUnit Unit)>? billableItems = null)
     {
         EnsureRunning();
 
         var step = GetStep(stepInstanceId);
-        step.Complete();
+        step.Complete(billableItems);
         UpdatedAt = DateTime.UtcNow;
 
         RaiseDomainEvent(new StepCompletedEvent(step.Id, Id, TenantId, completedBy));

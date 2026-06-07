@@ -29,7 +29,11 @@ internal sealed class CompleteStepCommandHandler
             if (instance is null)
                 return Result.Failure($"Workflow instance '{request.WorkflowInstanceId}' not found.");
 
-            instance.CompleteStep(request.StepInstanceId, request.CompletedBy);
+            var billableItems = request.BillableItems?
+                .Select(b => (b.Description, b.Quantity, b.UnitPrice, b.Unit))
+                .ToList();
+
+            instance.CompleteStep(request.StepInstanceId, request.CompletedBy, billableItems);
             _instances.Update(instance);
             await _instances.SaveChangesAsync(cancellationToken);
 

@@ -8,6 +8,7 @@ import {
   WorkflowInstanceDetail,
   CreateWorkflowRequest,
   UpdateWorkflowRequest,
+  BillableItemInput,
 } from '../models/workflow.models';
 
 /**
@@ -93,11 +94,18 @@ export class WorkflowService {
     );
   }
 
-  /** Mark a step instance as completed by the current user. */
-  completeStep(instanceId: string, stepId: string): Observable<void> {
+  /** Mark a step instance as completed, optionally with billable items. */
+  completeStep(
+    instanceId: string,
+    stepId: string,
+    billableItems?: BillableItemInput[],
+  ): Observable<void> {
+    const body = billableItems?.length
+      ? { billableItems }
+      : {};
     return this.http.post<void>(
       `${this.base}/instances/${instanceId}/steps/${stepId}/complete`,
-      {},
+      body,
     );
   }
 

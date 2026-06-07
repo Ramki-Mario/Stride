@@ -96,14 +96,81 @@
       </form>
     }
 
-    <!-- ── COMPLETE confirmation ──────────────────────────────────────── -->
+    <!-- ── COMPLETE + billable items ─────────────────────────────────── -->
     @if (action === 'complete') {
       <div class="sam-confirm-body">
         <p>
-          Mark <strong>{{ step.stepName }}</strong> as <strong>Completed</strong>?
-          This action will be recorded against your user account and cannot be undone.
+          Mark <strong>{{ step.stepName }}</strong> as <strong>Completed</strong>.
+          Optionally log billable items for this step before confirming.
         </p>
       </div>
+
+      <!-- Billable Items Section -->
+      <div class="sam-billable-section">
+        <div class="sam-billable-header">
+          <span class="sam-billable-label">Billable Items</span>
+          <button type="button" class="sam-add-item-btn" (click)="addBillableItem()">
+            <span class="pi pi-plus"></span> Add Item
+          </button>
+        </div>
+
+        @if (billableItemsArray.length === 0) {
+          <p class="sam-billable-empty">No billable items — step will be completed with no charges.</p>
+        }
+
+        @for (ctrl of billableControls; track $index) {
+          <div class="sam-billable-row" [formGroup]="ctrl">
+            <!-- Description -->
+            <div class="sam-bi-field sam-bi-desc">
+              <input class="sam-input sam-input-sm"
+                     formControlName="description"
+                     placeholder="Description"
+                     [class.sam-input-error]="ctrl.get('description')!.invalid && ctrl.get('description')!.touched"/>
+              @if (ctrl.get('description')!.invalid && ctrl.get('description')!.touched) {
+                <span class="sam-error-msg">Required.</span>
+              }
+            </div>
+            <!-- Unit -->
+            <div class="sam-bi-field sam-bi-unit">
+              <select class="sam-input sam-input-sm sam-select" formControlName="unit" (change)="onBillableChange()">
+                @for (u of billableUnits; track u) {
+                  <option [value]="u">{{ billableUnitLabels[u] }}</option>
+                }
+              </select>
+            </div>
+            <!-- Quantity -->
+            <div class="sam-bi-field sam-bi-qty">
+              <input class="sam-input sam-input-sm" type="number" min="0.0001" step="0.5"
+                     formControlName="quantity" placeholder="Qty"
+                     (input)="onBillableChange()"
+                     [class.sam-input-error]="ctrl.get('quantity')!.invalid && ctrl.get('quantity')!.touched"/>
+            </div>
+            <!-- Unit price -->
+            <div class="sam-bi-field sam-bi-price">
+              <input class="sam-input sam-input-sm" type="number" min="0.0001" step="0.01"
+                     formControlName="unitPrice" placeholder="Unit £"
+                     (input)="onBillableChange()"
+                     [class.sam-input-error]="ctrl.get('unitPrice')!.invalid && ctrl.get('unitPrice')!.touched"/>
+            </div>
+            <!-- Line total (read-only) -->
+            <div class="sam-bi-field sam-bi-total">
+              {{ (ctrl.get('quantity')!.value || 0) * (ctrl.get('unitPrice')!.value || 0) | number:'1.2-2' }}
+            </div>
+            <!-- Remove -->
+            <button type="button" class="sam-remove-item-btn" (click)="removeBillableItem($index)"
+                    aria-label="Remove item">
+              <span class="pi pi-trash"></span>
+            </button>
+          </div>
+        }
+
+        @if (billableItemsArray.length > 0) {
+          <div class="sam-billable-total">
+            Total: <strong>{{ billableRunningTotal() | number:'1.2-2' }}</strong>
+          </div>
+        }
+      </div>
+
       <div class="sam-footer">
         <button type="button" class="sam-btn sam-btn-ghost" (click)="dismiss()">Cancel</button>
         <button

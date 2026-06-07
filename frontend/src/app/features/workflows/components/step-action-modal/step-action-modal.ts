@@ -6,15 +6,16 @@ import {
   Input,
   OnChanges,
   Output,
+  computed,
   inject,
   signal,
 } from '@angular/core';
-import { NgClass } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NgClass, DecimalPipe } from '@angular/common';
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
-import { StepInstance, StepAction } from '../../models/workflow.models';
+import { StepInstance, StepAction, BillableUnit, BILLABLE_UNIT_LABELS, BillableItemInput } from '../../models/workflow.models';
 import { WorkflowService } from '../../services/workflow.service';
 
 /**
@@ -40,7 +41,7 @@ import { WorkflowService } from '../../services/workflow.service';
 @Component({
   selector: 'app-step-action-modal',
   standalone: true,
-  imports: [NgClass, ReactiveFormsModule],
+  imports: [NgClass, DecimalPipe, ReactiveFormsModule],
   templateUrl: './step-action-modal.html',
   styleUrl: './step-action-modal.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -80,12 +81,53 @@ export class StepActionModalComponent implements OnChanges {
     reason: ['', [Validators.required, Validators.maxLength(500)]],
   });
 
+  /** Used for Complete action — optional billable items list. */
+  readonly billableItemsArray = this.fb.array<FormGroup>([]);
+
+  readonly billableUnits: BillableUnit[] = ['Hours', 'Each', 'Day', 'Fixed'];
+  readonly billableUnitLabels = BILLABLE_UNIT_LABELS;
+
+  /** Reactive running total — subscribes to form value changes. */
+  readonly billableRunningTotal = signal(0);
+
+  get billableControls(): FormGroup[] {
+    return this.billableItemsArray.controls as FormGroup[];
+  }
+
+  addBillableItem(): void {
+    this.billableItemsArray.push(this.fb.group({
+      description: ['', [Validators.required, Validators.maxLength(500)]],
+      quantity:    [1,  [Validators.required, Validators.min(0.0001)]],
+      unitPrice:   [0,  [Validators.required, Validators.min(0.0001)]],
+      unit:        ['Hours' as BillableUnit],
+    }));
+    this._recalcTotal();
+  }
+
+  removeBillableItem(index: number): void {
+    this.billableItemsArray.removeAt(index);
+    this._recalcTotal();
+  }
+
+  onBillableChange(): void { this._recalcTotal(); }
+
+  private _recalcTotal(): void {
+    const total = this.billableItemsArray.controls.reduce((sum, ctrl) => {
+      const qty   = Number(ctrl.get('quantity')?.value)  || 0;
+      const price = Number(ctrl.get('unitPrice')?.value) || 0;
+      return sum + qty * price;
+    }, 0);
+    this.billableRunningTotal.set(total);
+  }
+
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   ngOnChanges(): void {
     // Reset form state whenever the modal is re-opened for a new step/action
     this.assignForm.reset();
     this.failForm.reset();
+    this.billableItemsArray.clear();
+    this.billableRunningTotal.set(0);
     this.submitError.set(null);
   }
 
@@ -165,7 +207,18 @@ export class StepActionModalComponent implements OnChanges {
   }
 
   private submitComplete(): void {
-    this.dispatch(this.wfService.completeStep(this.instanceId, this.step.id));
+    // Validate all billable item rows before submitting
+    this.billableItemsArray.controls.forEach(c => c.markAllAsTouched());
+    if (this.billableItemsArray.invalid) return;
+
+    const items: BillableItemInput[] = this.billableItemsArray.controls.map(ctrl => ({
+      description: ctrl.get('description')!.value as string,
+      quantity:    Number(ctrl.get('quantity')!.value),
+      unitPrice:   Number(ctrl.get('unitPrice')!.value),
+      unit:        ctrl.get('unit')!.value as BillableUnit,
+    }));
+
+    this.dispatch(this.wfService.completeStep(this.instanceId, this.step.id, items.length ? items : undefined));
   }
 
   private submitFail(): void {

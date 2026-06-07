@@ -8,6 +8,7 @@ using STRIDE.Modules.Workflows.Application.Commands.AssignStep;
 using STRIDE.Modules.Workflows.Application.Commands.CompleteStep;
 using STRIDE.Modules.Workflows.Application.Commands.FailStep;
 using STRIDE.Modules.Workflows.Application.Commands.SkipStep;
+using STRIDE.Modules.Workflows.Domain.Enums;
 
 namespace STRIDE.Modules.Workflows.API.Controllers;
 
@@ -72,7 +73,7 @@ public sealed class StepsController : ControllerBase
     }
 
     /// <summary>
-    /// Mark a step as completed.
+    /// Mark a step as completed, optionally recording billable items.
     /// POST /api/workflows/instances/{instanceId}/steps/{stepId}/complete
     /// </summary>
     [HttpPost("{stepId:guid}/complete")]
@@ -82,13 +83,19 @@ public sealed class StepsController : ControllerBase
     public async Task<IActionResult> Complete(
         Guid instanceId,
         Guid stepId,
+        [FromBody] CompleteStepRequest? request,
         CancellationToken cancellationToken)
     {
+        var billableItems = request?.BillableItems?
+            .Select(b => new BillableItemInput(b.Description, b.Quantity, b.UnitPrice, b.Unit))
+            .ToList();
+
         var result = await _mediator.Send(
             new CompleteStepCommand(
                 WorkflowInstanceId: instanceId,
                 StepInstanceId:     stepId,
-                CompletedBy:        _currentUser.UserId),
+                CompletedBy:        _currentUser.UserId,
+                BillableItems:      billableItems),
             cancellationToken);
 
         if (result.IsFailure)

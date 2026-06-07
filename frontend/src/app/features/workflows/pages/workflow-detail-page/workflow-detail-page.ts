@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { NgClass, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
@@ -29,7 +29,7 @@ type DetailTab = 'steps' | 'run' | 'activity' | 'history';
 @Component({
   selector: 'app-workflow-detail-page',
   standalone: true,
-  imports: [NgClass, RouterLink, StepActionModalComponent],
+  imports: [NgClass, DecimalPipe, RouterLink, StepActionModalComponent],
   templateUrl: './workflow-detail-page.html',
   styleUrl: './workflow-detail-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -128,6 +128,21 @@ export class WorkflowDetailPageComponent implements OnInit {
     const s = this.instance()?.status;
     return s === 'Running' || s === 'Paused';
   });
+
+  readonly instanceBillableTotal = computed(() => this.instance()?.billableTotal ?? 0);
+
+  /** Tracks which step IDs have their billable-items list expanded. */
+  private readonly _expandedBillable = signal(new Set<string>());
+
+  toggleBillableStep(stepId: string): void {
+    const next = new Set(this._expandedBillable());
+    if (next.has(stepId)) { next.delete(stepId); } else { next.add(stepId); }
+    this._expandedBillable.set(next);
+  }
+
+  isBillableExpanded(stepId: string): boolean {
+    return this._expandedBillable().has(stepId);
+  }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 

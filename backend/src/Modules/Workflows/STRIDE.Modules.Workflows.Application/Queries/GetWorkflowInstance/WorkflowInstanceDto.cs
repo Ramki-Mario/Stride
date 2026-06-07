@@ -13,7 +13,11 @@ public sealed record WorkflowInstanceDto(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     DateTime? CompletedAt,
-    IReadOnlyList<StepInstanceDto> Steps);
+    IReadOnlyList<StepInstanceDto> Steps)
+{
+    /// <summary>Sum of all billable line totals across every step in this instance.</summary>
+    public decimal BillableTotal => Steps.Sum(s => s.BillableSubtotal);
+}
 
 public sealed record StepInstanceDto(
     Guid Id,
@@ -24,4 +28,17 @@ public sealed record StepInstanceDto(
     StepStatus Status,
     Guid? AssigneeId,
     string? FailureReason,
-    DateTime? CompletedAt);
+    DateTime? CompletedAt,
+    IReadOnlyList<BillableItemDto> BillableItems)
+{
+    /// <summary>Sum of line totals (Quantity × UnitPrice) for this step.</summary>
+    public decimal BillableSubtotal => BillableItems.Sum(b => b.LineTotal);
+}
+
+public sealed record BillableItemDto(
+    Guid Id,
+    string Description,
+    decimal Quantity,
+    decimal UnitPrice,
+    string Unit,
+    decimal LineTotal);

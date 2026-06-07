@@ -1,5 +1,6 @@
 using MediatR;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Workflows.Domain.Enums;
 
 namespace STRIDE.Modules.Workflows.Application.Commands.CompleteStep;
 
@@ -10,4 +11,14 @@ namespace STRIDE.Modules.Workflows.Application.Commands.CompleteStep;
 public sealed record CompleteStepCommand(
     Guid WorkflowInstanceId,
     Guid StepInstanceId,
-    Guid CompletedBy) : IRequest<Result>;
+    Guid CompletedBy,
+    IReadOnlyList<BillableItemInput>? BillableItems = null) : IRequest<Result>;
+
+/// <summary>
+/// A single billable line item passed in from the API when completing a step.
+/// </summary>
+public sealed record BillableItemInput(
+    string      Description,
+    decimal     Quantity,
+    decimal     UnitPrice,
+    BillableUnit Unit);

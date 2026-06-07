@@ -182,7 +182,16 @@ public sealed class WorkflowsController : ControllerBase
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        var response = await _workflows.CompleteStepAsync(instanceId, stepId, token, cancellationToken);
+
+        // Forward the request body as-is so billable items pass through transparently.
+        HttpContent? body = null;
+        if (Request.ContentLength > 0)
+        {
+            var json = await new System.IO.StreamReader(Request.Body).ReadToEndAsync(cancellationToken);
+            body = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        }
+
+        var response = await _workflows.CompleteStepAsync(instanceId, stepId, body, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 

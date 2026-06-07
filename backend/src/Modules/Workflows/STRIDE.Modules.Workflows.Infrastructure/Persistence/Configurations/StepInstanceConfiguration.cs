@@ -32,9 +32,21 @@ internal sealed class StepInstanceConfiguration : IEntityTypeConfiguration<StepI
 
         builder.Property(s => s.CompletedAt);
 
+        builder.Property(s => s.TenantId).IsRequired();
+
         builder.HasIndex(s => new { s.WorkflowInstanceId, s.Order });
         builder.HasIndex(s => new { s.WorkflowInstanceId, s.Status });
         builder.HasIndex(s => s.AssigneeId);
+
+        // Billable items are owned by the step instance; cascade delete removes them when step is removed.
+        builder.HasMany(s => s.BillableItems)
+            .WithOne()
+            .HasForeignKey(b => b.StepInstanceId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(s => s.BillableItems)
+            .HasField("_billableItems")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.ToTable("StepInstances");
     }

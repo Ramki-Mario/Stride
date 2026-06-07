@@ -303,6 +303,14 @@
                       {{ instanceCompletedSteps() }} / {{ instanceTotalSteps() }} steps
                     </span>
                   </div>
+
+                  @if (instanceBillableTotal() > 0) {
+                    <div class="wfd-inst-billable-total">
+                      <span class="pi pi-pound"></span>
+                      Billable total:
+                      <strong>{{ instanceBillableTotal() | number:'1.2-2' }}</strong>
+                    </div>
+                  }
                 </div>
 
                 <!-- Instance step list -->
@@ -393,6 +401,48 @@
                             <span class="pi pi-calendar-check"></span>
                             Completed {{ formatDateTime(step.completedAt) }}
                           </p>
+                        }
+
+                        <!-- Billable items (only on Completed steps that have items) -->
+                        @if (step.billableItems && step.billableItems.length > 0) {
+                          <div class="wfd-step-billable">
+                            <button
+                              type="button"
+                              class="wfd-step-billable-toggle"
+                              (click)="toggleBillableStep(step.id)"
+                              [attr.aria-expanded]="isBillableExpanded(step.id)"
+                            >
+                              <span class="pi pi-pound"></span>
+                              Billable subtotal:
+                              <strong>{{ step.billableSubtotal | number:'1.2-2' }}</strong>
+                              <span class="pi {{ isBillableExpanded(step.id) ? 'pi-chevron-up' : 'pi-chevron-down' }} wfd-step-billable-caret"></span>
+                            </button>
+
+                            @if (isBillableExpanded(step.id)) {
+                              <table class="wfd-billable-table" aria-label="Billable items">
+                                <thead>
+                                  <tr>
+                                    <th>Description</th>
+                                    <th>Unit</th>
+                                    <th class="wfd-col-num">Qty</th>
+                                    <th class="wfd-col-num">Unit £</th>
+                                    <th class="wfd-col-num">Total</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  @for (item of step.billableItems; track item.id) {
+                                    <tr>
+                                      <td>{{ item.description }}</td>
+                                      <td>{{ item.unit }}</td>
+                                      <td class="wfd-col-num">{{ item.quantity | number:'1.0-4' }}</td>
+                                      <td class="wfd-col-num">{{ item.unitPrice | number:'1.2-2' }}</td>
+                                      <td class="wfd-col-num">{{ item.lineTotal | number:'1.2-2' }}</td>
+                                    </tr>
+                                  }
+                                </tbody>
+                              </table>
+                            }
+                          </div>
                         }
                       </div>
                     </li>
