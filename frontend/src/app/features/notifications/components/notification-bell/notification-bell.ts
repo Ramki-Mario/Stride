@@ -361,7 +361,7 @@ export class NotificationBellComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.el.nativeElement.contains(event.target as Node)) {
+    if (!this.el.nativeElement.contains(event.target)) {
       this.open.set(false);
     }
   }

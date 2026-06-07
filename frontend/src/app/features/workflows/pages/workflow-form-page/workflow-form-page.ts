@@ -149,7 +149,7 @@ export class WorkflowFormPageComponent implements OnInit {
     if (!this.isEditMode() && this.stepsArray.invalid) return;
 
     const { name, description } = this.form.getRawValue();
-    const descValue = (description as string)?.trim() || null;
+    const descValue = description?.trim() || null;
 
     this.isSaving.set(true);
     this.saveError.set(null);

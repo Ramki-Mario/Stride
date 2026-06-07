@@ -120,7 +120,7 @@
             class="auth-input auth-input--pass"
             [class.auth-input--error]="passwordCtrl.invalid && passwordCtrl.touched"
             placeholder="Min. 8 characters"
-            autocomplete="current-password"
+            [attr.autocomplete]="showPassword() ? 'off' : 'current-password'"
             aria-describedby="password-error"
             [attr.aria-invalid]="passwordCtrl.invalid && passwordCtrl.touched ? 'true' : null"
           />

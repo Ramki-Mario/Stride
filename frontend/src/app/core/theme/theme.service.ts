@@ -87,7 +87,7 @@ export class ThemeService {
       const stored = localStorage.getItem(MODE_STORAGE_KEY) as ThemeMode | null;
       if (stored === 'light' || stored === 'dark') return stored;
     } catch { /* ignore */ }
-    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 
   private _resolveInitialPalette(): ThemePalette {

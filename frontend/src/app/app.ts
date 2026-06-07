@@ -16,8 +16,8 @@ export class App implements OnInit {
   ngOnInit(): void {
     // ThemeService constructor effect handles the initial apply.
     // Listen for OS-level theme changes while the app is open.
-    if (typeof window !== 'undefined') {
-      window
+    if (typeof globalThis.window !== 'undefined') {
+      globalThis
         .matchMedia('(prefers-color-scheme: dark)')
         .addEventListener('change', (e) => {
           // Only follow OS if the user has no explicit stored preference

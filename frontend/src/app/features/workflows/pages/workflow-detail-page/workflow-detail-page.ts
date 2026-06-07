@@ -20,7 +20,6 @@ import {
   StepAction,
   STATUS_CONFIG,
   STEP_INSTANCE_STATUS_CONFIG,
-  WorkflowStatus,
 } from '../../models/workflow.models';
 import { WorkflowService }       from '../../services/workflow.service';
 import { StepActionModalComponent } from '../../components/step-action-modal/step-action-modal';

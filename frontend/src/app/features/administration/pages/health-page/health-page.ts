@@ -11,7 +11,6 @@ import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
 import { HealthService } from '../../services/health.service';
-import { HealthEntry, HealthStatus } from '../../models/health.models';
 
 /** Friendly display names for each health-check entry name. */
 const ENTRY_LABELS: Record<string, { label: string; icon: string }> = {
@@ -448,7 +447,7 @@ export class HealthPageComponent implements OnInit {
     const parts = iso.split(':');
     if (parts.length !== 3) return iso;
     const [, , secPart] = parts;
-    const totalMs = parseFloat(secPart) * 1000;
+    const totalMs = Number.parseFloat(secPart) * 1000;
     if (totalMs < 1000) return `${Math.round(totalMs)}ms`;
     return `${(totalMs / 1000).toFixed(2)}s`;
   }
