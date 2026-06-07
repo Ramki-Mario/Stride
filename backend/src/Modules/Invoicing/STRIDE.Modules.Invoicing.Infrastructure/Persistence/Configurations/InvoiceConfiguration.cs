@@ -14,12 +14,13 @@ public sealed class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
 
         builder.Property(i => i.InvoiceNumber).IsRequired().HasMaxLength(50);
         builder.Property(i => i.ClientName).IsRequired().HasMaxLength(200);
-        builder.Property(i => i.ClientEmail).IsRequired().HasMaxLength(320);
+        builder.Property(i => i.ClientEmail).HasMaxLength(320);  // nullable: auto-generated drafts may not have an email yet
         builder.Property(i => i.Currency).IsRequired().HasMaxLength(3);
         builder.Property(i => i.Status).IsRequired().HasDefaultValue(InvoiceStatus.Draft);
         builder.Property(i => i.DueDate).IsRequired();
         builder.Property(i => i.Notes).HasMaxLength(2000);
         builder.Property(i => i.ClientId);   // nullable FK to clients.Clients (cross-module, no EF nav)
+        builder.Property(i => i.SourceWorkflowInstanceId);  // nullable FK to workflows.WorkflowInstances (cross-module, no EF nav)
         builder.Property(i => i.TenantId).IsRequired();
         builder.Property(i => i.CreatedAt).IsRequired();
         builder.Property(i => i.UpdatedAt).IsRequired();
@@ -44,5 +45,6 @@ public sealed class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
         builder.HasIndex(i => new { i.TenantId, i.Status });
         builder.HasIndex(i => new { i.TenantId, i.CreatedAt });
         builder.HasIndex(i => new { i.TenantId, i.ClientId });   // for client history queries
+        builder.HasIndex(i => new { i.TenantId, i.SourceWorkflowInstanceId }); // for idempotency check
     }
 }

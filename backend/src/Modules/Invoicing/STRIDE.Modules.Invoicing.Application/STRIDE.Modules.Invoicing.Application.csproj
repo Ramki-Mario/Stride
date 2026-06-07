@@ -3,6 +3,9 @@
   <ItemGroup>
     <ProjectReference Include="..\STRIDE.Modules.Invoicing.Domain\STRIDE.Modules.Invoicing.Domain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\STRIDE.BuildingBlocks.Application\STRIDE.BuildingBlocks.Application.csproj" />
+    <!-- Cross-module: needed to handle DomainEventNotification<WorkflowCompletedEvent> -->
+    <ProjectReference Include="..\..\..\BuildingBlocks\STRIDE.BuildingBlocks.Infrastructure\STRIDE.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Workflows\STRIDE.Modules.Workflows.Domain\STRIDE.Modules.Workflows.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -21,6 +21,11 @@ public sealed class InvoiceRepository : IInvoiceRepository
             .FirstOrDefaultAsync(
                 i => i.TenantId == tenantId && i.InvoiceNumber == invoiceNumber, cancellationToken);
 
+    public Task<Invoice?> GetBySourceWorkflowInstanceIdAsync(Guid tenantId, Guid workflowInstanceId, CancellationToken cancellationToken = default) =>
+        _ctx.Invoices
+            .FirstOrDefaultAsync(
+                i => i.TenantId == tenantId && i.SourceWorkflowInstanceId == workflowInstanceId, cancellationToken);
+
     public async Task AddAsync(Invoice invoice, CancellationToken cancellationToken = default) =>
         await _ctx.Invoices.AddAsync(invoice, cancellationToken);
 

@@ -46,7 +46,6 @@ public sealed class InvoiceTests
     [Theory]
     [InlineData("", "clientName", "email@a.com")]
     [InlineData("INV-001", "", "email@a.com")]
-    [InlineData("INV-001", "clientName", "")]
     public void Generate_WithMissingRequiredField_ThrowsInvoiceDomainException(
         string number, string clientName, string clientEmail)
     {
@@ -179,6 +178,29 @@ public sealed class InvoiceTests
         // Assert
         invoice.Status.Should().Be(InvoiceStatus.Sent);
         invoice.SentAt.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Send_WhenClientEmailMissing_ThrowsInvoiceDomainException()
+    {
+        // Arrange — invoice created without an email (auto-draft scenario)
+        var invoice = Invoice.Generate(new NewInvoice(
+            TenantId:      Guid.NewGuid(),
+            InvoiceNumber: "WF-ABCD1234",
+            ClientName:    "Auto Draft",
+            ClientEmail:   null,
+            Currency:      "GBP",
+            DueDate:       DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30)),
+            CreatedBy:     Guid.NewGuid()));
+        invoice.AddLineItem("Labour", 100m, 1);
+        invoice.ClearDomainEvents();
+
+        // Act
+        var act = () => invoice.Send(Guid.NewGuid());
+
+        // Assert
+        act.Should().Throw<InvoiceDomainException>()
+            .WithMessage("*email*");
     }
 
     [Fact]

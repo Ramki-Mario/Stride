@@ -9,12 +9,13 @@ public sealed record NewInvoice(
     Guid     TenantId,
     string   InvoiceNumber,
     string   ClientName,
-    string   ClientEmail,
+    string?  ClientEmail,                    // optional for auto-generated drafts; required before Send
     string   Currency,
     DateOnly DueDate,
     Guid     CreatedBy,
-    string?  Notes    = null,
-    Guid?    ClientId = null);   // optional link to a Clients.Client record
+    string?  Notes                    = null,
+    Guid?    ClientId                 = null,  // optional link to a Clients.Client record
+    Guid?    SourceWorkflowInstanceId = null); // optional back-reference to the source workflow
 
 /// <summary>
 /// Invoice aggregate root.
@@ -29,16 +30,17 @@ public sealed class Invoice : AuditableEntity
 {
     private readonly List<InvoiceLineItem> _lineItems = new();
 
-    public string        InvoiceNumber { get; private set; } = string.Empty;
-    public string        ClientName    { get; private set; } = string.Empty;
-    public string        ClientEmail   { get; private set; } = string.Empty;
-    public string        Currency      { get; private set; } = "USD";
-    public InvoiceStatus Status        { get; private set; }
-    public DateOnly      DueDate       { get; private set; }
-    public string?       Notes         { get; private set; }
-    public Guid?         ClientId      { get; private set; }   // optional link to Clients.Client
-    public DateTime?     SentAt        { get; private set; }
-    public DateTime?     PaidAt        { get; private set; }
+    public string        InvoiceNumber           { get; private set; } = string.Empty;
+    public string        ClientName              { get; private set; } = string.Empty;
+    public string?       ClientEmail             { get; private set; }
+    public string        Currency                { get; private set; } = "USD";
+    public InvoiceStatus Status                  { get; private set; }
+    public DateOnly      DueDate                 { get; private set; }
+    public string?       Notes                   { get; private set; }
+    public Guid?         ClientId                { get; private set; }   // optional link to Clients.Client
+    public Guid?         SourceWorkflowInstanceId { get; private set; }  // auto-invoice: back-ref to workflow
+    public DateTime?     SentAt                  { get; private set; }
+    public DateTime?     PaidAt                  { get; private set; }
 
     public IReadOnlyList<InvoiceLineItem> LineItems => _lineItems.AsReadOnly();
 
@@ -56,26 +58,27 @@ public sealed class Invoice : AuditableEntity
             throw new InvoiceDomainException("Invoice number is required.");
         if (string.IsNullOrWhiteSpace(data.ClientName))
             throw new InvoiceDomainException("Client name is required.");
-        if (string.IsNullOrWhiteSpace(data.ClientEmail))
-            throw new InvoiceDomainException("Client email is required.");
+        // ClientEmail is optional at creation (auto-generated drafts may not have one yet).
+        // It is enforced when the invoice is sent.
         if (data.DueDate < DateOnly.FromDateTime(DateTime.UtcNow))
             throw new InvoiceDomainException("Due date cannot be in the past.");
 
         var invoice = new Invoice
         {
-            Id            = Guid.NewGuid(),
-            TenantId      = data.TenantId,
-            InvoiceNumber = data.InvoiceNumber.Trim(),
-            ClientName    = data.ClientName.Trim(),
-            ClientEmail   = data.ClientEmail.Trim().ToLowerInvariant(),
-            Currency      = data.Currency.Trim().ToUpperInvariant(),
-            Status        = InvoiceStatus.Draft,
-            DueDate       = data.DueDate,
-            Notes         = data.Notes?.Trim(),
-            ClientId      = data.ClientId,
-            CreatedAt     = DateTime.UtcNow,
-            UpdatedAt     = DateTime.UtcNow,
-            CreatedBy     = data.CreatedBy,
+            Id                       = Guid.NewGuid(),
+            TenantId                 = data.TenantId,
+            InvoiceNumber            = data.InvoiceNumber.Trim(),
+            ClientName               = data.ClientName.Trim(),
+            ClientEmail              = data.ClientEmail?.Trim().ToLowerInvariant(),
+            Currency                 = data.Currency.Trim().ToUpperInvariant(),
+            Status                   = InvoiceStatus.Draft,
+            DueDate                  = data.DueDate,
+            Notes                    = data.Notes?.Trim(),
+            ClientId                 = data.ClientId,
+            SourceWorkflowInstanceId = data.SourceWorkflowInstanceId,
+            CreatedAt                = DateTime.UtcNow,
+            UpdatedAt                = DateTime.UtcNow,
+            CreatedBy                = data.CreatedBy,
         };
 
         invoice.RaiseDomainEvent(new InvoiceGeneratedEvent(
@@ -101,6 +104,8 @@ public sealed class Invoice : AuditableEntity
     {
         if (Status != InvoiceStatus.Draft)
             throw new InvoiceDomainException("Only Draft invoices can be sent.");
+        if (string.IsNullOrWhiteSpace(ClientEmail))
+            throw new InvoiceDomainException("A client email address is required before sending an invoice.");
         if (_lineItems.Count == 0)
             throw new InvoiceDomainException("Cannot send an invoice with no line items.");
 

@@ -26,6 +26,8 @@
     <ProjectReference Include="..\..\..\..\src\Modules\Invoicing\STRIDE.Modules.Invoicing.Domain\STRIDE.Modules.Invoicing.Domain.csproj" />
     <ProjectReference Include="..\..\..\..\src\Modules\Invoicing\STRIDE.Modules.Invoicing.Application\STRIDE.Modules.Invoicing.Application.csproj" />
     <ProjectReference Include="..\..\..\..\src\BuildingBlocks\STRIDE.BuildingBlocks.Application\STRIDE.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\..\..\..\src\BuildingBlocks\STRIDE.BuildingBlocks.Infrastructure\STRIDE.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Modules\Workflows\STRIDE.Modules.Workflows.Domain\STRIDE.Modules.Workflows.Domain.csproj" />
   </ItemGroup>
 
 </Project>

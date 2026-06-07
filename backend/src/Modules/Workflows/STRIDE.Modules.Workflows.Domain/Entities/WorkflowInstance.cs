@@ -2,7 +2,6 @@ using STRIDE.BuildingBlocks.Domain.Entities;
 using STRIDE.Modules.Workflows.Domain.Enums;
 using STRIDE.Modules.Workflows.Domain.Events;
 using STRIDE.Modules.Workflows.Domain.Exceptions;
-// BillableUnit referenced via tuple parameter — namespace resolved from Domain.Enums
 
 namespace STRIDE.Modules.Workflows.Domain.Entities;
 
@@ -179,7 +178,20 @@ public sealed class WorkflowInstance : AuditableEntity
         {
             Status = WorkflowStatus.Completed;
             CompletedAt = DateTime.UtcNow;
-            RaiseDomainEvent(new WorkflowCompletedEvent(Id, TenantId, StartedBy));
+
+            // Snapshot all billable items so downstream handlers (e.g. Invoicing) can
+            // create an invoice draft without a cross-module query.
+            var billableSnapshots = _steps
+                .SelectMany(s => s.BillableItems)
+                .Select(b => new WorkflowBillableItemSnapshot(
+                    b.Description,
+                    b.Quantity,
+                    b.UnitPrice,
+                    b.Unit.ToString()))
+                .ToList();
+
+            RaiseDomainEvent(new WorkflowCompletedEvent(
+                Id, TenantId, StartedBy, WorkflowName, ClientId, billableSnapshots));
         }
     }
 }
