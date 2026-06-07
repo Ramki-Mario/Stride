@@ -5,5 +5,5 @@ import { AuthService } from '../auth/auth.service';
 export class TenantService {
   readonly tenantId = computed(() => this.auth.user()?.tenantId ?? null);
 
-  constructor(private auth: AuthService) {}
+  constructor(private readonly auth: AuthService) {}
 }

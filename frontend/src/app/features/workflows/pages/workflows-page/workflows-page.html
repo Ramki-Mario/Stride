@@ -238,7 +238,7 @@
               type="checkbox"
               class="wfl-cb"
               [checked]="allOnPageSelected"
-              (change)="toggleAll($any($event.target).checked)"
+              (change)="$any($event.target).checked ? selectAll() : clearSelection()"
               aria-label="Select all on this page"
             />
           </th>

@@ -851,8 +851,8 @@ export class OnboardingPageComponent implements OnDestroy {
   });
 
   protected readonly strengthLabel = computed(() => {
-    const s = this.passwordStrength();
-    return s === 0 ? '' : s === 1 ? 'Weak' : s === 2 ? 'Fair' : s === 3 ? 'Good' : 'Strong';
+    const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+    return labels[this.passwordStrength()] ?? '';
   });
 
   // ── Navigation ─────────────────────────────────────────────────────────────

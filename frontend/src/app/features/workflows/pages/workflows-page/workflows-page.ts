@@ -198,13 +198,9 @@ export class WorkflowsPageComponent implements OnInit {
     return this.selectedIds().has(id);
   }
 
-  toggleAll(checked: boolean): void {
-    if (checked) {
-      const ids = new Set(this.paginatedWorkflows().map((w) => w.id));
-      this.selectedIds.set(ids);
-    } else {
-      this.selectedIds.set(new Set());
-    }
+  selectAll(): void {
+    const ids = new Set(this.paginatedWorkflows().map((w) => w.id));
+    this.selectedIds.set(ids);
   }
 
   get allOnPageSelected(): boolean {
