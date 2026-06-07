@@ -22,11 +22,3 @@ public sealed record StepRequestDto(
     string Name,
     string? Description,
     bool IsRequired = true);
-
-// ─── Workflow Instance ─────────────────────────────────────────────────────
-
-/// <summary>
-/// Body for POST /api/workflows/{id}/start  (start a workflow instance).
-/// Empty — the definition ID is taken from the route and startedBy from the JWT.
-/// </summary>
-public sealed record StartWorkflowRequest;
