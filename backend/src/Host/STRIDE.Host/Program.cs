@@ -110,7 +110,7 @@ builder.Services.AddRateLimiter(options =>
     options.OnRejected = async (ctx, cancellationToken) =>
     {
         ctx.HttpContext.Response.StatusCode  = StatusCodes.Status429TooManyRequests;
-        ctx.HttpContext.Response.Headers["Retry-After"] = "60";
+        ctx.HttpContext.Response.Headers.RetryAfter = "60";
         ctx.HttpContext.Response.ContentType = "application/json";
         await ctx.HttpContext.Response.WriteAsync(
             "{\"error\":\"Too many requests. Please retry after 60 seconds.\"}", cancellationToken);

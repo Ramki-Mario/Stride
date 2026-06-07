@@ -20,7 +20,6 @@ internal sealed partial class CssSanitiser : ICssSanitiser
     [GeneratedRegex(@":root\s*\{([^}]*)\}", RegexOptions.Singleline | RegexOptions.IgnoreCase)]
     private static partial Regex RootBlockRegex();
 
-    // Matches a CSS custom property declaration: --name : value ;
     [GeneratedRegex(@"(--[a-zA-Z0-9-]+)\s*:\s*([^;]+?)\s*;", RegexOptions.Singleline)]
     private static partial Regex DeclarationRegex();
 

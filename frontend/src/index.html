@@ -15,11 +15,15 @@
     (function () {
       // ── Theme mode ──────────────────────────────────────────────────────
       var storedMode = null;
-      try { storedMode = localStorage.getItem('stride-theme'); } catch (_) {}
+      try {
+        storedMode = localStorage.getItem('stride-theme');
+      } catch (e) {
+        console.warn('Unable to read theme preference from localStorage:', e);
+      }
       var mode =
         storedMode === 'dark' || storedMode === 'light'
           ? storedMode
-          : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+          : globalThis.matchMedia && globalThis.matchMedia('(prefers-color-scheme: dark)').matches
           ? 'dark'
           : 'light';
       document.documentElement.dataset['theme'] = mode;
@@ -28,7 +32,11 @@
       // Purple is the new official default — no attribute needed.
       // Indigo is the alternative and requires data-palette="indigo".
       var storedPalette = null;
-      try { storedPalette = localStorage.getItem('stride-palette'); } catch (_) {}
+      try {
+        storedPalette = localStorage.getItem('stride-palette');
+      } catch (e) {
+        console.warn('Unable to read palette preference from localStorage:', e);
+      }
       if (storedPalette === 'indigo') {
         document.documentElement.dataset['palette'] = 'indigo';
       }

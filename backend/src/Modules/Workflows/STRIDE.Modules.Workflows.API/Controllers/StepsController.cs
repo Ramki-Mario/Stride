@@ -27,6 +27,8 @@ namespace STRIDE.Modules.Workflows.API.Controllers;
 [Route("api/workflows/instances/{instanceId:guid}/steps")]
 public sealed class StepsController : ControllerBase
 {
+    private const string NotFoundFragment = "not found";
+
     private readonly IMediator    _mediator;
     private readonly ICurrentUser _currentUser;
 
@@ -60,7 +62,7 @@ public sealed class StepsController : ControllerBase
 
         if (result.IsFailure)
         {
-            if (result.Error!.Contains("not found", StringComparison.OrdinalIgnoreCase))
+            if (result.Error!.Contains(NotFoundFragment, StringComparison.OrdinalIgnoreCase))
                 return NotFound(new { error = result.Error });
 
             return BadRequest(new { error = result.Error });
@@ -91,7 +93,7 @@ public sealed class StepsController : ControllerBase
 
         if (result.IsFailure)
         {
-            if (result.Error!.Contains("not found", StringComparison.OrdinalIgnoreCase))
+            if (result.Error!.Contains(NotFoundFragment, StringComparison.OrdinalIgnoreCase))
                 return NotFound(new { error = result.Error });
 
             return BadRequest(new { error = result.Error });
@@ -125,7 +127,7 @@ public sealed class StepsController : ControllerBase
 
         if (result.IsFailure)
         {
-            if (result.Error!.Contains("not found", StringComparison.OrdinalIgnoreCase))
+            if (result.Error!.Contains(NotFoundFragment, StringComparison.OrdinalIgnoreCase))
                 return NotFound(new { error = result.Error });
 
             return BadRequest(new { error = result.Error });
@@ -156,7 +158,7 @@ public sealed class StepsController : ControllerBase
 
         if (result.IsFailure)
         {
-            if (result.Error!.Contains("not found", StringComparison.OrdinalIgnoreCase))
+            if (result.Error!.Contains(NotFoundFragment, StringComparison.OrdinalIgnoreCase))
                 return NotFound(new { error = result.Error });
 
             return BadRequest(new { error = result.Error });

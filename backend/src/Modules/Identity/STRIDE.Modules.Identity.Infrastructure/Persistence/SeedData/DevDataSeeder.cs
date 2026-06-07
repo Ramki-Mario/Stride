@@ -85,7 +85,7 @@ public static class DevDataSeeder
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(r =>
                     r.TenantId == tenantId &&
-                    r.NormalizedName == roleName.ToUpperInvariant());
+                    r.NormalizedName.Equals(roleName, StringComparison.OrdinalIgnoreCase));
 
             if (existing is null)
             {
@@ -102,7 +102,7 @@ public static class DevDataSeeder
         adminRole ??= await db.Roles
             .IgnoreQueryFilters()
             .FirstAsync(r => r.TenantId == tenantId &&
-                             r.NormalizedName == DefaultRoles.Admin.ToUpperInvariant());
+                             r.NormalizedName.Equals(DefaultRoles.Admin, StringComparison.OrdinalIgnoreCase));
 
         // ── 3. User ───────────────────────────────────────────────────────────
         var user = await db.Users
