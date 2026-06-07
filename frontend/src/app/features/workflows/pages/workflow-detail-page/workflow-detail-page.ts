@@ -22,8 +22,10 @@ import {
   STEP_INSTANCE_STATUS_CONFIG,
 } from '../../models/workflow.models';
 import { WorkflowService }       from '../../services/workflow.service';
-import { StepActionModalComponent } from '../../components/step-action-modal/step-action-modal';
-import { InvoiceService }           from '../../../invoicing/services/invoice.service';
+import { StepActionModalComponent }  from '../../components/step-action-modal/step-action-modal';
+import { StepAttachmentsComponent }  from '../../components/step-attachments/step-attachments';
+import { InvoiceService }            from '../../../invoicing/services/invoice.service';
+import { AuthService }               from '../../../../core/auth/auth.service';
 import {
   InvoiceReferenceDto,
   INVOICE_STATUS_CSS,
@@ -37,7 +39,7 @@ type DetailTab = 'steps' | 'run' | 'activity' | 'history';
 @Component({
   selector: 'app-workflow-detail-page',
   standalone: true,
-  imports: [NgClass, DecimalPipe, RouterLink, StepActionModalComponent],
+  imports: [NgClass, DecimalPipe, RouterLink, StepActionModalComponent, StepAttachmentsComponent],
   templateUrl: './workflow-detail-page.html',
   styleUrl: './workflow-detail-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,6 +49,7 @@ export class WorkflowDetailPageComponent implements OnInit {
   private readonly router       = inject(Router);
   private readonly wfService    = inject(WorkflowService);
   private readonly invoiceSvc   = inject(InvoiceService);
+  private readonly authService  = inject(AuthService);
   private readonly destroyRef   = inject(DestroyRef);
 
   // ── Config exposed to template ────────────────────────────────────────────
@@ -139,6 +142,9 @@ export class WorkflowDetailPageComponent implements OnInit {
   });
 
   readonly instanceBillableTotal = computed(() => this.instance()?.billableTotal ?? 0);
+
+  /** ID of the currently authenticated user — passed to StepAttachmentsComponent for delete permission checks. */
+  readonly currentUserId = computed(() => this.authService.user()?.userId ?? '');
 
   // ── Invoice panel state ───────────────────────────────────────────────────
 

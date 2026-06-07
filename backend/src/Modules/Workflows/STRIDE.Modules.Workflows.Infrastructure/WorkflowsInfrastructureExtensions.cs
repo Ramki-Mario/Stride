@@ -25,6 +25,7 @@ public static class WorkflowsInfrastructureExtensions
         // ── Repositories (EF Core writes) ──────────────────────────────────────
         services.AddScoped<IWorkflowDefinitionRepository, WorkflowDefinitionRepository>();
         services.AddScoped<IWorkflowInstanceRepository,   WorkflowInstanceRepository>();
+        services.AddScoped<IAttachmentRepository,         AttachmentRepository>();
 
         // ── Read service (Dapper reads) ────────────────────────────────────────
         services.AddScoped<IWorkflowReadService, WorkflowReadService>();

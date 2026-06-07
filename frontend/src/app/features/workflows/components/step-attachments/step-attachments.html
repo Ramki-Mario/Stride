@@ -1,0 +1,99 @@
+<div class="sa-root">
+
+  <!-- Upload zone -->
+  <div
+    class="sa-upload-zone"
+    [class.sa-dragover]="isDragOver()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+    (drop)="onDrop($event)"
+  >
+    <input
+      #fileInput
+      type="file"
+      [accept]="allowedMimes"
+      (change)="onFileSelected($event)"
+      hidden
+    />
+
+    <button
+      class="sa-upload-btn"
+      type="button"
+      [disabled]="isUploading()"
+      (click)="fileInput.click()"
+    >
+      <i class="pi" [class.pi-upload]="!isUploading()" [class.pi-spin]="isUploading()" [class.pi-spinner]="isUploading()"></i>
+      {{ isUploading() ? 'Uploading…' : 'Upload File' }}
+    </button>
+
+    <span class="sa-upload-hint">or drag &amp; drop here</span>
+  </div>
+
+  @if (uploadError()) {
+    <p class="sa-error sa-error--upload">{{ uploadError() }}</p>
+  }
+
+  <!-- Attachment list -->
+  @if (isLoading()) {
+    <p class="sa-loading">Loading attachments…</p>
+  } @else if (loadError()) {
+    <p class="sa-error">{{ loadError() }}</p>
+  } @else if (!hasAttachments()) {
+    <p class="sa-empty">No attachments yet.</p>
+  } @else {
+    <ul class="sa-list">
+      @for (att of attachments(); track att.id) {
+        <li class="sa-item" [class.sa-item--deleting]="deletingId() === att.id">
+
+          <!-- Thumbnail (images) or file-type icon -->
+          @if (att.isImage) {
+            <img
+              class="sa-thumbnail"
+              [src]="downloadUrl(att.id)"
+              [alt]="att.fileName"
+              loading="lazy"
+            />
+          } @else {
+            <span class="sa-icon"><i [class]="fileIcon(att.contentType)"></i></span>
+          }
+
+          <!-- Metadata -->
+          <div class="sa-meta">
+            <span class="sa-name" [title]="att.fileName">{{ att.fileName }}</span>
+            <span class="sa-size">{{ formatSize(att.fileSizeBytes) }}</span>
+          </div>
+
+          <!-- Actions -->
+          <div class="sa-actions">
+            <a
+              class="sa-btn sa-btn--download"
+              [href]="downloadUrl(att.id)"
+              [download]="att.fileName"
+              title="Download"
+            >
+              <i class="pi pi-download"></i>
+            </a>
+
+            @if (canDelete(att)) {
+              <button
+                class="sa-btn sa-btn--delete"
+                type="button"
+                title="Delete"
+                [disabled]="deletingId() !== null"
+                (click)="deleteAttachment(att)"
+              >
+                <i class="pi pi-trash"></i>
+              </button>
+            }
+          </div>
+
+        </li>
+      }
+    </ul>
+  }
+
+  @if (deleteError()) {
+    <p class="sa-error sa-error--delete">{{ deleteError() }}</p>
+  }
+
+</div>

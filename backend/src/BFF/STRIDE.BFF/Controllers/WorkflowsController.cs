@@ -214,6 +214,79 @@ public sealed class WorkflowsController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 
+    // ── Step Attachments ──────────────────────────────────────────────────
+
+    [HttpPost("instances/{instanceId:guid}/steps/{stepId:guid}/attachments")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(10 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 10 * 1024 * 1024)]
+    public async Task<IActionResult> UploadStepAttachment(
+        Guid instanceId, Guid stepId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+
+        // Forward the entire multipart body (including boundary) to the Host.
+        var content = new StreamContent(Request.Body);
+        content.Headers.ContentType =
+            System.Net.Http.Headers.MediaTypeHeaderValue.Parse(Request.ContentType!);
+
+        var response = await _workflows.UploadStepAttachmentAsync(
+            instanceId, stepId, content, token, cancellationToken);
+        return await ProxyAsync(response, forwardStatusCode: true, cancellationToken: cancellationToken);
+    }
+
+    [HttpGet("instances/{instanceId:guid}/steps/{stepId:guid}/attachments")]
+    public async Task<IActionResult> ListStepAttachments(
+        Guid instanceId, Guid stepId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(
+            await _workflows.ListStepAttachmentsAsync(instanceId, stepId, token, cancellationToken),
+            cancellationToken: cancellationToken);
+    }
+
+    [HttpGet("instances/{instanceId:guid}/steps/{stepId:guid}/attachments/{attachmentId:guid}/download")]
+    public async Task<IActionResult> DownloadStepAttachment(
+        Guid instanceId, Guid stepId, Guid attachmentId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _workflows.DownloadStepAttachmentAsync(
+            instanceId, stepId, attachmentId, token, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+            return await ProxyAsync(response, cancellationToken: cancellationToken);
+
+        // Stream binary content directly — do NOT read as JSON.
+        var stream      = await response.Content.ReadAsStreamAsync(cancellationToken);
+        var contentType = response.Content.Headers.ContentType?.ToString()
+                          ?? "application/octet-stream";
+
+        // Preserve the filename from the Host's Content-Disposition header.
+        string fileName = "download";
+        if (response.Content.Headers.ContentDisposition is { } cd)
+            fileName = cd.FileNameStar ?? cd.FileName?.Trim('"') ?? fileName;
+
+        return File(stream, contentType, fileName);
+    }
+
+    [HttpDelete("instances/{instanceId:guid}/steps/{stepId:guid}/attachments/{attachmentId:guid}")]
+    public async Task<IActionResult> DeleteStepAttachment(
+        Guid instanceId, Guid stepId, Guid attachmentId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _workflows.DeleteStepAttachmentAsync(
+            instanceId, stepId, attachmentId, token, cancellationToken);
+        return response.IsSuccessStatusCode
+            ? NoContent()
+            : await ProxyAsync(response, cancellationToken: cancellationToken);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────
 
     private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");

@@ -488,6 +488,14 @@
                             }
                           </div>
                         }
+
+                        <!-- ── Step Attachments ────────────────────────── -->
+                        <app-step-attachments
+                          [instanceId]="instance()!.id"
+                          [stepId]="step.id"
+                          [currentUserId]="currentUserId()"
+                        />
+
                       </div>
                     </li>
                   }

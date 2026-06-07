@@ -136,6 +136,58 @@ public sealed class WorkflowApiClient
         return _client.SendAsync(req, cancellationToken);
     }
 
+    // ── Step Attachments ──────────────────────────────────────────────────
+
+    /// <summary>
+    /// Forwards a multipart/form-data upload to the Host.
+    /// The caller is responsible for setting the correct Content-Type (including boundary).
+    /// </summary>
+    public Task<HttpResponseMessage> UploadStepAttachmentAsync(
+        Guid        instanceId,
+        Guid        stepId,
+        HttpContent multipartContent,
+        string      token,
+        CancellationToken cancellationToken = default)
+    {
+        var req = Build(HttpMethod.Post,
+            $"/api/workflows/instances/{instanceId}/steps/{stepId}/attachments", token);
+        req.Content = multipartContent;
+        return _client.SendAsync(req, cancellationToken);
+    }
+
+    public Task<HttpResponseMessage> ListStepAttachmentsAsync(
+        Guid instanceId,
+        Guid stepId,
+        string token,
+        CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get,
+            $"/api/workflows/instances/{instanceId}/steps/{stepId}/attachments", token),
+            cancellationToken);
+
+    /// <summary>
+    /// Downloads a file. The response carries binary content — callers must NOT
+    /// read it as JSON; stream it directly to the HTTP response body.
+    /// </summary>
+    public Task<HttpResponseMessage> DownloadStepAttachmentAsync(
+        Guid instanceId,
+        Guid stepId,
+        Guid attachmentId,
+        string token,
+        CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get,
+            $"/api/workflows/instances/{instanceId}/steps/{stepId}/attachments/{attachmentId}/download",
+            token), HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+    public Task<HttpResponseMessage> DeleteStepAttachmentAsync(
+        Guid instanceId,
+        Guid stepId,
+        Guid attachmentId,
+        string token,
+        CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Delete,
+            $"/api/workflows/instances/{instanceId}/steps/{stepId}/attachments/{attachmentId}",
+            token), cancellationToken);
+
     // ── Helper ────────────────────────────────────────────────────────────
 
     private static HttpRequestMessage Build(HttpMethod method, string uri, string token)
