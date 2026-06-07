@@ -267,7 +267,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 ### Milestone #11 — Product Layer Gaps (EP-048–061)
 
-**Board status (2026-06-08):** All 54 issues (#263–316) on board + Backlog ✅. EP-049 items (#264, #280–282) closed + board=Done ✅. US-153 (#283) closed + board=Done ✅. US-154 (#284) closed + board=Done ✅.
+**Board status (2026-06-08):** All 54 issues (#263–316) on board + Backlog ✅. EP-049 items (#264, #280–282) closed + board=Done ✅. US-153 (#283), US-154 (#284), US-155 (#285) closed + board=Done ✅. EP-050 fully complete ✅.
 
 **Epic → Issue → Story mapping:**
 - EP-048 #263 → US-147–149 (#277–279) — Search & Filter Improvements
@@ -343,7 +343,12 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - **Tests:** 7 new tests in `CreateInvoiceDraftFromWorkflowHandlerTests.cs` (persists, invoice number, sourceId, billable items, no items, clientId, idempotency); domain test updated: removed empty-email-at-generate case, added `Send_WhenClientEmailMissing` test; all 108 tests green
 - Issue #284 closed; board item → Done
 
-#### US-155 — Invoice status badge on workflow instance detail ⏳ Next (#285)
+#### US-155 — Invoice status badge on workflow instance detail ✅ Done (commit `b1b3e45`)
+- **Backend:** `GET /api/invoicing/invoices/by-workflow/{id}` → `InvoiceReferenceDto` (id, number, status, label) or 404; `POST /api/invoicing/invoices/from-workflow/{id}` → idempotent manual draft creation (accepts workflowName, clientId, billableItems from frontend); `InvoiceDetailDto` + `InvoiceSummaryDto`: `ClientEmail` → `string?`; `SourceWorkflowInstanceId: Guid?` added to `InvoiceDetailDto`; `GetInvoiceById.sql` updated; `InvoiceReadService` maps both new fields
+- **BFF:** both new endpoints proxied via `InvoicingApiClient` + `InvoicingController`
+- **Angular:** `InvoiceReferenceDto` + `INVOICE_STATUS_CSS` + `CreateWorkflowInvoiceRequest` added to models; `InvoiceService` gets `getInvoiceByWorkflowInstanceId()` / `createInvoiceFromWorkflow()`; workflow detail page invoice panel (badge, View Invoice link, Create Invoice Draft button) on completed instances; new `InvoiceDetailPageComponent` at `/invoicing/:id` with status management + source-workflow reference card; route added to `invoicing.routes.ts`
+- **Tests:** 4 new tests for `GetInvoiceByWorkflowInstanceIdQueryHandler`; 112 tests green
+- Issue #285 closed; board item → Done
 
 ---
 
