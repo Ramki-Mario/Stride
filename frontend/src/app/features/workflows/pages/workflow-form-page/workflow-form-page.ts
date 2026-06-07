@@ -166,13 +166,11 @@ export class WorkflowFormPageComponent implements OnInit {
           error: (err) => this.saveError.set(this.mapError(err)),
         });
     } else {
-      const steps = this.stepsArray.value.map(
-        (s: { name: any; description: string; isRequired: any; }) => ({
-          name:        s.name,
-          description: s.description?.trim() || null,
-          isRequired:  s.isRequired,
-        }),
-      );
+      const steps = this.stepsArray.value.map((s) => ({
+        name:        s.name,
+        description: s.description?.trim() || null,
+        isRequired:  s.isRequired,
+      }));
 
       this.wfService
         .createDefinition({ name, description: descValue, steps })
