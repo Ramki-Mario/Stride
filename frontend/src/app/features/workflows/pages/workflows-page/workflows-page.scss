@@ -577,21 +577,32 @@
   background: var(--stride-surface);
   border: 1px solid var(--stride-border);
   border-radius: var(--stride-radius-2xl);
-  padding: 1rem;
   box-shadow: var(--stride-shadow-xs);
-  cursor: pointer;
   transition: box-shadow var(--stride-transition), border-color var(--stride-transition), transform 100ms ease;
-  outline: none;
 
   &:hover {
     box-shadow: var(--stride-shadow-md);
     border-color: var(--stride-primary);
     transform: translateY(-1px);
   }
+}
+
+.wfl-card-btn {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
 
   &:focus-visible {
     outline: 2px solid var(--stride-primary);
     outline-offset: 2px;
+    border-radius: var(--stride-radius-2xl);
   }
 }
 

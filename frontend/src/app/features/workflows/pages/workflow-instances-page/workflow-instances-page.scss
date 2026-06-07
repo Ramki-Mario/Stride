@@ -150,15 +150,9 @@
 /* ── Row ──────────────────────────────────────────────────────────────────── */
 
 .wi-row {
-  display: grid;
-  grid-template-columns: 2.5rem 1fr auto auto auto;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.875rem 1rem;
   background: var(--stride-surface);
   border: 1px solid var(--stride-border-soft);
   border-radius: var(--stride-radius-xl);
-  cursor: pointer;
   transition: background var(--stride-transition), box-shadow var(--stride-transition),
               border-color var(--stride-transition);
 
@@ -167,10 +161,26 @@
     border-color: var(--stride-border);
     box-shadow: var(--stride-shadow-sm);
   }
+}
+
+.wi-row-btn {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
 
   &:focus-visible {
     outline: 2px solid var(--stride-primary);
     outline-offset: 2px;
+    border-radius: var(--stride-radius-xl);
   }
 }
 

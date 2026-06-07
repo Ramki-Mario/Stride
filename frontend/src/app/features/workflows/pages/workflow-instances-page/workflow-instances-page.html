@@ -83,15 +83,15 @@
   @else {
     <ul class="wi-list">
       @for (inst of filteredInstances(); track trackById($index, inst)) {
-        <li
-          class="wi-row"
-          role="button"
-          (click)="openInstance(inst)"
-          (keydown.enter)="openInstance(inst)"
-          (keydown.space)="openInstance(inst)"
-          tabindex="0"
-          [attr.aria-label]="inst.workflowName + ' instance'"
-        >
+        <li class="wi-row">
+          <button
+            type="button"
+            class="wi-row-btn"
+            (click)="openInstance(inst)"
+            (keydown.enter)="openInstance(inst)"
+            (keydown.space)="openInstance(inst)"
+            [attr.aria-label]="inst.workflowName + ' instance'"
+          >
           <!-- Status dot -->
           <div class="wi-row-icon" [ngClass]="'wi-icon--' + inst.status.toLowerCase()">
             @switch (inst.status) {
@@ -138,6 +138,7 @@
 
           <!-- Arrow -->
           <i class="pi pi-chevron-right wi-row-arrow"></i>
+          </button>
         </li>
       }
     </ul>
