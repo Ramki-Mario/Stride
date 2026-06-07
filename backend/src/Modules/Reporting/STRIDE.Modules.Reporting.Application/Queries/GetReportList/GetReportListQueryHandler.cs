@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Reporting.Application;
 using STRIDE.Modules.Reporting.Application.Abstractions;
 using STRIDE.Modules.Reporting.Application.ReadModels;
 
@@ -28,8 +29,7 @@ internal sealed class GetReportListQueryHandler
         GetReportListQuery request,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
-            "GetReportList: listing saved reports for tenant {TenantId}", request.TenantId);
+        _logger.GetReportList(request.TenantId);
 
         var reports = await _readService.GetReportSummariesAsync(request.TenantId, cancellationToken);
         return Result.Success(reports);

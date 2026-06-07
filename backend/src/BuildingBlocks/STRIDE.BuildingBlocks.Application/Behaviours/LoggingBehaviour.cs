@@ -18,11 +18,11 @@ public sealed class LoggingBehaviour<TRequest, TResponse>
         CancellationToken cancellationToken)
     {
         var requestName = typeof(TRequest).Name;
-        _logger.LogInformation("Handling {RequestName}", requestName);
+        _logger.Handling(requestName);
 
         var response = await next();
 
-        _logger.LogInformation("Handled {RequestName}", requestName);
+        _logger.Handled(requestName);
         return response;
     }
 }

@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Notifications.Application;
 using STRIDE.Modules.Notifications.Application.Repositories;
 
 namespace STRIDE.Modules.Notifications.Application.Commands.MarkNotificationAsRead;
@@ -26,17 +27,13 @@ internal sealed class MarkNotificationAsReadCommandHandler
 
         if (notification is null)
         {
-            _logger.LogWarning(
-                "MarkAsRead: notification {Id} not found for tenant {TenantId}",
-                request.NotificationId, request.TenantId);
+            _logger.MarkAsReadNotFound(request.NotificationId, request.TenantId);
             return Result.Failure($"Notification '{request.NotificationId}' not found.");
         }
 
         if (notification.RecipientId != request.RecipientId)
         {
-            _logger.LogWarning(
-                "MarkAsRead: recipient mismatch for notification {Id}",
-                request.NotificationId);
+            _logger.MarkAsReadRecipientMismatch(request.NotificationId);
             return Result.Failure("You do not have permission to modify this notification.");
         }
 
@@ -44,8 +41,7 @@ internal sealed class MarkNotificationAsReadCommandHandler
         await _notifications.UpdateAsync(notification, cancellationToken);
         await _notifications.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation(
-            "Notification {Id} marked as read by {RecipientId}", request.NotificationId, request.RecipientId);
+        _logger.NotificationMarkedAsRead(request.NotificationId, request.RecipientId);
 
         return Result.Success();
     }

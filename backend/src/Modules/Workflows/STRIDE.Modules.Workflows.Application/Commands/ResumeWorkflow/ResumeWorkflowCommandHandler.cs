@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Workflows.Application;
 using STRIDE.Modules.Workflows.Application.Abstractions;
 using STRIDE.Modules.Workflows.Domain.Exceptions;
 
@@ -32,8 +33,7 @@ internal sealed class ResumeWorkflowCommandHandler
             _instances.Update(instance);
             await _instances.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "WorkflowInstance {Id} resumed by {UserId}", instance.Id, request.ResumedBy);
+            _logger.WorkflowInstanceResumed(instance.Id, request.ResumedBy);
 
             return Result.Success();
         }

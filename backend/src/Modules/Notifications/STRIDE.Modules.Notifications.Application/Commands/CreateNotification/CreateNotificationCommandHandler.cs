@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Notifications.Application;
 using STRIDE.Modules.Notifications.Application.Repositories;
 using STRIDE.Modules.Notifications.Domain.Entities;
 
@@ -35,9 +36,7 @@ internal sealed class CreateNotificationCommandHandler
         await _notifications.AddAsync(notification, cancellationToken);
         await _notifications.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation(
-            "Notification {Id} ({Type}) created for recipient {RecipientId} in tenant {TenantId}",
-            notification.Id, notification.Type, request.RecipientId, request.TenantId);
+        _logger.NotificationCreated(notification.Id, notification.Type, request.RecipientId, request.TenantId);
 
         return Result.Success(new CreateNotificationResult(notification.Id));
     }

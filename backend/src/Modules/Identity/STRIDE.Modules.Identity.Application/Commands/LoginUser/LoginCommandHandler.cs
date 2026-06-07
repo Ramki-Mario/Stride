@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Identity.Application;
 using STRIDE.Modules.Identity.Application.Abstractions;
 
 namespace STRIDE.Modules.Identity.Application.Commands.LoginUser;
@@ -43,7 +44,7 @@ internal sealed class LoginCommandHandler
         var tenantId = await _tenantResolver.ResolveFromEmailAsync(request.Email, cancellationToken);
         if (tenantId is null)
         {
-            _logger.LogWarning("Login failed: tenant not found for {Email}", request.Email);
+            _logger.LoginTenantNotFound(request.Email);
             return Result.Failure<LoginResult>("Invalid email or password.");
         }
 
@@ -56,14 +57,14 @@ internal sealed class LoginCommandHandler
 
         if (user is null || !user.IsActive)
         {
-            _logger.LogWarning("Login failed: user not found or inactive for {Email}", request.Email);
+            _logger.LoginUserNotFound(request.Email);
             return Result.Failure<LoginResult>("Invalid email or password.");
         }
 
         // ── 3. Verify password ────────────────────────────────────────────
         if (!_hasher.Verify(request.Password, user.PasswordHash))
         {
-            _logger.LogWarning("Login failed: incorrect password for {Email}", request.Email);
+            _logger.LoginIncorrectPassword(request.Email);
             return Result.Failure<LoginResult>("Invalid email or password.");
         }
 
@@ -84,8 +85,7 @@ internal sealed class LoginCommandHandler
             DisplayName: user.DisplayName,
             Roles:       roleNames));
 
-        _logger.LogInformation(
-            "User {UserId} in tenant {TenantId} logged in successfully", user.Id, tenantId.Value);
+        _logger.LoginSucceeded(user.Id, tenantId.Value);
 
         return Result.Success(new LoginResult(
             UserId:      user.Id,

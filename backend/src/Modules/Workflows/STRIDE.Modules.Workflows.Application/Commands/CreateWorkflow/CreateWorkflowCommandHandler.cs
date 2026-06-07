@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Workflows.Application;
 using STRIDE.Modules.Workflows.Application.Abstractions;
 using STRIDE.Modules.Workflows.Domain.Entities;
 using STRIDE.Modules.Workflows.Domain.Exceptions;
@@ -30,9 +31,7 @@ internal sealed class CreateWorkflowCommandHandler
             // ── 1. Duplicate name guard ────────────────────────────────────────
             if (await _definitions.ExistsByNameAsync(request.Name.Trim(), cancellationToken))
             {
-                _logger.LogWarning(
-                    "CreateWorkflow failed: name '{Name}' already exists in tenant {TenantId}",
-                    request.Name, request.TenantId);
+                _logger.CreateWorkflowDuplicateName(request.Name, request.TenantId);
                 return Result.Failure<CreateWorkflowResult>(
                     $"A workflow named '{request.Name}' already exists.");
             }
@@ -53,9 +52,7 @@ internal sealed class CreateWorkflowCommandHandler
             await _definitions.AddAsync(definition, cancellationToken);
             await _definitions.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "WorkflowDefinition {Id} '{Name}' created by {UserId} in tenant {TenantId}",
-                definition.Id, definition.Name, request.CreatedBy, request.TenantId);
+            _logger.WorkflowDefinitionCreated(definition.Id, definition.Name, request.CreatedBy, request.TenantId);
 
             return Result.Success(new CreateWorkflowResult(
                 definition.Id,

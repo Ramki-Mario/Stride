@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Workflows.Application;
 using STRIDE.Modules.Workflows.Application.Abstractions;
 using STRIDE.Modules.Workflows.Domain.Exceptions;
 
@@ -32,8 +33,7 @@ internal sealed class ActivateWorkflowCommandHandler
             _definitions.Update(definition);
             await _definitions.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "WorkflowDefinition {Id} activated by {UserId}", definition.Id, request.ActivatedBy);
+            _logger.WorkflowDefinitionActivated(definition.Id, request.ActivatedBy);
 
             return Result.Success();
         }

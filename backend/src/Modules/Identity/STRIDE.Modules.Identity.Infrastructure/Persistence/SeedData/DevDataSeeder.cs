@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using STRIDE.Modules.Identity.Application.Abstractions;
 using STRIDE.Modules.Identity.Domain.Entities;
+using STRIDE.Modules.Identity.Infrastructure;
 using STRIDE.Modules.Identity.Infrastructure.Persistence;
 
 namespace STRIDE.Modules.Identity.Infrastructure.Persistence.SeedData;
@@ -62,7 +63,7 @@ public static class DevDataSeeder
             tenant = Tenant.Create(TenantName, TenantSlug, "Free", SystemActorId);
             db.Tenants.Add(tenant);
             await db.SaveChangesAsync();
-            logger.LogInformation("[DevSeed] Tenant '{Slug}' created ({Id})", TenantSlug, tenant.Id);
+            logger.DevSeedTenantCreated(TenantSlug, tenant.Id);
         }
 
         var tenantId = tenant.Id;
@@ -91,7 +92,7 @@ public static class DevDataSeeder
                 existing = Role.Create(tenantId, roleName, description, SystemActorId);
                 db.Roles.Add(existing);
                 await db.SaveChangesAsync();
-                logger.LogInformation("[DevSeed] Role '{Role}' created ({Id})", roleName, existing.Id);
+                logger.DevSeedRoleCreated(roleName, existing.Id);
             }
 
             if (roleName.Equals(DefaultRoles.Admin, StringComparison.OrdinalIgnoreCase))
@@ -118,7 +119,7 @@ public static class DevDataSeeder
 
             db.Users.Add(user);
             await db.SaveChangesAsync();
-            logger.LogInformation("[DevSeed] User '{Email}' created ({Id})", TestEmail, user.Id);
+            logger.DevSeedUserCreated(TestEmail, user.Id);
         }
 
         var userId = user.Id;
@@ -132,8 +133,7 @@ public static class DevDataSeeder
         {
             db.UserRoles.Add(UserRole.Create(tenantId, userId, adminRole.Id, SystemActorId));
             await db.SaveChangesAsync();
-            logger.LogInformation("[DevSeed] UserRole seeded (userId={U}, roleId={R})",
-                                   userId, adminRole.Id);
+            logger.DevSeedUserRoleSeeded(userId, adminRole.Id);
         }
 
         // ── 5. UserTenantMapping ──────────────────────────────────────────────
@@ -149,12 +149,10 @@ public static class DevDataSeeder
             db.UserTenantMappings.Add(
                 UserTenantMapping.Create(tenantId, userId, DefaultRoles.Admin, SystemActorId));
             await db.SaveChangesAsync();
-            logger.LogInformation("[DevSeed] UserTenantMapping seeded (userId={U})", userId);
+            logger.DevSeedMappingSeeded(userId);
         }
 
-        logger.LogInformation(
-            "[DevSeed] ✓ Dev seed complete — login with: {Email} (password in appsettings.Development.json)",
-            TestEmail);
+        logger.DevSeedComplete(TestEmail);
 
         return (tenantId, userId);
     }

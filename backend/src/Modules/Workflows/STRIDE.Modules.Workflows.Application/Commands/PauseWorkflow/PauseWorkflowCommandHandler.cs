@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Workflows.Application;
 using STRIDE.Modules.Workflows.Application.Abstractions;
 using STRIDE.Modules.Workflows.Domain.Exceptions;
 
@@ -32,8 +33,7 @@ internal sealed class PauseWorkflowCommandHandler
             _instances.Update(instance);
             await _instances.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "WorkflowInstance {Id} paused by {UserId}", instance.Id, request.PausedBy);
+            _logger.WorkflowInstancePaused(instance.Id, request.PausedBy);
 
             return Result.Success();
         }

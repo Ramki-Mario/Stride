@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Workflows.Application;
 using STRIDE.Modules.Workflows.Application.Abstractions;
 using STRIDE.Modules.Workflows.Domain.Exceptions;
 
@@ -35,9 +36,7 @@ internal sealed class UpdateWorkflowCommandHandler
             _definitions.Update(definition);
             await _definitions.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "WorkflowDefinition {Id} updated by {UserId}",
-                definition.Id, request.UpdatedBy);
+            _logger.WorkflowDefinitionUpdated(definition.Id, request.UpdatedBy);
 
             return Result.Success();
         }

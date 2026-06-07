@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Workflows.Application;
 using STRIDE.Modules.Workflows.Application.Abstractions;
 using STRIDE.Modules.Workflows.Domain.Exceptions;
 
@@ -32,8 +33,7 @@ internal sealed class CancelWorkflowCommandHandler
             _instances.Update(instance);
             await _instances.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "WorkflowInstance {Id} cancelled by {UserId}", instance.Id, request.CancelledBy);
+            _logger.WorkflowInstanceCancelled(instance.Id, request.CancelledBy);
 
             return Result.Success();
         }

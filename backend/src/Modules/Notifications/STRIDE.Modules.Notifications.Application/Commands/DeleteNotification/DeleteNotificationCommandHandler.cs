@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Notifications.Application;
 using STRIDE.Modules.Notifications.Application.Repositories;
 
 namespace STRIDE.Modules.Notifications.Application.Commands.DeleteNotification;
@@ -26,17 +27,13 @@ internal sealed class DeleteNotificationCommandHandler
 
         if (notification is null)
         {
-            _logger.LogWarning(
-                "DeleteNotification: notification {Id} not found for tenant {TenantId}",
-                request.NotificationId, request.TenantId);
+            _logger.DeleteNotificationNotFound(request.NotificationId, request.TenantId);
             return Result.Failure($"Notification '{request.NotificationId}' not found.");
         }
 
         if (notification.RecipientId != request.RecipientId)
         {
-            _logger.LogWarning(
-                "DeleteNotification: recipient mismatch for notification {Id}",
-                request.NotificationId);
+            _logger.DeleteNotificationRecipientMismatch(request.NotificationId);
             return Result.Failure("You do not have permission to delete this notification.");
         }
 
@@ -44,8 +41,7 @@ internal sealed class DeleteNotificationCommandHandler
         await _notifications.UpdateAsync(notification, cancellationToken);
         await _notifications.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation(
-            "Notification {Id} soft-deleted by {RecipientId}", request.NotificationId, request.RecipientId);
+        _logger.NotificationDeleted(request.NotificationId, request.RecipientId);
 
         return Result.Success();
     }

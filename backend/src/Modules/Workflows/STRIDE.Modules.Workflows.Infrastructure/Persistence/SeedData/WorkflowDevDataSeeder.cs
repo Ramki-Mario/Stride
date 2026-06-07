@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using STRIDE.Modules.Workflows.Domain.Entities;
+using STRIDE.Modules.Workflows.Infrastructure;
 using STRIDE.Modules.Workflows.Infrastructure.Persistence;
 
 namespace STRIDE.Modules.Workflows.Infrastructure.Persistence.SeedData;
@@ -161,8 +162,7 @@ public static class WorkflowDevDataSeeder
                 """);
         }
 
-        logger.LogInformation("[WorkflowSeed] ✓ Workflow seed complete — {Count} instances across 3 active definitions.",
-            instances.Count);
+        logger.WorkflowSeedComplete(instances.Count);
     }
 
     // ── Build helpers ─────────────────────────────────────────────────────────

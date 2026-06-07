@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Reporting.Application;
 using STRIDE.Modules.Reporting.Application.Abstractions;
 using STRIDE.Modules.Reporting.Domain.Entities;
 
@@ -31,9 +32,7 @@ internal sealed class GenerateReportCommandHandler
         GenerateReportCommand request,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
-            "GenerateReport: generating {ReportType} for tenant {TenantId} by user {UserId}",
-            request.ReportType, request.TenantId, request.RequestedBy);
+        _logger.GenerateReportStarted(request.ReportType, request.TenantId, request.RequestedBy);
 
         // ── Strategy: compute record count per report type ─────────────────
         var (reportName, recordCount) = request.ReportType switch
@@ -55,9 +54,7 @@ internal sealed class GenerateReportCommandHandler
         await _reports.AddAsync(report, cancellationToken);
         await _reports.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation(
-            "GenerateReport: report {ReportId} ({Name}) saved with {Count} records",
-            report.Id, report.Name, report.RecordCount);
+        _logger.GenerateReportSaved(report.Id, report.Name, report.RecordCount);
 
         return Result.Success(new GenerateReportResult(
             report.Id,

@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Reporting.Application;
 using STRIDE.Modules.Reporting.Application.Abstractions;
 using STRIDE.Modules.Reporting.Application.ReadModels;
 
@@ -28,9 +29,7 @@ internal sealed class GetWorkflowTrendsQueryHandler
         GetWorkflowTrendsQuery request,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
-            "GetWorkflowTrends: fetching {Days}-day trend for tenant {TenantId}",
-            request.Days, request.TenantId);
+        _logger.GetWorkflowTrends(request.Days, request.TenantId);
 
         var trends = await _readService.GetWorkflowTrendsAsync(request.TenantId, request.Days, cancellationToken);
         return Result.Success(trends);

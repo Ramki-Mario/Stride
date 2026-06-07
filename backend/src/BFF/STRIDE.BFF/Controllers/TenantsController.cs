@@ -116,9 +116,7 @@ public sealed class TenantsController : ControllerBase
             principal,
             properties);
 
-        _logger.LogInformation(
-            "[BFF] Tenant registration complete — userId={UserId} tenantId={TenantId}",
-            hostResponse.UserId, hostResponse.TenantId);
+        _logger.TenantRegistrationComplete(hostResponse.UserId, hostResponse.TenantId);
 
         // TenantSettings are auto-created on first GET; use OrgName directly so the
         // sidebar shows the correct name immediately without a second round-trip.

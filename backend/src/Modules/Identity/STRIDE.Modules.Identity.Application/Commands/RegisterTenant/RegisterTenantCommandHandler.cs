@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Identity.Application;
 using STRIDE.Modules.Identity.Application.Abstractions;
 using STRIDE.Modules.Identity.Application.Commands.LoginUser;
 using STRIDE.Modules.Identity.Domain.Entities;
@@ -103,9 +104,7 @@ internal sealed class RegisterTenantCommandHandler
         // ── 7. Flush — all entities saved in one EF transaction ───────────────
         await _users.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation(
-            "[RegisterTenant] Tenant {TenantId} ('{Slug}') created with admin user {UserId}",
-            tenant.Id, tenant.Slug, user.Id);
+        _logger.TenantRegistered(tenant.Id, tenant.Slug, user.Id);
 
         // ── 8. Mint JWT — same shape as LoginResult ───────────────────────────
         var roleNames  = new[] { AdminRoleName }.AsReadOnly();

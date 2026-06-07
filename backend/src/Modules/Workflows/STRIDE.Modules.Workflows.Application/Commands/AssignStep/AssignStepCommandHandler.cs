@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Workflows.Application;
 using STRIDE.Modules.Workflows.Application.Abstractions;
 using STRIDE.Modules.Workflows.Domain.Exceptions;
 
@@ -32,9 +33,7 @@ internal sealed class AssignStepCommandHandler
             _instances.Update(instance);
             await _instances.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "Step {StepId} in instance {InstanceId} assigned to {AssigneeId} by {AssignedBy}",
-                request.StepInstanceId, instance.Id, request.AssigneeId, request.AssignedBy);
+            _logger.StepAssigned(request.StepInstanceId, instance.Id, request.AssigneeId, request.AssignedBy);
 
             return Result.Success();
         }

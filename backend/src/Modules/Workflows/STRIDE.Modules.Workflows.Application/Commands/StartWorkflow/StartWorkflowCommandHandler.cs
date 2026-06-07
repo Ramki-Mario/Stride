@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Workflows.Application;
 using STRIDE.Modules.Workflows.Application.Abstractions;
 using STRIDE.Modules.Workflows.Domain.Entities;
 using STRIDE.Modules.Workflows.Domain.Exceptions;
@@ -42,9 +43,7 @@ internal sealed class StartWorkflowCommandHandler
             await _instances.AddAsync(instance, cancellationToken);
             await _instances.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "WorkflowInstance {InstanceId} started from definition {DefinitionId} by {UserId}",
-                instance.Id, definition.Id, request.StartedBy);
+            _logger.WorkflowInstanceStarted(instance.Id, definition.Id, request.StartedBy);
 
             return Result.Success(new StartWorkflowResult(
                 instance.Id,

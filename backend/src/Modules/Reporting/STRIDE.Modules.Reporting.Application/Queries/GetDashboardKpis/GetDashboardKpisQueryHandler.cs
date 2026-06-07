@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Reporting.Application;
 using STRIDE.Modules.Reporting.Application.Abstractions;
 using STRIDE.Modules.Reporting.Application.ReadModels;
 
@@ -28,8 +29,7 @@ internal sealed class GetDashboardKpisQueryHandler
         GetDashboardKpisQuery request,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
-            "GetDashboardKpis: fetching KPI snapshot for tenant {TenantId}", request.TenantId);
+        _logger.GetDashboardKpis(request.TenantId);
 
         var kpis = await _readService.GetDashboardKpisAsync(request.TenantId, cancellationToken);
         return Result.Success(kpis);

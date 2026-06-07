@@ -2,6 +2,7 @@ using System.Text;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Reporting.Application;
 using STRIDE.Modules.Reporting.Application.Abstractions;
 using STRIDE.Modules.Reporting.Application.ReadModels;
 using STRIDE.Modules.Reporting.Domain.Entities;
@@ -37,16 +38,12 @@ internal sealed class ExportReportCsvQueryHandler
         var report = await _reports.GetByIdAsync(request.ReportId, cancellationToken);
         if (report is null)
         {
-            _logger.LogWarning(
-                "ExportReportCsv: report {ReportId} not found for tenant {TenantId}",
-                request.ReportId, request.TenantId);
+            _logger.ExportReportNotFound(request.ReportId, request.TenantId);
             return Result.Failure<ExportReportCsvResult>(
                 $"Report '{request.ReportId}' not found.");
         }
 
-        _logger.LogInformation(
-            "ExportReportCsv: exporting {ReportType} report {ReportId} for tenant {TenantId}",
-            report.ReportType, report.Id, request.TenantId);
+        _logger.ExportReportStarted(report.ReportType, report.Id, request.TenantId);
 
         var csv = report.ReportType switch
         {

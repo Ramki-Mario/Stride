@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
+using STRIDE.Modules.Identity.Application;
 using STRIDE.Modules.Identity.Application.Abstractions;
 using STRIDE.Modules.Identity.Domain.Entities;
 
@@ -42,8 +43,7 @@ internal sealed class RegisterCommandHandler
         var tenantId = await _tenantResolver.ResolveFromEmailAsync(request.Email, cancellationToken);
         if (tenantId is null)
         {
-            _logger.LogWarning(
-                "Registration failed: no tenant found for email domain of {Email}", request.Email);
+            _logger.RegisterTenantNotFound(request.Email);
             return Result.Failure<RegisterResult>(
                 "No tenant could be associated with this email address. " +
                 "Contact your administrator to set up your organization.");
@@ -55,9 +55,7 @@ internal sealed class RegisterCommandHandler
         var normalizedEmail = request.Email.Trim().ToUpperInvariant();
         if (await _users.ExistsByEmailAsync(normalizedEmail, cancellationToken))
         {
-            _logger.LogWarning(
-                "Registration failed: email {Email} already exists in tenant {TenantId}",
-                request.Email, tenantId.Value);
+            _logger.RegisterEmailExists(request.Email, tenantId.Value);
             return Result.Failure<RegisterResult>("An account with this email address already exists.");
         }
 
@@ -73,8 +71,7 @@ internal sealed class RegisterCommandHandler
         await _users.AddAsync(user, cancellationToken);
         await _users.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation(
-            "User {UserId} registered in tenant {TenantId}", user.Id, tenantId.Value);
+        _logger.UserRegistered(user.Id, tenantId.Value);
 
         return Result.Success(new RegisterResult(
             UserId:      user.Id,
