@@ -267,7 +267,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 ### Milestone #11 — Product Layer Gaps (EP-048–061)
 
-**Board status (2026-06-07):** All 54 issues (#263–316) on board + Backlog ✅. EP-049 items (#264, #280–282) closed + board=Done ✅. US-153 (#283) closed + board=Done ✅.
+**Board status (2026-06-08):** All 54 issues (#263–316) on board + Backlog ✅. EP-049 items (#264, #280–282) closed + board=Done ✅. US-153 (#283) closed + board=Done ✅. US-154 (#284) closed + board=Done ✅.
 
 **Epic → Issue → Story mapping:**
 - EP-048 #263 → US-147–149 (#277–279) — Search & Filter Improvements
@@ -333,8 +333,17 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - **Tests:** `BillableItemTests.cs` (9 domain tests — valid items, multiple items, empty, empty/zero/negative validation), `CompleteStepCommandHandlerTests.cs` (5 handler tests — not found, no items, with items, persists, domain exception); `InternalsVisibleTo` added to Workflows.Application.csproj; Application.Tests Usings.cs updated (FluentAssertions + NSubstitute)
 - Issue #283 closed; board item → Done
 
-#### US-154 — Auto invoice draft on workflow instance closure ⏳ Next (#284)
-#### US-155 — Invoice status badge on workflow instance detail ⏳ Pending (#285)
+#### US-154 — Auto invoice draft on workflow instance closure ✅ Done (commit `84c3533`)
+- **Domain enrichment:** `WorkflowBillableItemSnapshot` record added to Workflows.Domain/Events; `WorkflowCompletedEvent` extended with `WorkflowName`, `ClientId`, `BillableItems` (all defaulted so existing code compiles); `WorkflowInstance.CheckCompletion()` builds snapshot and passes all 6 args
+- **Invoice domain:** `ClientEmail` made nullable (`string?`) at `Generate()` time — email now only enforced at `Send()` time (guard added to `Send()`); `SourceWorkflowInstanceId: Guid?` property added; `NewInvoice` record updated with both nullable fields
+- **Invoicing.Infrastructure:** `InvoiceConfiguration` — removed `.IsRequired()` from ClientEmail, added `SourceWorkflowInstanceId` property + index on `(TenantId, SourceWorkflowInstanceId)`; `InvoiceRepository` implements `GetBySourceWorkflowInstanceIdAsync`; EF migration `20260607181957_AddSourceWorkflowInstanceIdToInvoices` applied
+- **Invoicing.Application:** `CreateInvoiceDraftFromWorkflowHandler` — idempotent draft creation; decimal qty preserved as `(qty=1, unitPrice=lineTotal)`; description embeds `"{desc} ({qty} × {unit} @ £{price})"`. Handles `DomainEventNotification<WorkflowCompletedEvent>`. Failures swallowed (logs error, never re-throws)
+- **Notifications.Application:** `InvoiceDraftCreatedNotificationHandler` — sends `NotificationType.InvoiceDraftCreated` to `StartedBy` on same event; Notifications.Domain gains `InvoiceDraftCreated` enum value
+- **Invoicing.Application.Tests.csproj:** Added project references to `BuildingBlocks.Infrastructure` + `Workflows.Domain`; Usings.cs updated with FluentAssertions + NSubstitute global usings
+- **Tests:** 7 new tests in `CreateInvoiceDraftFromWorkflowHandlerTests.cs` (persists, invoice number, sourceId, billable items, no items, clientId, idempotency); domain test updated: removed empty-email-at-generate case, added `Send_WhenClientEmailMissing` test; all 108 tests green
+- Issue #284 closed; board item → Done
+
+#### US-155 — Invoice status badge on workflow instance detail ⏳ Next (#285)
 
 ---
 
