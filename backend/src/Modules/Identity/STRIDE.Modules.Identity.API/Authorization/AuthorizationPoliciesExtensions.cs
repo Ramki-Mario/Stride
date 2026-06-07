@@ -16,41 +16,39 @@ public static class AuthorizationPoliciesExtensions
     public static IServiceCollection AddIdentityAuthorizationPolicies(
         this IServiceCollection services)
     {
-        services.AddAuthorization(options =>
-        {
+        services.AddAuthorizationBuilder()
             // ── Tier 0: any authenticated user ────────────────────────────
-            options.AddPolicy(Policies.RequireAuthenticated,
-                policy => policy.RequireAuthenticatedUser());
+            .AddPolicy(Policies.RequireAuthenticated,
+                policy => policy.RequireAuthenticatedUser())
 
             // ── Tier 1: Admin-only ─────────────────────────────────────────
-            options.AddPolicy(Policies.RequireAdmin,
-                policy => policy.RequireRole(DefaultRoles.Admin));
+            .AddPolicy(Policies.RequireAdmin,
+                policy => policy.RequireRole(DefaultRoles.Admin))
 
             // ── Tier 2: Admin OR OperationsManager ────────────────────────
-            options.AddPolicy(Policies.RequireManager,
+            .AddPolicy(Policies.RequireManager,
                 policy => policy.RequireRole(
                     DefaultRoles.Admin,
-                    DefaultRoles.OperationsManager));
+                    DefaultRoles.OperationsManager))
 
             // ── Tier 3: Admin OR FinanceUser ──────────────────────────────
-            options.AddPolicy(Policies.RequireFinance,
+            .AddPolicy(Policies.RequireFinance,
                 policy => policy.RequireRole(
                     DefaultRoles.Admin,
-                    DefaultRoles.FinanceUser));
+                    DefaultRoles.FinanceUser))
 
             // ── Tier 4: Admin, OperationsManager, OR Supervisor ───────────
-            options.AddPolicy(Policies.RequireSupervisor,
+            .AddPolicy(Policies.RequireSupervisor,
                 policy => policy.RequireRole(
                     DefaultRoles.Admin,
                     DefaultRoles.OperationsManager,
-                    DefaultRoles.Supervisor));
+                    DefaultRoles.Supervisor))
 
             // ── Tier 5: Admin OR FieldWorker ──────────────────────────────
-            options.AddPolicy(Policies.RequireFieldWorker,
+            .AddPolicy(Policies.RequireFieldWorker,
                 policy => policy.RequireRole(
                     DefaultRoles.Admin,
                     DefaultRoles.FieldWorker));
-        });
 
         return services;
     }
