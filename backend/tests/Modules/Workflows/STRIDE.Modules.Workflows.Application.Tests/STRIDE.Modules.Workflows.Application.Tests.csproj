@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\Modules\Workflows\STRIDE.Modules.Workflows.Domain\STRIDE.Modules.Workflows.Domain.csproj" />
     <ProjectReference Include="..\..\..\..\src\Modules\Workflows\STRIDE.Modules.Workflows.Application\STRIDE.Modules.Workflows.Application.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Modules\Workflows\STRIDE.Modules.Workflows.Infrastructure\STRIDE.Modules.Workflows.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
