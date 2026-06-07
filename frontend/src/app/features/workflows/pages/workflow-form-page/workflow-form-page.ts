@@ -167,7 +167,7 @@ export class WorkflowFormPageComponent implements OnInit {
         });
     } else {
       const steps = this.stepsArray.value.map(
-        (s) => ({
+        (s: { name: any; description: string; isRequired: any; }) => ({
           name:        s.name,
           description: s.description?.trim() || null,
           isRequired:  s.isRequired,
