@@ -4,6 +4,10 @@ name: CI
 # - Build + test on Linux (cheaper runner, faster feedback)
 # - Generate HTML coverage report and upload as artifact
 #
+# Path filtering: backend job runs only when backend/** changes;
+# frontend job runs only when frontend/** changes.
+# Both jobs run when the CI workflow file itself changes.
+#
 # SonarCloud full analysis runs separately in sonarcloud.yml (windows-latest,
 # requires JDK 17, runs only on develop pushes and PRs).
 
@@ -14,9 +18,31 @@ on:
     branches: [main, develop]
 
 jobs:
+  # ── Detect changed paths ────────────────────────────────────────────────────
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend:  ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - '.github/workflows/ci.yml'
+            frontend:
+              - 'frontend/**'
+              - '.github/workflows/ci.yml'
+
   # ── Backend: Build → Test → Coverage HTML ──────────────────────────────────
   backend:
     name: Backend Build & Test
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -83,6 +109,8 @@ jobs:
   # ── Frontend: Build ─────────────────────────────────────────────────────────
   frontend:
     name: Frontend Build
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
 
     steps:
