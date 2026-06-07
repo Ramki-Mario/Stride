@@ -20,6 +20,7 @@ using STRIDE.Modules.Reporting.API.Extensions;
 using STRIDE.Modules.Notifications.API.Extensions;
 using STRIDE.Modules.Invoicing.API.Extensions;
 using STRIDE.Modules.Administration.API.Extensions;
+using STRIDE.Modules.Clients.API.Extensions;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -41,6 +42,7 @@ builder.Services
     .AddNotificationsModule(builder.Configuration)
     .AddInvoicingModule(builder.Configuration)
     .AddAdministrationModule(builder.Configuration)
+    .AddClientsModule(builder.Configuration)
     // IEventBus (MediatREventBus) depends on IPublisher — registered here AFTER
     // all modules have called AddMediatR() so IPublisher is already in the container.
     // This is intentionally NOT called in the BFF (BFF has no MediatR handlers).
@@ -60,7 +62,8 @@ builder.Services
     .AddApplicationPart(typeof(ReportingModuleExtensions).Assembly)
     .AddApplicationPart(typeof(NotificationsModuleExtensions).Assembly)
     .AddApplicationPart(typeof(InvoicingModuleExtensions).Assembly)
-    .AddApplicationPart(typeof(AdministrationModuleExtensions).Assembly);
+    .AddApplicationPart(typeof(AdministrationModuleExtensions).Assembly)
+    .AddApplicationPart(typeof(ClientsModuleExtensions).Assembly);
 
 // ── Health Checks ──────────────────────────────────────────────────────────
 // SQL Server + Redis checks tagged "ready" so /health/ready includes them.

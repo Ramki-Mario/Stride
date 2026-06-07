@@ -43,6 +43,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STRIDE.Modules.Identity.Dom
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STRIDE.Modules.Identity.Infrastructure", "src\Modules\Identity\STRIDE.Modules.Identity.Infrastructure\STRIDE.Modules.Identity.Infrastructure.csproj", "{13F82F4B-8F10-4E01-97D1-29ED4E987142}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clients", "Clients", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STRIDE.Modules.Clients.API", "src\Modules\Clients\STRIDE.Modules.Clients.API\STRIDE.Modules.Clients.API.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567891}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STRIDE.Modules.Clients.Application", "src\Modules\Clients\STRIDE.Modules.Clients.Application\STRIDE.Modules.Clients.Application.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567892}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STRIDE.Modules.Clients.Domain", "src\Modules\Clients\STRIDE.Modules.Clients.Domain\STRIDE.Modules.Clients.Domain.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567893}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STRIDE.Modules.Clients.Infrastructure", "src\Modules\Clients\STRIDE.Modules.Clients.Infrastructure\STRIDE.Modules.Clients.Infrastructure.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567894}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Invoicing", "Invoicing", "{838F508F-A7B9-459F-A323-987C0D628227}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STRIDE.Modules.Invoicing.API", "src\Modules\Invoicing\STRIDE.Modules.Invoicing.API\STRIDE.Modules.Invoicing.API.csproj", "{7DC87319-CFDE-418C-A29C-7CF798A3FB1D}"
@@ -116,6 +126,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STRIDE.Modules.Identity.Application.Tests", "tests\Modules\Identity\STRIDE.Modules.Identity.Application.Tests\STRIDE.Modules.Identity.Application.Tests.csproj", "{ED146189-0C64-4AC5-AA93-2ED6586166B1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STRIDE.Modules.Identity.Domain.Tests", "tests\Modules\Identity\STRIDE.Modules.Identity.Domain.Tests\STRIDE.Modules.Identity.Domain.Tests.csproj", "{1F69F801-D1E2-4774-8F42-CA8598BE5798}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clients (Tests)", "Clients", "{B1C2D3E4-F5A6-7890-BCDE-F12345678901}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STRIDE.Modules.Clients.Application.Tests", "tests\Modules\Clients\STRIDE.Modules.Clients.Application.Tests\STRIDE.Modules.Clients.Application.Tests.csproj", "{B1C2D3E4-F5A6-7890-BCDE-F12345678902}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STRIDE.Modules.Clients.Domain.Tests", "tests\Modules\Clients\STRIDE.Modules.Clients.Domain.Tests\STRIDE.Modules.Clients.Domain.Tests.csproj", "{B1C2D3E4-F5A6-7890-BCDE-F12345678903}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Invoicing", "Invoicing", "{0A790914-C54E-4643-BDB2-099CF6E124FB}"
 EndProject

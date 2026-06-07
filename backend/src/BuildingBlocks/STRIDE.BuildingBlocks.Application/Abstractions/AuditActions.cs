@@ -20,6 +20,12 @@ public static class AuditActions
     public const string InvoicePaid      = "invoice.paid";
     public const string InvoiceVoided    = "invoice.voided";
 
+    // ── Clients ───────────────────────────────────────────────────────────────
+    public const string ClientCreated     = "client.created";
+    public const string ClientUpdated     = "client.updated";
+    public const string ClientDeactivated = "client.deactivated";
+    public const string ClientReactivated = "client.reactivated";
+
     // ── Tenant settings ───────────────────────────────────────────────────────
     public const string TenantSettingsUpdated = "tenant_settings.updated";
 }
