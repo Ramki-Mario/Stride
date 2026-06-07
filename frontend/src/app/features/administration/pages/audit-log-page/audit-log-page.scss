@@ -146,12 +146,12 @@
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
-.badge--blue   { background: color-mix(in srgb, #3B82F6 12%, transparent); color: #2563EB; }
-.badge--green  { background: color-mix(in srgb, #10B981 12%, transparent); color: #059669; }
-.badge--red    { background: color-mix(in srgb, #EF4444 12%, transparent); color: #DC2626; }
+.badge--blue   { background: color-mix(in srgb, #3B82F6 12%, transparent); color: #1D4ED8; }
+.badge--green  { background: color-mix(in srgb, #10B981 12%, transparent); color: #047857; }
+.badge--red    { background: color-mix(in srgb, #EF4444 12%, transparent); color: #B91C1C; }
 .badge--purple { background: color-mix(in srgb, var(--stride-primary) 12%, transparent); color: var(--stride-primary); }
-.badge--orange { background: color-mix(in srgb, #F59E0B 12%, transparent); color: #D97706; }
-.badge--default { background: color-mix(in srgb, #6B7280 12%, transparent); color: #6B7280; }
+.badge--orange { background: color-mix(in srgb, #F59E0B 12%, transparent); color: #B45309; }
+.badge--default { background: color-mix(in srgb, #6B7280 12%, transparent); color: #4B5563; }
 
 /* Expand button */
 .al-expand-btn {
