@@ -30,3 +30,6 @@ desktop.ini
 
 # Mermaid CLI local tooling
 docs/diagrams/.puppeteer.json
+
+# ── Claude Code workspace (local AI tooling config, not project source) ───────
+.claude/
