@@ -11,7 +11,7 @@ public sealed record InvoiceDetailDto(
     Guid     Id,
     string   InvoiceNumber,
     string   ClientName,
-    string   ClientEmail,
+    string?  ClientEmail,
     string   Currency,
     int      Status,
     string   StatusLabel,
@@ -21,4 +21,5 @@ public sealed record InvoiceDetailDto(
     DateTime CreatedAt,
     DateTime? SentAt,
     DateTime? PaidAt,
-    IReadOnlyList<InvoiceLineItemDto> LineItems);
+    IReadOnlyList<InvoiceLineItemDto> LineItems,
+    Guid?    SourceWorkflowInstanceId = null);

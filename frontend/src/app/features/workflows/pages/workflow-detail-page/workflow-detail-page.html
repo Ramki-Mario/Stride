@@ -311,6 +311,50 @@
                       <strong>{{ instanceBillableTotal() | number:'1.2-2' }}</strong>
                     </div>
                   }
+
+                  <!-- Invoice panel (only on completed instances) -->
+                  @if (instanceIsComplete()) {
+                    <div class="wfd-invoice-panel">
+                      <div class="wfd-invoice-panel-label">
+                        <span class="pi pi-file-invoice"></span>
+                        Invoice
+                      </div>
+
+                      @if (isLoadingInvoice()) {
+                        <span class="wfd-invoice-loading">
+                          <span class="pi pi-spin pi-spinner"></span> Checking…
+                        </span>
+                      } @else if (invoiceRef(); as ref) {
+                        <!-- Invoice exists: show badge + link -->
+                        <span class="invd-badge" [ngClass]="invoiceStatusCss()">
+                          {{ ref.statusLabel }}
+                        </span>
+                        <code class="wfd-inv-number">{{ ref.invoiceNumber }}</code>
+                        <a
+                          [routerLink]="['/invoicing', ref.id]"
+                          class="wfd-btn wfd-btn-ghost wfd-btn-sm"
+                        >
+                          <span class="pi pi-external-link"></span> View Invoice
+                        </a>
+                      } @else {
+                        <!-- No invoice: offer create button -->
+                        <span class="wfd-invoice-none">No invoice yet</span>
+                        @if (isCreatingInvoice()) {
+                          <span class="wfd-invoice-loading">
+                            <span class="pi pi-spin pi-spinner"></span> Creating…
+                          </span>
+                        } @else {
+                          <button class="wfd-btn wfd-btn-primary wfd-btn-sm" (click)="createInvoice()">
+                            <span class="pi pi-plus"></span> Create Invoice Draft
+                          </button>
+                        }
+                      }
+
+                      @if (invoiceError()) {
+                        <span class="wfd-invoice-error">{{ invoiceError() }}</span>
+                      }
+                    </div>
+                  }
                 </div>
 
                 <!-- Instance step list -->

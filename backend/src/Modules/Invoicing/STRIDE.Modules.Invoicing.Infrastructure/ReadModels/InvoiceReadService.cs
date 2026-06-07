@@ -54,7 +54,7 @@ internal sealed class InvoiceReadService : IInvoiceReadService
             Id:            (Guid)r.Id,
             InvoiceNumber: (string)r.InvoiceNumber,
             ClientName:    (string)r.ClientName,
-            ClientEmail:   (string)r.ClientEmail,
+            ClientEmail:   r.ClientEmail is DBNull ? null : (string?)r.ClientEmail,
             Currency:      (string)r.Currency,
             Status:        (int)r.Status,
             StatusLabel:   StatusLabels[(int)r.Status],
@@ -94,19 +94,22 @@ internal sealed class InvoiceReadService : IInvoiceReadService
             .ToList();
 
         return new InvoiceDetailDto(
-            Id:            (Guid)first.Id,
-            InvoiceNumber: (string)first.InvoiceNumber,
-            ClientName:    (string)first.ClientName,
-            ClientEmail:   (string)first.ClientEmail,
-            Currency:      (string)first.Currency,
-            Status:        statusInt,
-            StatusLabel:   StatusLabels[statusInt],
-            DueDate:       DateOnly.FromDateTime((DateTime)first.DueDate),
-            Notes:         first.Notes is DBNull ? null : (string?)first.Notes,
-            TotalAmount:   lineItems.Sum(l => l.Subtotal),
-            CreatedAt:     (DateTime)first.CreatedAt,
-            SentAt:        first.SentAt is DBNull ? null : (DateTime?)first.SentAt,
-            PaidAt:        first.PaidAt is DBNull ? null : (DateTime?)first.PaidAt,
-            LineItems:     lineItems);
+            Id:                       (Guid)first.Id,
+            InvoiceNumber:            (string)first.InvoiceNumber,
+            ClientName:               (string)first.ClientName,
+            ClientEmail:              first.ClientEmail is DBNull ? null : (string?)first.ClientEmail,
+            Currency:                 (string)first.Currency,
+            Status:                   statusInt,
+            StatusLabel:              StatusLabels[statusInt],
+            DueDate:                  DateOnly.FromDateTime((DateTime)first.DueDate),
+            Notes:                    first.Notes is DBNull ? null : (string?)first.Notes,
+            TotalAmount:              lineItems.Sum(l => l.Subtotal),
+            CreatedAt:                (DateTime)first.CreatedAt,
+            SentAt:                   first.SentAt is DBNull ? null : (DateTime?)first.SentAt,
+            PaidAt:                   first.PaidAt is DBNull ? null : (DateTime?)first.PaidAt,
+            LineItems:                lineItems,
+            SourceWorkflowInstanceId: first.SourceWorkflowInstanceId is DBNull
+                                        ? null
+                                        : (Guid?)first.SourceWorkflowInstanceId);
     }
 }

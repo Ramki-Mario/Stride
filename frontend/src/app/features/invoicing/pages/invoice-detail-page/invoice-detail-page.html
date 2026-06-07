@@ -1,0 +1,258 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     STRIDE — Invoice Detail Page   (US-155 · EP-050)
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- Loading skeleton -->
+@if (isLoading()) {
+  <div class="invd-page" aria-busy="true">
+    <div class="invd-skeleton" style="height: 9rem;"></div>
+    <div class="invd-skeleton" style="height: 22rem; margin-top: 1.5rem;"></div>
+  </div>
+}
+
+<!-- Error state -->
+@else if (error()) {
+  <div class="invd-page">
+    <div class="invd-error-banner" role="alert">
+      <span class="pi pi-exclamation-triangle"></span> {{ error() }}
+    </div>
+    <a routerLink="/invoicing" class="invd-btn invd-btn-ghost">
+      <span class="pi pi-arrow-left"></span> Back to Invoices
+    </a>
+  </div>
+}
+
+<!-- Main -->
+@else if (invoice(); as inv) {
+  <div class="invd-page">
+
+    <!-- Breadcrumb -->
+    <nav class="invd-breadcrumb" aria-label="Breadcrumb">
+      <a routerLink="/invoicing" class="invd-bc-link">Invoices</a>
+      <span class="pi pi-chevron-right invd-bc-sep" aria-hidden="true"></span>
+      @if (inv.sourceWorkflowInstanceId) {
+        <!-- Source-workflow breadcrumb not linkable without the definition ID;
+             we show a non-linked reference for now -->
+        <span class="invd-bc-wf">
+          <span class="pi pi-sitemap"></span>
+          Workflow Instance
+        </span>
+        <span class="pi pi-chevron-right invd-bc-sep" aria-hidden="true"></span>
+      }
+      <span class="invd-bc-current">{{ inv.invoiceNumber }}</span>
+    </nav>
+
+    <!-- Action feedback -->
+    @if (actionError()) {
+      <div class="invd-error-banner" role="alert">
+        <span class="pi pi-exclamation-triangle"></span> {{ actionError() }}
+      </div>
+    }
+
+    <!-- ── Hero card ────────────────────────────────────────────────────── -->
+    <div class="invd-hero">
+      <div class="invd-hero-top">
+
+        <div class="invd-hero-icon" aria-hidden="true">
+          <span class="pi pi-file-invoice"></span>
+        </div>
+
+        <div class="invd-hero-meta">
+          <div class="invd-hero-number">{{ inv.invoiceNumber }}</div>
+          <h1 class="invd-hero-client">{{ inv.clientName }}</h1>
+          @if (inv.clientEmail) {
+            <p class="invd-hero-email">{{ inv.clientEmail }}</p>
+          }
+          <div class="invd-hero-badges">
+            <span class="invd-badge" [ngClass]="statusCss()">{{ statusLabel() }}</span>
+            @if (inv.currency) {
+              <span class="invd-badge invd-badge-currency">{{ inv.currency }}</span>
+            }
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="invd-hero-actions">
+          @if (actionPending()) {
+            <span class="invd-spinner">
+              <span class="pi pi-spin pi-spinner"></span> {{ actionPending() }}
+            </span>
+          } @else {
+            @if (canSend()) {
+              <button class="invd-btn invd-btn-primary" (click)="send()">
+                <span class="pi pi-send"></span> Send
+              </button>
+            }
+            @if (canMarkPaid()) {
+              <button class="invd-btn invd-btn-success" (click)="markPaid()">
+                <span class="pi pi-check-circle"></span> Mark Paid
+              </button>
+            }
+            @if (canVoid()) {
+              <button class="invd-btn invd-btn-danger" (click)="voidInvoice()">
+                <span class="pi pi-ban"></span> Void
+              </button>
+            }
+            <a routerLink="/invoicing" class="invd-btn invd-btn-ghost">
+              <span class="pi pi-arrow-left"></span> Back
+            </a>
+          }
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="invd-stats-row">
+        <div class="invd-stat">
+          <div class="invd-stat-label">Total</div>
+          <div class="invd-stat-value invd-stat-amount">
+            {{ inv.currency }} {{ inv.totalAmount | number:'1.2-2' }}
+          </div>
+        </div>
+        <div class="invd-stat">
+          <div class="invd-stat-label">Due Date</div>
+          <div class="invd-stat-value">{{ formatDueDate(inv.dueDate) }}</div>
+        </div>
+        <div class="invd-stat">
+          <div class="invd-stat-label">Created</div>
+          <div class="invd-stat-value">{{ formatDateTime(inv.createdAt) }}</div>
+        </div>
+        @if (inv.sentAt) {
+          <div class="invd-stat">
+            <div class="invd-stat-label">Sent</div>
+            <div class="invd-stat-value">{{ formatDateTime(inv.sentAt) }}</div>
+          </div>
+        }
+        @if (inv.paidAt) {
+          <div class="invd-stat">
+            <div class="invd-stat-label">Paid</div>
+            <div class="invd-stat-value invd-paid-date">{{ formatDateTime(inv.paidAt) }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ── Two-column layout ─────────────────────────────────────────────── -->
+    <div class="invd-cols">
+
+      <!-- Left: Line items -->
+      <div class="invd-col-main">
+        <div class="invd-card">
+          <div class="invd-card-header">
+            <span class="pi pi-list"></span> Line Items
+          </div>
+
+          @if (inv.lineItems.length === 0) {
+            <div class="invd-empty-items">
+              <span class="pi pi-inbox" style="font-size: 2rem; opacity: 0.3;"></span>
+              <p>No line items yet. Add them before sending.</p>
+            </div>
+          } @else {
+            <table class="invd-items-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th class="invd-col-num">Qty</th>
+                  <th class="invd-col-num">Unit Price</th>
+                  <th class="invd-col-num">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of inv.lineItems; track item.id) {
+                  <tr>
+                    <td>{{ item.description }}</td>
+                    <td class="invd-col-num">{{ item.quantity }}</td>
+                    <td class="invd-col-num">{{ item.unitPrice | number:'1.2-2' }}</td>
+                    <td class="invd-col-num">{{ item.subtotal | number:'1.2-2' }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="invd-total-row">
+                  <td colspan="3" class="invd-total-label">Total</td>
+                  <td class="invd-col-num invd-total-amount">
+                    {{ inv.currency }} {{ inv.totalAmount | number:'1.2-2' }}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          }
+        </div>
+
+        @if (inv.notes) {
+          <div class="invd-card invd-notes-card">
+            <div class="invd-card-header">
+              <span class="pi pi-comment"></span> Notes
+            </div>
+            <p class="invd-notes-body">{{ inv.notes }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Right: Metadata -->
+      <div class="invd-col-side">
+
+        <div class="invd-info-card">
+          <div class="invd-info-header">
+            <span class="pi pi-info-circle"></span> Details
+          </div>
+          <div class="invd-info-body">
+            <div class="invd-info-row">
+              <span class="invd-info-label">Invoice #</span>
+              <code class="invd-info-code">{{ inv.invoiceNumber }}</code>
+            </div>
+            <div class="invd-info-row">
+              <span class="invd-info-label">Status</span>
+              <span class="invd-badge invd-badge-sm" [ngClass]="statusCss()">{{ statusLabel() }}</span>
+            </div>
+            <div class="invd-info-row">
+              <span class="invd-info-label">Client</span>
+              <span class="invd-info-value">{{ inv.clientName }}</span>
+            </div>
+            @if (inv.clientEmail) {
+              <div class="invd-info-row">
+                <span class="invd-info-label">Email</span>
+                <span class="invd-info-value">{{ inv.clientEmail }}</span>
+              </div>
+            }
+            <div class="invd-info-row">
+              <span class="invd-info-label">Currency</span>
+              <span class="invd-info-value">{{ inv.currency }}</span>
+            </div>
+            <div class="invd-info-row">
+              <span class="invd-info-label">Due Date</span>
+              <span class="invd-info-value">{{ formatDueDate(inv.dueDate) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Source workflow reference -->
+        @if (inv.sourceWorkflowInstanceId) {
+          <div class="invd-info-card invd-wf-card">
+            <div class="invd-info-header">
+              <span class="pi pi-sitemap"></span> Source Workflow
+            </div>
+            <div class="invd-info-body">
+              <p class="invd-wf-desc">
+                This invoice was auto-generated from a workflow instance.
+              </p>
+              <div class="invd-info-row">
+                <span class="invd-info-label">Instance ID</span>
+                <code class="invd-info-code">
+                  {{ inv.sourceWorkflowInstanceId.substring(0, 8).toUpperCase() }}…
+                </code>
+              </div>
+              <a
+                routerLink="/workflows"
+                [queryParams]="{ search: inv.sourceWorkflowInstanceId }"
+                class="invd-btn invd-btn-ghost invd-btn-sm invd-wf-link"
+              >
+                <span class="pi pi-external-link"></span> Find Workflow
+              </a>
+            </div>
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+}

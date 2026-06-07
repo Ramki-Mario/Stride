@@ -1,0 +1,312 @@
+/* ── Invoice Detail Page ────────────────────────────────────────────────── */
+
+.invd-page {
+  padding: 1.5rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── Breadcrumb ─────────────────────────────────────────────────────────── */
+
+.invd-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--stride-text-muted);
+  margin-bottom: 1.25rem;
+}
+.invd-bc-link {
+  color: var(--stride-primary);
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
+.invd-bc-sep  { font-size: 0.625rem; opacity: 0.5; }
+.invd-bc-wf   { display: flex; align-items: center; gap: 0.25rem; }
+.invd-bc-current { font-weight: 600; color: var(--stride-text-primary); }
+
+/* ── Error banner ───────────────────────────────────────────────────────── */
+
+.invd-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--stride-danger-bg, #fef2f2);
+  border: 1px solid var(--stride-danger-border, #fecaca);
+  border-radius: var(--stride-radius-lg, 0.75rem);
+  color: var(--stride-danger, #dc2626);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Skeleton ───────────────────────────────────────────────────────────── */
+
+.invd-skeleton {
+  background: var(--stride-surface-2, #f1f5f9);
+  border-radius: var(--stride-radius-xl, 1rem);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* ── Hero card ──────────────────────────────────────────────────────────── */
+
+.invd-hero {
+  background: var(--stride-surface-card, #fff);
+  border: 1px solid var(--stride-border, #e2e8f0);
+  border-radius: var(--stride-radius-xl, 1rem);
+  box-shadow: var(--stride-shadow-card);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.invd-hero-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.invd-hero-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--stride-radius-lg, 0.75rem);
+  background: var(--stride-primary-light, rgba(185, 122, 249, 0.12));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  color: var(--stride-primary);
+}
+
+.invd-hero-meta  { flex: 1; min-width: 0; }
+.invd-hero-number {
+  font-family: var(--stride-font-mono, monospace);
+  font-size: 0.8125rem;
+  color: var(--stride-text-muted);
+  margin-bottom: 0.125rem;
+}
+.invd-hero-client {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--stride-text-primary);
+  margin: 0 0 0.125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.invd-hero-email {
+  font-size: 0.8125rem;
+  color: var(--stride-text-muted);
+  margin: 0 0 0.5rem;
+}
+.invd-hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
+}
+
+.invd-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* ── Stats row ──────────────────────────────────────────────────────────── */
+
+.invd-stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--stride-border, #e2e8f0);
+}
+.invd-stat { display: flex; flex-direction: column; gap: 0.125rem; }
+.invd-stat-label  { font-size: 0.75rem; color: var(--stride-text-muted); }
+.invd-stat-value  { font-size: 0.9375rem; font-weight: 600; color: var(--stride-text-primary); }
+.invd-stat-amount { font-size: 1.125rem; color: var(--stride-primary); }
+.invd-paid-date   { color: var(--stride-success, #16a34a); }
+
+/* ── Two-column layout ──────────────────────────────────────────────────── */
+
+.invd-cols {
+  display: grid;
+  grid-template-columns: 1fr 22rem;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .invd-cols { grid-template-columns: 1fr; }
+}
+
+/* ── Cards ──────────────────────────────────────────────────────────────── */
+
+.invd-card {
+  background: var(--stride-surface-card, #fff);
+  border: 1px solid var(--stride-border, #e2e8f0);
+  border-radius: var(--stride-radius-xl, 1rem);
+  box-shadow: var(--stride-shadow-card);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+.invd-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--stride-text-secondary);
+  border-bottom: 1px solid var(--stride-border, #e2e8f0);
+  background: var(--stride-surface-1, #f8fafc);
+}
+
+/* ── Items table ────────────────────────────────────────────────────────── */
+
+.invd-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  th, td { padding: 0.625rem 1.25rem; text-align: left; }
+  th { font-weight: 600; color: var(--stride-text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; background: var(--stride-surface-1, #f8fafc); }
+  td { color: var(--stride-text-primary); }
+  tbody tr:not(:last-child) td { border-bottom: 1px solid var(--stride-border, #e2e8f0); }
+  tbody tr:hover { background: var(--stride-surface-hover, rgba(185,122,249,0.04)); }
+}
+
+.invd-col-num { text-align: right !important; font-variant-numeric: tabular-nums; }
+
+.invd-total-row {
+  border-top: 2px solid var(--stride-border, #e2e8f0);
+  td { font-weight: 700; padding: 0.75rem 1.25rem; }
+}
+.invd-total-label { color: var(--stride-text-secondary); }
+.invd-total-amount { color: var(--stride-primary); font-size: 1rem; }
+
+.invd-empty-items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2.5rem 1rem;
+  color: var(--stride-text-muted);
+  p { margin: 0; font-size: 0.875rem; }
+}
+
+/* ── Notes ──────────────────────────────────────────────────────────────── */
+
+.invd-notes-card { margin-bottom: 0; }
+.invd-notes-body {
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  color: var(--stride-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* ── Right column info card ─────────────────────────────────────────────── */
+
+.invd-info-card {
+  background: var(--stride-surface-card, #fff);
+  border: 1px solid var(--stride-border, #e2e8f0);
+  border-radius: var(--stride-radius-xl, 1rem);
+  box-shadow: var(--stride-shadow-card);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+.invd-info-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--stride-text-secondary);
+  border-bottom: 1px solid var(--stride-border, #e2e8f0);
+  background: var(--stride-surface-1, #f8fafc);
+}
+.invd-info-body { padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.625rem; }
+.invd-info-row  { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; min-height: 1.5rem; }
+.invd-info-label { font-size: 0.75rem; color: var(--stride-text-muted); flex-shrink: 0; }
+.invd-info-value { font-size: 0.875rem; font-weight: 500; color: var(--stride-text-primary); text-align: right; }
+.invd-info-code  { font-family: var(--stride-font-mono, monospace); font-size: 0.75rem; color: var(--stride-primary); background: var(--stride-primary-light, rgba(185,122,249,0.1)); padding: 0.125rem 0.375rem; border-radius: 0.25rem; }
+
+/* ── Workflow reference card ─────────────────────────────────────────────── */
+
+.invd-wf-card { border-color: var(--stride-primary-muted, rgba(185,122,249,0.3)); }
+.invd-wf-desc {
+  font-size: 0.8125rem;
+  color: var(--stride-text-muted);
+  margin: 0 0 0.5rem;
+  line-height: 1.5;
+}
+.invd-wf-link { margin-top: 0.25rem; align-self: flex-start; }
+
+/* ── Badges ─────────────────────────────────────────────────────────────── */
+
+.invd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &.invd-badge-sm { font-size: 0.6875rem; padding: 0.1875rem 0.5rem; }
+
+  &.inv-badge-draft    { background: rgba(148,163,184,0.15); color: #64748b; }
+  &.inv-badge-sent     { background: rgba(59,130,246,0.12);  color: #2563eb; }
+  &.inv-badge-paid     { background: rgba(22,163,74,0.12);   color: #16a34a; }
+  &.inv-badge-void     { background: rgba(239,68,68,0.12);   color: #dc2626; }
+  &.invd-badge-currency { background: var(--stride-primary-light, rgba(185,122,249,0.12)); color: var(--stride-primary); }
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+
+.invd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--stride-radius-xl, 0.75rem);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: opacity 0.15s;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:not(:disabled):hover { opacity: 0.85; }
+
+  &.invd-btn-sm { padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
+
+  &.invd-btn-primary { background: var(--stride-primary); color: #fff; }
+  &.invd-btn-success { background: var(--stride-success, #16a34a); color: #fff; }
+  &.invd-btn-danger  { background: var(--stride-danger, #dc2626); color: #fff; }
+  &.invd-btn-ghost   {
+    background: transparent;
+    border: 1px solid var(--stride-border, #e2e8f0);
+    color: var(--stride-text-secondary);
+  }
+}
+
+.invd-spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--stride-text-muted);
+}

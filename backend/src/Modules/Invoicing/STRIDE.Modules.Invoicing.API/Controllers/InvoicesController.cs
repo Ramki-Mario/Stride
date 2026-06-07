@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Invoicing.API.DTOs;
+using STRIDE.Modules.Invoicing.Application.Commands.CreateWorkflowInvoiceDraft;
 using STRIDE.Modules.Invoicing.Application.Commands.GenerateInvoice;
 using STRIDE.Modules.Invoicing.Application.Commands.MarkInvoicePaid;
 using STRIDE.Modules.Invoicing.Application.Commands.SendInvoice;
 using STRIDE.Modules.Invoicing.Application.Commands.VoidInvoice;
 using STRIDE.Modules.Invoicing.Application.Queries.GetInvoiceById;
+using STRIDE.Modules.Invoicing.Application.Queries.GetInvoiceByWorkflowInstanceId;
 using STRIDE.Modules.Invoicing.Application.Queries.GetInvoices;
 
 namespace STRIDE.Modules.Invoicing.API.Controllers;
@@ -16,12 +18,14 @@ namespace STRIDE.Modules.Invoicing.API.Controllers;
 /// <summary>
 /// Tenant invoice management endpoints.
 ///
-///   GET    /api/invoicing/invoices              — paged list
-///   POST   /api/invoicing/invoices              — generate new invoice
-///   GET    /api/invoicing/invoices/{id}         — get detail
-///   PUT    /api/invoicing/invoices/{id}/send    — send to client
-///   PUT    /api/invoicing/invoices/{id}/paid    — mark as paid
-///   PUT    /api/invoicing/invoices/{id}/void    — void invoice
+///   GET    /api/invoicing/invoices                                        — paged list
+///   POST   /api/invoicing/invoices                                        — generate new invoice
+///   GET    /api/invoicing/invoices/{id}                                   — get detail
+///   GET    /api/invoicing/invoices/by-workflow/{workflowInstanceId}       — get invoice linked to a workflow instance
+///   POST   /api/invoicing/invoices/from-workflow/{workflowInstanceId}     — manually create draft from workflow instance
+///   PUT    /api/invoicing/invoices/{id}/send                              — send to client
+///   PUT    /api/invoicing/invoices/{id}/paid                              — mark as paid
+///   PUT    /api/invoicing/invoices/{id}/void                              — void invoice
 /// </summary>
 [ApiController]
 [Authorize]
@@ -82,6 +86,57 @@ public sealed class InvoicesController : ControllerBase
             return BadRequest(new { error = result.Error });
 
         return CreatedAtAction(nameof(GetInvoice), new { id = result.Value }, new { id = result.Value });
+    }
+
+    /// <summary>Returns the invoice linked to a workflow instance, or 404 when none exists.</summary>
+    [HttpGet("by-workflow/{workflowInstanceId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetInvoiceByWorkflowInstance(
+        Guid workflowInstanceId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetInvoiceByWorkflowInstanceIdQuery(_tenantContext.TenantId, workflowInstanceId),
+            cancellationToken);
+
+        if (result.IsFailure || result.Value is null)
+            return NotFound();
+
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Manually creates a draft invoice from a workflow instance (idempotent fallback).
+    /// Returns the existing invoice ID if one already exists for this workflow instance.
+    /// </summary>
+    [HttpPost("from-workflow/{workflowInstanceId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateInvoiceFromWorkflow(
+        Guid workflowInstanceId,
+        [FromBody] CreateWorkflowInvoiceRequest request,
+        CancellationToken cancellationToken)
+    {
+        var billableItems = request.BillableItems?
+            .Select(b => new CreateWorkflowInvoiceDraftBillableItem(
+                b.Description, b.Quantity, b.UnitPrice, b.Unit))
+            .ToList()
+            .AsReadOnly();
+
+        var result = await _mediator.Send(
+            new CreateWorkflowInvoiceDraftCommand(
+                _tenantContext.TenantId,
+                workflowInstanceId,
+                request.WorkflowName,
+                _currentUser.UserId,
+                request.ClientId,
+                billableItems),
+            cancellationToken);
+
+        if (result.IsFailure)
+            return BadRequest(new { error = result.Error });
+
+        return Ok(new { id = result.Value });
     }
 
     [HttpGet("{id:guid}")]

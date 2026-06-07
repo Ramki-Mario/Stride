@@ -8,12 +8,14 @@ namespace STRIDE.BFF.Controllers;
 /// <summary>
 /// BFF proxy for Invoicing module endpoints.
 ///
-///   GET    /bff/invoicing/invoices              — paged invoice list
-///   POST   /bff/invoicing/invoices              — generate invoice
-///   GET    /bff/invoicing/invoices/{id}         — invoice detail
-///   PUT    /bff/invoicing/invoices/{id}/send    — send invoice
-///   PUT    /bff/invoicing/invoices/{id}/paid    — mark paid
-///   PUT    /bff/invoicing/invoices/{id}/void    — void invoice
+///   GET    /bff/invoicing/invoices                                    — paged invoice list
+///   POST   /bff/invoicing/invoices                                    — generate invoice
+///   GET    /bff/invoicing/invoices/{id}                               — invoice detail
+///   GET    /bff/invoicing/invoices/by-workflow/{workflowInstanceId}   — invoice for workflow instance
+///   POST   /bff/invoicing/invoices/from-workflow/{workflowInstanceId} — create draft from workflow
+///   PUT    /bff/invoicing/invoices/{id}/send                          — send invoice
+///   PUT    /bff/invoicing/invoices/{id}/paid                          — mark paid
+///   PUT    /bff/invoicing/invoices/{id}/void                          — void invoice
 /// </summary>
 [ApiController]
 [Authorize]
@@ -60,6 +62,30 @@ public sealed class InvoicingController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         return await ProxyAsync(await _invoicing.GetInvoiceByIdAsync(id, token, cancellationToken), cancellationToken);
+    }
+
+    [HttpGet("invoices/by-workflow/{workflowInstanceId:guid}")]
+    public async Task<IActionResult> GetInvoiceByWorkflowInstance(
+        Guid workflowInstanceId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(
+            await _invoicing.GetInvoiceByWorkflowInstanceIdAsync(workflowInstanceId, token, cancellationToken),
+            cancellationToken);
+    }
+
+    [HttpPost("invoices/from-workflow/{workflowInstanceId:guid}")]
+    public async Task<IActionResult> CreateInvoiceFromWorkflow(
+        Guid workflowInstanceId,
+        [FromBody] object body,
+        CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(
+            await _invoicing.CreateInvoiceFromWorkflowAsync(workflowInstanceId, body, token, cancellationToken),
+            cancellationToken);
     }
 
     [HttpPut("invoices/{id:guid}/send")]

@@ -7,11 +7,26 @@ export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
   3: 'Void',
 };
 
+export const INVOICE_STATUS_CSS: Record<InvoiceStatus, string> = {
+  0: 'inv-badge-draft',
+  1: 'inv-badge-sent',
+  2: 'inv-badge-paid',
+  3: 'inv-badge-void',
+};
+
+/** Lightweight DTO returned by GET /bff/invoicing/invoices/by-workflow/{id}. */
+export interface InvoiceReferenceDto {
+  id:            string;
+  invoiceNumber: string;
+  status:        InvoiceStatus;
+  statusLabel:   string;
+}
+
 export interface InvoiceSummaryDto {
   id:            string;
   invoiceNumber: string;
   clientName:    string;
-  clientEmail:   string;
+  clientEmail:   string | null;
   currency:      string;
   status:        InvoiceStatus;
   statusLabel:   string;
@@ -31,8 +46,22 @@ export interface InvoiceLineItemDto {
 }
 
 export interface InvoiceDetailDto extends InvoiceSummaryDto {
-  notes:     string | null;
-  lineItems: InvoiceLineItemDto[];
+  notes:                    string | null;
+  lineItems:                InvoiceLineItemDto[];
+  sourceWorkflowInstanceId: string | null;
+}
+
+export interface CreateWorkflowInvoiceBillableItemRequest {
+  description: string;
+  quantity:    number;
+  unitPrice:   number;
+  unit:        string;
+}
+
+export interface CreateWorkflowInvoiceRequest {
+  workflowName: string;
+  clientId:     string | null;
+  billableItems: CreateWorkflowInvoiceBillableItemRequest[];
 }
 
 export interface PagedResult<T> {

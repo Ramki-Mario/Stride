@@ -5,7 +5,7 @@ public sealed record InvoiceSummaryDto(
     Guid     Id,
     string   InvoiceNumber,
     string   ClientName,
-    string   ClientEmail,
+    string?  ClientEmail,
     string   Currency,
     int      Status,
     string   StatusLabel,

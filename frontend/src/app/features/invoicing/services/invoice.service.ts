@@ -4,8 +4,10 @@ import { Observable } from 'rxjs';
 import {
   InvoiceSummaryDto,
   InvoiceDetailDto,
+  InvoiceReferenceDto,
   PagedResult,
   GenerateInvoiceRequest,
+  CreateWorkflowInvoiceRequest,
   InvoiceStatus,
 } from '../models/invoice.models';
 
@@ -88,5 +90,26 @@ export class InvoiceService {
 
   voidInvoice(id: string): Observable<void> {
     return this.http.put<void>(`${this.base}/${id}/void`, {});
+  }
+
+  /** Returns the invoice linked to a workflow instance, or null when none exists. */
+  getInvoiceByWorkflowInstanceId(workflowInstanceId: string): Observable<InvoiceReferenceDto | null> {
+    return this.http.get<InvoiceReferenceDto | null>(
+      `${this.base}/by-workflow/${workflowInstanceId}`
+    );
+  }
+
+  /**
+   * Manually creates a draft invoice from a completed workflow instance.
+   * Idempotent — returns the existing invoice ID if one already exists.
+   */
+  createInvoiceFromWorkflow(
+    workflowInstanceId: string,
+    request: CreateWorkflowInvoiceRequest
+  ): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>(
+      `${this.base}/from-workflow/${workflowInstanceId}`,
+      request
+    );
   }
 }

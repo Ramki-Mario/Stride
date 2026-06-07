@@ -8,4 +8,11 @@ export const invoicingRoutes: Routes = [
         (m) => m.InvoicingPageComponent
       ),
   },
+  {
+    path: ':id',
+    loadComponent: () =>
+      import('./pages/invoice-detail-page/invoice-detail-page').then(
+        (m) => m.InvoiceDetailPageComponent
+      ),
+  },
 ];

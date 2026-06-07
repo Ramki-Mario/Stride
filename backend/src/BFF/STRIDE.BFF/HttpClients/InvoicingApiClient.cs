@@ -8,12 +8,14 @@ namespace STRIDE.BFF.HttpClients;
 /// Typed HttpClient for the Invoicing module surface of STRIDE.Host.
 ///
 /// BFF route → Host route mapping:
-///   GET    /bff/invoicing/invoices              → GET    /api/invoicing/invoices
-///   POST   /bff/invoicing/invoices              → POST   /api/invoicing/invoices
-///   GET    /bff/invoicing/invoices/{id}         → GET    /api/invoicing/invoices/{id}
-///   PUT    /bff/invoicing/invoices/{id}/send    → PUT    /api/invoicing/invoices/{id}/send
-///   PUT    /bff/invoicing/invoices/{id}/paid    → PUT    /api/invoicing/invoices/{id}/paid
-///   PUT    /bff/invoicing/invoices/{id}/void    → PUT    /api/invoicing/invoices/{id}/void
+///   GET    /bff/invoicing/invoices                                      → GET    /api/invoicing/invoices
+///   POST   /bff/invoicing/invoices                                      → POST   /api/invoicing/invoices
+///   GET    /bff/invoicing/invoices/{id}                                 → GET    /api/invoicing/invoices/{id}
+///   GET    /bff/invoicing/invoices/by-workflow/{workflowInstanceId}     → GET    /api/invoicing/invoices/by-workflow/{workflowInstanceId}
+///   POST   /bff/invoicing/invoices/from-workflow/{workflowInstanceId}   → POST   /api/invoicing/invoices/from-workflow/{workflowInstanceId}
+///   PUT    /bff/invoicing/invoices/{id}/send                            → PUT    /api/invoicing/invoices/{id}/send
+///   PUT    /bff/invoicing/invoices/{id}/paid                            → PUT    /api/invoicing/invoices/{id}/paid
+///   PUT    /bff/invoicing/invoices/{id}/void                            → PUT    /api/invoicing/invoices/{id}/void
 /// </summary>
 public sealed class InvoicingApiClient
 {
@@ -31,6 +33,12 @@ public sealed class InvoicingApiClient
 
     public Task<HttpResponseMessage> GetInvoiceByIdAsync(Guid id, string token, CancellationToken cancellationToken = default)
         => _client.SendAsync(Build(HttpMethod.Get, $"/api/invoicing/invoices/{id}", token), cancellationToken);
+
+    public Task<HttpResponseMessage> GetInvoiceByWorkflowInstanceIdAsync(Guid workflowInstanceId, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, $"/api/invoicing/invoices/by-workflow/{workflowInstanceId}", token), cancellationToken);
+
+    public Task<HttpResponseMessage> CreateInvoiceFromWorkflowAsync(Guid workflowInstanceId, object body, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Post, $"/api/invoicing/invoices/from-workflow/{workflowInstanceId}", body, token), cancellationToken);
 
     public Task<HttpResponseMessage> GenerateInvoiceAsync(object body, string token, CancellationToken cancellationToken = default)
         => _client.SendAsync(BuildWithBody(HttpMethod.Post, "/api/invoicing/invoices", body, token), cancellationToken);

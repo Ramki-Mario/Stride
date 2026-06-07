@@ -23,6 +23,14 @@ import {
 } from '../../models/workflow.models';
 import { WorkflowService }       from '../../services/workflow.service';
 import { StepActionModalComponent } from '../../components/step-action-modal/step-action-modal';
+import { InvoiceService }           from '../../../invoicing/services/invoice.service';
+import {
+  InvoiceReferenceDto,
+  INVOICE_STATUS_CSS,
+  INVOICE_STATUS_LABELS,
+  InvoiceStatus,
+  CreateWorkflowInvoiceRequest,
+} from '../../../invoicing/models/invoice.models';
 
 type DetailTab = 'steps' | 'run' | 'activity' | 'history';
 
@@ -35,10 +43,11 @@ type DetailTab = 'steps' | 'run' | 'activity' | 'history';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkflowDetailPageComponent implements OnInit {
-  private readonly route      = inject(ActivatedRoute);
-  private readonly router     = inject(Router);
-  private readonly wfService  = inject(WorkflowService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly route        = inject(ActivatedRoute);
+  private readonly router       = inject(Router);
+  private readonly wfService    = inject(WorkflowService);
+  private readonly invoiceSvc   = inject(InvoiceService);
+  private readonly destroyRef   = inject(DestroyRef);
 
   // ── Config exposed to template ────────────────────────────────────────────
   readonly STATUS_CONFIG               = STATUS_CONFIG;
@@ -131,6 +140,21 @@ export class WorkflowDetailPageComponent implements OnInit {
 
   readonly instanceBillableTotal = computed(() => this.instance()?.billableTotal ?? 0);
 
+  // ── Invoice panel state ───────────────────────────────────────────────────
+
+  readonly invoiceRef        = signal<InvoiceReferenceDto | null>(null);
+  readonly isLoadingInvoice  = signal(false);
+  readonly invoiceError      = signal<string | null>(null);
+  readonly isCreatingInvoice = signal(false);
+
+  readonly invoiceStatusCss = computed(() => {
+    const ref = this.invoiceRef();
+    if (!ref) return '';
+    return INVOICE_STATUS_CSS[ref.status as InvoiceStatus] ?? 'inv-badge-draft';
+  });
+
+  readonly instanceIsComplete = computed(() => this.instance()?.status === 'Completed');
+
   /** Tracks which step IDs have their billable-items list expanded. */
   private readonly _expandedBillable = signal(new Set<string>());
 
@@ -194,8 +218,56 @@ export class WorkflowDetailPageComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next:  (inst) => this.instance.set(inst),
-        error: ()     => this.instanceError.set('Failed to load instance data.'),
+        next: (inst) => {
+          this.instance.set(inst);
+          if (inst.status === 'Completed') {
+            this.loadInvoiceRef(instanceId);
+          }
+        },
+        error: () => this.instanceError.set('Failed to load instance data.'),
+      });
+  }
+
+  loadInvoiceRef(instanceId: string): void {
+    this.isLoadingInvoice.set(true);
+    this.invoiceError.set(null);
+
+    this.invoiceSvc.getInvoiceByWorkflowInstanceId(instanceId)
+      .pipe(finalize(() => this.isLoadingInvoice.set(false)), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next:  ref  => this.invoiceRef.set(ref),
+        // 404 = no invoice yet — not an error condition
+        error: ()   => this.invoiceRef.set(null),
+      });
+  }
+
+  createInvoice(): void {
+    const inst = this.instance();
+    if (!inst) return;
+    this.isCreatingInvoice.set(true);
+    this.invoiceError.set(null);
+
+    // Collect all billable items from all steps
+    const billableItems = inst.steps.flatMap(s =>
+      (s.billableItems ?? []).map(b => ({
+        description: b.description,
+        quantity:    b.quantity,
+        unitPrice:   b.unitPrice,
+        unit:        b.unit,
+      }))
+    );
+
+    const request: CreateWorkflowInvoiceRequest = {
+      workflowName: inst.workflowName,
+      clientId:     null,
+      billableItems,
+    };
+
+    this.invoiceSvc.createInvoiceFromWorkflow(inst.id, request)
+      .pipe(finalize(() => this.isCreatingInvoice.set(false)), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next:  () => this.loadInvoiceRef(inst.id),
+        error: () => this.invoiceError.set('Failed to create invoice draft. Please try again.'),
       });
   }
 
