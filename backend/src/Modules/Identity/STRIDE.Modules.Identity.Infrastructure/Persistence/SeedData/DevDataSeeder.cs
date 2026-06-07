@@ -81,11 +81,12 @@ public static class DevDataSeeder
         Role? adminRole = null;
         foreach (var (roleName, description) in roleDescriptions)
         {
+            var normalizedRoleName = roleName.ToUpperInvariant();
             var existing = await db.Roles
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(r =>
                     r.TenantId == tenantId &&
-                    r.NormalizedName.Equals(roleName, StringComparison.OrdinalIgnoreCase));
+                    r.NormalizedName == normalizedRoleName);
 
             if (existing is null)
             {
