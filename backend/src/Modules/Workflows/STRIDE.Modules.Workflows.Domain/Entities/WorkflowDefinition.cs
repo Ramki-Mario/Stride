@@ -13,6 +13,13 @@ public sealed class WorkflowDefinition : AuditableEntity
     public string? Description { get; private set; }
     public WorkflowStatus Status { get; private set; }
 
+    /// <summary>
+    /// Hours allowed from instance start to complete the entire workflow.
+    /// When set, every started instance receives a DeadlineAt timestamp.
+    /// Null means no SLA is configured for this workflow.
+    /// </summary>
+    public decimal? SlaOffsetHours { get; private set; }
+
     public IReadOnlyList<StepDefinition> Steps => _steps.AsReadOnly();
 
     private WorkflowDefinition() { }
@@ -21,10 +28,14 @@ public sealed class WorkflowDefinition : AuditableEntity
         Guid tenantId,
         string name,
         string? description,
-        Guid createdBy)
+        Guid createdBy,
+        decimal? slaOffsetHours = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new WorkflowDomainException("Workflow name cannot be empty.");
+
+        if (slaOffsetHours.HasValue && slaOffsetHours.Value <= 0)
+            throw new WorkflowDomainException("SLA offset hours must be greater than zero.");
 
         var definition = new WorkflowDefinition
         {
@@ -33,6 +44,7 @@ public sealed class WorkflowDefinition : AuditableEntity
             Name = name.Trim(),
             Description = description?.Trim(),
             Status = WorkflowStatus.Draft,
+            SlaOffsetHours = slaOffsetHours,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             CreatedBy = createdBy,
@@ -42,7 +54,7 @@ public sealed class WorkflowDefinition : AuditableEntity
         return definition;
     }
 
-    public void Update(string name, string? description)
+    public void Update(string name, string? description, decimal? slaOffsetHours = null)
     {
         if (Status != WorkflowStatus.Draft)
             throw new WorkflowDomainException("Only Draft workflows can be edited.");
@@ -50,8 +62,12 @@ public sealed class WorkflowDefinition : AuditableEntity
         if (string.IsNullOrWhiteSpace(name))
             throw new WorkflowDomainException("Workflow name cannot be empty.");
 
+        if (slaOffsetHours.HasValue && slaOffsetHours.Value <= 0)
+            throw new WorkflowDomainException("SLA offset hours must be greater than zero.");
+
         Name = name.Trim();
         Description = description?.Trim();
+        SlaOffsetHours = slaOffsetHours;
         UpdatedAt = DateTime.UtcNow;
     }
 

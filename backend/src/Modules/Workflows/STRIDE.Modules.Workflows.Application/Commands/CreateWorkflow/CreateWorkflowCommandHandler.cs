@@ -41,7 +41,8 @@ internal sealed class CreateWorkflowCommandHandler
                 request.TenantId,
                 request.Name,
                 request.Description,
-                request.CreatedBy);
+                request.CreatedBy,
+                request.SlaOffsetHours);
 
             // ── 3. Add steps (order = insertion order) ─────────────────────────
             foreach (var stepReq in request.Steps)

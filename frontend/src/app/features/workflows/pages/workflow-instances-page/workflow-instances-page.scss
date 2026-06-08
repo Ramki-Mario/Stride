@@ -366,3 +366,20 @@
   color: var(--stride-text-muted);
   text-align: right;
 }
+
+/* ── SLA badge ─────────────────────────────────────────────────────────────── */
+
+.wi-sla-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 0.25rem;
+
+  &.wi-sla-ontime  { background: rgba(34,197,94,.15);  color: #15803d; }
+  &.wi-sla-atrisk  { background: rgba(234,179,8,.18);  color: #92400e; }
+  &.wi-sla-breached{ background: rgba(239,68,68,.15);  color: #b91c1c; }
+}

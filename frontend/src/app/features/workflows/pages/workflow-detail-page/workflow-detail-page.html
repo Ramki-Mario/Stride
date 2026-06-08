@@ -295,8 +295,20 @@
                       <span class="wfd-badge-dot" [class.pulse]="inst.status === 'Running'"></span>
                       {{ instanceStatusLabel() }}
                     </span>
+                    @if (inst.slaStatus) {
+                      <span class="wfd-sla-badge" [ngClass]="slaBadgeClass(inst.slaStatus)">
+                        <span class="pi pi-clock"></span>
+                        {{ slaLabel(inst.slaStatus) }}
+                      </span>
+                    }
                     <span class="wfd-inst-id">{{ inst.id.substring(0, 8).toUpperCase() }}</span>
                     <span class="wfd-inst-started">Started {{ formatDateTime(inst.createdAt) }}</span>
+                    @if (inst.deadlineAt) {
+                      <span class="wfd-inst-deadline" [ngClass]="{ 'wfd-inst-deadline--breached': inst.slaStatus === 'Breached' }">
+                        <span class="pi pi-flag"></span>
+                        Deadline {{ formatDateTime(inst.deadlineAt) }}
+                      </span>
+                    }
                   </div>
 
                   @if (canCancel()) {

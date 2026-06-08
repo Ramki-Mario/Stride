@@ -122,6 +122,12 @@
             <span class="wi-badge" [ngClass]="statusClass(inst.status)">
               {{ statusLabel(inst.status) }}
             </span>
+            @if (inst.slaStatus) {
+              <span class="wi-sla-badge" [ngClass]="slaBadgeClass(inst.slaStatus)">
+                <i class="pi pi-clock"></i>
+                {{ slaLabel(inst.slaStatus) }}
+              </span>
+            }
           </div>
 
           <!-- Progress -->

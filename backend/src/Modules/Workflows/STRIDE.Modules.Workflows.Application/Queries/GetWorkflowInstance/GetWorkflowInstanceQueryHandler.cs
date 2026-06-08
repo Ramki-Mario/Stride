@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Workflows.Application.Abstractions;
+using STRIDE.Modules.Workflows.Application.Helpers;
 
 namespace STRIDE.Modules.Workflows.Application.Queries.GetWorkflowInstance;
 
@@ -63,6 +64,8 @@ internal sealed class GetWorkflowInstanceQueryHandler
             instance.CreatedAt,
             instance.UpdatedAt,
             instance.CompletedAt,
+            instance.DeadlineAt,
+            SlaStatusComputer.Compute(instance.CreatedAt, instance.DeadlineAt, instance.CompletedAt),
             instance.Steps
                 .OrderBy(s => s.Order)
                 .Select(s => new StepInstanceDto(

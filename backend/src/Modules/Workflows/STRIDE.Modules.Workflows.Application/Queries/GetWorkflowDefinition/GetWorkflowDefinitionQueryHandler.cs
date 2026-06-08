@@ -41,6 +41,7 @@ internal sealed class GetWorkflowDefinitionQueryHandler
             definition.CreatedAt,
             definition.UpdatedAt,
             definition.CreatedBy,
+            definition.SlaOffsetHours,
             definition.Steps
                 .OrderBy(s => s.Order)
                 .Select(s => new StepDefinitionDto(

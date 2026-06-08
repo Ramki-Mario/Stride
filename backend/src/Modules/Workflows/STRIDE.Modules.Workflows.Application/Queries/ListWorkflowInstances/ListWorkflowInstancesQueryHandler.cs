@@ -1,6 +1,7 @@
 using MediatR;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Workflows.Application.Abstractions;
+using STRIDE.Modules.Workflows.Application.Helpers;
 using STRIDE.Modules.Workflows.Domain.Enums;
 
 namespace STRIDE.Modules.Workflows.Application.Queries.ListWorkflowInstances;
@@ -36,7 +37,9 @@ internal sealed class ListWorkflowInstancesQueryHandler
                     i.Steps.Count,
                     completedSteps,
                     i.CreatedAt,
-                    i.CompletedAt);
+                    i.CompletedAt,
+                    i.DeadlineAt,
+                    SlaStatusComputer.Compute(i.CreatedAt, i.DeadlineAt, i.CompletedAt));
             })
             .ToList()
             .AsReadOnly();

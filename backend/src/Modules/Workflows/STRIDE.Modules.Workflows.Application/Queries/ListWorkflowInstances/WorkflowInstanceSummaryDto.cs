@@ -14,4 +14,6 @@ public sealed record WorkflowInstanceSummaryDto(
     int TotalSteps,
     int CompletedSteps,
     DateTime CreatedAt,
-    DateTime? CompletedAt);
+    DateTime? CompletedAt,
+    DateTime? DeadlineAt,
+    SlaStatus? SlaStatus);

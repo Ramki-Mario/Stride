@@ -69,8 +69,9 @@ export class WorkflowFormPageComponent implements OnInit {
   // ── Form ──────────────────────────────────────────────────────────────────
 
   readonly form: FormGroup = this.fb.group({
-    name:        ['', [Validators.required, Validators.maxLength(100)]],
-    description: [''],
+    name:           ['', [Validators.required, Validators.maxLength(100)]],
+    description:    [''],
+    slaOffsetHours: [null as number | null, [Validators.min(0.01)]],
   });
 
   readonly stepsArray: FormArray = this.fb.array([] as AbstractControl[]);
@@ -224,7 +225,7 @@ export class WorkflowFormPageComponent implements OnInit {
     if (this.form.invalid) return;
     if (!this.isEditMode() && this.stepsArray.invalid) return;
 
-    const { name, description } = this.form.getRawValue();
+    const { name, description, slaOffsetHours } = this.form.getRawValue();
     const descValue = description?.trim() || null;
 
     this.isSaving.set(true);
@@ -272,7 +273,7 @@ export class WorkflowFormPageComponent implements OnInit {
       );
 
       this.wfService
-        .createDefinition({ name, description: descValue, steps })
+        .createDefinition({ name, description: descValue, slaOffsetHours: slaOffsetHours ?? null, steps })
         .pipe(
           finalize(() => this.isSaving.set(false)),
           takeUntilDestroyed(this.destroyRef),
