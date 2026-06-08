@@ -16,4 +16,5 @@ public sealed record WorkflowInstanceSummaryDto(
     DateTime CreatedAt,
     DateTime? CompletedAt,
     DateTime? DeadlineAt,
-    SlaStatus? SlaStatus);
+    SlaStatus? SlaStatus,
+    bool IsSlaBreached);

@@ -161,6 +161,10 @@
     border-color: var(--stride-border);
     box-shadow: var(--stride-shadow-sm);
   }
+
+  &.wi-row--sla-breached {
+    border-left: 3px solid rgba(239, 68, 68, 0.6);
+  }
 }
 
 .wi-row-btn {

@@ -28,6 +28,13 @@ internal sealed class WorkflowInstanceConfiguration : IEntityTypeConfiguration<W
         builder.Property(i => i.DeadlineAt)
             .HasColumnType("datetime2");
 
+        builder.Property(i => i.IsSlaBreached)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(i => i.SlaBreachedNotifiedAt)
+            .HasColumnType("datetime2");
+
         builder.Property(i => i.TenantId).IsRequired();
         builder.Property(i => i.CreatedAt).IsRequired();
         builder.Property(i => i.UpdatedAt).IsRequired();

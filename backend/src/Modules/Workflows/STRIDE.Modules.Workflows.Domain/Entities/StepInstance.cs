@@ -37,6 +37,15 @@ public sealed class StepInstance : BaseEntity<Guid>
     /// </summary>
     public DateTime? DueAt           { get; private set; }
 
+    /// <summary>
+    /// Set to <c>true</c> by the background deadline checker once DueAt has passed and the step
+    /// is still incomplete. Prevents duplicate overdue notifications.
+    /// </summary>
+    public bool IsOverdue { get; private set; }
+
+    /// <summary>Timestamp at which the overdue notification was sent. Null until IsOverdue is set.</summary>
+    public DateTime? OverdueNotifiedAt { get; private set; }
+
     /// <summary>Billable items logged when this step was completed.</summary>
     public IReadOnlyList<BillableItem> BillableItems => _billableItems.AsReadOnly();
 
@@ -72,6 +81,17 @@ public sealed class StepInstance : BaseEntity<Guid>
     /// Called by the workflow aggregate when the preceding step completes.
     /// </summary>
     internal void SetDueAt(DateTime? dueAt) => DueAt = dueAt;
+
+    /// <summary>
+    /// Flags this step as overdue. Called by the <c>WorkflowInstance</c> aggregate in response
+    /// to the deadline-checker background job. No-op if already flagged.
+    /// </summary>
+    internal void MarkOverdue()
+    {
+        if (IsOverdue) return;
+        IsOverdue          = true;
+        OverdueNotifiedAt  = DateTime.UtcNow;
+    }
 
     internal void Assign(Guid assigneeId)
     {

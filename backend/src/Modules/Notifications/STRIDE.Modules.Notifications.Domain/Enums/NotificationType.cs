@@ -7,6 +7,8 @@ public enum NotificationType
     WorkflowFailed,
     StepAssigned,
     StepCompleted,
+    StepOverdue,
+    WorkflowSlaBreached,
     SystemAlert,
     InvoiceDraftCreated,
 }
