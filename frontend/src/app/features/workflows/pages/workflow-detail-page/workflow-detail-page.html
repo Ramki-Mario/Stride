@@ -490,6 +490,12 @@
                             Completed {{ formatDateTime(step.completedAt) }}
                           </p>
                         }
+                        @if (step.dueAt) {
+                          <p class="wfd-inst-step-due" [ngClass]="{ 'wfd-inst-step-due--overdue': isOverdue(step) }">
+                            <span class="pi pi-clock"></span>
+                            Due {{ formatDateTime(step.dueAt) }}
+                          </p>
+                        }
 
                         <!-- Billable items (only on Completed steps that have items) -->
                         @if (step.billableItems && step.billableItems.length > 0) {

@@ -21,6 +21,7 @@ public sealed record StepDefinitionDto(
     int Order,
     bool IsRequired,
     Guid? RequiredRoleId,
+    decimal? DueOffsetHours,
     IReadOnlyList<FieldDefinitionDto> Fields);
 
 /// <summary>

@@ -25,7 +25,8 @@ public sealed record StepRequestDto(
     string? Description,
     bool IsRequired = true,
     Guid? RequiredRoleId = null,
-    IReadOnlyList<FieldDefinitionRequestDto>? FieldDefinitions = null);
+    IReadOnlyList<FieldDefinitionRequestDto>? FieldDefinitions = null,
+    decimal? DueOffsetHours = null);
 
 /// <summary>
 /// A single data-capture field on a step — submitted in the create-workflow request.

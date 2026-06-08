@@ -31,6 +31,7 @@ public sealed record StepInstanceDto(
     Guid? RequiredRoleId,
     string? FailureReason,
     DateTime? CompletedAt,
+    DateTime? DueAt,
     IReadOnlyList<BillableItemDto> BillableItems,
     IReadOnlyList<StepFieldDefinitionDto> Fields,
     IReadOnlyList<StepFieldValueDto> FieldValues)

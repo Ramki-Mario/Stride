@@ -105,6 +105,7 @@ export interface StepInstance {
   /** Cross-module FK to Identity.Role — bare Guid, no navigation. */
   requiredRoleId: string | null;
   completedAt:    string | null;
+  dueAt:          string | null;
   failureReason:  string | null;
   billableItems:    BillableItemDto[];
   billableSubtotal: number;
@@ -203,6 +204,7 @@ export interface StepRequest {
   description:      string | null;
   isRequired:       boolean;
   requiredRoleId:   string | null;
+  dueOffsetHours:   number | null;
   fieldDefinitions: FieldDefinitionRequest[];
 }
 
@@ -239,13 +241,14 @@ export interface RoleDto {
 }
 
 export interface StepDefinition {
-  id:             string;
-  name:           string;
-  description:    string | null;
-  order:          number;
-  isRequired:     boolean;
-  requiredRoleId: string | null;
-  fields:         FieldDefinition[];
+  id:              string;
+  name:            string;
+  description:     string | null;
+  order:           number;
+  isRequired:      boolean;
+  requiredRoleId:  string | null;
+  dueOffsetHours:  number | null;
+  fields:          FieldDefinition[];
 }
 
 export interface WorkflowDefinitionDetail {

@@ -23,6 +23,20 @@ public sealed class StepInstance : BaseEntity<Guid>
     public string? FailureReason     { get; private set; }
     public DateTime? CompletedAt     { get; private set; }
 
+    /// <summary>
+    /// Snapshotted from the step definition at instance creation.
+    /// Hours allowed from the preceding step's completion (or instance start for step 1).
+    /// Null means no deadline for this step.
+    /// </summary>
+    public decimal? DueOffsetHours   { get; private set; }
+
+    /// <summary>
+    /// Absolute deadline for this step. Calculated on instance creation for step 1;
+    /// recalculated when the preceding step completes for all subsequent steps.
+    /// Null when no DueOffsetHours was configured.
+    /// </summary>
+    public DateTime? DueAt           { get; private set; }
+
     /// <summary>Billable items logged when this step was completed.</summary>
     public IReadOnlyList<BillableItem> BillableItems => _billableItems.AsReadOnly();
 
@@ -34,7 +48,8 @@ public sealed class StepInstance : BaseEntity<Guid>
     internal static StepInstance Create(
         Guid workflowInstanceId,
         Guid tenantId,
-        StepDefinition definition)
+        StepDefinition definition,
+        DateTime? dueAt = null)
     {
         return new StepInstance
         {
@@ -46,9 +61,17 @@ public sealed class StepInstance : BaseEntity<Guid>
             Order              = definition.Order,
             IsRequired         = definition.IsRequired,
             RequiredRoleId     = definition.RequiredRoleId,
+            DueOffsetHours     = definition.DueOffsetHours,
+            DueAt              = dueAt,
             Status             = StepStatus.Pending,
         };
     }
+
+    /// <summary>
+    /// Sets or updates the absolute due date for this step.
+    /// Called by the workflow aggregate when the preceding step completes.
+    /// </summary>
+    internal void SetDueAt(DateTime? dueAt) => DueAt = dueAt;
 
     internal void Assign(Guid assigneeId)
     {

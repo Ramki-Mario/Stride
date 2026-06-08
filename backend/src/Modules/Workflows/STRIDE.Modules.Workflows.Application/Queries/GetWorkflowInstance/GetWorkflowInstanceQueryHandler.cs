@@ -77,6 +77,7 @@ internal sealed class GetWorkflowInstanceQueryHandler
                     s.RequiredRoleId,
                     s.FailureReason,
                     s.CompletedAt,
+                    s.DueAt,
                     s.BillableItems
                         .Select(b => new BillableItemDto(
                             b.Id,

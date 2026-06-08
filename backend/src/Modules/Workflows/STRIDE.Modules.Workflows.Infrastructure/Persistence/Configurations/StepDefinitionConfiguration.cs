@@ -26,6 +26,9 @@ internal sealed class StepDefinitionConfiguration : IEntityTypeConfiguration<Ste
         builder.Property(s => s.RequiredRoleId);
         builder.HasIndex(s => s.RequiredRoleId);
 
+        builder.Property(s => s.DueOffsetHours)
+            .HasColumnType("decimal(6,2)");
+
         builder.HasIndex(s => new { s.WorkflowDefinitionId, s.Order });
 
         // Field definitions — owned collection; cascades deletes with the step.
