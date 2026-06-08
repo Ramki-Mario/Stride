@@ -45,10 +45,17 @@ public sealed class WorkflowInstance : AuditableEntity
             CreatedBy = startedBy,
         };
 
-        // Snapshot steps from definition at start time (order preserved)
+        // Snapshot steps from definition at start time.
+        // The first step's due date is calculated from the instance start time;
+        // all subsequent steps are calculated when their predecessor completes.
+        var startedAt = instance.CreatedAt;
         foreach (var stepDef in definition.Steps.OrderBy(s => s.Order))
         {
-            instance._steps.Add(StepInstance.Create(instance.Id, instance.TenantId, stepDef));
+            var dueAt = stepDef.Order == 0 && stepDef.DueOffsetHours.HasValue
+                ? startedAt.AddHours((double)stepDef.DueOffsetHours.Value)
+                : (DateTime?)null;
+
+            instance._steps.Add(StepInstance.Create(instance.Id, instance.TenantId, stepDef, dueAt));
         }
 
         instance.RaiseDomainEvent(new WorkflowStartedEvent(
@@ -127,6 +134,10 @@ public sealed class WorkflowInstance : AuditableEntity
         step.Complete(billableItems, fieldValues);
         UpdatedAt = DateTime.UtcNow;
 
+        // When a step completes, recalculate the next pending step's due date
+        // from this step's actual completion time (handles late completions).
+        RecalculateNextStepDueDate(step);
+
         RaiseDomainEvent(new StepCompletedEvent(step.Id, Id, TenantId, completedBy));
         CheckCompletion();
     }
@@ -162,6 +173,24 @@ public sealed class WorkflowInstance : AuditableEntity
     }
 
     // ── Private helpers ────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// When a step completes, finds the immediately next non-terminal step and
+    /// sets its DueAt from the actual completion time. This correctly handles
+    /// steps that complete late, cascading the new baseline forward.
+    /// </summary>
+    private void RecalculateNextStepDueDate(StepInstance completedStep)
+    {
+        if (completedStep.CompletedAt is null) return;
+
+        var nextStep = _steps
+            .Where(s => s.Order > completedStep.Order && !s.IsTerminal)
+            .OrderBy(s => s.Order)
+            .FirstOrDefault();
+
+        if (nextStep is not null && nextStep.DueOffsetHours.HasValue)
+            nextStep.SetDueAt(completedStep.CompletedAt.Value.AddHours((double)nextStep.DueOffsetHours.Value));
+    }
 
     private void EnsureRunning()
     {

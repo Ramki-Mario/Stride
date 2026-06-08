@@ -116,7 +116,8 @@ public sealed class WorkflowsController : ControllerBase
                         f.HelpText,
                         f.DropdownOptions))
                     .ToList()
-                    .AsReadOnly()))
+                    .AsReadOnly(),
+                s.DueOffsetHours))
             .ToList()
             .AsReadOnly();
 

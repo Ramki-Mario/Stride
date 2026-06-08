@@ -50,6 +50,7 @@ internal sealed class GetWorkflowDefinitionQueryHandler
                     s.Order,
                     s.IsRequired,
                     s.RequiredRoleId,
+                    s.DueOffsetHours,
                     s.Fields
                         .OrderBy(f => f.DisplayOrder)
                         .Select(f => new FieldDefinitionDto(

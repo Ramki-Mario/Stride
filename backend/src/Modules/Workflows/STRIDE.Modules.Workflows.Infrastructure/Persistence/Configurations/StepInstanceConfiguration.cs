@@ -36,6 +36,12 @@ internal sealed class StepInstanceConfiguration : IEntityTypeConfiguration<StepI
 
         builder.Property(s => s.CompletedAt);
 
+        builder.Property(s => s.DueOffsetHours)
+            .HasColumnType("decimal(6,2)");
+
+        builder.Property(s => s.DueAt)
+            .HasColumnType("datetime2");
+
         builder.Property(s => s.TenantId).IsRequired();
 
         builder.HasIndex(s => new { s.WorkflowInstanceId, s.Order });

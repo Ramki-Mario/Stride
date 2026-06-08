@@ -21,7 +21,8 @@ public sealed record StepRequest(
     string? Description,
     bool IsRequired = true,
     Guid? RequiredRoleId = null,
-    IReadOnlyList<FieldDefinitionRequest>? FieldDefinitions = null);
+    IReadOnlyList<FieldDefinitionRequest>? FieldDefinitions = null,
+    decimal? DueOffsetHours = null);
 
 /// <summary>
 /// Defines a single data-capture field on a step.

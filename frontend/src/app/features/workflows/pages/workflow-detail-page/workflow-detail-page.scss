@@ -828,6 +828,19 @@
   gap: 0.3125rem;
 }
 
+.wfd-inst-step-due {
+  font-size: 0.78125rem;
+  color: var(--stride-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.3125rem;
+
+  &--overdue {
+    color: var(--stride-warning, #e07b00);
+    font-weight: 600;
+  }
+}
+
 // ── Instance billable total banner ─────────────────────────────────────────
 
 .wfd-inst-billable-total {

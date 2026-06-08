@@ -21,6 +21,12 @@ public sealed class StepDefinition : BaseEntity<Guid>
     public Guid? RequiredRoleId { get; private set; }
 
     /// <summary>
+    /// Hours allowed to complete this step from the moment the preceding step closes
+    /// (or from instance creation for the first step). Null means no deadline.
+    /// </summary>
+    public decimal? DueOffsetHours { get; private set; }
+
+    /// <summary>
     /// Ordered list of data-capture fields defined on this step.
     /// Populated at workflow-definition time; rendered as a form at step-completion time.
     /// </summary>
@@ -34,13 +40,17 @@ public sealed class StepDefinition : BaseEntity<Guid>
         string? description,
         int order,
         bool isRequired = true,
-        Guid? requiredRoleId = null)
+        Guid? requiredRoleId = null,
+        decimal? dueOffsetHours = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new WorkflowDomainException("Step name cannot be empty.");
 
         if (order < 0)
             throw new WorkflowDomainException("Step order must be a non-negative integer.");
+
+        if (dueOffsetHours.HasValue && dueOffsetHours.Value <= 0)
+            throw new WorkflowDomainException("Due offset hours must be greater than zero.");
 
         return new StepDefinition
         {
@@ -51,18 +61,28 @@ public sealed class StepDefinition : BaseEntity<Guid>
             Order                = order,
             IsRequired           = isRequired,
             RequiredRoleId       = requiredRoleId,
+            DueOffsetHours       = dueOffsetHours,
         };
     }
 
-    internal void Update(string name, string? description, bool isRequired, Guid? requiredRoleId = null)
+    internal void Update(
+        string name,
+        string? description,
+        bool isRequired,
+        Guid? requiredRoleId = null,
+        decimal? dueOffsetHours = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new WorkflowDomainException("Step name cannot be empty.");
+
+        if (dueOffsetHours.HasValue && dueOffsetHours.Value <= 0)
+            throw new WorkflowDomainException("Due offset hours must be greater than zero.");
 
         Name           = name.Trim();
         Description    = description?.Trim();
         IsRequired     = isRequired;
         RequiredRoleId = requiredRoleId;
+        DueOffsetHours = dueOffsetHours;
     }
 
     // ── Field definition management ──────────────────────────────────────────

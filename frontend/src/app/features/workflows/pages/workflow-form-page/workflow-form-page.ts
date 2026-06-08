@@ -137,6 +137,7 @@ export class WorkflowFormPageComponent implements OnInit {
       description:    [''],
       isRequired:     [true],
       requiredRoleId: [null as string | null],
+      dueOffsetHours: [null as number | null, [Validators.min(0.01)]],
       fields:          this.fb.array([] as AbstractControl[]),
     });
     this.stepsArray.push(stepGroup);
@@ -250,12 +251,14 @@ export class WorkflowFormPageComponent implements OnInit {
           description: string;
           isRequired: boolean;
           requiredRoleId: string | null;
+          dueOffsetHours: number | null;
           fields: { label: string; fieldType: FieldType; isRequired: boolean; helpText: string; dropdownOptions: string }[];
         }) => ({
           name:           s.name,
           description:    s.description?.trim() || null,
           isRequired:     s.isRequired,
           requiredRoleId: s.requiredRoleId || null,
+          dueOffsetHours: s.dueOffsetHours ?? null,
           fieldDefinitions: (s.fields ?? []).map(f => ({
             label:           f.label.trim(),
             fieldType:       f.fieldType,

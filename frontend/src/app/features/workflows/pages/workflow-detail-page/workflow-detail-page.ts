@@ -534,6 +534,11 @@ export class WorkflowDetailPageComponent implements OnInit {
     });
   }
 
+  isOverdue(step: StepInstance): boolean {
+    if (!step.dueAt || step.status === 'Completed' || step.status === 'Skipped') return false;
+    return new Date(step.dueAt) < new Date();
+  }
+
   requiredStepCount(steps: StepDefinition[]): number {
     return steps.filter((s) => s.isRequired).length;
   }

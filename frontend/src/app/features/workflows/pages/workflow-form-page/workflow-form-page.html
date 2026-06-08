@@ -253,6 +253,23 @@
                         </select>
                         <p class="wff-hint">Optional — restricts assignment to users who hold this role.</p>
                       </div>
+
+                      <div class="wff-field wff-field-compact">
+                        <label class="wff-label" [for]="'step-due-' + si">Due offset (hours)</label>
+                        <input
+                          [id]="'step-due-' + si"
+                          type="number"
+                          min="0.01"
+                          step="0.5"
+                          [formControl]="$any(stepsArray.at(si).get('dueOffsetHours'))"
+                          class="wff-input"
+                          placeholder="e.g. 24"
+                        />
+                        <p class="wff-hint">
+                          Optional — hours allowed from the previous step's completion (or workflow start for step 1).
+                          Leave blank for no deadline.
+                        </p>
+                      </div>
                     </div>
 
                     <!-- ── Field definitions ──────────────────────────── -->
