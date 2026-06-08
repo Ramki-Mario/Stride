@@ -44,9 +44,19 @@ internal sealed class CreateWorkflowCommandHandler
                 request.CreatedBy);
 
             // ── 3. Add steps (order = insertion order) ─────────────────────────
-            foreach (var step in request.Steps)
+            foreach (var stepReq in request.Steps)
             {
-                definition.AddStep(step.Name, step.Description, step.IsRequired, step.RequiredRoleId);
+                var fields = stepReq.FieldDefinitions?
+                    .Select(f => (f.Label, f.FieldType, f.IsRequired, f.HelpText, f.DropdownOptions))
+                    .ToList()
+                    .AsReadOnly();
+
+                definition.AddStep(
+                    stepReq.Name,
+                    stepReq.Description,
+                    stepReq.IsRequired,
+                    stepReq.RequiredRoleId,
+                    fields);
             }
 
             await _definitions.AddAsync(definition, cancellationToken);

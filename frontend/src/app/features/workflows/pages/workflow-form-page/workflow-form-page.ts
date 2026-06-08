@@ -21,7 +21,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
 import { WorkflowService } from '../../services/workflow.service';
-import { RoleDto } from '../../models/workflow.models';
+import { FieldType, FIELD_TYPES, FIELD_TYPE_LABELS, RoleDto } from '../../models/workflow.models';
 
 @Component({
   selector: 'app-workflow-form-page',
@@ -47,6 +47,11 @@ export class WorkflowFormPageComponent implements OnInit {
 
   readonly roles        = signal<RoleDto[]>([]);
   readonly rolesLoading = signal(false);
+
+  // ── Field type catalogue ──────────────────────────────────────────────────
+
+  readonly fieldTypes      = FIELD_TYPES;
+  readonly fieldTypeLabels = FIELD_TYPE_LABELS;
 
   // ── Async state ───────────────────────────────────────────────────────────
 
@@ -132,8 +137,59 @@ export class WorkflowFormPageComponent implements OnInit {
       description:    [''],
       isRequired:     [true],
       requiredRoleId: [null as string | null],
+      fields:          this.fb.array([] as AbstractControl[]),
     });
     this.stepsArray.push(stepGroup);
+  }
+
+  // ── Field management within a step ───────────────────────────────────────
+
+  getFieldsArray(stepIndex: number): FormArray {
+    return this.stepsArray.at(stepIndex).get('fields') as FormArray;
+  }
+
+  getFields(stepIndex: number): FormGroup[] {
+    return this.getFieldsArray(stepIndex).controls as FormGroup[];
+  }
+
+  addField(stepIndex: number): void {
+    const fieldGroup = this.fb.group({
+      label:           ['', [Validators.required, Validators.maxLength(200)]],
+      fieldType:       ['Text' as FieldType, Validators.required],
+      isRequired:      [false],
+      helpText:        [''],
+      dropdownOptions: [''],   // comma-separated string; split on submit
+    });
+    this.getFieldsArray(stepIndex).push(fieldGroup);
+  }
+
+  removeField(stepIndex: number, fieldIndex: number): void {
+    this.getFieldsArray(stepIndex).removeAt(fieldIndex);
+  }
+
+  moveFieldUp(stepIndex: number, fieldIndex: number): void {
+    const arr = this.getFieldsArray(stepIndex);
+    if (fieldIndex === 0) return;
+    const ctrl = arr.at(fieldIndex);
+    arr.removeAt(fieldIndex);
+    arr.insert(fieldIndex - 1, ctrl);
+  }
+
+  moveFieldDown(stepIndex: number, fieldIndex: number): void {
+    const arr = this.getFieldsArray(stepIndex);
+    if (fieldIndex >= arr.length - 1) return;
+    const ctrl = arr.at(fieldIndex);
+    arr.removeAt(fieldIndex);
+    arr.insert(fieldIndex + 1, ctrl);
+  }
+
+  isDropdownType(stepIndex: number, fieldIndex: number): boolean {
+    return this.getFieldsArray(stepIndex).at(fieldIndex)?.get('fieldType')?.value === 'Dropdown';
+  }
+
+  isFieldInvalid(stepIndex: number, fieldIndex: number, control: string): boolean {
+    const c = this.getFieldsArray(stepIndex).at(fieldIndex)?.get(control);
+    return !!(c?.invalid && c.touched);
   }
 
   removeStep(index: number): void {
@@ -189,11 +245,26 @@ export class WorkflowFormPageComponent implements OnInit {
         });
     } else {
       const steps = this.stepsArray.value.map(
-        (s: { name: string; description: string; isRequired: boolean; requiredRoleId: string | null }) => ({
+        (s: {
+          name: string;
+          description: string;
+          isRequired: boolean;
+          requiredRoleId: string | null;
+          fields: { label: string; fieldType: FieldType; isRequired: boolean; helpText: string; dropdownOptions: string }[];
+        }) => ({
           name:           s.name,
           description:    s.description?.trim() || null,
           isRequired:     s.isRequired,
           requiredRoleId: s.requiredRoleId || null,
+          fieldDefinitions: (s.fields ?? []).map(f => ({
+            label:           f.label.trim(),
+            fieldType:       f.fieldType,
+            isRequired:      f.isRequired,
+            helpText:        f.helpText?.trim() || null,
+            dropdownOptions: f.fieldType === 'Dropdown'
+              ? f.dropdownOptions.split(',').map((o: string) => o.trim()).filter(Boolean)
+              : null,
+          })),
         }),
       );
 

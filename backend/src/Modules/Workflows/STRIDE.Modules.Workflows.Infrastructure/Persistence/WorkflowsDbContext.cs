@@ -16,12 +16,13 @@ public sealed class WorkflowsDbContext : DbContext
         _publisher = publisher;
     }
 
-    public DbSet<WorkflowDefinition> WorkflowDefinitions => Set<WorkflowDefinition>();
-    public DbSet<StepDefinition>     StepDefinitions     => Set<StepDefinition>();
-    public DbSet<WorkflowInstance>   WorkflowInstances   => Set<WorkflowInstance>();
-    public DbSet<StepInstance>       StepInstances       => Set<StepInstance>();
-    public DbSet<BillableItem>       BillableItems       => Set<BillableItem>();
-    public DbSet<Attachment>         Attachments         => Set<Attachment>();
+    public DbSet<WorkflowDefinition>  WorkflowDefinitions  => Set<WorkflowDefinition>();
+    public DbSet<StepDefinition>      StepDefinitions      => Set<StepDefinition>();
+    public DbSet<StepFieldDefinition> StepFieldDefinitions => Set<StepFieldDefinition>();
+    public DbSet<WorkflowInstance>    WorkflowInstances    => Set<WorkflowInstance>();
+    public DbSet<StepInstance>        StepInstances        => Set<StepInstance>();
+    public DbSet<BillableItem>        BillableItems        => Set<BillableItem>();
+    public DbSet<Attachment>          Attachments          => Set<Attachment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -20,4 +20,18 @@ public sealed record StepDefinitionDto(
     string? Description,
     int Order,
     bool IsRequired,
-    Guid? RequiredRoleId);
+    Guid? RequiredRoleId,
+    IReadOnlyList<FieldDefinitionDto> Fields);
+
+/// <summary>
+/// Read model for a single data-capture field on a step definition.
+/// FieldType is returned as its string name for easy consumption by Angular.
+/// </summary>
+public sealed record FieldDefinitionDto(
+    Guid   Id,
+    string Label,
+    string FieldType,
+    bool   IsRequired,
+    int    DisplayOrder,
+    string? HelpText,
+    IReadOnlyList<string> DropdownOptions);

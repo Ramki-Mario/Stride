@@ -1,3 +1,5 @@
+using STRIDE.Modules.Workflows.Domain.Enums;
+
 namespace STRIDE.Modules.Workflows.API.Dtos;
 
 // ─── Workflow Definition ───────────────────────────────────────────────────
@@ -21,4 +23,16 @@ public sealed record UpdateWorkflowRequest(
 public sealed record StepRequestDto(
     string Name,
     string? Description,
-    bool IsRequired = true);
+    bool IsRequired = true,
+    Guid? RequiredRoleId = null,
+    IReadOnlyList<FieldDefinitionRequestDto>? FieldDefinitions = null);
+
+/// <summary>
+/// A single data-capture field on a step — submitted in the create-workflow request.
+/// </summary>
+public sealed record FieldDefinitionRequestDto(
+    string Label,
+    StepFieldType FieldType,
+    bool IsRequired,
+    string? HelpText = null,
+    IReadOnlyList<string>? DropdownOptions = null);

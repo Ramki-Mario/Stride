@@ -55,17 +55,33 @@ public sealed class WorkflowDefinition : AuditableEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
+    /// <summary>
+    /// Appends a step to this draft workflow definition.
+    /// Optionally seeds the step with an initial set of data-capture field definitions.
+    /// </summary>
+    /// <param name="fields">
+    /// Zero or more field definitions to attach to the step at creation time.
+    /// Each tuple carries (Label, FieldType, IsRequired, HelpText, DropdownOptions).
+    /// </param>
     public StepDefinition AddStep(
         string name,
         string? description,
         bool isRequired = true,
-        Guid? requiredRoleId = null)
+        Guid? requiredRoleId = null,
+        IReadOnlyList<(string Label, StepFieldType FieldType, bool IsRequired, string? HelpText, IReadOnlyList<string>? DropdownOptions)>? fields = null)
     {
         if (Status != WorkflowStatus.Draft)
             throw new WorkflowDomainException("Steps can only be added to Draft workflows.");
 
         var order = _steps.Count;
-        var step = StepDefinition.Create(Id, name, description, order, isRequired, requiredRoleId);
+        var step  = StepDefinition.Create(Id, name, description, order, isRequired, requiredRoleId);
+
+        if (fields is { Count: > 0 })
+        {
+            foreach (var (label, fieldType, fieldRequired, helpText, dropdownOptions) in fields)
+                step.AddField(label, fieldType, fieldRequired, helpText, dropdownOptions);
+        }
+
         _steps.Add(step);
         UpdatedAt = DateTime.UtcNow;
         return step;

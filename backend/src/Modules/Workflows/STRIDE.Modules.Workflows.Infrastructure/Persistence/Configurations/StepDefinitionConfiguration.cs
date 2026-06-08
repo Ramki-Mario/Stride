@@ -28,6 +28,12 @@ internal sealed class StepDefinitionConfiguration : IEntityTypeConfiguration<Ste
 
         builder.HasIndex(s => new { s.WorkflowDefinitionId, s.Order });
 
+        // Field definitions — owned collection; cascades deletes with the step.
+        builder.HasMany(s => s.Fields)
+            .WithOne()
+            .HasForeignKey(f => f.StepDefinitionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.ToTable("StepDefinitions");
     }
 }

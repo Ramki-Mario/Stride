@@ -136,13 +136,61 @@ export interface WorkflowInstanceDetail {
 
 export type StepAction = 'assign' | 'claim' | 'complete' | 'fail' | 'skip';
 
+// ─── Step field definitions ───────────────────────────────────────────────────
+
+export type FieldType =
+  | 'Text'
+  | 'Number'
+  | 'Currency'
+  | 'Hours'
+  | 'Dropdown'
+  | 'Date'
+  | 'Boolean'
+  | 'LongText';
+
+export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
+  Text:     'Text',
+  Number:   'Number',
+  Currency: 'Currency amount',
+  Hours:    'Hours worked',
+  Dropdown: 'Dropdown (select)',
+  Date:     'Date',
+  Boolean:  'Yes / No',
+  LongText: 'Long text (notes)',
+};
+
+export const FIELD_TYPES: FieldType[] = [
+  'Text', 'Number', 'Currency', 'Hours', 'Dropdown', 'Date', 'Boolean', 'LongText',
+];
+
+/** Read model — returned by GET /bff/workflows/definitions/:id for each step. */
+export interface FieldDefinition {
+  id:             string;
+  label:          string;
+  fieldType:      FieldType;
+  isRequired:     boolean;
+  displayOrder:   number;
+  helpText:       string | null;
+  dropdownOptions: string[];
+}
+
+/** Write model — submitted in the create-workflow request body. */
+export interface FieldDefinitionRequest {
+  label:          string;
+  fieldType:      FieldType;
+  isRequired:     boolean;
+  helpText:       string | null;
+  dropdownOptions: string[] | null;
+}
+
 // ─── Form request payloads ────────────────────────────────────────────────────
 
 export interface StepRequest {
-  name:           string;
-  description:    string | null;
-  isRequired:     boolean;
-  requiredRoleId: string | null;
+  name:             string;
+  description:      string | null;
+  isRequired:       boolean;
+  requiredRoleId:   string | null;
+  fieldDefinitions: FieldDefinitionRequest[];
 }
 
 export interface CreateWorkflowRequest {
@@ -184,6 +232,7 @@ export interface StepDefinition {
   order:          number;
   isRequired:     boolean;
   requiredRoleId: string | null;
+  fields:         FieldDefinition[];
 }
 
 export interface WorkflowDefinitionDetail {

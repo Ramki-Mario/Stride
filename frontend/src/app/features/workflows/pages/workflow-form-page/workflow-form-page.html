@@ -153,18 +153,18 @@
               }
 
               <div class="wff-steps-list">
-                @for (step of steps; track trackByIndex($index)) {
-                  <div class="wff-step-card" [ngClass]="{ 'wff-step-card-error': isStepInvalid($index, 'name') }">
+                @for (step of steps; track trackByIndex($index); let si = $index) {
+                  <div class="wff-step-card" [ngClass]="{ 'wff-step-card-error': isStepInvalid(si, 'name') }">
 
                     <!-- Step header -->
                     <div class="wff-step-header">
-                      <span class="wff-step-number">{{ $index + 1 }}</span>
+                      <span class="wff-step-number">{{ si + 1 }}</span>
 
                       <!-- Required toggle -->
                       <label class="wff-toggle" title="Required step">
                         <input
                           type="checkbox"
-                          [formControl]="$any(stepsArray.at($index).get('isRequired'))"
+                          [formControl]="$any(stepsArray.at(si).get('isRequired'))"
                           class="wff-toggle-input"
                         />
                         <span class="wff-toggle-track"></span>
@@ -176,8 +176,8 @@
                         <button
                           type="button"
                           class="wff-icon-btn"
-                          (click)="moveUp($index)"
-                          [disabled]="$index === 0"
+                          (click)="moveUp(si)"
+                          [disabled]="si === 0"
                           title="Move up"
                         >
                           <span class="pi pi-chevron-up"></span>
@@ -185,8 +185,8 @@
                         <button
                           type="button"
                           class="wff-icon-btn"
-                          (click)="moveDown($index)"
-                          [disabled]="$index === steps.length - 1"
+                          (click)="moveDown(si)"
+                          [disabled]="si === steps.length - 1"
                           title="Move down"
                         >
                           <span class="pi pi-chevron-down"></span>
@@ -197,7 +197,7 @@
                       <button
                         type="button"
                         class="wff-icon-btn wff-icon-btn-danger"
-                        (click)="removeStep($index)"
+                        (click)="removeStep(si)"
                         [disabled]="steps.length === 1"
                         title="Remove step"
                       >
@@ -208,31 +208,31 @@
                     <!-- Step fields -->
                     <div class="wff-step-fields">
                       <div class="wff-field wff-field-compact">
-                        <label class="wff-label" [for]="'step-name-' + $index">
+                        <label class="wff-label" [for]="'step-name-' + si">
                           Step Name <span class="wff-required" aria-hidden="true">*</span>
                         </label>
                         <input
-                          [id]="'step-name-' + $index"
+                          [id]="'step-name-' + si"
                           type="text"
-                          [formControl]="$any(stepsArray.at($index).get('name'))"
+                          [formControl]="$any(stepsArray.at(si).get('name'))"
                           class="wff-input"
-                          [ngClass]="{ 'wff-input-error': isStepInvalid($index, 'name') }"
+                          [ngClass]="{ 'wff-input-error': isStepInvalid(si, 'name') }"
                           placeholder="e.g. Manager Approval"
                           maxlength="100"
                         />
-                        @if (stepRequiredError($index, 'name')) {
+                        @if (stepRequiredError(si, 'name')) {
                           <p class="wff-error-msg" role="alert">Step name is required.</p>
-                        } @else if (stepMaxLengthError($index, 'name')) {
+                        } @else if (stepMaxLengthError(si, 'name')) {
                           <p class="wff-error-msg" role="alert">Step name cannot exceed 100 characters.</p>
                         }
                       </div>
 
                       <div class="wff-field wff-field-compact">
-                        <label class="wff-label" [for]="'step-desc-' + $index">Description</label>
+                        <label class="wff-label" [for]="'step-desc-' + si">Description</label>
                         <input
-                          [id]="'step-desc-' + $index"
+                          [id]="'step-desc-' + si"
                           type="text"
-                          [formControl]="$any(stepsArray.at($index).get('description'))"
+                          [formControl]="$any(stepsArray.at(si).get('description'))"
                           class="wff-input"
                           placeholder="Optional step description"
                           maxlength="250"
@@ -240,10 +240,10 @@
                       </div>
 
                       <div class="wff-field wff-field-compact">
-                        <label class="wff-label" [for]="'step-role-' + $index">Required Role</label>
+                        <label class="wff-label" [for]="'step-role-' + si">Required Role</label>
                         <select
-                          [id]="'step-role-' + $index"
-                          [formControl]="$any(stepsArray.at($index).get('requiredRoleId'))"
+                          [id]="'step-role-' + si"
+                          [formControl]="$any(stepsArray.at(si).get('requiredRoleId'))"
                           class="wff-select"
                         >
                           <option [ngValue]="null">— Any user —</option>
@@ -254,6 +254,125 @@
                         <p class="wff-hint">Optional — restricts assignment to users who hold this role.</p>
                       </div>
                     </div>
+
+                    <!-- ── Field definitions ──────────────────────────── -->
+                    <div class="wff-fields-section">
+                      <div class="wff-fields-header">
+                        <span class="pi pi-table wff-fields-icon"></span>
+                        <span class="wff-fields-title">Data capture fields</span>
+                        <span class="wff-fields-count">{{ getFields(si).length }}</span>
+                        <button
+                          type="button"
+                          class="wff-btn-add-field"
+                          (click)="addField(si)"
+                          title="Add a field to this step"
+                        >
+                          <span class="pi pi-plus"></span> Add Field
+                        </button>
+                      </div>
+
+                      @if (getFields(si).length === 0) {
+                        <p class="wff-fields-empty">
+                          No fields yet — click <strong>Add Field</strong> to capture structured data when this step is completed.
+                        </p>
+                      }
+
+                      <div class="wff-fields-list">
+                        @for (field of getFields(si); track $index; let fi = $index) {
+                          <div class="wff-field-row">
+
+                            <!-- Field reorder + remove -->
+                            <div class="wff-field-row-actions">
+                              <button type="button" class="wff-icon-btn" (click)="moveFieldUp(si, fi)" [disabled]="fi === 0" title="Move field up">
+                                <span class="pi pi-chevron-up"></span>
+                              </button>
+                              <button type="button" class="wff-icon-btn" (click)="moveFieldDown(si, fi)" [disabled]="fi === getFields(si).length - 1" title="Move field down">
+                                <span class="pi pi-chevron-down"></span>
+                              </button>
+                              <button type="button" class="wff-icon-btn wff-icon-btn-danger" (click)="removeField(si, fi)" title="Remove field">
+                                <span class="pi pi-trash"></span>
+                              </button>
+                            </div>
+
+                            <!-- Field inputs -->
+                            <div class="wff-field-row-body">
+                              <div class="wff-field-row-top">
+
+                                <!-- Label -->
+                                <div class="wff-field wff-field-compact wff-field-grow">
+                                  <label class="wff-label" [for]="'field-label-' + si + '-' + fi">
+                                    Label <span class="wff-required">*</span>
+                                  </label>
+                                  <input
+                                    [id]="'field-label-' + si + '-' + fi"
+                                    type="text"
+                                    [formControl]="$any(getFieldsArray(si).at(fi).get('label'))"
+                                    class="wff-input"
+                                    [ngClass]="{ 'wff-input-error': isFieldInvalid(si, fi, 'label') }"
+                                    placeholder="e.g. Hours worked"
+                                    maxlength="200"
+                                  />
+                                </div>
+
+                                <!-- Field type -->
+                                <div class="wff-field wff-field-compact">
+                                  <label class="wff-label" [for]="'field-type-' + si + '-' + fi">Type</label>
+                                  <select
+                                    [id]="'field-type-' + si + '-' + fi"
+                                    [formControl]="$any(getFieldsArray(si).at(fi).get('fieldType'))"
+                                    class="wff-select"
+                                  >
+                                    @for (ft of fieldTypes; track ft) {
+                                      <option [value]="ft">{{ fieldTypeLabels[ft] }}</option>
+                                    }
+                                  </select>
+                                </div>
+
+                                <!-- Required toggle -->
+                                <label class="wff-toggle wff-toggle-sm" title="Required field">
+                                  <input
+                                    type="checkbox"
+                                    [formControl]="$any(getFieldsArray(si).at(fi).get('isRequired'))"
+                                    class="wff-toggle-input"
+                                  />
+                                  <span class="wff-toggle-track"></span>
+                                  <span class="wff-toggle-label">Required</span>
+                                </label>
+
+                              </div>
+
+                              <!-- Help text -->
+                              <div class="wff-field wff-field-compact">
+                                <input
+                                  type="text"
+                                  [formControl]="$any(getFieldsArray(si).at(fi).get('helpText'))"
+                                  class="wff-input wff-input-sm"
+                                  placeholder="Help text (optional)"
+                                  maxlength="500"
+                                />
+                              </div>
+
+                              <!-- Dropdown options (shown only when type = Dropdown) -->
+                              @if (isDropdownType(si, fi)) {
+                                <div class="wff-field wff-field-compact">
+                                  <label class="wff-label">
+                                    Options <span class="wff-required">*</span>
+                                    <span class="wff-hint-inline"> — comma-separated (at least 2)</span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    [formControl]="$any(getFieldsArray(si).at(fi).get('dropdownOptions'))"
+                                    class="wff-input wff-input-sm"
+                                    placeholder="e.g. Pending, In Review, Approved"
+                                  />
+                                </div>
+                              }
+                            </div>
+
+                          </div>
+                        }
+                      </div>
+                    </div><!-- /wff-fields-section -->
 
                   </div>
                 }

@@ -102,7 +102,20 @@ public sealed class WorkflowsController : ControllerBase
         CancellationToken cancellationToken)
     {
         var steps = request.Steps
-            .Select(s => new StepRequest(s.Name, s.Description, s.IsRequired))
+            .Select(s => new StepRequest(
+                s.Name,
+                s.Description,
+                s.IsRequired,
+                s.RequiredRoleId,
+                s.FieldDefinitions?
+                    .Select(f => new FieldDefinitionRequest(
+                        f.Label,
+                        f.FieldType,
+                        f.IsRequired,
+                        f.HelpText,
+                        f.DropdownOptions))
+                    .ToList()
+                    .AsReadOnly()))
             .ToList()
             .AsReadOnly();
 

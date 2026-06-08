@@ -16,11 +16,13 @@ internal sealed class WorkflowDefinitionRepository
     public async Task<WorkflowDefinition?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => await Query
             .Include(d => d.Steps)
+                .ThenInclude(s => s.Fields)
             .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
 
     public async Task<IReadOnlyList<WorkflowDefinition>> GetAllAsync(CancellationToken cancellationToken = default)
         => await Query
             .Include(d => d.Steps)
+                .ThenInclude(s => s.Fields)
             .OrderByDescending(d => d.UpdatedAt)
             .ToListAsync(cancellationToken);
 
