@@ -7,8 +7,9 @@ namespace STRIDE.Modules.Workflows.Domain.Events;
 /// Consumed by the Notifications module to alert the assignee (or workflow starter).
 /// </summary>
 public sealed record StepOverdueEvent(
-    Guid StepInstanceId,
-    Guid WorkflowInstanceId,
-    Guid TenantId,
-    Guid? AssigneeId,
-    Guid StartedBy) : IDomainEvent;
+    Guid   StepInstanceId,
+    Guid   WorkflowInstanceId,
+    Guid   TenantId,
+    Guid?  AssigneeId,
+    Guid   StartedBy,
+    string StepName = "") : IDomainEvent;

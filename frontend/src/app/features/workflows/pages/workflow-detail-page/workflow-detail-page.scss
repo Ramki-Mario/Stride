@@ -468,6 +468,29 @@
   font-size: 0.875rem;
 }
 
+// ── Activity tab split layout ─────────────────────────────────────────────
+
+.wfd-activity-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--stride-space-6, 1.5rem);
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.wfd-activity-col-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--stride-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--stride-space-3, 0.75rem);
+  padding: 0 var(--stride-space-4, 1rem);
+}
+
 // ── Activity / History placeholder ─────────────────────────────────────────
 
 .wfd-activity-placeholder {

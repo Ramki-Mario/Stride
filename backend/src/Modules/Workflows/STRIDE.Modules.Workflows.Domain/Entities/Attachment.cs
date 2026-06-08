@@ -1,4 +1,5 @@
 using STRIDE.BuildingBlocks.Domain.Entities;
+using STRIDE.Modules.Workflows.Domain.Events;
 
 namespace STRIDE.Modules.Workflows.Domain.Entities;
 
@@ -53,7 +54,7 @@ public sealed class Attachment : AuditableEntity
         if (fileSizeBytes <= 0)
             throw new ArgumentOutOfRangeException(nameof(fileSizeBytes), "File size must be positive.");
 
-        return new Attachment
+        var attachment = new Attachment
         {
             Id                  = Guid.NewGuid(),
             TenantId            = tenantId,
@@ -67,6 +68,16 @@ public sealed class Attachment : AuditableEntity
             CreatedAt           = DateTime.UtcNow,
             UpdatedAt           = DateTime.UtcNow,
         };
+
+        attachment.RaiseDomainEvent(new AttachmentUploadedEvent(
+            attachment.Id,
+            workflowInstanceId,
+            stepInstanceId,
+            tenantId,
+            uploadedByUserId,
+            fileName.Trim()));
+
+        return attachment;
     }
 
     /// <summary>Soft-deletes the attachment. The storage key is retained for deferred cleanup.</summary>

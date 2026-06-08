@@ -262,6 +262,25 @@ export interface PagedCommentsDto {
   pageSize:   number;
 }
 
+// ─── Activity timeline ────────────────────────────────────────────────────────
+
+export interface WorkflowActivityEventDto {
+  id:             string;
+  eventType:      number;
+  eventTypeLabel: string;
+  actorUserId:    string;
+  description:    string;
+  payload:        Record<string, string | null>;
+  occurredAt:     string;   // ISO-8601
+}
+
+export interface PagedActivityDto {
+  items:      WorkflowActivityEventDto[];
+  totalCount: number;
+  page:       number;
+  pageSize:   number;
+}
+
 // ─── Definition detail (GET /bff/workflows/definitions/:id) ──────────────────
 
 export interface RoleDto {

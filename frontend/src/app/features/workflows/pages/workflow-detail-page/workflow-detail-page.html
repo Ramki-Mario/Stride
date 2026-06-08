@@ -613,19 +613,30 @@
           @if (activeTab() === 'activity') {
             <div class="wfd-tab-panel" role="tabpanel">
               @if (instance(); as inst) {
-                <!-- Comment thread — visible when an instance is loaded -->
-                <app-comment-thread
-                  [instanceId]="inst.id"
-                  [currentUserId]="currentUserId()"
-                  [isManager]="isManager()"
-                />
+                <div class="wfd-activity-split">
+                  <!-- Left: activity timeline -->
+                  <section class="wfd-activity-timeline-col">
+                    <h3 class="wfd-activity-col-title">Timeline</h3>
+                    <app-activity-timeline [instanceId]="inst.id" />
+                  </section>
+
+                  <!-- Right: comment thread -->
+                  <section class="wfd-activity-comments-col">
+                    <h3 class="wfd-activity-col-title">Comments</h3>
+                    <app-comment-thread
+                      [instanceId]="inst.id"
+                      [currentUserId]="currentUserId()"
+                      [isManager]="isManager()"
+                    />
+                  </section>
+                </div>
               } @else {
                 <!-- No instance yet -->
                 <div class="wfd-activity-placeholder">
                   <span class="pi pi-comments" style="font-size: 2rem; opacity: 0.3;"></span>
-                  <p class="wfd-ph-title">Start an instance to post comments</p>
+                  <p class="wfd-ph-title">Start an instance to see activity</p>
                   <p class="wfd-ph-desc">
-                    Comments and activity notes will appear here once a workflow
+                    The activity timeline and comment thread will appear here once a workflow
                     instance is running.
                   </p>
                 </div>
