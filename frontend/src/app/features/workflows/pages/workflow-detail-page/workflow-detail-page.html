@@ -612,14 +612,24 @@
           <!-- ── Activity tab ─────────────────────────────────────────── -->
           @if (activeTab() === 'activity') {
             <div class="wfd-tab-panel" role="tabpanel">
-              <div class="wfd-activity-placeholder">
-                <span class="pi pi-clock" style="font-size: 2rem; opacity: 0.3;"></span>
-                <p class="wfd-ph-title">Activity feed coming in Phase 4</p>
-                <p class="wfd-ph-desc">
-                  Step completions, comments, and status changes will appear here
-                  once workflow instances are in use.
-                </p>
-              </div>
+              @if (instance(); as inst) {
+                <!-- Comment thread — visible when an instance is loaded -->
+                <app-comment-thread
+                  [instanceId]="inst.id"
+                  [currentUserId]="currentUserId()"
+                  [isManager]="isManager()"
+                />
+              } @else {
+                <!-- No instance yet -->
+                <div class="wfd-activity-placeholder">
+                  <span class="pi pi-comments" style="font-size: 2rem; opacity: 0.3;"></span>
+                  <p class="wfd-ph-title">Start an instance to post comments</p>
+                  <p class="wfd-ph-desc">
+                    Comments and activity notes will appear here once a workflow
+                    instance is running.
+                  </p>
+                </div>
+              }
             </div>
           }
 

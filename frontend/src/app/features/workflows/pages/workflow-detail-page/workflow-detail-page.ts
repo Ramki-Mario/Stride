@@ -30,6 +30,7 @@ import { WorkflowService }       from '../../services/workflow.service';
 import { StepActionModalComponent }  from '../../components/step-action-modal/step-action-modal';
 import { StepAttachmentsComponent }      from '../../components/step-attachments/step-attachments';
 import { InstanceAttachmentsComponent } from '../../components/instance-attachments/instance-attachments';
+import { CommentThreadComponent }        from '../../components/comment-thread/comment-thread';
 import { InvoiceService }            from '../../../invoicing/services/invoice.service';
 import { AuthService }               from '../../../../core/auth/auth.service';
 import {
@@ -45,7 +46,7 @@ type DetailTab = 'steps' | 'run' | 'attachments' | 'activity' | 'history';
 @Component({
   selector: 'app-workflow-detail-page',
   standalone: true,
-  imports: [NgClass, DecimalPipe, RouterLink, StepActionModalComponent, StepAttachmentsComponent, InstanceAttachmentsComponent],
+  imports: [NgClass, DecimalPipe, RouterLink, StepActionModalComponent, StepAttachmentsComponent, InstanceAttachmentsComponent, CommentThreadComponent],
   templateUrl: './workflow-detail-page.html',
   styleUrl: './workflow-detail-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -151,6 +152,11 @@ export class WorkflowDetailPageComponent implements OnInit {
 
   /** ID of the currently authenticated user — passed to attachment components for delete permission checks. */
   readonly currentUserId = computed(() => this.authService.user()?.userId ?? '');
+
+  /** True when the current user has the TenantAdmin role — grants manager-level delete on comments. */
+  readonly isManager = computed(() =>
+    this.authService.user()?.roles.includes('TenantAdmin') ?? false,
+  );
 
   /** Total attachment count for this instance — updated by InstanceAttachmentsComponent via (countChange). */
   readonly attachmentCount = signal(0);

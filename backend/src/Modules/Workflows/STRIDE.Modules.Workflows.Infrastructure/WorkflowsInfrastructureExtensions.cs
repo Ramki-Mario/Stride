@@ -28,6 +28,7 @@ public static class WorkflowsInfrastructureExtensions
         services.AddScoped<IWorkflowDefinitionRepository, WorkflowDefinitionRepository>();
         services.AddScoped<IWorkflowInstanceRepository,   WorkflowInstanceRepository>();
         services.AddScoped<IAttachmentRepository,         AttachmentRepository>();
+        services.AddScoped<IWorkflowCommentRepository,    WorkflowCommentRepository>();
 
         // ── Read service (Dapper reads) ────────────────────────────────────────
         services.AddScoped<IWorkflowReadService, WorkflowReadService>();
