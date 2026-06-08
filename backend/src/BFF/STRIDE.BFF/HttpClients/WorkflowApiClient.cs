@@ -188,6 +188,57 @@ public sealed class WorkflowApiClient
             $"/api/workflows/instances/{instanceId}/steps/{stepId}/attachments/{attachmentId}",
             token), cancellationToken);
 
+    // ── Instance Attachments ──────────────────────────────────────────────
+
+    /// <summary>
+    /// Forwards a multipart/form-data upload to the Host (instance-level — no step).
+    /// The caller is responsible for setting the correct Content-Type (including boundary).
+    /// </summary>
+    public Task<HttpResponseMessage> UploadInstanceAttachmentAsync(
+        Guid        instanceId,
+        HttpContent multipartContent,
+        string      token,
+        CancellationToken cancellationToken = default)
+    {
+        var req = Build(HttpMethod.Post,
+            $"/api/workflows/instances/{instanceId}/attachments", token);
+        req.Content = multipartContent;
+        return _client.SendAsync(req, cancellationToken);
+    }
+
+    /// <summary>
+    /// Lists all attachments (step-level + instance-level) for a workflow instance.
+    /// </summary>
+    public Task<HttpResponseMessage> ListWorkflowAttachmentsAsync(
+        Guid instanceId,
+        string token,
+        CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get,
+            $"/api/workflows/instances/{instanceId}/attachments", token),
+            cancellationToken);
+
+    /// <summary>
+    /// Downloads an instance-level attachment file.
+    /// Uses ResponseHeadersRead so the response stream is not buffered.
+    /// </summary>
+    public Task<HttpResponseMessage> DownloadInstanceAttachmentAsync(
+        Guid instanceId,
+        Guid attachmentId,
+        string token,
+        CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get,
+            $"/api/workflows/instances/{instanceId}/attachments/{attachmentId}/download",
+            token), HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+    public Task<HttpResponseMessage> DeleteInstanceAttachmentAsync(
+        Guid instanceId,
+        Guid attachmentId,
+        string token,
+        CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Delete,
+            $"/api/workflows/instances/{instanceId}/attachments/{attachmentId}",
+            token), cancellationToken);
+
     // ── Helper ────────────────────────────────────────────────────────────
 
     private static HttpRequestMessage Build(HttpMethod method, string uri, string token)

@@ -191,6 +191,23 @@
               </button>
             }
 
+            <!-- Attachments — only visible when an instance is loaded -->
+            @if (hasActiveInstance()) {
+              <button
+                class="wfd-tab"
+                [class.active]="activeTab() === 'attachments'"
+                (click)="setTab('attachments')"
+                role="tab"
+                [attr.aria-selected]="activeTab() === 'attachments'"
+              >
+                <span class="pi pi-paperclip"></span>
+                Attachments
+                @if (attachmentCount() > 0) {
+                  <span class="wfd-tab-badge">{{ attachmentCount() }}</span>
+                }
+              </button>
+            }
+
             <button
               class="wfd-tab"
               [class.active]="activeTab() === 'activity'"
@@ -501,6 +518,17 @@
                   }
                 </ul>
               }
+            </div>
+          }
+
+          <!-- ── Attachments tab ─────────────────────────────────────── -->
+          @if (activeTab() === 'attachments' && instance()) {
+            <div class="wfd-tab-panel" role="tabpanel">
+              <app-instance-attachments
+                [instanceId]="instance()!.id"
+                [currentUserId]="currentUserId()"
+                (countChange)="attachmentCount.set($event)"
+              />
             </div>
           }
 

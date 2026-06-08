@@ -1,0 +1,129 @@
+<div class="ia-root">
+
+  <!-- ── Job Documents (instance-level) ───────────────────────────────────── -->
+  <section class="ia-section">
+    <h4 class="ia-section-title">
+      <span class="pi pi-briefcase"></span>
+      Job Documents
+      <span class="ia-count-chip">{{ instanceAttachments().length }}</span>
+    </h4>
+
+    <!-- Upload zone -->
+    <div
+      class="ia-upload-zone"
+      [class.ia-dragover]="isDragOver()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)"
+    >
+      <input
+        #fileInput
+        type="file"
+        [accept]="allowedMimes"
+        (change)="onFileSelected($event)"
+        hidden
+      />
+      <button
+        class="ia-upload-btn"
+        type="button"
+        [disabled]="isUploading()"
+        (click)="fileInput.click()"
+      >
+        <i class="pi" [class.pi-upload]="!isUploading()" [class.pi-spin]="isUploading()" [class.pi-spinner]="isUploading()"></i>
+        {{ isUploading() ? 'Uploading…' : 'Upload Document' }}
+      </button>
+      <span class="ia-upload-hint">or drag &amp; drop here</span>
+    </div>
+
+    @if (uploadError()) {
+      <p class="ia-error">{{ uploadError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <p class="ia-muted">Loading…</p>
+    } @else if (loadError()) {
+      <p class="ia-error">{{ loadError() }}</p>
+    } @else if (instanceAttachments().length === 0) {
+      <p class="ia-muted">No job-level documents yet.</p>
+    } @else {
+      <ul class="ia-list">
+        @for (att of instanceAttachments(); track att.id) {
+          <li class="ia-item" [class.ia-item--deleting]="deletingId() === att.id">
+            @if (att.isImage) {
+              <img class="ia-thumb" [src]="downloadUrl(att.id)" [alt]="att.fileName" loading="lazy" />
+            } @else {
+              <span class="ia-icon"><i [class]="fileIcon(att.contentType)"></i></span>
+            }
+            <div class="ia-meta">
+              <span class="ia-name" [title]="att.fileName">{{ att.fileName }}</span>
+              <span class="ia-size">{{ formatSize(att.fileSizeBytes) }}</span>
+            </div>
+            <div class="ia-actions">
+              <a class="ia-btn ia-btn--download" [href]="downloadUrl(att.id)" [download]="att.fileName" title="Download">
+                <i class="pi pi-download"></i>
+              </a>
+              @if (canDelete(att)) {
+                <button class="ia-btn ia-btn--delete" type="button" title="Delete"
+                  [disabled]="deletingId() !== null" (click)="deleteAttachment(att)">
+                  <i class="pi pi-trash"></i>
+                </button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <!-- ── Step Attachments (grouped by step) ───────────────────────────────── -->
+  @if (stepGroups().length > 0) {
+    <section class="ia-section">
+      <h4 class="ia-section-title">
+        <span class="pi pi-list-check"></span>
+        Step Attachments
+      </h4>
+
+      @for (group of stepGroups(); track group.stepInstanceId) {
+        <div class="ia-step-group">
+          <p class="ia-step-label">
+            <span class="pi pi-angle-right"></span>
+            {{ group.stepName }}
+            <span class="ia-count-chip">{{ group.items.length }}</span>
+          </p>
+
+          <ul class="ia-list">
+            @for (att of group.items; track att.id) {
+              <li class="ia-item" [class.ia-item--deleting]="deletingId() === att.id">
+                @if (att.isImage) {
+                  <img class="ia-thumb" [src]="downloadUrl(att.id)" [alt]="att.fileName" loading="lazy" />
+                } @else {
+                  <span class="ia-icon"><i [class]="fileIcon(att.contentType)"></i></span>
+                }
+                <div class="ia-meta">
+                  <span class="ia-name" [title]="att.fileName">{{ att.fileName }}</span>
+                  <span class="ia-size">{{ formatSize(att.fileSizeBytes) }}</span>
+                </div>
+                <div class="ia-actions">
+                  <a class="ia-btn ia-btn--download" [href]="downloadUrl(att.id)" [download]="att.fileName" title="Download">
+                    <i class="pi pi-download"></i>
+                  </a>
+                  @if (canDelete(att)) {
+                    <button class="ia-btn ia-btn--delete" type="button" title="Delete"
+                      [disabled]="deletingId() !== null" (click)="deleteAttachment(att)">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </section>
+  }
+
+  @if (deleteError()) {
+    <p class="ia-error ia-error--delete">{{ deleteError() }}</p>
+  }
+
+</div>

@@ -287,6 +287,76 @@ public sealed class WorkflowsController : ControllerBase
             : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 
+    // ── Instance Attachments ──────────────────────────────────────────────
+
+    [HttpPost("instances/{instanceId:guid}/attachments")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(10 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 10 * 1024 * 1024)]
+    public async Task<IActionResult> UploadInstanceAttachment(
+        Guid instanceId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var content = new StreamContent(Request.Body);
+        content.Headers.ContentType =
+            System.Net.Http.Headers.MediaTypeHeaderValue.Parse(Request.ContentType!);
+
+        var response = await _workflows.UploadInstanceAttachmentAsync(
+            instanceId, content, token, cancellationToken);
+        return await ProxyAsync(response, forwardStatusCode: true, cancellationToken: cancellationToken);
+    }
+
+    [HttpGet("instances/{instanceId:guid}/attachments")]
+    public async Task<IActionResult> ListWorkflowAttachments(
+        Guid instanceId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(
+            await _workflows.ListWorkflowAttachmentsAsync(instanceId, token, cancellationToken),
+            cancellationToken: cancellationToken);
+    }
+
+    [HttpGet("instances/{instanceId:guid}/attachments/{attachmentId:guid}/download")]
+    public async Task<IActionResult> DownloadInstanceAttachment(
+        Guid instanceId, Guid attachmentId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _workflows.DownloadInstanceAttachmentAsync(
+            instanceId, attachmentId, token, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+            return await ProxyAsync(response, cancellationToken: cancellationToken);
+
+        var stream      = await response.Content.ReadAsStreamAsync(cancellationToken);
+        var contentType = response.Content.Headers.ContentType?.ToString()
+                          ?? "application/octet-stream";
+
+        string fileName = "download";
+        if (response.Content.Headers.ContentDisposition is { } cd)
+            fileName = cd.FileNameStar ?? cd.FileName?.Trim('"') ?? fileName;
+
+        return File(stream, contentType, fileName);
+    }
+
+    [HttpDelete("instances/{instanceId:guid}/attachments/{attachmentId:guid}")]
+    public async Task<IActionResult> DeleteInstanceAttachment(
+        Guid instanceId, Guid attachmentId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _workflows.DeleteInstanceAttachmentAsync(
+            instanceId, attachmentId, token, cancellationToken);
+        return response.IsSuccessStatusCode
+            ? NoContent()
+            : await ProxyAsync(response, cancellationToken: cancellationToken);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────
 
     private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");

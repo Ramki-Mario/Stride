@@ -9,6 +9,15 @@ export interface AttachmentDto {
   isImage:          boolean;
 }
 
+/**
+ * Extended attachment DTO returned by the unified workflow-instance list endpoint.
+ * stepInstanceId / stepName are null for instance-level (job-level) attachments.
+ */
+export interface WorkflowAttachmentDto extends AttachmentDto {
+  stepInstanceId: string | null;
+  stepName:       string | null;
+}
+
 /** MIME types accepted by the server — mirror the server-side allowlist. */
 export const ALLOWED_ATTACHMENT_MIME_TYPES =
   'image/jpeg,image/png,image/webp,application/pdf,application/msword,text/plain,' +
