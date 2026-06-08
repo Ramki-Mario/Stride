@@ -256,10 +256,13 @@ Located at: `C:/Users/rmrra/.claude/projects/D--Repos-stride/memory/`
 | `MEMORY.md` | Single-line index with current status and key patterns |
 | `project_stride_overview.md` | Full deep-dive reference document |
 
-**After every story, update `MEMORY.md`** — update the inline status line to reflect:
-- Which EP/US is now ✅ DONE
-- Which US is next
-- Any new patterns established
+> ⚠️ **CODEX: DO NOT TOUCH THESE FILES.** They are Claude's private memory, stored in a
+> Claude-specific directory outside the repo. The format is parsed by Claude's auto-memory
+> system — any write by a non-Claude agent risks silent corruption that Claude won't detect
+> until the next session starts broken.
+>
+> **Claude updates these itself** when it comes back, by reading your session log in Section 10
+> of this file. Your handoff entry IS the update mechanism — write it well.
 
 ---
 
@@ -292,16 +295,20 @@ gh issue close {issue_number} --comment "Implemented in {commit_hash} — {brief
 gh issue close {epic_issue_number} --comment "EP-0XX complete — all stories merged."
 ```
 
-### Step 5 — Update Layer 3 memory (MEMORY.md)
-Edit `C:/Users/rmrra/.claude/projects/D--Repos-stride/memory/MEMORY.md`:
-- Mark the story as ✅ DONE with commit hash and issue number
-- Add the commit hash to the EP-052 status line
-- Update "next:" to point to the next story
-- Add any new patterns to the patterns list
+### Step 5 — ⚠️ DO NOT touch Claude's MEMORY.md
 
-### Step 6 — Write the handoff entry in this file
+`C:/Users/rmrra/.claude/projects/D--Repos-stride/memory/MEMORY.md` is **Claude's private memory file**.
+**Do not read it, do not write to it, do not delete it.**
 
-**Add a new section at the bottom of this file** (see Section 9 below) with:
+- It lives outside the repo in a Claude-specific directory format
+- Claude's auto-memory system parses it in a specific way — any edit by a non-Claude agent risks silent corruption
+- Claude will update it itself when it comes back, by reading your session log in this file
+
+Your job is Step 6 only.
+
+### Step 6 — Write the handoff entry in this file (YOUR MOST IMPORTANT STEP)
+
+**Add a new section at the bottom of this file** (see Section 10 below) with:
 ```markdown
 ## Codex Session — {date}
 
@@ -311,7 +318,7 @@ Edit `C:/Users/rmrra/.claude/projects/D--Repos-stride/memory/MEMORY.md`:
 **Tests added:** {count} — {pass/fail}
 **Next story:** US-XXX (#NNN) — {description}
 **Any issues encountered:** {if any}
-**Memory updated:** MEMORY.md ✅ | GitHub issue closed ✅ | Board moved to Done ✅
+**Memory updated:** MEMORY.md — NOT TOUCHED (Claude does this) ✅ | GitHub issue closed ✅ | Board moved to Done ✅
 ```
 
 This is the **most important step** — it's how Claude knows exactly what happened while it was away.
@@ -463,10 +470,12 @@ I'll review everything you've done when the token limit resets. If you leave cle
 **Angular build:** {Clean / Errors — describe if errors}
 
 **Memory updates:**
-- [ ] MEMORY.md updated
-- [ ] GitHub issue(s) closed: #{NNN}
-- [ ] Board item(s) moved to Done
+- [ ] `pilot/shared-memory.md` — this entry appended ✅
+- [ ] `pilot/current-status.md` — updated ✅
+- [ ] GitHub issue(s) closed: #{NNN} ✅
+- [ ] Board item(s) moved to Done ✅
 - [ ] Epic closed (if applicable): #{NNN}
+- [ ] `MEMORY.md` — ⚠️ NOT touched (Claude's private file — Claude updates it on return)
 
 **Next story:** US-XXX (#NNN) — {description}
 
