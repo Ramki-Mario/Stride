@@ -214,6 +214,15 @@ public sealed class WorkflowsController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 
+    [HttpPost("instances/{instanceId:guid}/steps/{stepId:guid}/claim")]
+    public async Task<IActionResult> ClaimStep(Guid instanceId, Guid stepId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        var response = await _workflows.ClaimStepAsync(instanceId, stepId, token, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
+    }
+
     // ── Step Attachments ──────────────────────────────────────────────────
 
     [HttpPost("instances/{instanceId:guid}/steps/{stepId:guid}/attachments")]

@@ -233,6 +233,31 @@
       </form>
     }
 
+    <!-- ── CLAIM confirmation ────────────────────────────────────────── -->
+    @if (action === 'claim') {
+      <div class="sam-confirm-body">
+        <p>
+          Claim <strong>{{ step.stepName }}</strong>? The step will be assigned to you
+          and you will be responsible for completing it.
+        </p>
+      </div>
+      <div class="sam-footer">
+        <button type="button" class="sam-btn sam-btn-ghost" (click)="dismiss()">Cancel</button>
+        <button
+          type="button"
+          class="sam-btn {{ submitClass }}"
+          (click)="onSubmit()"
+          [disabled]="isSubmitting()"
+        >
+          @if (isSubmitting()) {
+            <span class="sam-spinner" aria-hidden="true"></span> Saving…
+          } @else {
+            <span class="pi pi-hand-paper"></span> {{ submitLabel }}
+          }
+        </button>
+      </div>
+    }
+
     <!-- ── SKIP confirmation ──────────────────────────────────────────── -->
     @if (action === 'skip') {
       <div class="sam-confirm-body">

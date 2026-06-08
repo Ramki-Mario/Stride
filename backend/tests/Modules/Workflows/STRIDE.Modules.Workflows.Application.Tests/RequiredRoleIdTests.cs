@@ -136,7 +136,7 @@ public sealed class RequiredRoleIdTests
         step.AssignedAt.Should().BeNull();
         var before = DateTime.UtcNow;
 
-        instance.AssignStep(step.Id, Guid.NewGuid());
+        instance.AssignStep(step.Id, Guid.NewGuid(), Guid.NewGuid());
 
         step.AssignedAt.Should().NotBeNull();
         step.AssignedAt.Should().BeOnOrAfter(before);

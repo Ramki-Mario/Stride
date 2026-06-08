@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Workflows.API.Dtos;
 using STRIDE.Modules.Workflows.Application.Commands.AssignStep;
+using STRIDE.Modules.Workflows.Application.Commands.ClaimStep;
 using STRIDE.Modules.Workflows.Application.Commands.CompleteStep;
 using STRIDE.Modules.Workflows.Application.Commands.FailStep;
 using STRIDE.Modules.Workflows.Application.Commands.SkipStep;
@@ -37,6 +38,38 @@ public sealed class StepsController : ControllerBase
     {
         _mediator    = mediator;
         _currentUser = currentUser;
+    }
+
+    /// <summary>
+    /// Claim a step for the calling user (self-assignment).
+    /// If the step has a RequiredRoleId the caller must hold that role.
+    /// POST /api/workflows/instances/{instanceId}/steps/{stepId}/claim
+    /// </summary>
+    [HttpPost("{stepId:guid}/claim")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Claim(
+        Guid instanceId,
+        Guid stepId,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new ClaimStepCommand(
+                WorkflowInstanceId: instanceId,
+                StepInstanceId:     stepId,
+                ClaimantId:         _currentUser.UserId),
+            cancellationToken);
+
+        if (result.IsFailure)
+        {
+            if (result.Error!.Contains(NotFoundFragment, StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { error = result.Error });
+
+            return BadRequest(new { error = result.Error });
+        }
+
+        return NoContent();
     }
 
     /// <summary>

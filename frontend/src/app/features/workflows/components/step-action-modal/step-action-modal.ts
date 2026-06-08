@@ -136,6 +136,7 @@ export class StepActionModalComponent implements OnChanges {
   get title(): string {
     switch (this.action) {
       case 'assign':   return 'Assign Step';
+      case 'claim':    return 'Claim Step';
       case 'complete': return 'Complete Step';
       case 'fail':     return 'Fail Step';
       case 'skip':     return 'Skip Step';
@@ -146,6 +147,7 @@ export class StepActionModalComponent implements OnChanges {
   get iconClass(): string {
     switch (this.action) {
       case 'assign':   return 'pi pi-user-plus  modal-icon-primary';
+      case 'claim':    return 'pi pi-hand-paper  modal-icon-primary';
       case 'complete': return 'pi pi-check-circle modal-icon-success';
       case 'fail':     return 'pi pi-times-circle modal-icon-error';
       case 'skip':     return 'pi pi-forward      modal-icon-warning';
@@ -156,6 +158,7 @@ export class StepActionModalComponent implements OnChanges {
   get submitLabel(): string {
     switch (this.action) {
       case 'assign':   return 'Assign';
+      case 'claim':    return 'Claim Step';
       case 'complete': return 'Mark Complete';
       case 'fail':     return 'Mark Failed';
       case 'skip':     return 'Skip Step';
@@ -166,6 +169,7 @@ export class StepActionModalComponent implements OnChanges {
   get submitClass(): string {
     switch (this.action) {
       case 'assign':   return 'sam-btn-primary';
+      case 'claim':    return 'sam-btn-primary';
       case 'complete': return 'sam-btn-success';
       case 'fail':     return 'sam-btn-danger';
       case 'skip':     return 'sam-btn-warning';
@@ -192,10 +196,15 @@ export class StepActionModalComponent implements OnChanges {
 
     switch (this.action) {
       case 'assign':   this.submitAssign();   break;
+      case 'claim':    this.submitClaim();    break;
       case 'complete': this.submitComplete(); break;
       case 'fail':     this.submitFail();     break;
       case 'skip':     this.submitSkip();     break;
     }
+  }
+
+  private submitClaim(): void {
+    this.dispatch(this.wfService.claimStep(this.instanceId, this.step.id));
   }
 
   private submitAssign(): void {

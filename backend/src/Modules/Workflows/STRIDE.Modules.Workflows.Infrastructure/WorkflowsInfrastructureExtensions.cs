@@ -6,6 +6,7 @@ using STRIDE.Modules.Workflows.Infrastructure.FileStorage;
 using STRIDE.Modules.Workflows.Infrastructure.Persistence;
 using STRIDE.Modules.Workflows.Infrastructure.Persistence.Repositories;
 using STRIDE.Modules.Workflows.Infrastructure.ReadModels;
+using STRIDE.Modules.Workflows.Infrastructure.Services;
 
 namespace STRIDE.Modules.Workflows.Infrastructure;
 
@@ -29,6 +30,9 @@ public static class WorkflowsInfrastructureExtensions
 
         // ── Read service (Dapper reads) ────────────────────────────────────────
         services.AddScoped<IWorkflowReadService, WorkflowReadService>();
+
+        // ── Cross-module role service (Dapper, identity schema) ────────────────
+        services.AddScoped<IUserRoleService, UserRoleService>();
 
         // ── File storage ───────────────────────────────────────────────────────
         // Switch between local (dev) and Azure Blob Storage (prod) via config.

@@ -134,7 +134,7 @@ export interface WorkflowInstanceDetail {
 
 // ─── Step action types ────────────────────────────────────────────────────────
 
-export type StepAction = 'assign' | 'complete' | 'fail' | 'skip';
+export type StepAction = 'assign' | 'claim' | 'complete' | 'fail' | 'skip';
 
 // ─── Form request payloads ────────────────────────────────────────────────────
 

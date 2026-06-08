@@ -405,6 +405,16 @@
                           <!-- Action buttons (only for actionable states) -->
                           @if (inst.status === 'Running' || inst.status === 'Paused') {
                             <div class="wfd-inst-step-actions">
+                              @if (canClaim(step)) {
+                                <button
+                                  class="wfd-step-action-btn claim"
+                                  (click)="openModal(step, 'claim')"
+                                  aria-label="Claim step"
+                                  title="Claim this step for yourself"
+                                >
+                                  <span class="pi pi-hand-paper"></span>
+                                </button>
+                              }
                               @if (canAssign(step)) {
                                 <button
                                   class="wfd-step-action-btn assign"
@@ -449,6 +459,9 @@
                           <p class="wfd-inst-step-assignee">
                             <span class="pi pi-user"></span>
                             Assigned to {{ step.assigneeId.substring(0, 8) }}…
+                            @if (step.assignedAt) {
+                              <span class="wfd-assigned-at">({{ formatDateTime(step.assignedAt) }})</span>
+                            }
                           </p>
                         }
                         @if (step.failureReason) {

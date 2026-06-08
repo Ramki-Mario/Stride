@@ -410,6 +410,11 @@ export class WorkflowDetailPageComponent implements OnInit {
     return !step.isRequired && (step.status === 'Pending' || step.status === 'InProgress');
   }
 
+  /** A step can be claimed if it's Pending and not yet assigned to anyone. */
+  canClaim(step: StepInstance): boolean {
+    return step.status === 'Pending' && !step.assigneeId;
+  }
+
   stepInstanceStatusClass(status: string): string {
     return STEP_INSTANCE_STATUS_CONFIG[status as keyof typeof STEP_INSTANCE_STATUS_CONFIG]?.cssClass ?? 'ssi-pending';
   }

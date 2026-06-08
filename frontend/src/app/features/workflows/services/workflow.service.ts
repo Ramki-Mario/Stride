@@ -101,6 +101,14 @@ export class WorkflowService {
     );
   }
 
+  /** Claim a step for the current user (self-assignment). */
+  claimStep(instanceId: string, stepId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.base}/instances/${instanceId}/steps/${stepId}/claim`,
+      {},
+    );
+  }
+
   /** Mark a step instance as completed, optionally with billable items. */
   completeStep(
     instanceId: string,
