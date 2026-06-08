@@ -281,6 +281,15 @@ export interface PagedActivityDto {
   pageSize:   number;
 }
 
+// ─── @mention autocomplete ───────────────────────────────────────────────────
+
+/** Minimal user record returned from the administration users search. */
+export interface MentionSuggestionDto {
+  id:          string;
+  displayName: string;
+  email:       string;
+}
+
 // ─── Definition detail (GET /bff/workflows/definitions/:id) ──────────────────
 
 export interface RoleDto {

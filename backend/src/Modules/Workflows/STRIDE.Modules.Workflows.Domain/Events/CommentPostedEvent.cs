@@ -7,8 +7,9 @@ namespace STRIDE.Modules.Workflows.Domain.Events;
 /// Consumed by the activity-timeline handler (US-166) and the @mention handler (US-167).
 /// </summary>
 public sealed record CommentPostedEvent(
-    Guid CommentId,
-    Guid WorkflowInstanceId,
-    Guid TenantId,
-    Guid AuthorId,
-    string Body) : IDomainEvent;
+    Guid   CommentId,
+    Guid   WorkflowInstanceId,
+    Guid   TenantId,
+    Guid   AuthorId,
+    string Body,
+    string WorkflowName = "") : IDomainEvent;

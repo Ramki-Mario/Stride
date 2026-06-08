@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   WorkflowDefinitionSummary,
   WorkflowDefinitionDetail,
@@ -14,6 +15,7 @@ import {
   MyTask,
   PagedCommentsDto,
   PagedActivityDto,
+  MentionSuggestionDto,
 } from '../models/workflow.models';
 
 /**
@@ -195,6 +197,25 @@ export class WorkflowService {
       `${this.base}/instances/${instanceId}/activity`,
       { params: { page, pageSize, order } },
     );
+  }
+
+  // ── @mention autocomplete ──────────────────────────────────────────────────
+
+  /**
+   * Searches tenant users by display name or email prefix, returning a small
+   * result set for @mention autocomplete.  Reuses the administration users
+   * endpoint — no new BFF route is needed.
+   */
+  searchUsersForMention(query: string, pageSize = 8): Observable<MentionSuggestionDto[]> {
+    const params = new HttpParams()
+      .set('search',   query)
+      .set('pageSize', pageSize)
+      .set('page',     1);
+
+    return this.http.get<{ items: MentionSuggestionDto[] }>(
+      '/bff/administration/users',
+      { params },
+    ).pipe(map(r => r.items));
   }
 
   /** Export all captured step field values for an instance as a CSV blob. */

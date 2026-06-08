@@ -37,7 +37,8 @@ internal sealed class CreateCommentCommandHandler
                 request.WorkflowInstanceId,
                 request.TenantId,
                 request.AuthorId,
-                request.Body);
+                request.Body,
+                instance.WorkflowName);
         }
         catch (WorkflowDomainException ex)
         {

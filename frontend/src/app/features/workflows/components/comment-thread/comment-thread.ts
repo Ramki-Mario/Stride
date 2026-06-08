@@ -4,6 +4,7 @@ import {
   DestroyRef,
   Input,
   OnChanges,
+  OnInit,
   SimpleChanges,
   computed,
   inject,
@@ -11,12 +12,20 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, catchError, finalize } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 import { WorkflowService }       from '../../services/workflow.service';
-import { WorkflowCommentDto }    from '../../models/workflow.models';
+import { WorkflowCommentDto, MentionSuggestionDto } from '../../models/workflow.models';
 
 const PAGE_SIZE = 20;
+
+/** A segment of a rendered comment body — either plain text or a @mention highlight. */
+export interface CommentSegment {
+  text: string;
+  isMention: boolean;
+}
 
 /**
  * Comment thread for a workflow instance.
@@ -24,11 +33,15 @@ const PAGE_SIZE = 20;
  * Renders a chronological list of comments with inline edit/delete,
  * a new-comment textarea, and pagination.
  *
+ * Supports @mention autocomplete: type @ followed by one or more characters to
+ * see a dropdown of matching users. Select a user to insert @emailLocalPart.
+ * Posted @mentions are highlighted in rendered comment text.
+ *
  * Inputs:
- *   instanceId   — the workflow instance to thread on (required)
+ *   instanceId    — the workflow instance to thread on (required)
  *   currentUserId — ID of the logged-in user (for edit/delete permission checks)
- *   isManager    — true when the current user has the TenantAdmin role
- *                  (managers can soft-delete others' comments)
+ *   isManager     — true when the current user has the TenantAdmin role
+ *                   (managers can soft-delete others' comments)
  */
 @Component({
   selector: 'app-comment-thread',
@@ -38,7 +51,7 @@ const PAGE_SIZE = 20;
   styleUrl:    './comment-thread.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CommentThreadComponent implements OnChanges {
+export class CommentThreadComponent implements OnChanges, OnInit {
   @Input({ required: true }) instanceId!:   string;
   @Input() currentUserId = '';
   @Input() isManager     = false;
@@ -68,6 +81,19 @@ export class CommentThreadComponent implements OnChanges {
   readonly deletingId  = signal<string | null>(null);
   readonly deleteError = signal<string | null>(null);
 
+  // ── @mention autocomplete state ───────────────────────────────────────────
+  /** null = dropdown closed; string = the partial word typed after @ */
+  readonly mentionQuery       = signal<string | null>(null);
+  readonly mentionSuggestions = signal<MentionSuggestionDto[]>([]);
+  readonly mentionLoading     = signal(false);
+  /** Which textarea is currently driving the mention dropdown. */
+  private activeTextareaEl: HTMLTextAreaElement | null = null;
+  /** Which body signal maps to the active textarea. */
+  private activeMentionBody: (() => string) & { set: (v: string) => void } | null = null;
+
+  /** Subject used to debounce mention search calls. */
+  private readonly mentionSearch$ = new Subject<string>();
+
   // ── Computed ──────────────────────────────────────────────────────────────
   readonly totalPages = computed(() =>
     Math.max(1, Math.ceil(this.totalCount() / PAGE_SIZE)),
@@ -77,6 +103,23 @@ export class CommentThreadComponent implements OnChanges {
   readonly hasNext = computed(() => this.page() < this.totalPages());
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
+
+  ngOnInit(): void {
+    // Debounce @mention searches to avoid hammering the server on each keystroke.
+    this.mentionSearch$.pipe(
+      debounceTime(200),
+      distinctUntilChanged(),
+      switchMap(q => {
+        if (!q) return of([]);
+        this.mentionLoading.set(true);
+        return this.svc.searchUsersForMention(q).pipe(
+          catchError(() => of([])),
+          finalize(() => this.mentionLoading.set(false)),
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(suggestions => this.mentionSuggestions.set(suggestions));
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['instanceId'] && this.instanceId) {
@@ -141,12 +184,14 @@ export class CommentThreadComponent implements OnChanges {
     this.editingId.set(comment.id);
     this.editBody.set(comment.body);
     this.saveError.set(null);
+    this.closeMention();
   }
 
   cancelEdit(): void {
     this.editingId.set(null);
     this.editBody.set('');
     this.saveError.set(null);
+    this.closeMention();
   }
 
   saveEdit(commentId: string): void {
@@ -208,6 +253,102 @@ export class CommentThreadComponent implements OnChanges {
     this.load();
   }
 
+  // ── @mention autocomplete ─────────────────────────────────────────────────
+
+  /**
+   * Called by (input) on the compose or edit textarea.
+   * Inspects the text before the caret to detect an in-progress @mention.
+   */
+  onInput(event: Event, bodySignal: WritableSignal<string>): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    bodySignal.set(textarea.value);
+
+    const caret  = textarea.selectionStart ?? textarea.value.length;
+    const before = textarea.value.substring(0, caret);
+    const match  = before.match(/@([\w.\-]*)$/);
+
+    if (match) {
+      this.activeTextareaEl  = textarea;
+      this.activeMentionBody = bodySignal as unknown as (() => string) & { set: (v: string) => void };
+      this.mentionQuery.set(match[1]);
+      this.mentionSearch$.next(match[1]);
+    } else {
+      this.closeMention();
+    }
+  }
+
+  /**
+   * Called when the user selects a suggestion from the dropdown.
+   * Replaces the partial @handle before the caret with the full @emailLocalPart.
+   */
+  pickMention(suggestion: MentionSuggestionDto, event: MouseEvent): void {
+    // Prevent the textarea blur that would otherwise close the dropdown before this fires.
+    event.preventDefault();
+
+    const textarea  = this.activeTextareaEl;
+    const bodyFn    = this.activeMentionBody;
+    if (!textarea || !bodyFn) { this.closeMention(); return; }
+
+    const localPart = suggestion.email.split('@')[0].toLowerCase();
+    const caret     = textarea.selectionStart ?? textarea.value.length;
+    const before    = textarea.value.substring(0, caret);
+    const after     = textarea.value.substring(caret);
+    const replaced  = before.replace(/@([\w.\-]*)$/, `@${localPart} `);
+
+    bodyFn.set(replaced + after);
+    this.closeMention();
+
+    // Restore focus and move caret to end of inserted token.
+    setTimeout(() => {
+      textarea.focus();
+      const pos = replaced.length;
+      textarea.setSelectionRange(pos, pos);
+    }, 0);
+  }
+
+  /** Closes the mention dropdown and clears related state. */
+  closeMention(): void {
+    this.mentionQuery.set(null);
+    this.mentionSuggestions.set([]);
+    this.activeTextareaEl  = null;
+    this.activeMentionBody = null;
+  }
+
+  /**
+   * Derives the email local-part from a full email address.
+   * Used in the suggestion dropdown to show the @handle that will be inserted.
+   */
+  localPart(email: string): string {
+    return email.split('@')[0].toLowerCase();
+  }
+
+  // ── Mention rendering ─────────────────────────────────────────────────────
+
+  /**
+   * Splits a comment body into alternating plain-text and @mention segments
+   * so the template can render mentions as highlighted spans.
+   */
+  parseMentions(body: string): CommentSegment[] {
+    const mentionPattern = /@([\w.\-]+)/g;
+    const segments: CommentSegment[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = mentionPattern.exec(body)) !== null) {
+      if (match.index > lastIndex) {
+        segments.push({ text: body.substring(lastIndex, match.index), isMention: false });
+      }
+      segments.push({ text: match[0], isMention: true });
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < body.length) {
+      segments.push({ text: body.substring(lastIndex), isMention: false });
+    }
+
+    return segments;
+  }
+
   // ── Permissions ───────────────────────────────────────────────────────────
 
   isOwnComment(comment: WorkflowCommentDto): boolean {
@@ -253,4 +394,14 @@ export class CommentThreadComponent implements OnChanges {
   trackById(_: number, c: WorkflowCommentDto): string {
     return c.id;
   }
+
+  trackBySuggestion(_: number, s: MentionSuggestionDto): string {
+    return s.id;
+  }
+}
+
+/** TypeScript helper — WritableSignal shape used in the mention insertion path. */
+interface WritableSignal<T> {
+  (): T;
+  set(value: T): void;
 }

@@ -34,8 +34,9 @@ public static class WorkflowsInfrastructureExtensions
         // ── Read service (Dapper reads) ────────────────────────────────────────
         services.AddScoped<IWorkflowReadService, WorkflowReadService>();
 
-        // ── Cross-module role service (Dapper, identity schema) ────────────────
-        services.AddScoped<IUserRoleService, UserRoleService>();
+        // ── Cross-module services (Dapper, identity schema) ───────────────────
+        services.AddScoped<IUserRoleService,   UserRoleService>();
+        services.AddScoped<IUserLookupService, UserLookupService>();
 
         // ── Background jobs ────────────────────────────────────────────────────
         // Hosted service that periodically scans for overdue steps and SLA breaches.
