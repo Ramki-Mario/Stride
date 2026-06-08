@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using STRIDE.Modules.Workflows.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using STRIDE.Modules.Workflows.Infrastructure.Persistence;
 namespace STRIDE.Modules.Workflows.Infrastructure.Migrations
 {
     [DbContext(typeof(WorkflowsDbContext))]
-    partial class WorkflowsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260608124547_AddWorkflowComments")]
+    partial class AddWorkflowComments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
