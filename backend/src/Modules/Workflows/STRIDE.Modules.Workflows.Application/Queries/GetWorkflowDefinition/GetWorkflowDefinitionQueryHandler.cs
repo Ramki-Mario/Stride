@@ -43,7 +43,7 @@ internal sealed class GetWorkflowDefinitionQueryHandler
             definition.CreatedBy,
             definition.Steps
                 .OrderBy(s => s.Order)
-                .Select(s => new StepDefinitionDto(s.Id, s.Name, s.Description, s.Order, s.IsRequired))
+                .Select(s => new StepDefinitionDto(s.Id, s.Name, s.Description, s.Order, s.IsRequired, s.RequiredRoleId))
                 .ToList()
                 .AsReadOnly());
 

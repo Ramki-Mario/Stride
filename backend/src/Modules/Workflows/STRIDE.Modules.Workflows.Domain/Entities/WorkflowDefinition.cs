@@ -55,19 +55,28 @@ public sealed class WorkflowDefinition : AuditableEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public StepDefinition AddStep(string name, string? description, bool isRequired = true)
+    public StepDefinition AddStep(
+        string name,
+        string? description,
+        bool isRequired = true,
+        Guid? requiredRoleId = null)
     {
         if (Status != WorkflowStatus.Draft)
             throw new WorkflowDomainException("Steps can only be added to Draft workflows.");
 
         var order = _steps.Count;
-        var step = StepDefinition.Create(Id, name, description, order, isRequired);
+        var step = StepDefinition.Create(Id, name, description, order, isRequired, requiredRoleId);
         _steps.Add(step);
         UpdatedAt = DateTime.UtcNow;
         return step;
     }
 
-    public void UpdateStep(Guid stepId, string name, string? description, bool isRequired)
+    public void UpdateStep(
+        Guid stepId,
+        string name,
+        string? description,
+        bool isRequired,
+        Guid? requiredRoleId = null)
     {
         if (Status != WorkflowStatus.Draft)
             throw new WorkflowDomainException("Steps can only be edited on Draft workflows.");
@@ -75,7 +84,7 @@ public sealed class WorkflowDefinition : AuditableEntity
         var step = _steps.FirstOrDefault(s => s.Id == stepId)
             ?? throw new WorkflowDomainException($"Step '{stepId}' not found.");
 
-        step.Update(name, description, isRequired);
+        step.Update(name, description, isRequired, requiredRoleId);
         UpdatedAt = DateTime.UtcNow;
     }
 

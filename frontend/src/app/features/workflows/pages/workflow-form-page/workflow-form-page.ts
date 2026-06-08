@@ -21,6 +21,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
 import { WorkflowService } from '../../services/workflow.service';
+import { RoleDto } from '../../models/workflow.models';
 
 @Component({
   selector: 'app-workflow-form-page',
@@ -41,6 +42,11 @@ export class WorkflowFormPageComponent implements OnInit {
 
   readonly isEditMode  = signal(false);
   readonly workflowId  = signal<string | null>(null);
+
+  // ── Roles (for step role-assignment dropdown) ──────────────────────────
+
+  readonly roles        = signal<RoleDto[]>([]);
+  readonly rolesLoading = signal(false);
 
   // ── Async state ───────────────────────────────────────────────────────────
 
@@ -67,6 +73,18 @@ export class WorkflowFormPageComponent implements OnInit {
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
+    // Load available roles for the role-assignment dropdown on each step.
+    this.rolesLoading.set(true);
+    this.wfService.listRoles()
+      .pipe(
+        finalize(() => this.rolesLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next:  (roles) => this.roles.set(roles),
+        error: () => { /* non-fatal — dropdown will show empty */ },
+      });
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode.set(true);
@@ -110,9 +128,10 @@ export class WorkflowFormPageComponent implements OnInit {
 
   addStep(): void {
     const stepGroup = this.fb.group({
-      name:        ['', [Validators.required, Validators.maxLength(100)]],
-      description: [''],
-      isRequired:  [true],
+      name:           ['', [Validators.required, Validators.maxLength(100)]],
+      description:    [''],
+      isRequired:     [true],
+      requiredRoleId: [null as string | null],
     });
     this.stepsArray.push(stepGroup);
   }
@@ -169,11 +188,14 @@ export class WorkflowFormPageComponent implements OnInit {
           error: (err) => this.saveError.set(this.mapError(err)),
         });
     } else {
-      const steps = this.stepsArray.value.map((s: { name: any; description: string; isRequired: any; }) => ({
-        name:        s.name,
-        description: s.description?.trim() || null,
-        isRequired:  s.isRequired,
-      }));
+      const steps = this.stepsArray.value.map(
+        (s: { name: string; description: string; isRequired: boolean; requiredRoleId: string | null }) => ({
+          name:           s.name,
+          description:    s.description?.trim() || null,
+          isRequired:     s.isRequired,
+          requiredRoleId: s.requiredRoleId || null,
+        }),
+      );
 
       this.wfService
         .createDefinition({ name, description: descValue, steps })

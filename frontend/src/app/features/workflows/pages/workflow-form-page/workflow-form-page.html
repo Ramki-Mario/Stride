@@ -238,6 +238,21 @@
                           maxlength="250"
                         />
                       </div>
+
+                      <div class="wff-field wff-field-compact">
+                        <label class="wff-label" [for]="'step-role-' + $index">Required Role</label>
+                        <select
+                          [id]="'step-role-' + $index"
+                          [formControl]="$any(stepsArray.at($index).get('requiredRoleId'))"
+                          class="wff-select"
+                        >
+                          <option [ngValue]="null">— Any user —</option>
+                          @for (role of roles(); track role.id) {
+                            <option [ngValue]="role.id">{{ role.name }}</option>
+                          }
+                        </select>
+                        <p class="wff-hint">Optional — restricts assignment to users who hold this role.</p>
+                      </div>
                     </div>
 
                   </div>

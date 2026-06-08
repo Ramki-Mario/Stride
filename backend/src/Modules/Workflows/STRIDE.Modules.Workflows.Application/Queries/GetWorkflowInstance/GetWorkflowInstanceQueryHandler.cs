@@ -52,6 +52,8 @@ internal sealed class GetWorkflowInstanceQueryHandler
                     s.IsRequired,
                     s.Status,
                     s.AssigneeId,
+                    s.AssignedAt,
+                    s.RequiredRoleId,
                     s.FailureReason,
                     s.CompletedAt,
                     s.BillableItems

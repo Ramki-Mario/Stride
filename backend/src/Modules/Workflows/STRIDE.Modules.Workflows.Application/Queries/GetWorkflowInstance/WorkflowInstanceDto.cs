@@ -27,6 +27,8 @@ public sealed record StepInstanceDto(
     bool IsRequired,
     StepStatus Status,
     Guid? AssigneeId,
+    DateTime? AssignedAt,
+    Guid? RequiredRoleId,
     string? FailureReason,
     DateTime? CompletedAt,
     IReadOnlyList<BillableItemDto> BillableItems)

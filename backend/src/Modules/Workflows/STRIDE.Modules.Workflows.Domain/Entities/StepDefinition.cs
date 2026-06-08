@@ -5,11 +5,17 @@ namespace STRIDE.Modules.Workflows.Domain.Entities;
 
 public sealed class StepDefinition : BaseEntity<Guid>
 {
-    public Guid WorkflowDefinitionId { get; private set; }
-    public string Name { get; private set; } = string.Empty;
-    public string? Description { get; private set; }
-    public int Order { get; private set; }
-    public bool IsRequired { get; private set; }
+    public Guid  WorkflowDefinitionId { get; private set; }
+    public string  Name               { get; private set; } = string.Empty;
+    public string? Description        { get; private set; }
+    public int     Order              { get; private set; }
+    public bool    IsRequired         { get; private set; }
+    /// <summary>
+    /// Optional cross-module reference to an Identity Role.
+    /// When set, only users who hold this role may be auto-assigned or claim this step.
+    /// Stored as a bare FK (no EF navigation — Identity is a separate DbContext).
+    /// </summary>
+    public Guid? RequiredRoleId { get; private set; }
 
     private StepDefinition() { }
 
@@ -18,7 +24,8 @@ public sealed class StepDefinition : BaseEntity<Guid>
         string name,
         string? description,
         int order,
-        bool isRequired = true)
+        bool isRequired = true,
+        Guid? requiredRoleId = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new WorkflowDomainException("Step name cannot be empty.");
@@ -28,22 +35,24 @@ public sealed class StepDefinition : BaseEntity<Guid>
 
         return new StepDefinition
         {
-            Id = Guid.NewGuid(),
+            Id                   = Guid.NewGuid(),
             WorkflowDefinitionId = workflowDefinitionId,
-            Name = name.Trim(),
-            Description = description?.Trim(),
-            Order = order,
-            IsRequired = isRequired,
+            Name                 = name.Trim(),
+            Description          = description?.Trim(),
+            Order                = order,
+            IsRequired           = isRequired,
+            RequiredRoleId       = requiredRoleId,
         };
     }
 
-    internal void Update(string name, string? description, bool isRequired)
+    internal void Update(string name, string? description, bool isRequired, Guid? requiredRoleId = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new WorkflowDomainException("Step name cannot be empty.");
 
-        Name = name.Trim();
-        Description = description?.Trim();
-        IsRequired = isRequired;
+        Name           = name.Trim();
+        Description    = description?.Trim();
+        IsRequired     = isRequired;
+        RequiredRoleId = requiredRoleId;
     }
 }

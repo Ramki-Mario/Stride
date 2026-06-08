@@ -19,6 +19,19 @@ public sealed class IdentityApiClient
     public IdentityApiClient(HttpClient client) => _client = client;
 
     /// <summary>
+    /// Returns all active roles for the current tenant.
+    /// Forwards the Bearer token from the BFF session cookie.
+    /// </summary>
+    public Task<HttpResponseMessage> ListRolesAsync(
+        string accessToken,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "/api/identity/roles");
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+        return _client.SendAsync(request, cancellationToken);
+    }
+
+    /// <summary>
     /// Authenticates the user against the Host. Returns null on 401/invalid credentials,
     /// the populated response on success, and throws on transport / 5xx errors.
     /// </summary>

@@ -17,4 +17,5 @@ public sealed record CreateWorkflowCommand(
 public sealed record StepRequest(
     string Name,
     string? Description,
-    bool IsRequired = true);
+    bool IsRequired = true,
+    Guid? RequiredRoleId = null);

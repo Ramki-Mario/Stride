@@ -26,6 +26,10 @@ internal sealed class StepInstanceConfiguration : IEntityTypeConfiguration<StepI
             .HasMaxLength(20);
 
         builder.Property(s => s.AssigneeId);
+        builder.Property(s => s.AssignedAt);
+
+        // Cross-module FK to Identity.Role — bare nullable Guid, no EF navigation.
+        builder.Property(s => s.RequiredRoleId);
 
         builder.Property(s => s.FailureReason)
             .HasMaxLength(2000);

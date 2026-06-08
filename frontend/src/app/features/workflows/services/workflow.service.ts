@@ -9,6 +9,7 @@ import {
   CreateWorkflowRequest,
   UpdateWorkflowRequest,
   BillableItemInput,
+  RoleDto,
 } from '../models/workflow.models';
 
 /**
@@ -29,7 +30,13 @@ import {
 export class WorkflowService {
   private readonly http = inject(HttpClient);
 
-  private readonly base = '/bff/workflows';
+  private readonly base       = '/bff/workflows';
+  private readonly identityBase = '/bff/identity';
+
+  /** Returns all active roles for the tenant, used by the workflow builder role dropdown. */
+  listRoles(): Observable<RoleDto[]> {
+    return this.http.get<RoleDto[]>(`${this.identityBase}/roles`);
+  }
 
   /** List all workflow definitions for the current tenant. */
   getDefinitions(): Observable<WorkflowDefinitionSummary[]> {

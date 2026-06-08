@@ -90,14 +90,17 @@ export interface StepInstance {
   id: string;
   stepDefinitionId: string;
   /** Matches backend StepInstanceDto.StepName → JSON "stepName". */
-  stepName: string;
-  order: number;
-  isRequired: boolean;
-  status: StepInstanceStatus;
+  stepName:       string;
+  order:          number;
+  isRequired:     boolean;
+  status:         StepInstanceStatus;
   /** Matches backend StepInstanceDto.AssigneeId → JSON "assigneeId". */
-  assigneeId: string | null;
-  completedAt: string | null;
-  failureReason: string | null;
+  assigneeId:     string | null;
+  assignedAt:     string | null;
+  /** Cross-module FK to Identity.Role — bare Guid, no navigation. */
+  requiredRoleId: string | null;
+  completedAt:    string | null;
+  failureReason:  string | null;
   billableItems:    BillableItemDto[];
   billableSubtotal: number;
 }
@@ -136,9 +139,10 @@ export type StepAction = 'assign' | 'complete' | 'fail' | 'skip';
 // ─── Form request payloads ────────────────────────────────────────────────────
 
 export interface StepRequest {
-  name: string;
-  description: string | null;
-  isRequired: boolean;
+  name:           string;
+  description:    string | null;
+  isRequired:     boolean;
+  requiredRoleId: string | null;
 }
 
 export interface CreateWorkflowRequest {
@@ -154,12 +158,19 @@ export interface UpdateWorkflowRequest {
 
 // ─── Definition detail (GET /bff/workflows/definitions/:id) ──────────────────
 
+export interface RoleDto {
+  id:          string;
+  name:        string;
+  description: string;
+}
+
 export interface StepDefinition {
-  id: string;
-  name: string;
-  description: string | null;
-  order: number;
-  isRequired: boolean;
+  id:             string;
+  name:           string;
+  description:    string | null;
+  order:          number;
+  isRequired:     boolean;
+  requiredRoleId: string | null;
 }
 
 export interface WorkflowDefinitionDetail {

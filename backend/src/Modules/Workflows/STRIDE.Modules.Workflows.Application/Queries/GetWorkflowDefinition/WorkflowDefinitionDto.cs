@@ -19,4 +19,5 @@ public sealed record StepDefinitionDto(
     string Name,
     string? Description,
     int Order,
-    bool IsRequired);
+    bool IsRequired,
+    Guid? RequiredRoleId);

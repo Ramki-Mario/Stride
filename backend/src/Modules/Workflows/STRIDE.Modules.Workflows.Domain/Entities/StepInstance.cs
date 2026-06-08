@@ -16,6 +16,9 @@ public sealed class StepInstance : BaseEntity<Guid>
     public bool   IsRequired         { get; private set; }
     public StepStatus Status         { get; private set; }
     public Guid?  AssigneeId         { get; private set; }
+    public DateTime? AssignedAt      { get; private set; }
+    /// <summary>Cross-module FK — bare Guid, no EF navigation across module boundary.</summary>
+    public Guid?  RequiredRoleId     { get; private set; }
     public string? FailureReason     { get; private set; }
     public DateTime? CompletedAt     { get; private set; }
 
@@ -38,6 +41,7 @@ public sealed class StepInstance : BaseEntity<Guid>
             StepName           = definition.Name,
             Order              = definition.Order,
             IsRequired         = definition.IsRequired,
+            RequiredRoleId     = definition.RequiredRoleId,
             Status             = StepStatus.Pending,
         };
     }
@@ -48,7 +52,8 @@ public sealed class StepInstance : BaseEntity<Guid>
             throw new WorkflowDomainException($"Step '{StepName}' cannot be assigned in its current state ({Status}).");
 
         AssigneeId = assigneeId;
-        Status = StepStatus.Assigned;
+        AssignedAt = DateTime.UtcNow;
+        Status     = StepStatus.Assigned;
     }
 
     /// <summary>
