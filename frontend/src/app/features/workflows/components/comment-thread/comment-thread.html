@@ -1,5 +1,6 @@
 <!-- ═══════════════════════════════════════════════════════════════════════
      Comment Thread  (US-165 · EP-054)
+     @mention autocomplete added in US-167.
      Embedded in the "Activity" tab of the workflow detail page.
      ═══════════════════════════════════════════════════════════════════════ -->
 
@@ -11,15 +12,44 @@
       <span class="pi pi-user"></span>
     </div>
     <div class="ct-compose-body">
-      <textarea
-        class="ct-textarea"
-        rows="3"
-        placeholder="Write a comment…"
-        [ngModel]="newBody()"
-        (ngModelChange)="newBody.set($event)"
-        [disabled]="isPosting()"
-        aria-label="New comment"
-      ></textarea>
+      <!-- Wrapper gives the dropdown a positioning anchor -->
+      <div class="ct-textarea-wrap">
+        <textarea
+          class="ct-textarea"
+          rows="3"
+          placeholder="Write a comment… type @ to mention someone"
+          [ngModel]="newBody()"
+          (input)="onInput($event, newBody)"
+          [disabled]="isPosting()"
+          (keydown.escape)="closeMention()"
+          (blur)="closeMention()"
+          aria-label="New comment"
+        ></textarea>
+
+        <!-- @mention dropdown (compose) -->
+        @if (mentionQuery() !== null) {
+          <ul class="ct-mention-list" role="listbox" aria-label="Mention suggestions">
+            @if (mentionLoading()) {
+              <li class="ct-mention-loading">
+                <span class="pi pi-spin pi-spinner"></span> Searching…
+              </li>
+            } @else if (mentionSuggestions().length === 0) {
+              <li class="ct-mention-empty">No users found</li>
+            } @else {
+              @for (s of mentionSuggestions(); track s.id) {
+                <li
+                  class="ct-mention-item"
+                  role="option"
+                  (mousedown)="pickMention(s, $event)"
+                >
+                  <span class="ct-mention-handle">@{{ localPart(s.email) }}</span>
+                  <span class="ct-mention-name">{{ s.displayName }}</span>
+                </li>
+              }
+            }
+          </ul>
+        }
+      </div>
 
       @if (postError()) {
         <div class="ct-error-line" role="alert">
@@ -148,14 +178,42 @@
             <!-- Edit mode -->
             @if (editingId() === comment.id) {
               <div class="ct-edit-form">
-                <textarea
-                  class="ct-textarea"
-                  rows="3"
-                  [ngModel]="editBody()"
-                  (ngModelChange)="editBody.set($event)"
-                  [disabled]="isSaving()"
-                  aria-label="Edit comment body"
-                ></textarea>
+                <div class="ct-textarea-wrap">
+                  <textarea
+                    class="ct-textarea"
+                    rows="3"
+                    [ngModel]="editBody()"
+                    (input)="onInput($event, editBody)"
+                    [disabled]="isSaving()"
+                    (keydown.escape)="closeMention()"
+                    (blur)="closeMention()"
+                    aria-label="Edit comment body"
+                  ></textarea>
+
+                  <!-- @mention dropdown (edit) -->
+                  @if (mentionQuery() !== null) {
+                    <ul class="ct-mention-list" role="listbox" aria-label="Mention suggestions">
+                      @if (mentionLoading()) {
+                        <li class="ct-mention-loading">
+                          <span class="pi pi-spin pi-spinner"></span> Searching…
+                        </li>
+                      } @else if (mentionSuggestions().length === 0) {
+                        <li class="ct-mention-empty">No users found</li>
+                      } @else {
+                        @for (s of mentionSuggestions(); track s.id) {
+                          <li
+                            class="ct-mention-item"
+                            role="option"
+                            (mousedown)="pickMention(s, $event)"
+                          >
+                            <span class="ct-mention-handle">@{{ localPart(s.email) }}</span>
+                            <span class="ct-mention-name">{{ s.displayName }}</span>
+                          </li>
+                        }
+                      }
+                    </ul>
+                  }
+                </div>
 
                 @if (saveError()) {
                   <div class="ct-error-line" role="alert">
@@ -189,9 +247,15 @@
                 </div>
               </div>
             } @else {
-              <!-- Comment body (display mode) -->
+              <!-- Comment body (display mode) — @mentions rendered as highlighted chips -->
               <p class="ct-body" [class.ct-body--deleted]="comment.isDeleted">
-                {{ comment.body }}
+                @for (seg of parseMentions(comment.body); track $index) {
+                  @if (seg.isMention) {
+                    <span class="ct-mention-chip">{{ seg.text }}</span>
+                  } @else {
+                    {{ seg.text }}
+                  }
+                }
               </p>
             }
 

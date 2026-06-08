@@ -322,6 +322,79 @@
   justify-content: flex-end;
 }
 
+// ── Textarea wrapper (provides positioning anchor for the mention dropdown) ──
+
+.ct-textarea-wrap {
+  position: relative;
+}
+
+// ── @mention autocomplete dropdown ────────────────────────────────────────────
+
+.ct-mention-list {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  background: var(--stride-surface, #fff);
+  border: 1px solid var(--stride-border, #d1d5db);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.ct-mention-loading,
+.ct-mention-empty {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  color: var(--stride-text-muted);
+}
+
+.ct-mention-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.45rem 0.875rem;
+  cursor: pointer;
+  transition: background 0.1s;
+
+  &:hover {
+    background: var(--stride-surface-hover, #f3f4f6);
+  }
+}
+
+.ct-mention-handle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--stride-primary, #2563eb);
+  flex-shrink: 0;
+}
+
+.ct-mention-name {
+  font-size: 0.8125rem;
+  color: var(--stride-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ── @mention chip (rendered in comment body) ──────────────────────────────────
+
+.ct-mention-chip {
+  display: inline-block;
+  padding: 0 0.3em;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--stride-primary, #2563eb) 12%, transparent);
+  color: var(--stride-primary, #2563eb);
+  font-weight: 500;
+  font-size: 0.875em;
+  white-space: nowrap;
+}
+
 // ── Pagination ─────────────────────────────────────────────────────────────
 
 .ct-pagination {

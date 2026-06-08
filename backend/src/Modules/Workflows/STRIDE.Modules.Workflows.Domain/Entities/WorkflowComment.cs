@@ -26,11 +26,16 @@ public sealed class WorkflowComment : AuditableEntity
     /// <summary>
     /// Creates and returns a new comment. Raises <see cref="CommentPostedEvent"/>.
     /// </summary>
+    /// <param name="workflowName">
+    /// Optional name of the workflow instance — forwarded in the event so handlers
+    /// can compose notification text without an extra DB round-trip.
+    /// </param>
     public static WorkflowComment Create(
-        Guid workflowInstanceId,
-        Guid tenantId,
-        Guid authorId,
-        string body)
+        Guid   workflowInstanceId,
+        Guid   tenantId,
+        Guid   authorId,
+        string body,
+        string workflowName = "")
     {
         if (string.IsNullOrWhiteSpace(body))
             throw new WorkflowDomainException("Comment body cannot be empty.");
@@ -55,7 +60,8 @@ public sealed class WorkflowComment : AuditableEntity
             workflowInstanceId,
             tenantId,
             authorId,
-            comment.Body));
+            comment.Body,
+            workflowName));
 
         return comment;
     }
