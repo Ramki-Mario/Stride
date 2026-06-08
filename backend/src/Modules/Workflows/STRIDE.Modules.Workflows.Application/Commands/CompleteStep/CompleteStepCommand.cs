@@ -12,7 +12,8 @@ public sealed record CompleteStepCommand(
     Guid WorkflowInstanceId,
     Guid StepInstanceId,
     Guid CompletedBy,
-    IReadOnlyList<BillableItemInput>? BillableItems = null) : IRequest<Result>;
+    IReadOnlyList<BillableItemInput>? BillableItems = null,
+    IReadOnlyList<FieldValueInput>? FieldValues = null) : IRequest<Result>;
 
 /// <summary>
 /// A single billable line item passed in from the API when completing a step.
@@ -22,3 +23,10 @@ public sealed record BillableItemInput(
     decimal     Quantity,
     decimal     UnitPrice,
     BillableUnit Unit);
+
+/// <summary>
+/// A single captured field value submitted when completing a step.
+/// </summary>
+public sealed record FieldValueInput(
+    Guid StepFieldDefinitionId,
+    string Value);

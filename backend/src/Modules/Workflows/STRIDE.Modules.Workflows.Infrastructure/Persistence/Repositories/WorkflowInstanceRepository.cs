@@ -21,6 +21,8 @@ internal sealed class WorkflowInstanceRepository
         => await Query
             .Include(i => i.Steps)
                 .ThenInclude(s => s.BillableItems)
+            .Include(i => i.Steps)
+                .ThenInclude(s => s.FieldValues)
             .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
 
     public async Task<IReadOnlyList<WorkflowInstance>> GetByDefinitionIdAsync(
@@ -29,6 +31,8 @@ internal sealed class WorkflowInstanceRepository
         => await Query
             .Include(i => i.Steps)
                 .ThenInclude(s => s.BillableItems)
+            .Include(i => i.Steps)
+                .ThenInclude(s => s.FieldValues)
             .Where(i => i.WorkflowDefinitionId == definitionId)
             .OrderByDescending(i => i.CreatedAt)
             .ToListAsync(cancellationToken);
@@ -37,6 +41,8 @@ internal sealed class WorkflowInstanceRepository
         => await Query
             .Include(i => i.Steps)
                 .ThenInclude(s => s.BillableItems)
+            .Include(i => i.Steps)
+                .ThenInclude(s => s.FieldValues)
             .OrderByDescending(i => i.UpdatedAt)
             .ToListAsync(cancellationToken);
 

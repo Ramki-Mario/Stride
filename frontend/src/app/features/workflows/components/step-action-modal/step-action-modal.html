@@ -101,9 +101,92 @@
       <div class="sam-confirm-body">
         <p>
           Mark <strong>{{ step.stepName }}</strong> as <strong>Completed</strong>.
-          Optionally log billable items for this step before confirming.
+          Capture required step details and optionally log billable items before confirming.
         </p>
       </div>
+
+      @if (orderedFields.length > 0) {
+        <div class="sam-fields-section">
+          <div class="sam-fields-header">
+            <span class="sam-fields-label">Step Fields</span>
+          </div>
+
+          @for (field of orderedFields; track field.id; let fi = $index) {
+            <div class="sam-runtime-field" [formGroup]="fieldValueControls[fi]">
+              <label class="sam-label" [attr.for]="'sam-field-' + field.id">
+                {{ field.label }}
+                @if (field.isRequired) {
+                  <span class="sam-required" aria-hidden="true">*</span>
+                }
+              </label>
+
+              @if (field.fieldType === 'LongText') {
+                <textarea
+                  [id]="'sam-field-' + field.id"
+                  formControlName="value"
+                  class="sam-textarea"
+                  rows="3"
+                  [class.sam-input-error]="isFieldInvalid(fi)"
+                ></textarea>
+              } @else if (field.fieldType === 'Dropdown') {
+                <select
+                  [id]="'sam-field-' + field.id"
+                  formControlName="value"
+                  class="sam-input sam-select"
+                  [class.sam-input-error]="isFieldInvalid(fi)"
+                >
+                  <option value="">Select...</option>
+                  @for (option of field.dropdownOptions; track option) {
+                    <option [value]="option">{{ option }}</option>
+                  }
+                </select>
+              } @else if (field.fieldType === 'Boolean') {
+                <label class="sam-checkbox">
+                  <input
+                    [id]="'sam-field-' + field.id"
+                    type="checkbox"
+                    formControlName="value"
+                  />
+                  <span>Yes</span>
+                </label>
+              } @else if (field.fieldType === 'Date') {
+                <input
+                  [id]="'sam-field-' + field.id"
+                  type="date"
+                  formControlName="value"
+                  class="sam-input"
+                  [class.sam-input-error]="isFieldInvalid(fi)"
+                />
+              } @else if (field.fieldType === 'Number' || field.fieldType === 'Currency' || field.fieldType === 'Hours') {
+                <input
+                  [id]="'sam-field-' + field.id"
+                  type="number"
+                  formControlName="value"
+                  class="sam-input"
+                  [attr.step]="field.fieldType === 'Number' ? '1' : '0.01'"
+                  [class.sam-input-error]="isFieldInvalid(fi)"
+                />
+              } @else {
+                <input
+                  [id]="'sam-field-' + field.id"
+                  type="text"
+                  formControlName="value"
+                  class="sam-input"
+                  [class.sam-input-error]="isFieldInvalid(fi)"
+                />
+              }
+
+              @if (field.helpText) {
+                <p class="sam-hint">{{ field.helpText }}</p>
+              }
+
+              @if (isFieldInvalid(fi)) {
+                <p class="sam-error-msg" role="alert">This field is required.</p>
+              }
+            </div>
+          }
+        </div>
+      }
 
       <!-- Billable Items Section -->
       <div class="sam-billable-section">

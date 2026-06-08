@@ -7,6 +7,7 @@ namespace STRIDE.Modules.Workflows.Domain.Entities;
 public sealed class StepInstance : BaseEntity<Guid>
 {
     private readonly List<BillableItem> _billableItems = new();
+    private readonly List<StepFieldValue> _fieldValues = new();
 
     public Guid   WorkflowInstanceId { get; private set; }
     public Guid   TenantId           { get; private set; }
@@ -24,6 +25,9 @@ public sealed class StepInstance : BaseEntity<Guid>
 
     /// <summary>Billable items logged when this step was completed.</summary>
     public IReadOnlyList<BillableItem> BillableItems => _billableItems.AsReadOnly();
+
+    /// <summary>Runtime field values captured when this step was completed.</summary>
+    public IReadOnlyList<StepFieldValue> FieldValues => _fieldValues.AsReadOnly();
 
     private StepInstance() { }
 
@@ -60,7 +64,9 @@ public sealed class StepInstance : BaseEntity<Guid>
     /// Marks the step as completed and optionally records billable items.
     /// Items with zero quantity or zero price are rejected at the domain level.
     /// </summary>
-    internal void Complete(IReadOnlyList<(string Description, decimal Quantity, decimal UnitPrice, BillableUnit Unit)>? billableItems = null)
+    internal void Complete(
+        IReadOnlyList<(string Description, decimal Quantity, decimal UnitPrice, BillableUnit Unit)>? billableItems = null,
+        IReadOnlyList<(Guid StepFieldDefinitionId, string Value)>? fieldValues = null)
     {
         if (Status is not (StepStatus.Assigned or StepStatus.InProgress or StepStatus.Pending))
             throw new WorkflowDomainException($"Step '{StepName}' cannot be completed in its current state ({Status}).");
@@ -70,6 +76,22 @@ public sealed class StepInstance : BaseEntity<Guid>
             foreach (var (desc, qty, price, unit) in billableItems)
             {
                 _billableItems.Add(BillableItem.Create(Id, TenantId, desc, qty, price, unit));
+            }
+        }
+
+        if (fieldValues is not null)
+        {
+            var duplicateField = fieldValues
+                .GroupBy(v => v.StepFieldDefinitionId)
+                .FirstOrDefault(g => g.Count() > 1);
+
+            if (duplicateField is not null)
+                throw new WorkflowDomainException(
+                    $"Field '{duplicateField.Key}' was submitted more than once for step '{StepName}'.");
+
+            foreach (var (fieldDefinitionId, value) in fieldValues)
+            {
+                _fieldValues.Add(StepFieldValue.Create(Id, TenantId, fieldDefinitionId, value));
             }
         }
 

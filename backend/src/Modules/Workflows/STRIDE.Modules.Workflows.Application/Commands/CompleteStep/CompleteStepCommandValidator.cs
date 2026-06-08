@@ -14,5 +14,12 @@ public sealed class CompleteStepCommandValidator : AbstractValidator<CompleteSte
 
         RuleFor(x => x.CompletedBy)
             .NotEmpty().WithMessage("CompletedBy (user ID) is required.");
+
+        RuleForEach(x => x.FieldValues)
+            .ChildRules(v =>
+            {
+                v.RuleFor(x => x.StepFieldDefinitionId)
+                    .NotEmpty().WithMessage("StepFieldDefinitionId is required.");
+            });
     }
 }

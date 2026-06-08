@@ -52,6 +52,15 @@ internal sealed class StepInstanceConfiguration : IEntityTypeConfiguration<StepI
             .HasField("_billableItems")
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
+        builder.HasMany(s => s.FieldValues)
+            .WithOne()
+            .HasForeignKey(v => v.StepInstanceId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(s => s.FieldValues)
+            .HasField("_fieldValues")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
         builder.ToTable("StepInstances");
     }
 }

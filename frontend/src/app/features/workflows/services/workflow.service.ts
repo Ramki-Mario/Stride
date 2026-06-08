@@ -9,6 +9,7 @@ import {
   CreateWorkflowRequest,
   UpdateWorkflowRequest,
   BillableItemInput,
+  FieldValueInput,
   RoleDto,
   MyTask,
 } from '../models/workflow.models';
@@ -120,10 +121,12 @@ export class WorkflowService {
     instanceId: string,
     stepId: string,
     billableItems?: BillableItemInput[],
+    fieldValues?: FieldValueInput[],
   ): Observable<void> {
-    const body = billableItems?.length
-      ? { billableItems }
-      : {};
+    const body: { billableItems?: BillableItemInput[]; fieldValues?: FieldValueInput[] } = {};
+    if (billableItems?.length) body.billableItems = billableItems;
+    if (fieldValues?.length) body.fieldValues = fieldValues;
+
     return this.http.post<void>(
       `${this.base}/instances/${instanceId}/steps/${stepId}/complete`,
       body,

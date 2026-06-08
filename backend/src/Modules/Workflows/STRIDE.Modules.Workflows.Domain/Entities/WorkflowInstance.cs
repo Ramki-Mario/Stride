@@ -118,12 +118,13 @@ public sealed class WorkflowInstance : AuditableEntity
     public void CompleteStep(
         Guid stepInstanceId,
         Guid completedBy,
-        IReadOnlyList<(string Description, decimal Quantity, decimal UnitPrice, BillableUnit Unit)>? billableItems = null)
+        IReadOnlyList<(string Description, decimal Quantity, decimal UnitPrice, BillableUnit Unit)>? billableItems = null,
+        IReadOnlyList<(Guid StepFieldDefinitionId, string Value)>? fieldValues = null)
     {
         EnsureRunning();
 
         var step = GetStep(stepInstanceId);
-        step.Complete(billableItems);
+        step.Complete(billableItems, fieldValues);
         UpdatedAt = DateTime.UtcNow;
 
         RaiseDomainEvent(new StepCompletedEvent(step.Id, Id, TenantId, completedBy));

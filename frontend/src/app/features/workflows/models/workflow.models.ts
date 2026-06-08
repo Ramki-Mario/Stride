@@ -82,6 +82,11 @@ export interface BillableItemInput {
   unit:        BillableUnit;
 }
 
+export interface FieldValueInput {
+  stepFieldDefinitionId: string;
+  value:                 string;
+}
+
 // ─── Step instance ────────────────────────────────────────────────────────────
 
 export type StepInstanceStatus = 'Pending' | 'InProgress' | 'Completed' | 'Failed' | 'Skipped';
@@ -103,6 +108,8 @@ export interface StepInstance {
   failureReason:  string | null;
   billableItems:    BillableItemDto[];
   billableSubtotal: number;
+  fields:           FieldDefinition[];
+  fieldValues:      StepFieldValueDto[];
 }
 
 export const STEP_INSTANCE_STATUS_CONFIG: Record<
@@ -172,6 +179,12 @@ export interface FieldDefinition {
   displayOrder:   number;
   helpText:       string | null;
   dropdownOptions: string[];
+}
+
+export interface StepFieldValueDto {
+  id:                    string;
+  stepFieldDefinitionId: string;
+  value:                 string;
 }
 
 /** Write model — submitted in the create-workflow request body. */

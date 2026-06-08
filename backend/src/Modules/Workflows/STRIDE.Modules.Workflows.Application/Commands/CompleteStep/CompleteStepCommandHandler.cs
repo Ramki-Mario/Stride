@@ -33,7 +33,11 @@ internal sealed class CompleteStepCommandHandler
                 .Select(b => (b.Description, b.Quantity, b.UnitPrice, b.Unit))
                 .ToList();
 
-            instance.CompleteStep(request.StepInstanceId, request.CompletedBy, billableItems);
+            var fieldValues = request.FieldValues?
+                .Select(v => (v.StepFieldDefinitionId, v.Value))
+                .ToList();
+
+            instance.CompleteStep(request.StepInstanceId, request.CompletedBy, billableItems, fieldValues);
             _instances.Update(instance);
             await _instances.SaveChangesAsync(cancellationToken);
 

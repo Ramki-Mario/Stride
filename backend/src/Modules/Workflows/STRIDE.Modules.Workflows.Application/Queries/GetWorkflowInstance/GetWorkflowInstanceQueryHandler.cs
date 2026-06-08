@@ -9,14 +9,17 @@ internal sealed class GetWorkflowInstanceQueryHandler
     : IRequestHandler<GetWorkflowInstanceQuery, Result<WorkflowInstanceDto>>
 {
     private readonly IWorkflowInstanceRepository _instances;
+    private readonly IWorkflowDefinitionRepository _definitions;
     private readonly ILogger<GetWorkflowInstanceQueryHandler> _logger;
 
     public GetWorkflowInstanceQueryHandler(
         IWorkflowInstanceRepository instances,
+        IWorkflowDefinitionRepository definitions,
         ILogger<GetWorkflowInstanceQueryHandler> logger)
     {
-        _instances = instances;
-        _logger    = logger;
+        _instances   = instances;
+        _definitions = definitions;
+        _logger      = logger;
     }
 
     public async Task<Result<WorkflowInstanceDto>> Handle(
@@ -31,6 +34,24 @@ internal sealed class GetWorkflowInstanceQueryHandler
             return Result.Failure<WorkflowInstanceDto>(
                 $"Workflow instance '{request.WorkflowInstanceId}' not found.");
         }
+
+        var definition = await _definitions.GetByIdAsync(instance.WorkflowDefinitionId, cancellationToken);
+        var fieldsByStepDefinitionId = definition?.Steps
+            .ToDictionary(
+                s => s.Id,
+                s => (IReadOnlyList<StepFieldDefinitionDto>)s.Fields
+                    .OrderBy(f => f.DisplayOrder)
+                    .Select(f => new StepFieldDefinitionDto(
+                        f.Id,
+                        f.Label,
+                        f.FieldType.ToString(),
+                        f.IsRequired,
+                        f.DisplayOrder,
+                        f.HelpText,
+                        f.DropdownOptions))
+                    .ToList()
+                    .AsReadOnly())
+            ?? new Dictionary<Guid, IReadOnlyList<StepFieldDefinitionDto>>();
 
         var dto = new WorkflowInstanceDto(
             instance.Id,
@@ -64,6 +85,16 @@ internal sealed class GetWorkflowInstanceQueryHandler
                             b.UnitPrice,
                             b.Unit.ToString(),
                             b.LineTotal))
+                        .ToList()
+                        .AsReadOnly(),
+                    fieldsByStepDefinitionId.TryGetValue(s.StepDefinitionId, out var fields)
+                        ? fields
+                        : Array.Empty<StepFieldDefinitionDto>(),
+                    s.FieldValues
+                        .Select(v => new StepFieldValueDto(
+                            v.Id,
+                            v.StepFieldDefinitionId,
+                            v.Value))
                         .ToList()
                         .AsReadOnly()))
                 .ToList()

@@ -31,7 +31,9 @@ public sealed record StepInstanceDto(
     Guid? RequiredRoleId,
     string? FailureReason,
     DateTime? CompletedAt,
-    IReadOnlyList<BillableItemDto> BillableItems)
+    IReadOnlyList<BillableItemDto> BillableItems,
+    IReadOnlyList<StepFieldDefinitionDto> Fields,
+    IReadOnlyList<StepFieldValueDto> FieldValues)
 {
     /// <summary>Sum of line totals (Quantity × UnitPrice) for this step.</summary>
     public decimal BillableSubtotal => BillableItems.Sum(b => b.LineTotal);
@@ -44,3 +46,19 @@ public sealed record BillableItemDto(
     decimal UnitPrice,
     string Unit,
     decimal LineTotal);
+
+/// <summary>Runtime field metadata copied from the source step definition.</summary>
+public sealed record StepFieldDefinitionDto(
+    Guid Id,
+    string Label,
+    string FieldType,
+    bool IsRequired,
+    int DisplayOrder,
+    string? HelpText,
+    IReadOnlyList<string> DropdownOptions);
+
+/// <summary>Captured runtime value for a step field.</summary>
+public sealed record StepFieldValueDto(
+    Guid Id,
+    Guid StepFieldDefinitionId,
+    string Value);

@@ -15,7 +15,15 @@ import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } fr
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
-import { StepInstance, StepAction, BillableUnit, BILLABLE_UNIT_LABELS, BillableItemInput } from '../../models/workflow.models';
+import {
+  StepInstance,
+  StepAction,
+  BillableUnit,
+  BILLABLE_UNIT_LABELS,
+  BillableItemInput,
+  FieldDefinition,
+  FieldValueInput,
+} from '../../models/workflow.models';
 import { WorkflowService } from '../../services/workflow.service';
 
 /**
@@ -83,6 +91,7 @@ export class StepActionModalComponent implements OnChanges {
 
   /** Used for Complete action — optional billable items list. */
   readonly billableItemsArray = this.fb.array<FormGroup>([]);
+  readonly fieldValuesArray = this.fb.array<FormGroup>([]);
 
   readonly billableUnits: BillableUnit[] = ['Hours', 'Each', 'Day', 'Fixed'];
   readonly billableUnitLabels = BILLABLE_UNIT_LABELS;
@@ -92,6 +101,15 @@ export class StepActionModalComponent implements OnChanges {
 
   get billableControls(): FormGroup[] {
     return this.billableItemsArray.controls as FormGroup[];
+  }
+
+  get fieldValueControls(): FormGroup[] {
+    return this.fieldValuesArray.controls as FormGroup[];
+  }
+
+  get orderedFields(): FieldDefinition[] {
+    return [...(this.step?.fields ?? [])]
+      .sort((a, b) => a.displayOrder - b.displayOrder);
   }
 
   addBillableItem(): void {
@@ -127,8 +145,29 @@ export class StepActionModalComponent implements OnChanges {
     this.assignForm.reset();
     this.failForm.reset();
     this.billableItemsArray.clear();
+    this.fieldValuesArray.clear();
+    this.buildFieldValueControls();
     this.billableRunningTotal.set(0);
     this.submitError.set(null);
+  }
+
+  private buildFieldValueControls(): void {
+    for (const field of this.orderedFields) {
+      this.fieldValuesArray.push(this.fb.group({
+        stepFieldDefinitionId: [field.id],
+        value: [this.defaultFieldValue(field), this.fieldValidators(field)],
+      }));
+    }
+  }
+
+  private defaultFieldValue(field: FieldDefinition): string | boolean {
+    return field.fieldType === 'Boolean' ? false : '';
+  }
+
+  private fieldValidators(field: FieldDefinition) {
+    return field.isRequired && field.fieldType !== 'Boolean'
+      ? [Validators.required]
+      : [];
   }
 
   // ── Metadata helpers ──────────────────────────────────────────────────────
@@ -189,6 +228,11 @@ export class StepActionModalComponent implements OnChanges {
     return !!(c?.invalid && c.touched);
   }
 
+  isFieldInvalid(index: number): boolean {
+    const c = this.fieldValuesArray.at(index)?.get('value');
+    return !!(c?.invalid && c.touched);
+  }
+
   // ── Submit ────────────────────────────────────────────────────────────────
 
   onSubmit(): void {
@@ -218,7 +262,8 @@ export class StepActionModalComponent implements OnChanges {
   private submitComplete(): void {
     // Validate all billable item rows before submitting
     this.billableItemsArray.controls.forEach(c => c.markAllAsTouched());
-    if (this.billableItemsArray.invalid) return;
+    this.fieldValuesArray.controls.forEach(c => c.markAllAsTouched());
+    if (this.billableItemsArray.invalid || this.fieldValuesArray.invalid) return;
 
     const items: BillableItemInput[] = this.billableItemsArray.controls.map(ctrl => ({
       description: ctrl.get('description')!.value as string,
@@ -227,7 +272,38 @@ export class StepActionModalComponent implements OnChanges {
       unit:        ctrl.get('unit')!.value as BillableUnit,
     }));
 
-    this.dispatch(this.wfService.completeStep(this.instanceId, this.step.id, items.length ? items : undefined));
+    const fieldValues = this.buildFieldValuePayload();
+
+    this.dispatch(this.wfService.completeStep(
+      this.instanceId,
+      this.step.id,
+      items.length ? items : undefined,
+      fieldValues.length ? fieldValues : undefined,
+    ));
+  }
+
+  private buildFieldValuePayload(): FieldValueInput[] {
+    return this.fieldValuesArray.controls
+      .map((ctrl, index) => {
+        const field = this.orderedFields[index];
+        const raw = ctrl.get('value')!.value;
+        const value = field.fieldType === 'Boolean'
+          ? String(Boolean(raw))
+          : String(raw ?? '').trim();
+
+        return {
+          field,
+          input: {
+            stepFieldDefinitionId: ctrl.get('stepFieldDefinitionId')!.value as string,
+            value,
+          },
+        };
+      })
+      .filter(({ field, input }) =>
+        field.fieldType === 'Boolean'
+          ? field.isRequired || input.value === 'true'
+          : field.isRequired || input.value.length > 0)
+      .map(({ input }) => input);
   }
 
   private submitFail(): void {

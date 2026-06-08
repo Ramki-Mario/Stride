@@ -13,10 +13,11 @@ public sealed record FailStepRequest(string Reason);
 
 /// <summary>
 /// Optional body for POST .../steps/{stepId}/complete
-/// When omitted, the step is completed with no billable items.
+/// When omitted, the step is completed with no billable items or field values.
 /// </summary>
 public sealed record CompleteStepRequest(
-    IReadOnlyList<BillableItemRequest>? BillableItems = null);
+    IReadOnlyList<BillableItemRequest>? BillableItems = null,
+    IReadOnlyList<FieldValueRequest>? FieldValues = null);
 
 /// <summary>A single billable line item submitted on step completion.</summary>
 public sealed record BillableItemRequest(
@@ -24,3 +25,8 @@ public sealed record BillableItemRequest(
     decimal      Quantity,
     decimal      UnitPrice,
     BillableUnit Unit);
+
+/// <summary>A captured value for one runtime step field.</summary>
+public sealed record FieldValueRequest(
+    Guid StepFieldDefinitionId,
+    string Value);

@@ -123,12 +123,17 @@ public sealed class StepsController : ControllerBase
             .Select(b => new BillableItemInput(b.Description, b.Quantity, b.UnitPrice, b.Unit))
             .ToList();
 
+        var fieldValues = request?.FieldValues?
+            .Select(v => new FieldValueInput(v.StepFieldDefinitionId, v.Value))
+            .ToList();
+
         var result = await _mediator.Send(
             new CompleteStepCommand(
                 WorkflowInstanceId: instanceId,
                 StepInstanceId:     stepId,
                 CompletedBy:        _currentUser.UserId,
-                BillableItems:      billableItems),
+                BillableItems:      billableItems,
+                FieldValues:        fieldValues),
             cancellationToken);
 
         if (result.IsFailure)

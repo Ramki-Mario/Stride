@@ -113,6 +113,32 @@ public sealed class CompleteStepCommandHandlerTests
         await _repo.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task Handle_WithFieldValues_CompletesStepWithValues()
+    {
+        // Arrange
+        var (instance, stepId) = BuildRunningInstance();
+        var fieldId = Guid.NewGuid();
+        _repo.GetByIdAsync(instance.Id, Arg.Any<CancellationToken>())
+            .Returns(instance);
+
+        var command = new CompleteStepCommand(
+            instance.Id,
+            stepId,
+            Guid.NewGuid(),
+            FieldValues: new[] { new FieldValueInput(fieldId, "2026-06-08") });
+
+        // Act
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        var step = instance.Steps.Single(s => s.Id == stepId);
+        step.FieldValues.Should().ContainSingle();
+        step.FieldValues[0].StepFieldDefinitionId.Should().Be(fieldId);
+        step.FieldValues[0].Value.Should().Be("2026-06-08");
+    }
+
     // ── Domain exception propagation ──────────────────────────────────────────
 
     [Fact]

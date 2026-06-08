@@ -228,6 +228,21 @@
   color: var(--stride-text-muted);
 }
 
+.sam-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--stride-text-secondary);
+  cursor: pointer;
+
+  input {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--stride-primary);
+  }
+}
+
 // ── Warning notice ─────────────────────────────────────────────────────────
 
 .sam-warning-notice {
@@ -341,6 +356,37 @@
 }
 
 // ── Billable items widget ──────────────────────────────────────────────────
+
+.sam-fields-section {
+  margin-top: 0.75rem;
+  border: 1px solid var(--stride-border-soft);
+  border-radius: var(--stride-radius-md);
+  padding: 0.875rem 1rem;
+  background: var(--stride-surface-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.sam-fields-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sam-fields-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--stride-text-muted);
+}
+
+.sam-runtime-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3125rem;
+}
 
 .sam-billable-section {
   margin-top: 0.75rem;
