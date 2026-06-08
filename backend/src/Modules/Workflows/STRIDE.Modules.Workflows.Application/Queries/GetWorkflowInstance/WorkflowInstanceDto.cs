@@ -34,6 +34,7 @@ public sealed record StepInstanceDto(
     string? FailureReason,
     DateTime? CompletedAt,
     DateTime? DueAt,
+    bool IsOverdue,
     IReadOnlyList<BillableItemDto> BillableItems,
     IReadOnlyList<StepFieldDefinitionDto> Fields,
     IReadOnlyList<StepFieldValueDto> FieldValues)

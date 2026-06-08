@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using STRIDE.Modules.Workflows.Application.Abstractions;
+using STRIDE.Modules.Workflows.Infrastructure.BackgroundJobs;
 using STRIDE.Modules.Workflows.Infrastructure.FileStorage;
 using STRIDE.Modules.Workflows.Infrastructure.Persistence;
 using STRIDE.Modules.Workflows.Infrastructure.Persistence.Repositories;
@@ -33,6 +34,10 @@ public static class WorkflowsInfrastructureExtensions
 
         // ── Cross-module role service (Dapper, identity schema) ────────────────
         services.AddScoped<IUserRoleService, UserRoleService>();
+
+        // ── Background jobs ────────────────────────────────────────────────────
+        // Hosted service that periodically scans for overdue steps and SLA breaches.
+        services.AddHostedService<DeadlineCheckerService>();
 
         // ── File storage ───────────────────────────────────────────────────────
         // Switch between local (dev) and Azure Blob Storage (prod) via config.

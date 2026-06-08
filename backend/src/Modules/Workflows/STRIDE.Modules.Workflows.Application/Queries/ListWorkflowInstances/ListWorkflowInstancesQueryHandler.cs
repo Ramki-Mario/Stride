@@ -39,7 +39,8 @@ internal sealed class ListWorkflowInstancesQueryHandler
                     i.CreatedAt,
                     i.CompletedAt,
                     i.DeadlineAt,
-                    SlaStatusComputer.Compute(i.CreatedAt, i.DeadlineAt, i.CompletedAt));
+                    SlaStatusComputer.Compute(i.CreatedAt, i.DeadlineAt, i.CompletedAt),
+                    i.IsSlaBreached);
             })
             .ToList()
             .AsReadOnly();

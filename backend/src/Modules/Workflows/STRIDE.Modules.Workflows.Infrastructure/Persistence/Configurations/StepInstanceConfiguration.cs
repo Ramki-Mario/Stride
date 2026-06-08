@@ -42,6 +42,13 @@ internal sealed class StepInstanceConfiguration : IEntityTypeConfiguration<StepI
         builder.Property(s => s.DueAt)
             .HasColumnType("datetime2");
 
+        builder.Property(s => s.IsOverdue)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(s => s.OverdueNotifiedAt)
+            .HasColumnType("datetime2");
+
         builder.Property(s => s.TenantId).IsRequired();
 
         builder.HasIndex(s => new { s.WorkflowInstanceId, s.Order });

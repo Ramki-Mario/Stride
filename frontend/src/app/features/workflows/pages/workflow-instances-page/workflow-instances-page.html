@@ -83,7 +83,7 @@
   @else {
     <ul class="wi-list">
       @for (inst of filteredInstances(); track trackById($index, inst)) {
-        <li class="wi-row">
+        <li class="wi-row" [class.wi-row--sla-breached]="inst.isSlaBreached">
           <button
             type="button"
             class="wi-row-btn"

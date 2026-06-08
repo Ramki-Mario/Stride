@@ -35,8 +35,9 @@ export interface WorkflowInstanceSummary {
   completedSteps: number;
   createdAt: string;
   completedAt: string | null;
-  deadlineAt:  string | null;
-  slaStatus:   SlaStatus | null;
+  deadlineAt:   string | null;
+  slaStatus:    SlaStatus | null;
+  isSlaBreached: boolean;
 }
 
 // ─── UI helpers ──────────────────────────────────────────────────────────────
@@ -110,6 +111,8 @@ export interface StepInstance {
   requiredRoleId: string | null;
   completedAt:    string | null;
   dueAt:          string | null;
+  /** True when DueAt has passed and the step is still incomplete (set by background job). */
+  isOverdue:      boolean;
   failureReason:  string | null;
   billableItems:    BillableItemDto[];
   billableSubtotal: number;
@@ -138,8 +141,9 @@ export interface WorkflowInstanceDetail {
   /** Matches backend WorkflowInstanceDto.CreatedAt → JSON "createdAt" (instance creation = start time). */
   createdAt: string;
   completedAt: string | null;
-  deadlineAt:  string | null;
-  slaStatus:   SlaStatus | null;
+  deadlineAt:   string | null;
+  slaStatus:    SlaStatus | null;
+  isSlaBreached: boolean;
   steps: StepInstance[];
   billableTotal: number;
   // Note: totalSteps and completedSteps are not in the backend DTO.

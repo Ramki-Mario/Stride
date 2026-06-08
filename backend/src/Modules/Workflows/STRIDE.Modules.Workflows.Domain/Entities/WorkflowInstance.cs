@@ -23,6 +23,15 @@ public sealed class WorkflowInstance : AuditableEntity
     /// </summary>
     public DateTime? DeadlineAt { get; private set; }
 
+    /// <summary>
+    /// Set to <c>true</c> by the background deadline checker once DeadlineAt has passed
+    /// and the workflow is still running. Prevents duplicate SLA-breach notifications.
+    /// </summary>
+    public bool IsSlaBreached { get; private set; }
+
+    /// <summary>Timestamp at which the SLA-breach notification was sent. Null until IsSlaBreached is set.</summary>
+    public DateTime? SlaBreachedNotifiedAt { get; private set; }
+
     public IReadOnlyList<StepInstance> Steps => _steps.AsReadOnly();
 
     private WorkflowInstance() { }
@@ -180,6 +189,39 @@ public sealed class WorkflowInstance : AuditableEntity
 
         RaiseDomainEvent(new StepSkippedEvent(step.Id, Id, TenantId, skippedBy));
         CheckCompletion();
+    }
+
+    // ── Deadline / overdue tracking ────────────────────────────────────────────
+
+    /// <summary>
+    /// Flags the specified step as overdue and raises a <see cref="StepOverdueEvent"/>.
+    /// Called by the background deadline-checker job via <see cref="WorkflowsDbContext"/>.
+    /// No-op when the step has already been flagged or has reached a terminal state.
+    /// </summary>
+    public void MarkStepOverdue(Guid stepId)
+    {
+        var step = _steps.FirstOrDefault(s => s.Id == stepId);
+        if (step is null || step.IsTerminal || step.IsOverdue) return;
+
+        step.MarkOverdue();
+        UpdatedAt = DateTime.UtcNow;
+        RaiseDomainEvent(new StepOverdueEvent(step.Id, Id, TenantId, step.AssigneeId, StartedBy));
+    }
+
+    /// <summary>
+    /// Flags the entire workflow instance's SLA as breached and raises a
+    /// <see cref="WorkflowSlaBreachedEvent"/>.
+    /// Called by the background deadline-checker job.
+    /// No-op if already breached, the workflow has no deadline, or the workflow is not running.
+    /// </summary>
+    public void MarkSlaBreached()
+    {
+        if (IsSlaBreached || DeadlineAt is null || Status != WorkflowStatus.Running) return;
+
+        IsSlaBreached           = true;
+        SlaBreachedNotifiedAt   = DateTime.UtcNow;
+        UpdatedAt               = DateTime.UtcNow;
+        RaiseDomainEvent(new WorkflowSlaBreachedEvent(Id, TenantId, StartedBy, DeadlineAt.Value));
     }
 
     // ── Private helpers ────────────────────────────────────────────────────────

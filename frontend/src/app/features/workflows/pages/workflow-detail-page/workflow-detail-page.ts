@@ -536,6 +536,10 @@ export class WorkflowDetailPageComponent implements OnInit {
   }
 
   isOverdue(step: StepInstance): boolean {
+    // Prefer the authoritative backend flag (set by the deadline-checker background job).
+    // Fall back to client-side computation to surface imminent overdue steps
+    // before the next background job tick (every 15 minutes).
+    if (step.isOverdue) return true;
     if (!step.dueAt || step.status === 'Completed' || step.status === 'Skipped') return false;
     return new Date(step.dueAt) < new Date();
   }
