@@ -28,6 +28,9 @@ internal sealed class WorkflowDefinitionConfiguration : IEntityTypeConfiguration
         builder.Property(d => d.CreatedBy).IsRequired();
         builder.Property(d => d.IsDeleted).IsRequired().HasDefaultValue(false);
 
+        builder.Property(d => d.SlaOffsetHours)
+            .HasColumnType("decimal(6,2)");
+
         builder.HasIndex(d => new { d.TenantId, d.Name })
             .IsUnique()
             .HasFilter("[IsDeleted] = 0");

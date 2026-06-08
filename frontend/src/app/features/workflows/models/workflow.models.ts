@@ -10,6 +10,8 @@ export type WorkflowStatus =
   | 'Failed'
   | 'Archived';
 
+export type SlaStatus = 'OnTime' | 'AtRisk' | 'Breached';
+
 // ─── Definition summary (GET /bff/workflows/definitions) ─────────────────────
 
 export interface WorkflowDefinitionSummary {
@@ -33,6 +35,8 @@ export interface WorkflowInstanceSummary {
   completedSteps: number;
   createdAt: string;
   completedAt: string | null;
+  deadlineAt:  string | null;
+  slaStatus:   SlaStatus | null;
 }
 
 // ─── UI helpers ──────────────────────────────────────────────────────────────
@@ -134,6 +138,8 @@ export interface WorkflowInstanceDetail {
   /** Matches backend WorkflowInstanceDto.CreatedAt → JSON "createdAt" (instance creation = start time). */
   createdAt: string;
   completedAt: string | null;
+  deadlineAt:  string | null;
+  slaStatus:   SlaStatus | null;
   steps: StepInstance[];
   billableTotal: number;
   // Note: totalSteps and completedSteps are not in the backend DTO.
@@ -211,6 +217,7 @@ export interface StepRequest {
 export interface CreateWorkflowRequest {
   name: string;
   description: string | null;
+  slaOffsetHours: number | null;
   steps: StepRequest[];
 }
 
@@ -260,5 +267,6 @@ export interface WorkflowDefinitionDetail {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
+  slaOffsetHours: number | null;
   steps: StepDefinition[];
 }

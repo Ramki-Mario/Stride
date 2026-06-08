@@ -109,6 +109,26 @@
               <p class="wff-hint">Optional — displayed on the workflow detail page.</p>
             </div>
 
+            <!-- SLA window -->
+            <div class="wff-field">
+              <label class="wff-label" for="wf-sla">
+                SLA window (hours)
+              </label>
+              <input
+                id="wf-sla"
+                type="number"
+                min="0.01"
+                step="1"
+                formControlName="slaOffsetHours"
+                class="wff-input"
+                placeholder="e.g. 48"
+              />
+              <p class="wff-hint">
+                Optional — maximum hours allowed to complete this workflow from start.
+                Instances will show On Time / At Risk / Breached badges.
+              </p>
+            </div>
+
             <!-- Edit-mode notice: steps locked -->
             @if (isEditMode()) {
               <div class="wff-notice">

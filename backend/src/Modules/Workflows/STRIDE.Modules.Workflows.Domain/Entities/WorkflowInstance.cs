@@ -16,6 +16,13 @@ public sealed class WorkflowInstance : AuditableEntity
     public Guid? ClientId  { get; private set; }       // optional link to a Clients.Client
     public DateTime? CompletedAt { get; private set; }
 
+    /// <summary>
+    /// Absolute SLA deadline for the entire workflow instance.
+    /// Calculated as <c>CreatedAt + definition.SlaOffsetHours</c> when the instance is started.
+    /// Null when no SLA was configured on the definition.
+    /// </summary>
+    public DateTime? DeadlineAt { get; private set; }
+
     public IReadOnlyList<StepInstance> Steps => _steps.AsReadOnly();
 
     private WorkflowInstance() { }
@@ -31,6 +38,7 @@ public sealed class WorkflowInstance : AuditableEntity
         if (definition.Steps.Count == 0)
             throw new WorkflowDomainException("Cannot start a workflow with no steps.");
 
+        var startedAt = DateTime.UtcNow;
         var instance = new WorkflowInstance
         {
             Id = Guid.NewGuid(),
@@ -40,15 +48,17 @@ public sealed class WorkflowInstance : AuditableEntity
             Status = WorkflowStatus.Running,
             StartedBy = startedBy,
             ClientId  = clientId,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
+            CreatedAt = startedAt,
+            UpdatedAt = startedAt,
             CreatedBy = startedBy,
+            DeadlineAt = definition.SlaOffsetHours.HasValue
+                ? startedAt.AddHours((double)definition.SlaOffsetHours.Value)
+                : (DateTime?)null,
         };
 
         // Snapshot steps from definition at start time.
         // The first step's due date is calculated from the instance start time;
         // all subsequent steps are calculated when their predecessor completes.
-        var startedAt = instance.CreatedAt;
         foreach (var stepDef in definition.Steps.OrderBy(s => s.Order))
         {
             var dueAt = stepDef.Order == 0 && stepDef.DueOffsetHours.HasValue

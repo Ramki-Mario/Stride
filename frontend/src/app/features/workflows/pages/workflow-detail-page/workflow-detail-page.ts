@@ -22,6 +22,7 @@ import {
   FieldType,
   BillableUnit,
   BillableItemInput,
+  SlaStatus,
   STATUS_CONFIG,
   STEP_INSTANCE_STATUS_CONFIG,
 } from '../../models/workflow.models';
@@ -537,6 +538,16 @@ export class WorkflowDetailPageComponent implements OnInit {
   isOverdue(step: StepInstance): boolean {
     if (!step.dueAt || step.status === 'Completed' || step.status === 'Skipped') return false;
     return new Date(step.dueAt) < new Date();
+  }
+
+  slaBadgeClass(status: SlaStatus | null | undefined): string {
+    if (!status) return '';
+    return { OnTime: 'sla-ontime', AtRisk: 'sla-atrisk', Breached: 'sla-breached' }[status] ?? '';
+  }
+
+  slaLabel(status: SlaStatus | null | undefined): string {
+    if (!status) return '';
+    return { OnTime: 'On Time', AtRisk: 'At Risk', Breached: 'Breached' }[status] ?? '';
   }
 
   requiredStepCount(steps: StepDefinition[]): number {

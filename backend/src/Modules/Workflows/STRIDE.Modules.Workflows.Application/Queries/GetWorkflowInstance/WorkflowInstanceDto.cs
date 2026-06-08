@@ -13,6 +13,8 @@ public sealed record WorkflowInstanceDto(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     DateTime? CompletedAt,
+    DateTime? DeadlineAt,
+    SlaStatus? SlaStatus,
     IReadOnlyList<StepInstanceDto> Steps)
 {
     /// <summary>Sum of all billable line totals across every step in this instance.</summary>

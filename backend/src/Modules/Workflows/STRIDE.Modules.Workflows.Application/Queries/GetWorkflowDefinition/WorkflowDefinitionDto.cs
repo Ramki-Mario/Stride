@@ -12,6 +12,7 @@ public sealed record WorkflowDefinitionDto(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     Guid CreatedBy,
+    decimal? SlaOffsetHours,
     IReadOnlyList<StepDefinitionDto> Steps);
 
 public sealed record StepDefinitionDto(

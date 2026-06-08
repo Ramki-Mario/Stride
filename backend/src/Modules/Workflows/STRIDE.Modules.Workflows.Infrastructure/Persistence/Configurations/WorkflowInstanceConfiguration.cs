@@ -25,6 +25,9 @@ internal sealed class WorkflowInstanceConfiguration : IEntityTypeConfiguration<W
         builder.Property(i => i.ClientId);   // nullable FK to clients.Clients (cross-module, no EF nav)
         builder.Property(i => i.CompletedAt);
 
+        builder.Property(i => i.DeadlineAt)
+            .HasColumnType("datetime2");
+
         builder.Property(i => i.TenantId).IsRequired();
         builder.Property(i => i.CreatedAt).IsRequired();
         builder.Property(i => i.UpdatedAt).IsRequired();

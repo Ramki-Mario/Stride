@@ -123,11 +123,12 @@ public sealed class WorkflowsController : ControllerBase
 
         var result = await _mediator.Send(
             new CreateWorkflowCommand(
-                TenantId:  _tenantContext.TenantId,
-                Name:      request.Name,
-                Description: request.Description,
-                CreatedBy: _currentUser.UserId,
-                Steps:     steps),
+                TenantId:       _tenantContext.TenantId,
+                Name:           request.Name,
+                Description:    request.Description,
+                CreatedBy:      _currentUser.UserId,
+                Steps:          steps,
+                SlaOffsetHours: request.SlaOffsetHours),
             cancellationToken);
 
         if (result.IsFailure)

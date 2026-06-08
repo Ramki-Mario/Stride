@@ -13,7 +13,8 @@ public sealed record CreateWorkflowCommand(
     string Name,
     string? Description,
     Guid CreatedBy,
-    IReadOnlyList<StepRequest> Steps) : IRequest<Result<CreateWorkflowResult>>;
+    IReadOnlyList<StepRequest> Steps,
+    decimal? SlaOffsetHours = null) : IRequest<Result<CreateWorkflowResult>>;
 
 /// <summary>One step in a create-workflow command.</summary>
 public sealed record StepRequest(

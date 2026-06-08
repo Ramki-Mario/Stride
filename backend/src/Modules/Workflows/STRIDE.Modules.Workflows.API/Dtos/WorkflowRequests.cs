@@ -10,7 +10,8 @@ namespace STRIDE.Modules.Workflows.API.Dtos;
 public sealed record CreateWorkflowRequest(
     string Name,
     string? Description,
-    IReadOnlyList<StepRequestDto> Steps);
+    IReadOnlyList<StepRequestDto> Steps,
+    decimal? SlaOffsetHours = null);
 
 /// <summary>
 /// Body for PUT /api/workflows/{id}  (update a Draft workflow definition).

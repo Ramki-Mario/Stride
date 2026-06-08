@@ -15,6 +15,7 @@ import { finalize } from 'rxjs/operators';
 import {
   WorkflowInstanceSummary,
   WorkflowStatus,
+  SlaStatus,
   STATUS_CONFIG,
 } from '../../models/workflow.models';
 import { WorkflowService } from '../../services/workflow.service';
@@ -150,6 +151,16 @@ export class WorkflowInstancesPageComponent implements OnInit {
       day: 'numeric', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
     });
+  }
+
+  slaBadgeClass(status: SlaStatus | null | undefined): string {
+    if (!status) return '';
+    return { OnTime: 'wi-sla-ontime', AtRisk: 'wi-sla-atrisk', Breached: 'wi-sla-breached' }[status] ?? '';
+  }
+
+  slaLabel(status: SlaStatus | null | undefined): string {
+    if (!status) return '';
+    return { OnTime: 'On Time', AtRisk: 'At Risk', Breached: 'Breached' }[status] ?? '';
   }
 
   trackById(_: number, inst: WorkflowInstanceSummary): string {
