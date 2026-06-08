@@ -12,6 +12,7 @@ using STRIDE.Modules.Workflows.Application.Commands.PauseWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.ResumeWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.StartWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.UpdateWorkflow;
+using STRIDE.Modules.Workflows.Application.Queries.GetMyTasks;
 using STRIDE.Modules.Workflows.Application.Queries.GetWorkflowDefinition;
 using STRIDE.Modules.Workflows.Application.Queries.GetWorkflowInstance;
 using STRIDE.Modules.Workflows.Application.Queries.ListWorkflowDefinitions;
@@ -33,6 +34,7 @@ namespace STRIDE.Modules.Workflows.API.Controllers;
 /// Instance lifecycle:
 ///   POST   /api/workflows/{id}/start        — start a new instance from an Active definition
 ///   GET    /api/workflows/{id}/instances    — list instances for a definition
+///   GET    /api/workflows/my-tasks           — get all tasks assigned to the current user
 ///   GET    /api/workflows/instances/{iid}   — get a single instance with its step instances
 ///   POST   /api/workflows/instances/{iid}/pause   — pause a Running instance
 ///   POST   /api/workflows/instances/{iid}/resume  — resume a Paused instance
@@ -252,6 +254,23 @@ public sealed class WorkflowsController : ControllerBase
     public async Task<IActionResult> ListAllInstances(CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new ListWorkflowInstancesQuery(), cancellationToken);
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Returns all non-terminal step instances assigned to the current user.
+    /// GET /api/workflows/my-tasks
+    /// </summary>
+    [HttpGet("my-tasks")]
+    [ProducesResponseType(typeof(IReadOnlyList<MyTaskDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyTasks(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetMyTasksQuery(
+                UserId:   _currentUser.UserId,
+                TenantId: _tenantContext.TenantId),
+            cancellationToken);
+
         return Ok(result.Value);
     }
 

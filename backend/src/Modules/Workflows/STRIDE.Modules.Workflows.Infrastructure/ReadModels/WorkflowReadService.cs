@@ -27,6 +27,10 @@ internal sealed class WorkflowReadService : IWorkflowReadService
         SqlLoader.Load(typeof(WorkflowReadService).Assembly,
             "STRIDE.Modules.Workflows.Infrastructure.ReadModels.Queries.GetDashboardStats.sql");
 
+    private static readonly string SqlGetMyTasks =
+        SqlLoader.Load(typeof(WorkflowReadService).Assembly,
+            "STRIDE.Modules.Workflows.Infrastructure.ReadModels.Queries.GetMyTasks.sql");
+
     private readonly IDbConnectionFactory _db;
 
     public WorkflowReadService(IDbConnectionFactory db) => _db = db;
@@ -79,5 +83,21 @@ internal sealed class WorkflowReadService : IWorkflowReadService
                 cancellationToken: cancellationToken));
 
         return stats ?? new WorkflowDashboardStats(0, 0, 0, 0, 0, 0);
+    }
+
+    public async Task<IReadOnlyList<MyTaskReadModel>> GetMyTasksAsync(
+        Guid userId,
+        Guid tenantId,
+        CancellationToken cancellationToken = default)
+    {
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
+        var results = await conn.QueryAsync<MyTaskReadModel>(
+            new CommandDefinition(
+                SqlGetMyTasks,
+                new { UserId = userId, TenantId = tenantId },
+                commandTimeout: 30,
+                cancellationToken: cancellationToken));
+
+        return results.ToList().AsReadOnly();
     }
 }

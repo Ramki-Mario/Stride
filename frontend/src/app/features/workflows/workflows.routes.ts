@@ -7,7 +7,14 @@ export const workflowRoutes: Routes = [
       import('./pages/workflows-page/workflows-page').then((m) => m.WorkflowsPageComponent),
   },
   {
-    // 'instances' and 'new' MUST appear before ':id' — static before dynamic
+    // 'my-tasks', 'instances', and 'new' MUST appear before ':id' — static before dynamic
+    path: 'my-tasks',
+    loadComponent: () =>
+      import('./pages/my-tasks-page/my-tasks-page').then(
+        (m) => m.MyTasksPageComponent,
+      ),
+  },
+  {
     path: 'instances',
     loadComponent: () =>
       import('./pages/workflow-instances-page/workflow-instances-page').then(

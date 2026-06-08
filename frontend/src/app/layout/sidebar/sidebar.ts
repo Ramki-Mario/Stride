@@ -5,14 +5,18 @@ import {
   inject,
   computed,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { map, catchError, of } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
+import { WorkflowService } from '../../features/workflows/services/workflow.service';
 
 interface NavItem {
   label: string;
   route: string;
   icon: string;   // PrimeIcons class name (e.g. 'pi-objects-column')
   exact?: boolean;
+  badgeCount?: () => number;  // optional dynamic badge count
 }
 
 interface NavGroup {
@@ -80,6 +84,9 @@ interface NavGroup {
              [title]="collapsed() ? item.label : ''">
             <i class="pi {{ item.icon }} sb-nav-icon" aria-hidden="true"></i>
             <span class="sb-nav-label">{{ item.label }}</span>
+            @if (item.badgeCount && item.badgeCount() > 0) {
+              <span class="sb-nav-badge">{{ item.badgeCount() }}</span>
+            }
           </a>
         }
       }
@@ -302,6 +309,28 @@ interface NavGroup {
       max-width: 0;
     }
 
+    /* Task count badge */
+    .sb-nav-badge {
+      margin-left: auto;
+      background: var(--stride-primary);
+      color: #fff;
+      font-size: 0.625rem;
+      font-weight: 700;
+      min-width: 1.125rem;
+      height: 1.125rem;
+      border-radius: var(--stride-radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0.25rem;
+      flex-shrink: 0;
+      transition: opacity 200ms cubic-bezier(0.4,0,0.2,1);
+    }
+
+    :host(.collapsed) .sb-nav-badge {
+      opacity: 0;
+    }
+
     /* ── User strip ──────────────────────────────────────── */
     .sb-user {
       border-top: 1px solid var(--stride-nav-border);
@@ -366,9 +395,19 @@ interface NavGroup {
 })
 export class SidebarComponent {
   protected readonly auth = inject(AuthService);
+  private   readonly wf   = inject(WorkflowService);
 
   /** Drives the collapsed CSS modifier on the host element. */
   protected readonly collapsed = signal(false);
+
+  /** Live task count fetched once on sidebar init; silently 0 on error. */
+  private readonly myTasks = toSignal(
+    this.wf.getMyTasks().pipe(
+      map(tasks => tasks.length),
+      catchError(() => of(0)),
+    ),
+    { initialValue: 0 },
+  );
 
   /** Authenticated user from the session signal. */
   protected readonly user = this.auth.user;
@@ -405,10 +444,11 @@ export class SidebarComponent {
     {
       label: 'Main',
       items: [
-        { label: 'Dashboard',     route: '/dashboard',     icon: 'pi-objects-column', exact: true },
-        { label: 'Workflows',     route: '/workflows',     icon: 'pi-sitemap' },
-        { label: 'Scheduling',    route: '/scheduling',    icon: 'pi-calendar' },
-        { label: 'Notifications', route: '/notifications', icon: 'pi-bell' },
+        { label: 'Dashboard',     route: '/dashboard',           icon: 'pi-objects-column', exact: true },
+        { label: 'My Tasks',      route: '/workflows/my-tasks',  icon: 'pi-check-square',   badgeCount: () => this.myTasks() },
+        { label: 'Workflows',     route: '/workflows',           icon: 'pi-sitemap' },
+        { label: 'Scheduling',    route: '/scheduling',          icon: 'pi-calendar' },
+        { label: 'Notifications', route: '/notifications',       icon: 'pi-bell' },
       ],
     },
     {

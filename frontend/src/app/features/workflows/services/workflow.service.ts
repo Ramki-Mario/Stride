@@ -10,6 +10,7 @@ import {
   UpdateWorkflowRequest,
   BillableItemInput,
   RoleDto,
+  MyTask,
 } from '../models/workflow.models';
 
 /**
@@ -36,6 +37,11 @@ export class WorkflowService {
   /** Returns all active roles for the tenant, used by the workflow builder role dropdown. */
   listRoles(): Observable<RoleDto[]> {
     return this.http.get<RoleDto[]>(`${this.identityBase}/roles`);
+  }
+
+  /** Returns all non-terminal step instances assigned to the current user. */
+  getMyTasks(): Observable<MyTask[]> {
+    return this.http.get<MyTask[]>(`${this.base}/my-tasks`);
   }
 
   /** List all workflow definitions for the current tenant. */

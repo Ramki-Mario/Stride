@@ -1,0 +1,94 @@
+<div class="mt-page">
+
+  <!-- ── Page header ──────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header__title-group">
+      <h1 class="page-title">My Tasks</h1>
+      <p class="page-subtitle">Step instances assigned to you that need attention</p>
+    </div>
+    <button class="stride-btn stride-btn-secondary stride-btn-sm" (click)="loadTasks()">
+      <i class="pi pi-refresh"></i> Refresh
+    </button>
+  </div>
+
+  <!-- ── Error banner ─────────────────────────────────────────────────────── -->
+  @if (errorMessage()) {
+    <div class="mt-error-banner" role="alert">
+      <i class="pi pi-exclamation-triangle"></i>
+      <span>{{ errorMessage() }}</span>
+      <button class="mt-retry" (click)="loadTasks()">Retry</button>
+    </div>
+  }
+
+  <!-- ── Loading skeleton ─────────────────────────────────────────────────── -->
+  @if (isLoading()) {
+    <div class="mt-list">
+      @for (n of [1,2,3,4]; track n) {
+        <div class="mt-card mt-card--skeleton">
+          <div class="mt-sk mt-sk--icon"></div>
+          <div class="mt-sk-body">
+            <div class="mt-sk mt-sk--title"></div>
+            <div class="mt-sk mt-sk--sub"></div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Empty state ──────────────────────────────────────────────────────── -->
+  @else if (tasks().length === 0) {
+    <div class="mt-empty">
+      <i class="pi pi-check-circle mt-empty-icon"></i>
+      <h3>All clear!</h3>
+      <p>You have no pending tasks right now.</p>
+    </div>
+  }
+
+  <!-- ── Task list ────────────────────────────────────────────────────────── -->
+  @else {
+    <ul class="mt-list">
+      @for (task of tasks(); track trackById($index, task)) {
+        <li class="mt-card">
+          <button
+            type="button"
+            class="mt-card-btn"
+            (click)="openInstance(task)"
+            [attr.aria-label]="task.stepName + ' in ' + task.workflowName"
+          >
+            <!-- Status icon -->
+            <div class="mt-status-icon" [ngClass]="stepStatusClass(task.stepStatus)">
+              <i class="pi {{ stepStatusIcon(task.stepStatus) }}"></i>
+            </div>
+
+            <!-- Step + workflow info -->
+            <div class="mt-card-body">
+              <div class="mt-step-name">{{ task.stepName }}</div>
+              <div class="mt-card-meta">
+                <span class="mt-workflow-name">{{ task.workflowName }}</span>
+                @if (task.clientName) {
+                  <span class="mt-sep">·</span>
+                  <span class="mt-client-name">{{ task.clientName }}</span>
+                }
+                @if (task.assignedAt) {
+                  <span class="mt-sep">·</span>
+                  <span class="mt-assigned-at">Assigned {{ relativeDate(task.assignedAt) }}</span>
+                }
+              </div>
+            </div>
+
+            <!-- Status badge -->
+            <span class="mt-status-badge ssi-badge" [ngClass]="stepStatusClass(task.stepStatus)">
+              {{ stepStatusLabel(task.stepStatus) }}
+            </span>
+
+            <!-- Arrow -->
+            <i class="pi pi-chevron-right mt-arrow"></i>
+          </button>
+        </li>
+      }
+    </ul>
+
+    <p class="mt-count-hint">{{ tasks().length }} task{{ tasks().length === 1 ? '' : 's' }}</p>
+  }
+
+</div>

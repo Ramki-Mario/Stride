@@ -156,6 +156,19 @@ export interface UpdateWorkflowRequest {
   description: string | null;
 }
 
+// ─── My Tasks (GET /bff/workflows/my-tasks) ──────────────────────────────────
+
+export interface MyTask {
+  stepInstanceId:    string;
+  stepName:          string;
+  stepStatus:        StepInstanceStatus;
+  assignedAt:        string | null;   // ISO-8601
+  workflowInstanceId: string;
+  workflowName:      string;
+  workflowStatus:    WorkflowStatus;
+  clientName:        string | null;
+}
+
 // ─── Definition detail (GET /bff/workflows/definitions/:id) ──────────────────
 
 export interface RoleDto {

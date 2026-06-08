@@ -22,6 +22,7 @@ namespace STRIDE.BFF.Controllers;
 ///   GET    /bff/workflows/definitions/{id}/instances
 ///
 /// Instances:
+///   GET    /bff/workflows/my-tasks
 ///   GET    /bff/workflows/instances
 ///   GET    /bff/workflows/instances/{instanceId}
 ///   POST   /bff/workflows/instances/{instanceId}/pause
@@ -121,6 +122,14 @@ public sealed class WorkflowsController : ControllerBase
     }
 
     // ── Instances ─────────────────────────────────────────────────────────
+
+    [HttpGet("my-tasks")]
+    public async Task<IActionResult> GetMyTasks(CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(await _workflows.GetMyTasksAsync(token, cancellationToken), cancellationToken: cancellationToken);
+    }
 
     [HttpGet("instances")]
     public async Task<IActionResult> GetAllInstances(CancellationToken cancellationToken)

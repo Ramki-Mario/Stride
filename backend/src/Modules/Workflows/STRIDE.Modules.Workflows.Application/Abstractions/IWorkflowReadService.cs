@@ -31,6 +31,15 @@ public interface IWorkflowReadService
     /// Returns aggregate KPI counts for the dashboard for the current tenant.
     /// </summary>
     Task<WorkflowDashboardStats> GetDashboardStatsAsync(Guid tenantId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns all step instances assigned to <paramref name="userId"/> that are not
+    /// yet in a terminal state (Completed / Skipped / Failed), within the current tenant.
+    /// </summary>
+    Task<IReadOnlyList<MyTaskReadModel>> GetMyTasksAsync(
+        Guid userId,
+        Guid tenantId,
+        CancellationToken cancellationToken = default);
 }
 
 // ── Read models (Dapper DTOs — flat, no navigation properties) ────────────────
@@ -53,6 +62,16 @@ public sealed record WorkflowInstanceReadModel(
     int    CompletedSteps,
     DateTime CreatedAt,
     DateTime? CompletedAt);
+
+public sealed record MyTaskReadModel(
+    Guid     StepInstanceId,
+    string   StepName,
+    string   StepStatus,
+    DateTime? AssignedAt,
+    Guid     WorkflowInstanceId,
+    string   WorkflowName,
+    string   WorkflowStatus,
+    string?  ClientName);
 
 public sealed record WorkflowDashboardStats(
     int TotalDefinitions,

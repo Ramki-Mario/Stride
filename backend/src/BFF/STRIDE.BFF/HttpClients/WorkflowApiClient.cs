@@ -25,6 +25,7 @@ namespace STRIDE.BFF.HttpClients;
 ///   POST   /bff/workflows/instances/{iId}/steps/{sId}/complete    → POST   /api/workflows/instances/{iId}/steps/{sId}/complete
 ///   POST   /bff/workflows/instances/{iId}/steps/{sId}/fail        → POST   /api/workflows/instances/{iId}/steps/{sId}/fail
 ///   POST   /bff/workflows/instances/{iId}/steps/{sId}/skip        → POST   /api/workflows/instances/{iId}/steps/{sId}/skip
+///   GET    /bff/workflows/my-tasks                                → GET    /api/workflows/my-tasks
 /// </summary>
 public sealed class WorkflowApiClient
 {
@@ -78,6 +79,9 @@ public sealed class WorkflowApiClient
         => _client.SendAsync(Build(HttpMethod.Get, $"/api/workflows/{definitionId}/instances", token), cancellationToken);
 
     // ── Instances ─────────────────────────────────────────────────────────
+
+    public Task<HttpResponseMessage> GetMyTasksAsync(string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, "/api/workflows/my-tasks", token), cancellationToken);
 
     public Task<HttpResponseMessage> GetAllInstancesAsync(string token, CancellationToken cancellationToken = default)
         => _client.SendAsync(Build(HttpMethod.Get, "/api/workflows/instances", token), cancellationToken);
