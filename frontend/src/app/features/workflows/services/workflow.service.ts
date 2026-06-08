@@ -148,4 +148,12 @@ export class WorkflowService {
       {},
     );
   }
+
+  /** Export all captured step field values for an instance as a CSV blob. */
+  exportFieldValuesCsv(instanceId: string): Observable<Blob> {
+    return this.http.get(
+      `${this.base}/instances/${instanceId}/field-values/csv`,
+      { responseType: 'blob' },
+    );
+  }
 }

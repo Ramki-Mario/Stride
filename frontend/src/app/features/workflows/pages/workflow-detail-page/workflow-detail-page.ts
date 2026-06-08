@@ -18,6 +18,10 @@ import {
   WorkflowInstanceDetail,
   StepInstance,
   StepAction,
+  FieldDefinition,
+  FieldType,
+  BillableUnit,
+  BillableItemInput,
   STATUS_CONFIG,
   STEP_INSTANCE_STATUS_CONFIG,
 } from '../../models/workflow.models';
@@ -166,7 +170,11 @@ export class WorkflowDetailPageComponent implements OnInit {
   readonly instanceIsComplete = computed(() => this.instance()?.status === 'Completed');
 
   /** Tracks which step IDs have their billable-items list expanded. */
-  private readonly _expandedBillable = signal(new Set<string>());
+  private readonly _expandedBillable    = signal(new Set<string>());
+  /** Tracks which step IDs have their field-values section expanded. */
+  private readonly _expandedFieldValues = signal(new Set<string>());
+
+  readonly isExportingCsv = signal(false);
 
   toggleBillableStep(stepId: string): void {
     const next = new Set(this._expandedBillable());
@@ -176,6 +184,67 @@ export class WorkflowDetailPageComponent implements OnInit {
 
   isBillableExpanded(stepId: string): boolean {
     return this._expandedBillable().has(stepId);
+  }
+
+  toggleFieldValues(stepId: string): void {
+    const next = new Set(this._expandedFieldValues());
+    if (next.has(stepId)) { next.delete(stepId); } else { next.add(stepId); }
+    this._expandedFieldValues.set(next);
+  }
+
+  isFieldValuesExpanded(stepId: string): boolean {
+    return this._expandedFieldValues().has(stepId);
+  }
+
+  getFieldDef(step: StepInstance, defId: string): FieldDefinition | undefined {
+    return step.fields?.find(f => f.id === defId);
+  }
+
+  /**
+   * Formats a raw stored field value for display, applying type-specific
+   * formatting: currency symbol, hours suffix, locale date, boolean labels.
+   */
+  formatFieldValue(fieldType: FieldType | undefined, value: string): string {
+    switch (fieldType) {
+      case 'Currency': {
+        const n = parseFloat(value);
+        return isNaN(n) ? value : `£${n.toFixed(2)}`;
+      }
+      case 'Hours':
+        return `${value}h`;
+      case 'Date': {
+        const d = new Date(value);
+        return isNaN(d.getTime())
+          ? value
+          : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+      case 'Boolean':
+        return value === 'true' ? 'Yes' : 'No';
+      default:
+        return value;
+    }
+  }
+
+  exportCsv(): void {
+    const inst = this.instance();
+    if (!inst) return;
+    this.isExportingCsv.set(true);
+    this.wfService.exportFieldValuesCsv(inst.id)
+      .pipe(
+        finalize(() => this.isExportingCsv.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (blob) => {
+          const url = URL.createObjectURL(blob);
+          const a   = document.createElement('a');
+          a.href     = url;
+          a.download = `workflow-${inst.id.substring(0, 8)}-fields.csv`;
+          a.click();
+          URL.revokeObjectURL(url);
+        },
+        error: () => this.actionError.set('Failed to export CSV. Please try again.'),
+      });
   }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -257,15 +326,33 @@ export class WorkflowDetailPageComponent implements OnInit {
     this.isCreatingInvoice.set(true);
     this.invoiceError.set(null);
 
-    // Collect all billable items from all steps
-    const billableItems = inst.steps.flatMap(s =>
-      (s.billableItems ?? []).map(b => ({
+    // Collect explicit billable items from each step.
+    // For steps that have no explicit items, fall back to any Hours / Currency
+    // field values captured during step completion.
+    const billableItems: BillableItemInput[] = inst.steps.flatMap(s => {
+      const explicit = (s.billableItems ?? []).map(b => ({
         description: b.description,
         quantity:    b.quantity,
         unitPrice:   b.unitPrice,
         unit:        b.unit,
-      }))
-    );
+      }));
+
+      if (explicit.length > 0) return explicit;
+
+      // Fallback: derive line items from Hours / Currency field values
+      return (s.fieldValues ?? []).flatMap(fv => {
+        const fd = s.fields?.find(f => f.id === fv.stepFieldDefinitionId);
+        if (!fd || (fd.fieldType !== 'Hours' && fd.fieldType !== 'Currency')) return [];
+        const qty = parseFloat(fv.value);
+        if (isNaN(qty) || qty <= 0) return [];
+        return [{
+          description: `${s.stepName} — ${fd.label}`,
+          quantity:    fd.fieldType === 'Hours' ? qty : 1,
+          unitPrice:   fd.fieldType === 'Currency' ? qty : 1,
+          unit:        (fd.fieldType === 'Hours' ? 'Hours' : 'Fixed') as BillableUnit,
+        }];
+      });
+    });
 
     const request: CreateWorkflowInvoiceRequest = {
       workflowName: inst.workflowName,

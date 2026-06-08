@@ -329,6 +329,20 @@
                     </div>
                   }
 
+                  <!-- CSV export button -->
+                  <button
+                    class="wfd-btn wfd-btn-ghost wfd-btn-sm wfd-csv-btn"
+                    (click)="exportCsv()"
+                    [disabled]="isExportingCsv()"
+                    title="Download all captured field values as CSV"
+                  >
+                    @if (isExportingCsv()) {
+                      <span class="pi pi-spin pi-spinner"></span> Exporting…
+                    } @else {
+                      <span class="pi pi-file-export"></span> Export Fields CSV
+                    }
+                  </button>
+
                   <!-- Invoice panel (only on completed instances) -->
                   @if (instanceIsComplete()) {
                     <div class="wfd-invoice-panel">
@@ -515,6 +529,38 @@
                                   }
                                 </tbody>
                               </table>
+                            }
+                          </div>
+                        }
+
+                        <!-- ── Captured field values ──────────────────── -->
+                        @if (step.fieldValues && step.fieldValues.length > 0) {
+                          <div class="wfd-step-fields">
+                            <button
+                              type="button"
+                              class="wfd-step-fields-toggle"
+                              (click)="toggleFieldValues(step.id)"
+                              [attr.aria-expanded]="isFieldValuesExpanded(step.id)"
+                            >
+                              <span class="pi pi-database"></span>
+                              Step data
+                              <span class="wfd-fv-count">({{ step.fieldValues.length }})</span>
+                              <span class="pi {{ isFieldValuesExpanded(step.id) ? 'pi-chevron-up' : 'pi-chevron-down' }} wfd-step-fields-caret"></span>
+                            </button>
+
+                            @if (isFieldValuesExpanded(step.id)) {
+                              <dl class="wfd-fv-list">
+                                @for (fv of step.fieldValues; track fv.id) {
+                                  <div class="wfd-fv-row">
+                                    <dt class="wfd-fv-label">
+                                      {{ getFieldDef(step, fv.stepFieldDefinitionId)?.label ?? '—' }}
+                                    </dt>
+                                    <dd class="wfd-fv-value">
+                                      {{ formatFieldValue(getFieldDef(step, fv.stepFieldDefinitionId)?.fieldType, fv.value) }}
+                                    </dd>
+                                  </div>
+                                }
+                              </dl>
                             }
                           </div>
                         }

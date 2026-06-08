@@ -970,6 +970,79 @@
   &.inv-badge-void  { background: rgba(239,68,68,0.12);   color: #dc2626; }
 }
 
+// ── CSV export button ──────────────────────────────────────────────────────
+
+.wfd-csv-btn {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+}
+
+// ── Per-step captured field values ────────────────────────────────────────
+
+.wfd-step-fields {
+  margin-top: 0.5rem;
+}
+
+.wfd-step-fields-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.78125rem;
+  font-weight: 500;
+  color: var(--stride-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.1875rem 0;
+  font-family: inherit;
+  transition: color 0.12s;
+
+  .pi-database { color: var(--stride-accent, #6366f1); }
+  &:hover { color: var(--stride-accent, #6366f1); }
+}
+
+.wfd-fv-count {
+  font-size: 0.6875rem;
+  color: var(--stride-text-muted);
+}
+
+.wfd-step-fields-caret {
+  font-size: 0.6875rem;
+  color: var(--stride-text-muted);
+}
+
+.wfd-fv-list {
+  margin: 0.4375rem 0 0;
+  padding: 0.5rem 0.75rem;
+  background: var(--stride-surface-secondary, #f8fafc);
+  border: 1px solid var(--stride-border-soft);
+  border-radius: var(--stride-radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.wfd-fv-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.625rem;
+  font-size: 0.78125rem;
+}
+
+.wfd-fv-label {
+  font-weight: 600;
+  color: var(--stride-text-muted);
+  flex-shrink: 0;
+  min-width: 7rem;
+
+  &::after { content: ':'; }
+}
+
+.wfd-fv-value {
+  color: var(--stride-text-primary);
+  word-break: break-word;
+}
+
 // ── Skeleton loading ───────────────────────────────────────────────────────
 
 .wfd-skeleton-block {

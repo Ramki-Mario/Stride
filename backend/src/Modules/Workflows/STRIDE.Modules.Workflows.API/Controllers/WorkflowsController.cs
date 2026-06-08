@@ -12,6 +12,7 @@ using STRIDE.Modules.Workflows.Application.Commands.PauseWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.ResumeWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.StartWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.UpdateWorkflow;
+using STRIDE.Modules.Workflows.Application.Queries.ExportStepFieldValuesCsv;
 using STRIDE.Modules.Workflows.Application.Queries.GetMyTasks;
 using STRIDE.Modules.Workflows.Application.Queries.GetWorkflowDefinition;
 using STRIDE.Modules.Workflows.Application.Queries.GetWorkflowInstance;
@@ -368,6 +369,25 @@ public sealed class WorkflowsController : ControllerBase
         }
 
         return NoContent();
+    }
+
+    /// <summary>
+    /// Export all captured step field values for a workflow instance as CSV.
+    /// GET /api/workflows/instances/{instanceId}/field-values/csv
+    /// </summary>
+    [HttpGet("instances/{instanceId:guid}/field-values/csv")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ExportFieldValuesCsv(Guid instanceId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new ExportStepFieldValuesCsvQuery(instanceId), cancellationToken);
+
+        if (result.IsFailure)
+            return NotFound(new { error = result.Error });
+
+        var bytes = System.Text.Encoding.UTF8.GetBytes(result.Value!);
+        return File(bytes, "text/csv", $"instance-{instanceId:N}-fields.csv");
     }
 
     /// <summary>
