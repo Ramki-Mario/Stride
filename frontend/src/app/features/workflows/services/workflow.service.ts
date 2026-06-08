@@ -12,6 +12,7 @@ import {
   FieldValueInput,
   RoleDto,
   MyTask,
+  PagedCommentsDto,
 } from '../models/workflow.models';
 
 /**
@@ -146,6 +147,39 @@ export class WorkflowService {
     return this.http.post<void>(
       `${this.base}/instances/${instanceId}/steps/${stepId}/skip`,
       {},
+    );
+  }
+
+  // ── Comment thread ─────────────────────────────────────────────────────────
+
+  /** Returns a page of comments for a workflow instance (chronological order). */
+  listComments(instanceId: string, page = 1, pageSize = 20): Observable<PagedCommentsDto> {
+    return this.http.get<PagedCommentsDto>(
+      `${this.base}/instances/${instanceId}/comments`,
+      { params: { page: page.toString(), pageSize: pageSize.toString() } },
+    );
+  }
+
+  /** Posts a new comment on a workflow instance. */
+  createComment(instanceId: string, body: string): Observable<{ commentId: string }> {
+    return this.http.post<{ commentId: string }>(
+      `${this.base}/instances/${instanceId}/comments`,
+      { body },
+    );
+  }
+
+  /** Edits an existing comment (author-only). */
+  editComment(instanceId: string, commentId: string, newBody: string): Observable<void> {
+    return this.http.put<void>(
+      `${this.base}/instances/${instanceId}/comments/${commentId}`,
+      { newBody },
+    );
+  }
+
+  /** Soft-deletes a comment (author or manager). */
+  deleteComment(instanceId: string, commentId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/instances/${instanceId}/comments/${commentId}`,
     );
   }
 

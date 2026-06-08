@@ -243,6 +243,25 @@ export interface MyTask {
   clientName:        string | null;
 }
 
+// ─── Comments (GET/POST/PUT/DELETE /bff/workflows/instances/:id/comments) ─────
+
+export interface WorkflowCommentDto {
+  id:                 string;
+  workflowInstanceId: string;
+  authorId:           string;
+  body:               string;
+  isDeleted:          boolean;
+  createdAt:          string;   // ISO-8601
+  editedAt:           string | null;
+}
+
+export interface PagedCommentsDto {
+  items:      WorkflowCommentDto[];
+  totalCount: number;
+  page:       number;
+  pageSize:   number;
+}
+
 // ─── Definition detail (GET /bff/workflows/definitions/:id) ──────────────────
 
 export interface RoleDto {

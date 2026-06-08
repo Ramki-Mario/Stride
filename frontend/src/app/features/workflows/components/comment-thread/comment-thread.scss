@@ -1,0 +1,340 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Comment Thread — Component Styles   (US-165 · EP-054)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:host { display: block; }
+
+// ── Root ───────────────────────────────────────────────────────────────────
+
+.ct-root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.25rem 0;
+}
+
+// ── Buttons ────────────────────────────────────────────────────────────────
+
+.ct-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--stride-radius-xl);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  line-height: 1;
+  transition: background var(--stride-transition), box-shadow var(--stride-transition);
+  white-space: nowrap;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  &-primary {
+    background: var(--stride-primary);
+    color: var(--stride-text-inverse);
+    &:hover:not(:disabled) { background: var(--stride-primary-hover); }
+  }
+
+  &-ghost {
+    background: transparent;
+    color: var(--stride-text-secondary);
+    border: 1px solid var(--stride-border);
+    &:hover:not(:disabled) { background: var(--stride-surface-hover); color: var(--stride-text-primary); }
+  }
+
+  &-sm { padding: 0.25rem 0.625rem; font-size: 0.75rem; }
+}
+
+// ── Compose box ────────────────────────────────────────────────────────────
+
+.ct-compose {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.ct-compose-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--stride-surface-raised);
+  border: 1px solid var(--stride-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--stride-text-muted);
+  font-size: 0.875rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.ct-compose-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ct-compose-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+// ── Textarea ───────────────────────────────────────────────────────────────
+
+.ct-textarea {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--stride-border);
+  border-radius: var(--stride-radius-md);
+  background: var(--stride-surface);
+  color: var(--stride-text-primary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color var(--stride-transition), box-shadow var(--stride-transition);
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: var(--stride-primary);
+    box-shadow: 0 0 0 3px var(--stride-primary-ring);
+  }
+
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+// ── Character hint ─────────────────────────────────────────────────────────
+
+.ct-char-hint {
+  font-size: 0.75rem;
+  color: var(--stride-text-muted);
+  margin-right: auto;
+
+  &--warn { color: var(--stride-warning, #f59e0b); }
+}
+
+// ── Error lines ────────────────────────────────────────────────────────────
+
+.ct-error-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  color: var(--stride-error);
+}
+
+.ct-banner-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: var(--stride-error-bg);
+  border: 1px solid var(--stride-error-border);
+  border-radius: var(--stride-radius-lg);
+  color: var(--stride-error);
+  font-size: 0.8125rem;
+}
+
+.ct-retry {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--stride-error);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  text-decoration: underline;
+}
+
+// ── Loading / empty ────────────────────────────────────────────────────────
+
+.ct-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem 0;
+  color: var(--stride-text-muted);
+  font-size: 0.875rem;
+}
+
+.ct-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2.5rem 1rem;
+  color: var(--stride-text-muted);
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.ct-empty-icon {
+  font-size: 2rem;
+  opacity: 0.3;
+}
+
+// ── Comment list ───────────────────────────────────────────────────────────
+
+.ct-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ct-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.875rem 0;
+  border-bottom: 1px solid var(--stride-border-subtle, var(--stride-border));
+
+  &:last-child { border-bottom: none; }
+
+  &--deleted { opacity: 0.6; }
+}
+
+// ── Avatar ─────────────────────────────────────────────────────────────────
+
+.ct-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--stride-surface-raised);
+  border: 1px solid var(--stride-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--stride-text-muted);
+  font-size: 0.875rem;
+  flex-shrink: 0;
+  margin-top: 0.0625rem;
+}
+
+// ── Comment content ────────────────────────────────────────────────────────
+
+.ct-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.ct-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ct-author {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--stride-text-primary);
+  font-family: monospace;
+}
+
+.ct-timestamp {
+  font-size: 0.75rem;
+  color: var(--stride-text-muted);
+  cursor: default;
+}
+
+.ct-edited {
+  font-size: 0.75rem;
+  color: var(--stride-text-muted);
+  font-style: italic;
+}
+
+.ct-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity var(--stride-transition);
+
+  .ct-item:hover & { opacity: 1; }
+}
+
+.ct-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--stride-radius-md);
+  border: none;
+  background: transparent;
+  color: var(--stride-text-muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background var(--stride-transition), color var(--stride-transition);
+
+  &:hover:not(:disabled) {
+    background: var(--stride-surface-hover);
+    color: var(--stride-text-primary);
+  }
+
+  &--danger:hover:not(:disabled) {
+    background: var(--stride-error-bg);
+    color: var(--stride-error);
+  }
+
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+// ── Comment body ───────────────────────────────────────────────────────────
+
+.ct-body {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--stride-text-primary);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+
+  &--deleted {
+    color: var(--stride-text-muted);
+    font-style: italic;
+  }
+}
+
+// ── Inline edit form ───────────────────────────────────────────────────────
+
+.ct-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ct-edit-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+// ── Pagination ─────────────────────────────────────────────────────────────
+
+.ct-pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: center;
+  padding-top: 0.5rem;
+}
+
+.ct-page-info {
+  font-size: 0.8125rem;
+  color: var(--stride-text-muted);
+  min-width: 3.5rem;
+  text-align: center;
+}

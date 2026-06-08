@@ -1,0 +1,225 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     Comment Thread  (US-165 · EP-054)
+     Embedded in the "Activity" tab of the workflow detail page.
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<div class="ct-root">
+
+  <!-- ── Post new comment ──────────────────────────────────────────────── -->
+  <div class="ct-compose">
+    <div class="ct-compose-avatar" aria-hidden="true">
+      <span class="pi pi-user"></span>
+    </div>
+    <div class="ct-compose-body">
+      <textarea
+        class="ct-textarea"
+        rows="3"
+        placeholder="Write a comment…"
+        [ngModel]="newBody()"
+        (ngModelChange)="newBody.set($event)"
+        [disabled]="isPosting()"
+        aria-label="New comment"
+      ></textarea>
+
+      @if (postError()) {
+        <div class="ct-error-line" role="alert">
+          <span class="pi pi-exclamation-triangle"></span>
+          {{ postError() }}
+        </div>
+      }
+
+      <div class="ct-compose-footer">
+        <span class="ct-char-hint" [class.ct-char-hint--warn]="newBody().length > 3800">
+          {{ newBody().length }} / 4000
+        </span>
+        <button
+          class="ct-btn ct-btn-primary"
+          (click)="post()"
+          [disabled]="isPosting() || !newBody().trim()"
+        >
+          @if (isPosting()) {
+            <span class="pi pi-spin pi-spinner"></span> Posting…
+          } @else {
+            <span class="pi pi-send"></span> Post
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Error banner (load) ───────────────────────────────────────────── -->
+  @if (loadError()) {
+    <div class="ct-banner-error" role="alert">
+      <span class="pi pi-exclamation-triangle"></span>
+      {{ loadError() }}
+      <button class="ct-retry" (click)="load()">Retry</button>
+    </div>
+  }
+
+  @if (deleteError()) {
+    <div class="ct-banner-error" role="alert">
+      <span class="pi pi-exclamation-triangle"></span>
+      {{ deleteError() }}
+    </div>
+  }
+
+  <!-- ── Loading ───────────────────────────────────────────────────────── -->
+  @if (isLoading()) {
+    <div class="ct-loading">
+      <span class="pi pi-spin pi-spinner"></span>
+      Loading comments…
+    </div>
+  }
+
+  <!-- ── Empty ─────────────────────────────────────────────────────────── -->
+  @else if (!loadError() && comments().length === 0) {
+    <div class="ct-empty">
+      <span class="pi pi-comments ct-empty-icon"></span>
+      <p>No comments yet. Be the first to leave a note.</p>
+    </div>
+  }
+
+  <!-- ── Comment list ──────────────────────────────────────────────────── -->
+  @else {
+    <ul class="ct-list" aria-label="Comments">
+      @for (comment of comments(); track comment.id; let idx = $index) {
+        <li class="ct-item" [class.ct-item--deleted]="comment.isDeleted">
+
+          <!-- Avatar -->
+          <div class="ct-avatar" aria-hidden="true">
+            <span class="pi pi-user"></span>
+          </div>
+
+          <!-- Body -->
+          <div class="ct-content">
+
+            <!-- Header row -->
+            <div class="ct-header">
+              <span class="ct-author" title="{{ comment.authorId }}">
+                {{ shortId(comment.authorId) }}
+              </span>
+              <span
+                class="ct-timestamp"
+                title="{{ formatAbsolute(comment.createdAt) }}"
+              >
+                {{ formatRelative(comment.createdAt) }}
+              </span>
+              @if (comment.editedAt && !comment.isDeleted) {
+                <span
+                  class="ct-edited"
+                  title="Edited {{ formatAbsolute(comment.editedAt) }}"
+                >
+                  (edited)
+                </span>
+              }
+
+              <!-- Action buttons (only when not editing this comment) -->
+              @if (editingId() !== comment.id) {
+                <div class="ct-actions">
+                  @if (canEdit(comment)) {
+                    <button
+                      class="ct-action-btn"
+                      (click)="startEdit(comment)"
+                      aria-label="Edit comment"
+                      title="Edit"
+                    >
+                      <span class="pi pi-pencil"></span>
+                    </button>
+                  }
+                  @if (canDelete(comment)) {
+                    <button
+                      class="ct-action-btn ct-action-btn--danger"
+                      (click)="deleteComment(comment)"
+                      [disabled]="deletingId() === comment.id"
+                      aria-label="Delete comment"
+                      title="Delete"
+                    >
+                      @if (deletingId() === comment.id) {
+                        <span class="pi pi-spin pi-spinner"></span>
+                      } @else {
+                        <span class="pi pi-trash"></span>
+                      }
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Edit mode -->
+            @if (editingId() === comment.id) {
+              <div class="ct-edit-form">
+                <textarea
+                  class="ct-textarea"
+                  rows="3"
+                  [ngModel]="editBody()"
+                  (ngModelChange)="editBody.set($event)"
+                  [disabled]="isSaving()"
+                  aria-label="Edit comment body"
+                ></textarea>
+
+                @if (saveError()) {
+                  <div class="ct-error-line" role="alert">
+                    <span class="pi pi-exclamation-triangle"></span>
+                    {{ saveError() }}
+                  </div>
+                }
+
+                <div class="ct-edit-footer">
+                  <span class="ct-char-hint" [class.ct-char-hint--warn]="editBody().length > 3800">
+                    {{ editBody().length }} / 4000
+                  </span>
+                  <button
+                    class="ct-btn ct-btn-ghost"
+                    (click)="cancelEdit()"
+                    [disabled]="isSaving()"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    class="ct-btn ct-btn-primary"
+                    (click)="saveEdit(comment.id)"
+                    [disabled]="isSaving() || !editBody().trim()"
+                  >
+                    @if (isSaving()) {
+                      <span class="pi pi-spin pi-spinner"></span> Saving…
+                    } @else {
+                      Save
+                    }
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <!-- Comment body (display mode) -->
+              <p class="ct-body" [class.ct-body--deleted]="comment.isDeleted">
+                {{ comment.body }}
+              </p>
+            }
+
+          </div>
+        </li>
+      }
+    </ul>
+
+    <!-- ── Pagination ────────────────────────────────────────────────── -->
+    @if (totalPages() > 1) {
+      <div class="ct-pagination">
+        <button
+          class="ct-btn ct-btn-ghost ct-btn-sm"
+          (click)="prevPage()"
+          [disabled]="!hasPrev()"
+        >
+          <span class="pi pi-chevron-left"></span> Prev
+        </button>
+        <span class="ct-page-info">{{ page() }} / {{ totalPages() }}</span>
+        <button
+          class="ct-btn ct-btn-ghost ct-btn-sm"
+          (click)="nextPage()"
+          [disabled]="!hasNext()"
+        >
+          Next <span class="pi pi-chevron-right"></span>
+        </button>
+      </div>
+    }
+  }
+
+</div>
