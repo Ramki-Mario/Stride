@@ -31,6 +31,7 @@ import { StepActionModalComponent }  from '../../components/step-action-modal/st
 import { StepAttachmentsComponent }      from '../../components/step-attachments/step-attachments';
 import { InstanceAttachmentsComponent } from '../../components/instance-attachments/instance-attachments';
 import { CommentThreadComponent }        from '../../components/comment-thread/comment-thread';
+import { ActivityTimelineComponent }     from '../../components/activity-timeline/activity-timeline';
 import { InvoiceService }            from '../../../invoicing/services/invoice.service';
 import { AuthService }               from '../../../../core/auth/auth.service';
 import {
@@ -46,7 +47,7 @@ type DetailTab = 'steps' | 'run' | 'attachments' | 'activity' | 'history';
 @Component({
   selector: 'app-workflow-detail-page',
   standalone: true,
-  imports: [NgClass, DecimalPipe, RouterLink, StepActionModalComponent, StepAttachmentsComponent, InstanceAttachmentsComponent, CommentThreadComponent],
+  imports: [NgClass, DecimalPipe, RouterLink, StepActionModalComponent, StepAttachmentsComponent, InstanceAttachmentsComponent, CommentThreadComponent, ActivityTimelineComponent],
   templateUrl: './workflow-detail-page.html',
   styleUrl: './workflow-detail-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -375,6 +375,70 @@ public sealed class WorkflowsController : ControllerBase
             : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 
+    // ── Comments ─────────────────────────────────────────────────────────
+
+    [HttpGet("instances/{instanceId:guid}/comments")]
+    public async Task<IActionResult> ListComments(
+        Guid instanceId,
+        [FromQuery] int page     = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(
+            await _workflows.ListCommentsAsync(instanceId, page, pageSize, token, cancellationToken),
+            cancellationToken: cancellationToken);
+    }
+
+    [HttpPost("instances/{instanceId:guid}/comments")]
+    public async Task<IActionResult> CreateComment(Guid instanceId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        using var body = JsonBody();
+        return await ProxyAsync(
+            await _workflows.CreateCommentAsync(instanceId, body, token, cancellationToken),
+            forwardStatusCode: true,
+            cancellationToken: cancellationToken);
+    }
+
+    [HttpPut("instances/{instanceId:guid}/comments/{commentId:guid}")]
+    public async Task<IActionResult> EditComment(Guid instanceId, Guid commentId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        using var body = JsonBody();
+        var response = await _workflows.EditCommentAsync(instanceId, commentId, body, token, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
+    }
+
+    [HttpDelete("instances/{instanceId:guid}/comments/{commentId:guid}")]
+    public async Task<IActionResult> DeleteComment(Guid instanceId, Guid commentId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        var response = await _workflows.DeleteCommentAsync(instanceId, commentId, token, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
+    }
+
+    // ── Activity ──────────────────────────────────────────────────────────
+
+    [HttpGet("instances/{instanceId:guid}/activity")]
+    public async Task<IActionResult> GetActivityTimeline(
+        Guid instanceId,
+        [FromQuery] int    page      = 1,
+        [FromQuery] int    pageSize  = 20,
+        [FromQuery] string order     = "asc",
+        CancellationToken cancellationToken = default)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(
+            await _workflows.GetActivityTimelineAsync(instanceId, page, pageSize, order, token, cancellationToken),
+            cancellationToken: cancellationToken);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────
 
     private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");

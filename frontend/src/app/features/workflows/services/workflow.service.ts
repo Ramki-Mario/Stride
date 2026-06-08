@@ -13,6 +13,7 @@ import {
   RoleDto,
   MyTask,
   PagedCommentsDto,
+  PagedActivityDto,
 } from '../models/workflow.models';
 
 /**
@@ -180,6 +181,19 @@ export class WorkflowService {
   deleteComment(instanceId: string, commentId: string): Observable<void> {
     return this.http.delete<void>(
       `${this.base}/instances/${instanceId}/comments/${commentId}`,
+    );
+  }
+
+  /** Returns a page of activity timeline events for a workflow instance. */
+  getActivityTimeline(
+    instanceId: string,
+    page       = 1,
+    pageSize   = 20,
+    order: 'asc' | 'desc' = 'asc',
+  ): Observable<PagedActivityDto> {
+    return this.http.get<PagedActivityDto>(
+      `${this.base}/instances/${instanceId}/activity`,
+      { params: { page, pageSize, order } },
     );
   }
 

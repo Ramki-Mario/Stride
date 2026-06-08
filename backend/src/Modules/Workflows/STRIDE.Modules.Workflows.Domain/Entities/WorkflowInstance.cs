@@ -138,7 +138,7 @@ public sealed class WorkflowInstance : AuditableEntity
         step.Assign(assigneeId);
         UpdatedAt = DateTime.UtcNow;
 
-        RaiseDomainEvent(new StepAssignedEvent(step.Id, Id, TenantId, assigneeId, assignedBy));
+        RaiseDomainEvent(new StepAssignedEvent(step.Id, Id, TenantId, assigneeId, assignedBy, step.StepName));
     }
 
     public void CompleteStep(
@@ -157,7 +157,7 @@ public sealed class WorkflowInstance : AuditableEntity
         // from this step's actual completion time (handles late completions).
         RecalculateNextStepDueDate(step);
 
-        RaiseDomainEvent(new StepCompletedEvent(step.Id, Id, TenantId, completedBy));
+        RaiseDomainEvent(new StepCompletedEvent(step.Id, Id, TenantId, completedBy, step.StepName));
         CheckCompletion();
     }
 
@@ -169,7 +169,7 @@ public sealed class WorkflowInstance : AuditableEntity
         step.Fail(reason);
         UpdatedAt = DateTime.UtcNow;
 
-        RaiseDomainEvent(new StepFailedEvent(step.Id, Id, TenantId, reason, failedBy));
+        RaiseDomainEvent(new StepFailedEvent(step.Id, Id, TenantId, reason, failedBy, step.StepName));
 
         // A required step failing fails the entire workflow
         if (step.IsRequired)
@@ -187,7 +187,7 @@ public sealed class WorkflowInstance : AuditableEntity
         step.Skip();
         UpdatedAt = DateTime.UtcNow;
 
-        RaiseDomainEvent(new StepSkippedEvent(step.Id, Id, TenantId, skippedBy));
+        RaiseDomainEvent(new StepSkippedEvent(step.Id, Id, TenantId, skippedBy, step.StepName));
         CheckCompletion();
     }
 
@@ -205,7 +205,7 @@ public sealed class WorkflowInstance : AuditableEntity
 
         step.MarkOverdue();
         UpdatedAt = DateTime.UtcNow;
-        RaiseDomainEvent(new StepOverdueEvent(step.Id, Id, TenantId, step.AssigneeId, StartedBy));
+        RaiseDomainEvent(new StepOverdueEvent(step.Id, Id, TenantId, step.AssigneeId, StartedBy, step.StepName));
     }
 
     /// <summary>

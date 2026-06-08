@@ -1,0 +1,69 @@
+<div class="at-root">
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="at-state at-state--loading">
+      <span class="at-spinner"></span>
+      <span>Loading activity…</span>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (loadError()) {
+    <div class="at-state at-state--error">
+      <span>{{ loadError() }}</span>
+      <button class="at-retry-btn" (click)="load()">Retry</button>
+    </div>
+  }
+
+  <!-- Empty -->
+  @if (!isLoading() && !loadError() && events().length === 0) {
+    <div class="at-state at-state--empty">
+      <span class="material-symbols-outlined at-empty-icon">history</span>
+      <p>No activity recorded yet.</p>
+    </div>
+  }
+
+  <!-- Timeline -->
+  @if (!isLoading() && events().length > 0) {
+    <ol class="at-list">
+      @for (event of events(); track trackById($index, event)) {
+        <li class="at-item">
+          <!-- Icon dot -->
+          <div class="at-dot {{ colorFor(event.eventType) }}">
+            <span class="material-symbols-outlined at-dot-icon">{{ iconFor(event.eventType) }}</span>
+          </div>
+
+          <!-- Content -->
+          <div class="at-content">
+            <div class="at-header">
+              <span class="at-label">{{ event.eventTypeLabel }}</span>
+              <time
+                class="at-time"
+                [attr.datetime]="event.occurredAt"
+                [title]="formatAbsolute(event.occurredAt)">
+                {{ formatRelative(event.occurredAt) }}
+              </time>
+            </div>
+            <p class="at-desc">{{ event.description }}</p>
+            <span class="at-actor" [title]="event.actorUserId">
+              by {{ shortId(event.actorUserId) }}
+            </span>
+          </div>
+        </li>
+      }
+    </ol>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="at-pagination">
+        <button class="at-page-btn" (click)="prevPage()" [disabled]="!hasPrev()">
+          ← Prev
+        </button>
+        <span class="at-page-info">{{ page() }} / {{ totalPages() }}</span>
+        <button class="at-page-btn" (click)="nextPage()" [disabled]="!hasNext()">
+          Next →
+        </button>
+      </div>
+    }
+  }
+</div>
