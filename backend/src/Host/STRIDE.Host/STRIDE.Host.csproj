@@ -17,6 +17,8 @@
     <ProjectReference Include="..\..\Modules\Administration\STRIDE.Modules.Administration.Infrastructure\STRIDE.Modules.Administration.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Clients\STRIDE.Modules.Clients.API\STRIDE.Modules.Clients.API.csproj" />
     <ProjectReference Include="..\..\Modules\Clients\STRIDE.Modules.Clients.Infrastructure\STRIDE.Modules.Clients.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Teams\STRIDE.Modules.Teams.API\STRIDE.Modules.Teams.API.csproj" />
+    <ProjectReference Include="..\..\Modules\Teams\STRIDE.Modules.Teams.Infrastructure\STRIDE.Modules.Teams.Infrastructure.csproj" />
     <ProjectReference Include="..\..\BuildingBlocks\STRIDE.BuildingBlocks.Infrastructure\STRIDE.BuildingBlocks.Infrastructure.csproj" />
   </ItemGroup>
 
