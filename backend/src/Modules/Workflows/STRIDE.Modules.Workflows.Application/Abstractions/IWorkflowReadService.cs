@@ -21,10 +21,12 @@ public interface IWorkflowReadService
     /// <summary>
     /// Returns a summary list of workflow instances for the current tenant.
     /// Pass <paramref name="definitionId"/> to filter to history for a specific template.
+    /// Pass <paramref name="teamId"/> to show only instances assigned to a particular team.
     /// </summary>
     Task<IReadOnlyList<WorkflowInstanceReadModel>> GetWorkflowInstanceSummariesAsync(
         Guid tenantId,
         Guid? definitionId = null,
+        Guid? teamId = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -61,7 +63,9 @@ public sealed record WorkflowInstanceReadModel(
     int    TotalSteps,
     int    CompletedSteps,
     DateTime CreatedAt,
-    DateTime? CompletedAt);
+    DateTime? CompletedAt,
+    Guid?  TeamId = null,
+    string? TeamName = null);
 
 public sealed record MyTaskReadModel(
     Guid     StepInstanceId,

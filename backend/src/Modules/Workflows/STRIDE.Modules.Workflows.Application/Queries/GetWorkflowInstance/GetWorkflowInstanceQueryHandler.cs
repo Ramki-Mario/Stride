@@ -103,7 +103,8 @@ internal sealed class GetWorkflowInstanceQueryHandler
                         .ToList()
                         .AsReadOnly()))
                 .ToList()
-                .AsReadOnly());
+                .AsReadOnly(),
+            TeamId: instance.TeamId);
 
         return Result.Success(dto);
     }
