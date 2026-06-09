@@ -4,6 +4,9 @@ import {
   signal,
   inject,
   computed,
+  Input,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -31,9 +34,11 @@ interface NavGroup {
   imports: [RouterLink, RouterLinkActive],
   // Apply the structural class + collapsed modifier directly to the host element
   // so the global styles.scss .stride-sidebar rules take effect.
+  // .mobile-open drives the off-canvas slide-in on small screens.
   host: {
     '[class.stride-sidebar]': 'true',
-    '[class.collapsed]': 'collapsed()',
+    '[class.collapsed]':      'collapsed()',
+    '[class.mobile-open]':    'mobileOpen',
   },
   template: `
     <!-- ── Collapse toggle — absolutely positioned so it stays visible
@@ -81,7 +86,8 @@ interface NavGroup {
              routerLinkActive="active"
              [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
              [attr.aria-label]="item.label"
-             [title]="collapsed() ? item.label : ''">
+             [title]="collapsed() ? item.label : ''"
+             (click)="onNavItemClick()">
             <i class="pi {{ item.icon }} sb-nav-icon" aria-hidden="true"></i>
             <span class="sb-nav-label">{{ item.label }}</span>
             @if (item.badgeCount && item.badgeCount() > 0) {
@@ -391,11 +397,22 @@ interface NavGroup {
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    /* ── Mobile: hide the desktop collapse button (overlay has no need for it) */
+    @media (max-width: 639px) {
+      .sb-collapse-btn { display: none; }
+    }
   `],
 })
 export class SidebarComponent {
   protected readonly auth = inject(AuthService);
   private   readonly wf   = inject(WorkflowService);
+
+  /** Set by ShellComponent when the mobile hamburger is tapped. */
+  @Input() mobileOpen = false;
+
+  /** Emitted when a nav item is clicked so Shell can close the mobile overlay. */
+  @Output() navClose = new EventEmitter<void>();
 
   /** Drives the collapsed CSS modifier on the host element. */
   protected readonly collapsed = signal(false);
@@ -483,5 +500,9 @@ export class SidebarComponent {
 
   protected toggleCollapse(): void {
     this.collapsed.update(c => !c);
+  }
+
+  protected onNavItemClick(): void {
+    this.navClose.emit();
   }
 }

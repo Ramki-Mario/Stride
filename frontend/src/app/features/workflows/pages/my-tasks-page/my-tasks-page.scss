@@ -254,3 +254,25 @@
   color: var(--stride-text-muted);
   text-align: right;
 }
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 639px) {
+  .mt-page {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Adequate touch target for task cards */
+  .mt-card-btn {
+    padding: 1rem;
+    min-height: 2.75rem;
+  }
+
+  .mt-step-name { font-size: 0.875rem; }
+}

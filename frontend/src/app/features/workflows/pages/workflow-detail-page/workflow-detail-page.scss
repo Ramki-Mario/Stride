@@ -1179,3 +1179,41 @@
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+// ── Responsive ────────────────────────────────────────────────────────────
+
+@media (max-width: 639px) {
+  // Adequate touch targets for step action buttons
+  .wfd-step-action-btn {
+    width:     2.75rem;
+    height:    2.75rem;
+    font-size: 0.875rem;
+  }
+
+  // Primary/ghost buttons in the hero
+  .wfd-btn {
+    min-height: 2.75rem;
+    padding: 0.625rem 1rem;
+  }
+
+  // Hero actions stack on mobile
+  .wfd-hero-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  // Breadcrumb can overflow on narrow — let it wrap
+  .wfd-breadcrumb {
+    flex-wrap: wrap;
+    row-gap: 0.25rem;
+  }
+
+  .wfd-bc-current {
+    max-width: 100%;
+  }
+
+  // Step action buttons in instance list — slightly larger gap
+  .wfd-inst-step-actions {
+    gap: 0.375rem;
+  }
+}

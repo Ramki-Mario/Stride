@@ -267,7 +267,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 ### Milestone #11 — Product Layer Gaps (EP-048–061)
 
-**Board status (2026-06-09):** EP-048–EP-054 ✅ Done. EP-055 Mobile-First = ⏳ Next. Extra Teams module (EP-062) delivered and closed. PRs #323 #324 #325 all merged.
+**Board status (2026-06-09):** EP-048–EP-054 ✅ Done. EP-055 Mobile-First 🔵 In Progress (US-168 PR #330 open). Extra Teams module (EP-062) delivered and closed. PRs #323 #324 #325 all merged.
 
 **Epic → Issue → Story mapping — Milestone #11 original plan (✅ = Done, ⏳ = Next/Backlog):**
 - EP-048 #263 → US-147–149 (#277–279) — Step Ownership & Assignment ✅
@@ -277,7 +277,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - EP-052 #267 → US-159–161 (#289–291) — Advanced Step Types ✅
 - EP-053 #268 → US-162–164 (#292–294) — SLA & Deadline Tracking ✅
 - EP-054 #269 → US-165–167 (#295–297) — Comments & Activity Log ✅ (PRs #320 #321 #322)
-- EP-055 #270 → US-168–170 (#298–300) — Mobile-First Experience ⏳ NEXT
+- EP-055 #270 → US-168–170 (#298–300) — Mobile-First Experience 🔵 In Progress (US-168 PR #330)
 - EP-056 #271 → US-171–173 (#301–303) — Approval Gates ⏳
 - EP-057 #272 → US-174–176 (#304–306) — Actionable Dashboard ⏳
 - EP-058 #273 → US-177–179 (#307–309) — External Customer-Facing Link ⏳
@@ -288,7 +288,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 **Extra work delivered outside original plan:**
 - EP-062 #327 → US-187 (#326) / US-188 (#328) / US-189 (#329) — Teams / Department Entity ✅ (PRs #323 #324 #325 — all closed, board=Done)
 
-**Next:** EP-055 Mobile-First Experience (#270), US-168 (#298) through US-170 (#300)
+**Next:** EP-055 Mobile-First Experience (#270) — US-168 PR #330 open (QA pending), US-169 and US-170 queued
 
 ### EP-049 — Client/Customer Entity ✅ Done (#264, closed 2026-06-07)
 
@@ -352,6 +352,24 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - **Angular:** `InvoiceReferenceDto` + `INVOICE_STATUS_CSS` + `CreateWorkflowInvoiceRequest` added to models; `InvoiceService` gets `getInvoiceByWorkflowInstanceId()` / `createInvoiceFromWorkflow()`; workflow detail page invoice panel (badge, View Invoice link, Create Invoice Draft button) on completed instances; new `InvoiceDetailPageComponent` at `/invoicing/:id` with status management + source-workflow reference card; route added to `invoicing.routes.ts`
 - **Tests:** 4 new tests for `GetInvoiceByWorkflowInstanceIdQueryHandler`; 112 tests green
 - Issue #285 closed; board item → Done
+
+---
+
+### EP-055 — Mobile-First Experience 🔵 In Progress (#270)
+
+**GitHub:** Epic #270 | Stories: US-168 #298 🔵 / US-169 #299 ⏳ / US-170 #300 ⏳
+
+#### US-168 — Responsive layout refactor 🔵 In Progress (PR #330, GitHub #298 board=In Progress)
+- Shell: `mobileNavOpen` signal; sidebar fixed off-canvas overlay at <640px, slides in from left; backdrop closes on tap
+- Topbar: hamburger button (44px touch target, mobile-only CSS); hides username, breadcrumb root, palette switcher at <640px
+- Sidebar: `mobileOpen` `@Input`, `navClose` `@Output`, `.mobile-open` host class, nav-item click emits close, hides collapse btn on mobile
+- Global `styles.scss`: off-canvas sidebar rules, 44×44px touch target minimums (`.stride-btn*`, topbar action buttons)
+- Dashboard page: reduced padding + chart height at <640px
+- Workflows list: touch targets, full-width search, stacked toolbar at <640px
+- My Tasks: padding reduction + touch target for card button
+- Workflow Instances: progress-bar column hidden at <640px; padding reduction; touch targets
+- Workflow Detail: step-action and hero button touch targets; breadcrumb wraps gracefully on mobile
+- **341 backend tests pass** ✅ · dev build clean ✅
 
 ---
 

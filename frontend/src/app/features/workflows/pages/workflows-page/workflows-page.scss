@@ -777,3 +777,35 @@
     text-align: center;
   }
 }
+
+@media (max-width: 639px) {
+  :host { padding: 1rem; }
+
+  // Touch targets for toolbar and table buttons
+  .wfl-btn {
+    min-height: 2.75rem;
+    padding: 0.625rem 1rem;
+  }
+
+  .wfl-page-btn {
+    min-width: 2.75rem;
+    height:    2.75rem;
+  }
+
+  // Search input — full width on mobile
+  .wfl-search-wrap {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+
+  // Stack toolbar controls that overflow on 375px
+  .wfl-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  // Summary strip — 2 columns is fine but reduce padding
+  .wfl-summary-card {
+    padding: 0.75rem;
+  }
+}

@@ -6,6 +6,8 @@ import {
   computed,
   ElementRef,
   HostListener,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -32,6 +34,17 @@ const ROUTE_LABELS: Record<string, string> = {
   // Apply the structural class to the host element so styles.scss rules apply.
   host: { class: 'stride-topbar' },
   template: `
+    <!-- ── Hamburger — visible on mobile only (CSS controls display) ── -->
+    <button class="tb-hamburger"
+            (click)="hamburgerClick.emit()"
+            aria-label="Open navigation menu"
+            aria-haspopup="dialog">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M3 12h18M3 6h18M3 18h18"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+
     <!-- ── Breadcrumb ───────────────────────────────────── -->
     <nav class="tb-breadcrumb" aria-label="Breadcrumb">
       <span class="tb-bc-root">STRIDE</span>
@@ -340,6 +353,40 @@ const ROUTE_LABELS: Record<string, string> = {
       border-top: 1px solid var(--stride-border-soft);
       margin: 0.25rem 0;
     }
+
+    /* ── Hamburger (mobile only) ────────────────────────── */
+    .tb-hamburger {
+      display: none;   /* hidden on desktop */
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: var(--stride-radius-md);
+      border: none;
+      background: transparent;
+      color: var(--stride-text-secondary);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 150ms, color 150ms;
+    }
+    .tb-hamburger:hover {
+      background: var(--stride-surface-hover);
+      color: var(--stride-text-primary);
+    }
+
+    @media (max-width: 639px) {
+      .tb-hamburger { display: flex; }
+
+      /* Compress breadcrumb on small screens */
+      .tb-bc-root { display: none; }
+      .tb-bc-sep  { display: none; }
+
+      /* Hide user name — show avatar only */
+      .tb-user-name { display: none; }
+
+      /* Hide palette switcher to save space */
+      .tb-palette-wrap { display: none; }
+    }
   `],
 })
 export class TopbarComponent {
@@ -350,6 +397,9 @@ export class TopbarComponent {
 
   protected readonly isDark    = this.theme.isDark;
   protected readonly palette   = this.theme.palette;
+
+  /** Emitted when the hamburger button is tapped on mobile. */
+  @Output() hamburgerClick = new EventEmitter<void>();
 
   protected readonly dropdownOpen = signal(false);
   protected readonly user         = this.auth.user;
