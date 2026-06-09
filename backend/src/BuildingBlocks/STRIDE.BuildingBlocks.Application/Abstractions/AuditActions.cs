@@ -28,4 +28,10 @@ public static class AuditActions
 
     // ── Tenant settings ───────────────────────────────────────────────────────
     public const string TenantSettingsUpdated = "tenant_settings.updated";
+
+    // ── Teams ─────────────────────────────────────────────────────────────────
+    public const string TeamCreated     = "team.created";
+    public const string TeamUpdated     = "team.updated";
+    public const string TeamDeactivated = "team.deactivated";
+    public const string TeamReactivated = "team.reactivated";
 }
