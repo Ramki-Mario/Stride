@@ -22,7 +22,8 @@ internal sealed class WorkflowInstanceConfiguration : IEntityTypeConfiguration<W
             .HasMaxLength(20);
 
         builder.Property(i => i.StartedBy).IsRequired();
-        builder.Property(i => i.ClientId);   // nullable FK to clients.Clients (cross-module, no EF nav)
+        builder.Property(i => i.ClientId);    // nullable FK to clients.Clients (cross-module, no EF nav)
+        builder.Property(i => i.TeamId);     // nullable FK to teams.Teams   (cross-module, no EF nav)
         builder.Property(i => i.CompletedAt);
 
         builder.Property(i => i.DeadlineAt)
@@ -46,6 +47,7 @@ internal sealed class WorkflowInstanceConfiguration : IEntityTypeConfiguration<W
         builder.HasIndex(i => new { i.TenantId, i.WorkflowDefinitionId });
         builder.HasIndex(i => new { i.TenantId, i.CreatedAt });
         builder.HasIndex(i => new { i.TenantId, i.ClientId });    // for client history queries
+        builder.HasIndex(i => new { i.TenantId, i.TeamId });      // for team assignment queries
 
         // Steps is exposed as IReadOnlyList; tell EF Core to use the _steps backing field.
         builder.HasMany(i => i.Steps)

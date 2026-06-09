@@ -23,6 +23,10 @@ internal sealed class WorkflowReadService : IWorkflowReadService
         SqlLoader.Load(typeof(WorkflowReadService).Assembly,
             "STRIDE.Modules.Workflows.Infrastructure.ReadModels.Queries.GetWorkflowInstanceSummariesByDefinition.sql");
 
+    private static readonly string SqlGetInstanceSummariesByTeam =
+        SqlLoader.Load(typeof(WorkflowReadService).Assembly,
+            "STRIDE.Modules.Workflows.Infrastructure.ReadModels.Queries.GetWorkflowInstanceSummariesByTeam.sql");
+
     private static readonly string SqlGetDashboardStats =
         SqlLoader.Load(typeof(WorkflowReadService).Assembly,
             "STRIDE.Modules.Workflows.Infrastructure.ReadModels.Queries.GetDashboardStats.sql");
@@ -53,17 +57,33 @@ internal sealed class WorkflowReadService : IWorkflowReadService
     public async Task<IReadOnlyList<WorkflowInstanceReadModel>> GetWorkflowInstanceSummariesAsync(
         Guid tenantId,
         Guid? definitionId = null,
+        Guid? teamId = null,
         CancellationToken cancellationToken = default)
     {
-        var sql = definitionId.HasValue
-            ? SqlGetInstanceSummariesByDefinition
-            : SqlGetInstanceSummaries;
+        string sql;
+        object param;
+
+        if (definitionId.HasValue)
+        {
+            sql   = SqlGetInstanceSummariesByDefinition;
+            param = new { TenantId = tenantId, DefinitionId = definitionId };
+        }
+        else if (teamId.HasValue)
+        {
+            sql   = SqlGetInstanceSummariesByTeam;
+            param = new { TenantId = tenantId, TeamId = teamId };
+        }
+        else
+        {
+            sql   = SqlGetInstanceSummaries;
+            param = new { TenantId = tenantId };
+        }
 
         await using var conn = await _db.OpenConnectionAsync(cancellationToken);
         var results = await conn.QueryAsync<WorkflowInstanceReadModel>(
             new CommandDefinition(
                 sql,
-                new { TenantId = tenantId, DefinitionId = definitionId },
+                param,
                 commandTimeout: 30,
                 cancellationToken: cancellationToken));
 

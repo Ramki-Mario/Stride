@@ -341,6 +341,31 @@
                     </div>
                   }
 
+                  <!-- Team picker -->
+                  <div class="wfd-team-picker">
+                    <label class="wfd-team-label" for="teamSelect">
+                      <span class="pi pi-users"></span> Team
+                    </label>
+                    <select
+                      id="teamSelect"
+                      class="wfd-team-select"
+                      [value]="inst.teamId ?? ''"
+                      (change)="assignTeam($any($event.target).value)"
+                      [disabled]="isAssigningTeam()"
+                    >
+                      <option value="">— No team —</option>
+                      @for (team of teams(); track team.id) {
+                        <option [value]="team.id">{{ team.name }}</option>
+                      }
+                    </select>
+                    @if (isAssigningTeam()) {
+                      <span class="pi pi-spin pi-spinner wfd-team-spinner"></span>
+                    }
+                    @if (teamAssignError()) {
+                      <span class="wfd-team-error">{{ teamAssignError() }}</span>
+                    }
+                  </div>
+
                   <!-- CSV export button -->
                   <button
                     class="wfd-btn wfd-btn-ghost wfd-btn-sm wfd-csv-btn"

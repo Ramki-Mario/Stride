@@ -27,6 +27,8 @@ import {
   STEP_INSTANCE_STATUS_CONFIG,
 } from '../../models/workflow.models';
 import { WorkflowService }       from '../../services/workflow.service';
+import { TeamsService }          from '../../../../features/teams/services/teams.service';
+import { TeamSummary }           from '../../../../features/teams/models/team.models';
 import { StepActionModalComponent }  from '../../components/step-action-modal/step-action-modal';
 import { StepAttachmentsComponent }      from '../../components/step-attachments/step-attachments';
 import { InstanceAttachmentsComponent } from '../../components/instance-attachments/instance-attachments';
@@ -56,6 +58,7 @@ export class WorkflowDetailPageComponent implements OnInit {
   private readonly route        = inject(ActivatedRoute);
   private readonly router       = inject(Router);
   private readonly wfService    = inject(WorkflowService);
+  private readonly teamsSvc     = inject(TeamsService);
   private readonly invoiceSvc   = inject(InvoiceService);
   private readonly authService  = inject(AuthService);
   private readonly destroyRef   = inject(DestroyRef);
@@ -176,6 +179,13 @@ export class WorkflowDetailPageComponent implements OnInit {
   });
 
   readonly instanceIsComplete = computed(() => this.instance()?.status === 'Completed');
+
+  // ── Team assignment state ─────────────────────────────────────────────────
+
+  /** Available teams for the picker, loaded once when the Run tab becomes active. */
+  readonly teams           = signal<TeamSummary[]>([]);
+  readonly isAssigningTeam = signal(false);
+  readonly teamAssignError = signal<string | null>(null);
 
   /** Tracks which step IDs have their billable-items list expanded. */
   private readonly _expandedBillable    = signal(new Set<string>());
@@ -310,8 +320,37 @@ export class WorkflowDetailPageComponent implements OnInit {
           if (inst.status === 'Completed') {
             this.loadInvoiceRef(instanceId);
           }
+          // Load teams list for team picker (lazy — only when an instance is shown)
+          if (this.teams().length === 0) {
+            this.loadTeams();
+          }
         },
         error: () => this.instanceError.set('Failed to load instance data.'),
+      });
+  }
+
+  loadTeams(): void {
+    this.teamsSvc.getTeams()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: teams => this.teams.set(teams) });
+  }
+
+  assignTeam(teamId: string): void {
+    const inst = this.instance();
+    if (!inst) return;
+
+    const valueToAssign = teamId === '' ? null : teamId;
+    this.isAssigningTeam.set(true);
+    this.teamAssignError.set(null);
+
+    this.wfService.assignTeam(inst.id, valueToAssign)
+      .pipe(
+        finalize(() => this.isAssigningTeam.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next:  () => this.loadInstance(inst.id),
+        error: () => this.teamAssignError.set('Could not assign team. Please try again.'),
       });
   }
 

@@ -14,6 +14,7 @@ public sealed class WorkflowInstance : AuditableEntity
     public WorkflowStatus Status { get; private set; }
     public Guid  StartedBy { get; private set; }
     public Guid? ClientId  { get; private set; }       // optional link to a Clients.Client
+    public Guid? TeamId    { get; private set; }       // optional link to a Teams.Team
     public DateTime? CompletedAt { get; private set; }
 
     /// <summary>
@@ -115,6 +116,18 @@ public sealed class WorkflowInstance : AuditableEntity
         Status = WorkflowStatus.Cancelled;
         UpdatedAt = DateTime.UtcNow;
         RaiseDomainEvent(new WorkflowCancelledEvent(Id, TenantId, cancelledBy));
+    }
+
+    /// <summary>
+    /// Assigns (or removes) a team from this workflow instance.
+    /// A null <paramref name="teamId"/> clears the current team assignment.
+    /// Can be called on any non-deleted instance regardless of status.
+    /// </summary>
+    public void AssignTeam(Guid? teamId, Guid assignedBy)
+    {
+        TeamId    = teamId;
+        UpdatedAt = DateTime.UtcNow;
+        RaiseDomainEvent(new WorkflowTeamAssignedEvent(Id, TenantId, teamId, assignedBy));
     }
 
     public void Fail(string reason, Guid failedBy)

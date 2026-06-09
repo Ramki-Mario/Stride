@@ -17,7 +17,10 @@ namespace STRIDE.BFF.HttpClients;
 ///   POST   /bff/workflows/definitions/{id}/activate               → POST   /api/workflows/{id}/activate
 ///   POST   /bff/workflows/definitions/{id}/start                  → POST   /api/workflows/{id}/start
 ///   GET    /bff/workflows/definitions/{id}/instances              → GET    /api/workflows/{id}/instances
+///   GET    /bff/workflows/instances                               → GET    /api/workflows/instances
+///   GET    /bff/workflows/instances?teamId={guid}                 → GET    /api/workflows/instances?teamId={guid}
 ///   GET    /bff/workflows/instances/{instanceId}                  → GET    /api/workflows/instances/{instanceId}
+///   PUT    /bff/workflows/instances/{instanceId}/assign-team      → PUT    /api/workflows/instances/{instanceId}/assign-team
 ///   POST   /bff/workflows/instances/{instanceId}/pause            → POST   /api/workflows/instances/{instanceId}/pause
 ///   POST   /bff/workflows/instances/{instanceId}/resume           → POST   /api/workflows/instances/{instanceId}/resume
 ///   POST   /bff/workflows/instances/{instanceId}/cancel           → POST   /api/workflows/instances/{instanceId}/cancel
@@ -83,11 +86,23 @@ public sealed class WorkflowApiClient
     public Task<HttpResponseMessage> GetMyTasksAsync(string token, CancellationToken cancellationToken = default)
         => _client.SendAsync(Build(HttpMethod.Get, "/api/workflows/my-tasks", token), cancellationToken);
 
-    public Task<HttpResponseMessage> GetAllInstancesAsync(string token, CancellationToken cancellationToken = default)
-        => _client.SendAsync(Build(HttpMethod.Get, "/api/workflows/instances", token), cancellationToken);
+    public Task<HttpResponseMessage> GetAllInstancesAsync(string token, Guid? teamId = null, CancellationToken cancellationToken = default)
+    {
+        var url = teamId.HasValue
+            ? $"/api/workflows/instances?teamId={teamId}"
+            : "/api/workflows/instances";
+        return _client.SendAsync(Build(HttpMethod.Get, url, token), cancellationToken);
+    }
 
     public Task<HttpResponseMessage> GetInstanceAsync(Guid instanceId, string token, CancellationToken cancellationToken = default)
         => _client.SendAsync(Build(HttpMethod.Get, $"/api/workflows/instances/{instanceId}", token), cancellationToken);
+
+    public Task<HttpResponseMessage> AssignTeamToInstanceAsync(Guid instanceId, HttpContent body, string token, CancellationToken cancellationToken = default)
+    {
+        var req = Build(HttpMethod.Put, $"/api/workflows/instances/{instanceId}/assign-team", token);
+        req.Content = body;
+        return _client.SendAsync(req, cancellationToken);
+    }
 
     public Task<HttpResponseMessage> PauseInstanceAsync(Guid instanceId, string token, CancellationToken cancellationToken = default)
     {

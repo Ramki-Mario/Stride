@@ -486,6 +486,9 @@ namespace STRIDE.Modules.Workflows.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<Guid?>("TeamId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
@@ -509,6 +512,8 @@ namespace STRIDE.Modules.Workflows.Infrastructure.Migrations
                     b.HasIndex("TenantId", "IsDeleted");
 
                     b.HasIndex("TenantId", "Status");
+
+                    b.HasIndex("TenantId", "TeamId");
 
                     b.HasIndex("TenantId", "WorkflowDefinitionId");
 

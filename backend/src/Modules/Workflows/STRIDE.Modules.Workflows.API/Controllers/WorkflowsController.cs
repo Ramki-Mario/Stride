@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Workflows.API.Dtos;
 using STRIDE.Modules.Workflows.Application.Commands.ActivateWorkflow;
+using STRIDE.Modules.Workflows.Application.Commands.AssignTeamToWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.CancelWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.CreateWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.DeleteWorkflow;
@@ -263,13 +264,16 @@ public sealed class WorkflowsController : ControllerBase
 
     /// <summary>
     /// List all workflow instances for the current tenant (across all definitions).
+    /// Optionally filter by team assignment: GET /api/workflows/instances?teamId={guid}
     /// GET /api/workflows/instances
     /// </summary>
     [HttpGet("instances")]
     [ProducesResponseType(typeof(IReadOnlyList<WorkflowInstanceSummaryDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> ListAllInstances(CancellationToken cancellationToken)
+    public async Task<IActionResult> ListAllInstances(
+        [FromQuery] Guid? teamId = null,
+        CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new ListWorkflowInstancesQuery(), cancellationToken);
+        var result = await _mediator.Send(new ListWorkflowInstancesQuery(TeamId: teamId), cancellationToken);
         return Ok(result.Value);
     }
 
@@ -360,6 +364,38 @@ public sealed class WorkflowsController : ControllerBase
             new ResumeWorkflowCommand(
                 WorkflowInstanceId: instanceId,
                 ResumedBy: _currentUser.UserId),
+            cancellationToken);
+
+        if (result.IsFailure)
+        {
+            if (result.Error!.Contains(NotFoundFragment, StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { error = result.Error });
+
+            return BadRequest(new { error = result.Error });
+        }
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Assign (or clear) a team on a workflow instance.
+    /// PUT /api/workflows/instances/{instanceId}/assign-team
+    /// </summary>
+    [HttpPut("instances/{instanceId:guid}/assign-team")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AssignTeam(
+        Guid instanceId,
+        [FromBody] AssignTeamRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new AssignTeamToWorkflowCommand(
+                WorkflowInstanceId: instanceId,
+                TeamId:             request.TeamId,
+                AssignedBy:         _currentUser.UserId,
+                TenantId:           _tenantContext.TenantId),
             cancellationToken);
 
         if (result.IsFailure)

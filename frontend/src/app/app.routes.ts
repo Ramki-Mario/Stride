@@ -80,6 +80,13 @@ export const appRoutes: Routes = [
             (m) => m.invoicingRoutes
           ),
       },
+      {
+        path: 'teams',
+        loadChildren: () =>
+          import('./features/teams/teams.routes').then(
+            (m) => m.teamRoutes
+          ),
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },
