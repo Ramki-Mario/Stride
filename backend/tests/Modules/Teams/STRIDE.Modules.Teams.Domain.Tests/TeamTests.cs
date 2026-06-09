@@ -288,4 +288,51 @@ public sealed class TeamTests
 
         team.Description.Should().Be("Squad");
     }
+
+    // ── Deleted-team guard paths ──────────────────────────────────────────────
+
+    [Fact]
+    public void Update_DeletedTeam_ThrowsTeamDomainException()
+    {
+        var team = new TeamBuilder().Build();
+        MarkDeleted(team);
+
+        var act = () => team.Update("New Name", null, null, Guid.NewGuid());
+
+        act.Should().Throw<TeamDomainException>()
+            .WithMessage("*deleted*");
+    }
+
+    [Fact]
+    public void Deactivate_DeletedTeam_ThrowsTeamDomainException()
+    {
+        var team = new TeamBuilder().Build();
+        MarkDeleted(team);
+
+        var act = () => team.Deactivate(Guid.NewGuid());
+
+        act.Should().Throw<TeamDomainException>()
+            .WithMessage("*deleted*");
+    }
+
+    [Fact]
+    public void Reactivate_DeletedTeam_ThrowsTeamDomainException()
+    {
+        var team = new TeamBuilder().Build();
+        MarkDeleted(team);
+
+        var act = () => team.Reactivate(Guid.NewGuid());
+
+        act.Should().Throw<TeamDomainException>()
+            .WithMessage("*deleted*");
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Uses reflection to set the protected <c>IsDeleted</c> flag so we can
+    /// exercise the guard branches without requiring a real soft-delete operation.
+    /// </summary>
+    private static void MarkDeleted(Team team)
+        => team.GetType().GetProperty("IsDeleted")!.SetValue(team, true);
 }

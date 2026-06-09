@@ -157,6 +157,38 @@ public sealed class BffTeamsControllerTests
         result.Should().BeOfType<NoContentResult>();
     }
 
+    // ── Unauthorized paths (null token) — remaining endpoints ────────────────
+
+    [Fact]
+    public async Task UpdateTeam_NullToken_ReturnsUnauthorized()
+    {
+        var (sut, _) = BuildSut(token: null);
+
+        var result = await sut.UpdateTeam(Guid.NewGuid(), new { }, CancellationToken.None);
+
+        result.Should().BeOfType<UnauthorizedResult>();
+    }
+
+    [Fact]
+    public async Task DeactivateTeam_NullToken_ReturnsUnauthorized()
+    {
+        var (sut, _) = BuildSut(token: null);
+
+        var result = await sut.DeactivateTeam(Guid.NewGuid(), CancellationToken.None);
+
+        result.Should().BeOfType<UnauthorizedResult>();
+    }
+
+    [Fact]
+    public async Task ReactivateTeam_NullToken_ReturnsUnauthorized()
+    {
+        var (sut, _) = BuildSut(token: null);
+
+        var result = await sut.ReactivateTeam(Guid.NewGuid(), CancellationToken.None);
+
+        result.Should().BeOfType<UnauthorizedResult>();
+    }
+
     // ── ProxyAsync error path ─────────────────────────────────────────────────
 
     [Fact]
@@ -187,6 +219,66 @@ public sealed class BffTeamsControllerTests
 
         result.Should().BeOfType<ObjectResult>()
             .Which.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+    }
+
+    [Fact]
+    public async Task GetTeam_UpstreamError_ProxiesErrorStatusCode()
+    {
+        var (sut, setResponse) = BuildSut();
+        setResponse(new HttpResponseMessage(HttpStatusCode.NotFound)
+        {
+            Content = new StringContent("{\"error\":\"not found\"}"),
+        });
+
+        var result = await sut.GetTeam(Guid.NewGuid(), CancellationToken.None);
+
+        result.Should().BeOfType<ObjectResult>()
+            .Which.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+    }
+
+    [Fact]
+    public async Task UpdateTeam_UpstreamError_ProxiesErrorResponse()
+    {
+        var (sut, setResponse) = BuildSut();
+        setResponse(new HttpResponseMessage(HttpStatusCode.UnprocessableEntity)
+        {
+            Content = new StringContent("{\"error\":\"validation failed\"}"),
+        });
+
+        var result = await sut.UpdateTeam(Guid.NewGuid(), new { }, CancellationToken.None);
+
+        result.Should().BeOfType<ObjectResult>()
+            .Which.StatusCode.Should().Be(StatusCodes.Status422UnprocessableEntity);
+    }
+
+    [Fact]
+    public async Task DeactivateTeam_UpstreamError_ProxiesErrorResponse()
+    {
+        var (sut, setResponse) = BuildSut();
+        setResponse(new HttpResponseMessage(HttpStatusCode.Conflict)
+        {
+            Content = new StringContent("{\"error\":\"already inactive\"}"),
+        });
+
+        var result = await sut.DeactivateTeam(Guid.NewGuid(), CancellationToken.None);
+
+        result.Should().BeOfType<ObjectResult>()
+            .Which.StatusCode.Should().Be(StatusCodes.Status409Conflict);
+    }
+
+    [Fact]
+    public async Task ReactivateTeam_UpstreamError_ProxiesErrorResponse()
+    {
+        var (sut, setResponse) = BuildSut();
+        setResponse(new HttpResponseMessage(HttpStatusCode.Conflict)
+        {
+            Content = new StringContent("{\"error\":\"already active\"}"),
+        });
+
+        var result = await sut.ReactivateTeam(Guid.NewGuid(), CancellationToken.None);
+
+        result.Should().BeOfType<ObjectResult>()
+            .Which.StatusCode.Should().Be(StatusCodes.Status409Conflict);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
