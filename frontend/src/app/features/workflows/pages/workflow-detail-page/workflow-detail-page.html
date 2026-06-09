@@ -502,6 +502,26 @@
                                   <span class="pi pi-forward"></span>
                                 </button>
                               }
+                              @if (canApprove(step)) {
+                                <button
+                                  class="wfd-step-action-btn approve"
+                                  (click)="openModal(step, 'approve')"
+                                  aria-label="Approve step"
+                                  title="Approve"
+                                >
+                                  <span class="pi pi-thumbs-up"></span>
+                                </button>
+                              }
+                              @if (canReject(step)) {
+                                <button
+                                  class="wfd-step-action-btn reject"
+                                  (click)="openModal(step, 'reject')"
+                                  aria-label="Reject step"
+                                  title="Reject"
+                                >
+                                  <span class="pi pi-thumbs-down"></span>
+                                </button>
+                              }
                             </div>
                           }
                         </div>

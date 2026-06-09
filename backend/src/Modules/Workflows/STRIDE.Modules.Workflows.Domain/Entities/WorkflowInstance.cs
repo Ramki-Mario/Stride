@@ -87,7 +87,7 @@ public sealed class WorkflowInstance : AuditableEntity
             var request = firstStep.ActivateForApproval();
             instance._approvalRequests.Add(request);
             instance.RaiseDomainEvent(new ApprovalRequestedEvent(
-                firstStep.Id, instance.Id, instance.TenantId, firstStep.RequiredRoleId, firstStep.StepName));
+                firstStep.Id, instance.Id, instance.TenantId, firstStep.RequiredRoleId, firstStep.StepName, instance.WorkflowName));
         }
 
         instance.RaiseDomainEvent(new WorkflowStartedEvent(
@@ -342,7 +342,7 @@ public sealed class WorkflowInstance : AuditableEntity
             var request = nextStep.ActivateForApproval();
             _approvalRequests.Add(request);
             RaiseDomainEvent(new ApprovalRequestedEvent(
-                nextStep.Id, Id, TenantId, nextStep.RequiredRoleId, nextStep.StepName));
+                nextStep.Id, Id, TenantId, nextStep.RequiredRoleId, nextStep.StepName, WorkflowName));
         }
     }
 

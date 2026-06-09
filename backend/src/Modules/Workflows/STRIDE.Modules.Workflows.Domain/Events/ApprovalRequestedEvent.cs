@@ -7,4 +7,5 @@ public sealed record ApprovalRequestedEvent(
     Guid   WorkflowInstanceId,
     Guid   TenantId,
     Guid?  RequiredRoleId,
-    string StepName = "") : IDomainEvent;
+    string StepName        = "",
+    string WorkflowName    = "") : IDomainEvent;

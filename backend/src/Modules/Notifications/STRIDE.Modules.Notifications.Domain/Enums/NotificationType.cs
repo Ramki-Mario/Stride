@@ -12,4 +12,5 @@ public enum NotificationType
     SystemAlert,
     InvoiceDraftCreated,
     Mentioned,
+    ApprovalRequested,
 }
