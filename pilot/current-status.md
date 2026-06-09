@@ -267,7 +267,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 ### Milestone #11 — Product Layer Gaps (EP-048–061)
 
-**Board status (2026-06-09):** EP-048–EP-054 ✅ Done. EP-055 Mobile-First 🔵 In Progress (US-168 ✅ Done, US-169 🔵 PR #331 open, US-170 🔵 PR #332 open). Extra Teams module (EP-062) delivered and closed. PRs #323 #324 #325 all merged.
+**Board status (2026-06-09):** EP-048–EP-054 ✅ Done. EP-055 Mobile-First 🔵 In Progress (US-168 ✅, US-169 🔵 PR #331 open, US-170 ✅ PR #332 merged). Extra Teams module (EP-062) delivered and closed. PRs #323 #324 #325 all merged.
 
 **Epic → Issue → Story mapping — Milestone #11 original plan (✅ = Done, ⏳ = Next/Backlog):**
 - EP-048 #263 → US-147–149 (#277–279) — Step Ownership & Assignment ✅
@@ -277,7 +277,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - EP-052 #267 → US-159–161 (#289–291) — Advanced Step Types ✅
 - EP-053 #268 → US-162–164 (#292–294) — SLA & Deadline Tracking ✅
 - EP-054 #269 → US-165–167 (#295–297) — Comments & Activity Log ✅ (PRs #320 #321 #322)
-- EP-055 #270 → US-168–170 (#298–300) — Mobile-First Experience 🔵 In Progress (US-168 ✅ #298 closed, US-169 🔵 PR #331, US-170 🔵 PR #332)
+- EP-055 #270 → US-168–170 (#298–300) — Mobile-First Experience 🔵 In Progress (US-168 ✅ #298 closed, US-169 🔵 PR #331, US-170 ✅ #300 closed PR #332)
 - EP-056 #271 → US-171–173 (#301–303) — Approval Gates ⏳
 - EP-057 #272 → US-174–176 (#304–306) — Actionable Dashboard ⏳
 - EP-058 #273 → US-177–179 (#307–309) — External Customer-Facing Link ⏳
@@ -288,7 +288,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 **Extra work delivered outside original plan:**
 - EP-062 #327 → US-187 (#326) / US-188 (#328) / US-189 (#329) — Teams / Department Entity ✅ (PRs #323 #324 #325 — all closed, board=Done)
 
-**Next:** EP-055 Mobile-First Experience (#270) — US-169 🔵 PR #331 + US-170 🔵 PR #332 both open, pending merge. After EP-055: EP-056 Approval Gates (#271)
+**Next:** EP-055 US-169 🔵 PR #331 pending merge (last story of EP-055). Then EP-056 Approval Gates (#271)
 
 ### EP-049 — Client/Customer Entity ✅ Done (#264, closed 2026-06-07)
 
@@ -357,7 +357,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 ### EP-055 — Mobile-First Experience 🔵 In Progress (#270)
 
-**GitHub:** Epic #270 | Stories: US-168 #298 ✅ / US-169 #299 🔵 PR #331 / US-170 #300 🔵 PR #332
+**GitHub:** Epic #270 | Stories: US-168 #298 ✅ / US-169 #299 🔵 PR #331 open / US-170 #300 ✅ PR #332 merged
 
 #### US-168 — Responsive layout refactor ✅ Done (PR #330, GitHub #298 closed, board=Done)
 - Shell: `mobileNavOpen` signal; sidebar fixed off-canvas overlay at <640px, slides in from left; backdrop closes on tap
@@ -378,7 +378,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - my-tasks-page: quick-complete ✓ button on Pending/InProgress tasks — always-visible on mobile (2.75rem), hover-visible on desktop; calls `completeStep` with no fields/billables, reloads list
 - **dev build clean** ✅
 
-#### US-170 — PWA setup (installable app, service worker, offline queue, Web Push) 🔵 In Review (PR #332)
+#### US-170 — PWA setup (installable app, service worker, offline queue, Web Push) ✅ Done (PR #332 merged, GitHub #300 closed, board=Done)
 - `ngsw-config.json`: Angular SW app-shell prefetch + lazy assets caching; `serviceWorker` enabled in production `angular.json`
 - `manifest.webmanifest`: `display: standalone`, `theme_color: #B97AF9`, PNG icons (192/512), SVG icon, apple-touch-icon, My Tasks shortcut
 - `index.html`: manifest link, theme-color, apple-mobile-web-app meta tags
