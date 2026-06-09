@@ -1093,6 +1093,21 @@ EP-036 (Invoicing)             ← parallel with EP-037 after EP-035 done
 | EP-043 Scheduling Module | #198 | US-123 #211, US-124 #212, US-125 #213, US-126 #214, US-127 #215 | [ ] Backlog |
 | EP-044 Live Deployment — Dev Environment | #199 | US-128 #216, US-129 #217, US-130 #218, US-131 #219 | [ ] Backlog |
 
+### Milestone #11 — Product Layer Gaps (EP-048–061, implemented as part of Phase 7)
+
+| Epic | Stories | PRs | Status |
+|---|---|---|---|
+| EP-048 Step Ownership & Assignment | US-147–149 (#277–279) | (prior) | [x] Done |
+| EP-049 Client/Customer Entity | US-150–152 (#280–282) | (prior) | [x] Done |
+| EP-050 Workflow ↔ Invoice Integration | US-153–155 (#283–285) | (prior) | [x] Done |
+| EP-051 File & Photo Attachments | US-156–158 (#286–288) | (prior) | [x] Done |
+| EP-052 Advanced Step Types | US-159–161 (#289–291) | (prior) | [x] Done |
+| EP-053 SLA & Deadline Tracking | US-162–164 (#292–294) | #317 #318 #319 | [x] Done |
+| EP-054 Comments & Activity Log | US-165–167 (#295–297) | #320 #321 #322 | [x] Done |
+| EP-055 Team / Department Entity | US-168 (#326) / US-169 / US-170 | #323 #324 #325 | [x] Done — 2026-06-09 |
+| EP-056 Custom Fields | TBD | — | [ ] Next |
+| EP-057–EP-061 | TBD | — | [ ] Backlog |
+
 ### Dependency order
 ```
 EP-040 (Tests)         — unblocked, start first
