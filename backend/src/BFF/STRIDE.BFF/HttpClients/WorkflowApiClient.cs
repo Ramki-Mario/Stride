@@ -162,6 +162,20 @@ public sealed class WorkflowApiClient
         return _client.SendAsync(req, cancellationToken);
     }
 
+    public Task<HttpResponseMessage> ApproveStepAsync(Guid instanceId, Guid stepId, HttpContent body, string token, CancellationToken cancellationToken = default)
+    {
+        var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/steps/{stepId}/approve", token);
+        req.Content = body ?? new StringContent(EmptyJson, System.Text.Encoding.UTF8, AppJson);
+        return _client.SendAsync(req, cancellationToken);
+    }
+
+    public Task<HttpResponseMessage> RejectStepAsync(Guid instanceId, Guid stepId, HttpContent body, string token, CancellationToken cancellationToken = default)
+    {
+        var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/steps/{stepId}/reject", token);
+        req.Content = body ?? new StringContent(EmptyJson, System.Text.Encoding.UTF8, AppJson);
+        return _client.SendAsync(req, cancellationToken);
+    }
+
     // ── Step Attachments ──────────────────────────────────────────────────
 
     /// <summary>

@@ -46,6 +46,15 @@ public sealed class StepInstance : BaseEntity<Guid>
     /// <summary>Timestamp at which the overdue notification was sent. Null until IsOverdue is set.</summary>
     public DateTime? OverdueNotifiedAt { get; private set; }
 
+    /// <summary>Snapshotted step type — Standard or Approval gate.</summary>
+    public StepType StepType { get; private set; }
+
+    /// <summary>Snapshotted rejection handling strategy for Approval steps.</summary>
+    public RejectionHandling RejectionHandling { get; private set; }
+
+    /// <summary>Snapshotted target step Order for RevertToStep rejection handling.</summary>
+    public int? RevertToStepOrder { get; private set; }
+
     /// <summary>Billable items logged when this step was completed.</summary>
     public IReadOnlyList<BillableItem> BillableItems => _billableItems.AsReadOnly();
 
@@ -73,6 +82,9 @@ public sealed class StepInstance : BaseEntity<Guid>
             DueOffsetHours     = definition.DueOffsetHours,
             DueAt              = dueAt,
             Status             = StepStatus.Pending,
+            StepType           = definition.StepType,
+            RejectionHandling  = definition.RejectionHandling,
+            RevertToStepOrder  = definition.RevertToStepOrder,
         };
     }
 
@@ -167,6 +179,64 @@ public sealed class StepInstance : BaseEntity<Guid>
         CompletedAt = DateTime.UtcNow;
     }
 
+    // ── Approval-gate methods ─────────────────────────────────────────────────
+
+    /// <summary>
+    /// Transitions a Pending Approval-type step to AwaitingApproval and returns
+    /// the new <see cref="ApprovalRequest"/> to be added to the aggregate.
+    /// </summary>
+    internal ApprovalRequest ActivateForApproval()
+    {
+        if (StepType != StepType.Approval)
+            throw new WorkflowDomainException($"Step '{StepName}' is not an Approval step.");
+
+        if (Status != StepStatus.Pending)
+            throw new WorkflowDomainException($"Step '{StepName}' must be Pending to activate for approval (current: {Status}).");
+
+        Status = StepStatus.AwaitingApproval;
+
+        return ApprovalRequest.Create(
+            WorkflowInstanceId,
+            Id,
+            TenantId,
+            RequiredRoleId,
+            RejectionHandling,
+            RevertToStepOrder);
+    }
+
+    /// <summary>Transitions AwaitingApproval → Completed when the approval request is approved.</summary>
+    internal void MarkApproved()
+    {
+        if (Status != StepStatus.AwaitingApproval)
+            throw new WorkflowDomainException($"Step '{StepName}' is not awaiting approval (current: {Status}).");
+
+        Status      = StepStatus.Completed;
+        CompletedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>Transitions AwaitingApproval → Rejected when the approval request is rejected.</summary>
+    internal void MarkRejected()
+    {
+        if (Status != StepStatus.AwaitingApproval)
+            throw new WorkflowDomainException($"Step '{StepName}' is not awaiting approval (current: {Status}).");
+
+        Status      = StepStatus.Rejected;
+        CompletedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Resets a step to Pending so it can be re-completed after an approval rejection
+    /// with RevertToStep handling.
+    /// </summary>
+    internal void ResetToPending()
+    {
+        Status        = StepStatus.Pending;
+        AssigneeId    = null;
+        AssignedAt    = null;
+        CompletedAt   = null;
+        FailureReason = null;
+    }
+
     internal bool IsTerminal =>
-        Status is StepStatus.Completed or StepStatus.Skipped or StepStatus.Failed;
+        Status is StepStatus.Completed or StepStatus.Skipped or StepStatus.Failed or StepStatus.Rejected;
 }
