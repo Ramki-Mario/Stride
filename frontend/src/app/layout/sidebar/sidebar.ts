@@ -461,6 +461,7 @@ export class SidebarComponent {
       label: 'Clients',
       items: [
         { label: 'Clients', route: '/clients', icon: 'pi-id-card' },
+        { label: 'Teams',   route: '/teams',   icon: 'pi-sitemap'  },
       ],
     },
     {
