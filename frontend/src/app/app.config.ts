@@ -2,6 +2,7 @@ import {
   APP_INITIALIZER,
   ApplicationConfig,
   inject,
+  isDevMode,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import {
@@ -10,6 +11,7 @@ import {
 } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideServiceWorker } from '@angular/service-worker';
 import { providePrimeNG } from 'primeng/config';
 import { firstValueFrom, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
@@ -68,5 +70,12 @@ export const appConfig: ApplicationConfig = {
       useFactory: initSession,
       multi: true,
     },
+
+    // Service Worker — enabled in production only; dev mode disables it
+    // so hot-reloads are not intercepted.
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
   ],
 };

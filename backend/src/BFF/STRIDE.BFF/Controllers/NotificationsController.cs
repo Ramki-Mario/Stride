@@ -66,6 +66,46 @@ public sealed class NotificationsController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
+    // ── Web Push ──────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Proxies the VAPID public key — no auth required so the Angular app can
+    /// call this before the user is fully authenticated.
+    /// GET /bff/notifications/push/vapid-key
+    /// </summary>
+    [HttpGet("push/vapid-key")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetVapidPublicKey(CancellationToken cancellationToken)
+        => await ProxyAsync(await _notifications.GetVapidPublicKeyAsync(cancellationToken), cancellationToken);
+
+    /// <summary>
+    /// Registers a Web Push subscription for the current session user.
+    /// POST /bff/notifications/push/subscribe
+    /// </summary>
+    [HttpPost("push/subscribe")]
+    public async Task<IActionResult> Subscribe([FromBody] object body, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        var json = System.Text.Json.JsonSerializer.Serialize(body);
+        var response = await _notifications.SubscribePushAsync(token, json, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
+    }
+
+    /// <summary>
+    /// Removes a Web Push subscription.
+    /// POST /bff/notifications/push/unsubscribe
+    /// </summary>
+    [HttpPost("push/unsubscribe")]
+    public async Task<IActionResult> Unsubscribe([FromBody] object body, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        var json = System.Text.Json.JsonSerializer.Serialize(body);
+        var response = await _notifications.UnsubscribePushAsync(token, json, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────
 
     private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");
