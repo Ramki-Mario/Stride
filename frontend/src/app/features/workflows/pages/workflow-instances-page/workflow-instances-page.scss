@@ -387,3 +387,28 @@
   &.wi-sla-atrisk  { background: rgba(234,179,8,.18);  color: #92400e; }
   &.wi-sla-breached{ background: rgba(239,68,68,.15);  color: #b91c1c; }
 }
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 639px) {
+  .wi-page {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Drop the progress-bar column on small screens — not enough space */
+  .wi-row-btn {
+    grid-template-columns: 2.5rem 1fr auto auto;
+    padding: 0.875rem;
+    min-height: 2.75rem;
+  }
+
+  .wi-row-progress { display: none; }
+
+  .wi-row-name { font-size: 0.875rem; }
+}

@@ -1325,6 +1325,67 @@ body {
   background: var(--stride-bg);
 }
 
+/* ── Mobile: off-canvas sidebar overlay (< 640 px) ─────────────────────── */
+
+/* Backdrop is in DOM only when mobileNavOpen; hide on desktop via CSS.     */
+.stride-nav-backdrop {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  /* Sidebar: pulled out of flex flow, slides in from left as overlay. */
+  .stride-sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    width: 15rem !important;   /* always expanded on mobile — no collapsed state */
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none !important;
+  }
+
+  .stride-sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: var(--stride-shadow-xl) !important;
+  }
+
+  /* Backdrop rendered behind sidebar, closes nav on tap-outside. */
+  .stride-nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 99;
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
+  }
+}
+
+/* ── Touch targets — minimum 44 × 44 px on mobile ──────────────────────── */
+
+@media (max-width: 639px) {
+  .stride-btn,
+  .stride-btn-primary,
+  .stride-btn-secondary,
+  .stride-btn-ghost {
+    min-height: 2.75rem;
+    padding-top:    0.625rem;
+    padding-bottom: 0.625rem;
+  }
+
+  /* Topbar action buttons (theme toggle, etc.) */
+  .stride-topbar .tb-action {
+    width:  2.75rem;
+    height: 2.75rem;
+  }
+
+  /* Condensed page padding */
+  .stride-page { padding: 1rem; }
+}
+
 /* ─────────────────────────────────────────────────────────────────────────
    7. TRANSITIONS & ANIMATIONS
    ───────────────────────────────────────────────────────────────────────── */

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar';
 import { TopbarComponent } from '../topbar/topbar';
@@ -10,13 +10,21 @@ import { TopbarComponent } from '../topbar/topbar';
   imports: [RouterOutlet, SidebarComponent, TopbarComponent],
   template: `
     <div class="stride-shell">
-      <!-- Sidebar: host element receives .stride-sidebar via host binding -->
-      <app-sidebar />
+      <!-- Sidebar: overlay on mobile (mobileOpen), collapsible rail on desktop -->
+      <app-sidebar
+        [mobileOpen]="mobileNavOpen()"
+        (navClose)="mobileNavOpen.set(false)" />
+
+      <!-- Backdrop: closes mobile nav on tap-outside; hidden on desktop via CSS -->
+      @if (mobileNavOpen()) {
+        <div class="stride-nav-backdrop"
+             (click)="mobileNavOpen.set(false)"
+             aria-hidden="true"></div>
+      }
 
       <!-- Main column: topbar + scrollable content -->
       <div class="stride-main">
-        <!-- Topbar: host element receives .stride-topbar via host binding -->
-        <app-topbar />
+        <app-topbar (hamburgerClick)="mobileNavOpen.set(true)" />
 
         <main class="stride-content stride-animate-in">
           <router-outlet />
@@ -25,4 +33,6 @@ import { TopbarComponent } from '../topbar/topbar';
     </div>
   `,
 })
-export class ShellComponent {}
+export class ShellComponent {
+  protected readonly mobileNavOpen = signal(false);
+}
