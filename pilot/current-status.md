@@ -267,9 +267,9 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 ### Milestone #11 — Product Layer Gaps (EP-048–061)
 
-**Board status (2026-06-09):** EP-048–EP-055 all ✅ Done. EP-056 = next. Teams work (EP-055) tracked as GitHub issue #326 (US-168, created + closed 2026-06-09); US-169/170 have no GitHub issues (PRs #324/#325 only). ⚠️ GitHub issues #270–#276 (planned Milestone #11 epic slots) belong to unrelated epics — avoid re-using those issue numbers.
+**Board status (2026-06-09):** EP-048–EP-054 ✅ Done. EP-055 Mobile-First = ⏳ Next. Extra Teams module (EP-062) delivered and closed. PRs #323 #324 #325 all merged.
 
-**Epic → Issue → Story mapping (✅ = Done, ⏳ = Backlog):**
+**Epic → Issue → Story mapping — Milestone #11 original plan (✅ = Done, ⏳ = Next/Backlog):**
 - EP-048 #263 → US-147–149 (#277–279) — Step Ownership & Assignment ✅
 - EP-049 #264 → US-150–152 (#280–282) — Client/Customer Entity ✅
 - EP-050 #265 → US-153–155 (#283–285) — Workflow ↔ Invoice Integration ✅
@@ -277,17 +277,18 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - EP-052 #267 → US-159–161 (#289–291) — Advanced Step Types ✅
 - EP-053 #268 → US-162–164 (#292–294) — SLA & Deadline Tracking ✅
 - EP-054 #269 → US-165–167 (#295–297) — Comments & Activity Log ✅ (PRs #320 #321 #322)
-- EP-055 (no epic issue) → US-168 (#326) / US-169 / US-170 — Team / Department Entity ✅ (PRs #323 #324 #325)
-- EP-056 — Custom Fields ⏳
-- EP-057 — Reporting Enhancements ⏳
-- EP-058 — Public API / Webhooks ⏳
-- EP-059 — Mobile-Responsive Shell ⏳
-- EP-060 — Accessibility & i18n ⏳
-- EP-061 — (remaining) ⏳
+- EP-055 #270 → US-168–170 (#298–300) — Mobile-First Experience ⏳ NEXT
+- EP-056 #271 → US-171–173 (#301–303) — Approval Gates ⏳
+- EP-057 #272 → US-174–176 (#304–306) — Actionable Dashboard ⏳
+- EP-058 #273 → US-177–179 (#307–309) — External Customer-Facing Link ⏳
+- EP-059 #274 → US-180–182 (#310–312) — Webhooks and Integrations ⏳
+- EP-060 #275 → US-183–185 (#313–315) — Operational Analytics ⏳
+- EP-061 #276 → US-186 (#316) — README and Product Story ⏳
 
-⚠️ GitHub issues #270–#276 were pre-allocated but contain different epic content (Mobile-First, Approval Gates, etc.). Do NOT assume those map to our EP-055–EP-061. Create fresh issues for each new epic going forward.
+**Extra work delivered outside original plan:**
+- EP-062 #327 → US-187 (#326) / US-188 (#328) / US-189 (#329) — Teams / Department Entity ✅ (PRs #323 #324 #325 — all closed, board=Done)
 
-**Implementation order (sequential):** ~~EP-049 → EP-050 → EP-051 → EP-052 → EP-053 → EP-054 → EP-055~~ ✅ → EP-056 → EP-057 → EP-058 → EP-059 → EP-060 → EP-061 → EP-048
+**Next:** EP-055 Mobile-First Experience (#270), US-168 (#298) through US-170 (#300)
 
 ### EP-049 — Client/Customer Entity ✅ Done (#264, closed 2026-06-07)
 
@@ -354,9 +355,11 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 ---
 
-### EP-055 — Team / Department Entity ✅ Done (2026-06-09)
+### EP-062 — Teams / Department Entity ✅ Done (extra epic, 2026-06-09)
 
-#### US-168 — Teams module scaffold, CQRS, Dapper read service ✅ Done (commit `532e583`+`9e9a178`, PR #323, GitHub #326 ✅ closed + board=Done)
+**GitHub:** Epic #327 (closed) | Stories: US-187 #326 ✅ / US-188 #328 ✅ / US-189 #329 ✅ | All board=Done
+
+#### US-187 — Teams module scaffold, CQRS, Dapper read service ✅ Done (commit `532e583`+`9e9a178`, PR #323, GitHub #326 ✅ closed)
 - New `STRIDE.Modules.Teams` module: 4 src projects + 2 test projects (Domain, Application, Infrastructure, API + Domain.Tests, Application.Tests + Infrastructure.Tests)
 - `Team` aggregate: Name, Description, `ParentTeamId` self-referential FK, `TeamStatus` (Active=0/Inactive=1), soft-delete
 - Full CQRS: CreateTeam, UpdateTeam, DeactivateTeam, ReactivateTeam commands; GetTeams (paged/search/filter), GetTeamById queries
@@ -365,12 +368,12 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - 341 total tests (76 Teams: 26 domain + 50 app; SonarCloud quality gate ≥80% ✅)
 - Coverage fix: `TeamRepositoryTests` (9 EF InMemory), `InternalsVisibleTo` added, `**/ReadModels/**` excluded from `sonar.coverage.exclusions`
 
-#### US-169 — Team ↔ Workflow assignment ✅ Done (commit `e6bb5ce`, PR #324)
+#### US-188 — Team ↔ Workflow assignment ✅ Done (commit `e6bb5ce`, PR #324, GitHub #328 ✅ closed)
 - Nullable `TeamId` FK on `WorkflowInstance` (no EF nav, bare column + composite index, SQL LEFT JOIN for name)
 - `AssignTeamToWorkflow` command + handler; filter instances by team; `WorkflowTeamAssignedEvent`
 - `GetWorkflowInstanceSummariesByTeam.sql`; Angular team picker in workflow-detail; 6 domain + 5 app tests
 
-#### US-170 — Teams Angular management page ✅ Done (commit `11c2159`, PR #325)
+#### US-189 — Teams Angular management page ✅ Done (commit `11c2159`, PR #325, GitHub #329 ✅ closed)
 - `/teams` lazy route + sidebar nav link; KPI cards, debounced search, status filter, pagination
 - Create/Edit modal: name, description, parent team picker (excludes self); row actions: Edit, Deactivate, Reactivate
 - `TeamsService` full CRUD signals; `PagedResult<T>.items` mapping fix; numeric `TeamStatus` model fix
