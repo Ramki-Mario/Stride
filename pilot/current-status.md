@@ -371,6 +371,13 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - Workflow Detail: step-action and hero button touch targets; breadcrumb wraps gracefully on mobile
 - **341 backend tests pass** ✅ · dev build clean ✅
 
+#### US-169 — Mobile-optimised step completion with camera capture 🔵 In Progress (PR #331, GitHub #299 board=In Progress)
+- step-action-modal: bottom-sheet on mobile (<640px) — slides up from bottom, full width, 92dvh max, rounded top corners
+- step-action-modal: **Photos** section in complete action — Camera button (`accept="image/*" capture="environment"`) opens rear camera; Gallery button opens file picker; thumbnails with remove; uploads fire after step completes (non-blocking)
+- step-action-modal: billable items grid collapses 6-col → 2-col stacked on mobile; footer buttons go full-width 2.75rem
+- my-tasks-page: quick-complete ✓ button on Pending/InProgress tasks — always-visible on mobile (2.75rem), hover-visible on desktop; calls `completeStep` with no fields/billables, reloads list
+- **dev build clean** ✅
+
 ---
 
 ### EP-062 — Teams / Department Entity ✅ Done (extra epic, 2026-06-09)
