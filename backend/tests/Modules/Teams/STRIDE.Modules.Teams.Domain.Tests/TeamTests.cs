@@ -191,4 +191,101 @@ public sealed class TeamTests
         act.Should().Throw<TeamDomainException>()
             .WithMessage("*already active*");
     }
+
+    // ── Update — additional validation paths ──────────────────────────────────
+
+    [Fact]
+    public void Update_NameTooLong_ThrowsTeamDomainException()
+    {
+        var team = new TeamBuilder().Build();
+
+        var act = () => team.Update(new string('Z', Team.NameMaxLength + 1), null, null, Guid.NewGuid());
+
+        act.Should().Throw<TeamDomainException>()
+            .WithMessage($"*{Team.NameMaxLength}*");
+    }
+
+    [Fact]
+    public void Update_DescriptionTooLong_ThrowsTeamDomainException()
+    {
+        var team = new TeamBuilder().Build();
+
+        var act = () => team.Update("Valid", new string('x', Team.DescriptionMaxLength + 1), null, Guid.NewGuid());
+
+        act.Should().Throw<TeamDomainException>()
+            .WithMessage($"*{Team.DescriptionMaxLength}*");
+    }
+
+    [Fact]
+    public void Update_TrimsName()
+    {
+        var team = new TeamBuilder().Build();
+
+        team.Update("  Platform  ", null, null, Guid.NewGuid());
+
+        team.Name.Should().Be("Platform");
+    }
+
+    [Fact]
+    public void Update_NullDescription_ClearsDescription()
+    {
+        var team = new TeamBuilder().WithDescription("old desc").Build();
+
+        team.Update("Name", null, null, Guid.NewGuid());
+
+        team.Description.Should().BeNull();
+    }
+
+    [Fact]
+    public void Update_SetsNewParentTeamId()
+    {
+        var parentId = Guid.NewGuid();
+        var team     = new TeamBuilder().Build();
+
+        team.Update("Name", null, parentId, Guid.NewGuid());
+
+        team.ParentTeamId.Should().Be(parentId);
+    }
+
+    [Fact]
+    public void Update_ClearsParentTeamId_WhenNullPassed()
+    {
+        var team = new TeamBuilder().WithParentTeamId(Guid.NewGuid()).Build();
+
+        team.Update("Name", null, null, Guid.NewGuid());
+
+        team.ParentTeamId.Should().BeNull();
+    }
+
+    // ── Create — additional property checks ───────────────────────────────────
+
+    [Fact]
+    public void Create_WhitespaceOnlyName_ThrowsTeamDomainException()
+    {
+        var act = () => new TeamBuilder().WithName("   ").Build();
+
+        act.Should().Throw<TeamDomainException>()
+            .WithMessage("*empty*");
+    }
+
+    [Fact]
+    public void Create_SetsAllCoreProperties()
+    {
+        var tenantId = Guid.NewGuid();
+        var team = Team.Create(new NewTeam(tenantId, "Engineering", "Core squad", null, Guid.NewGuid()));
+
+        team.TenantId.Should().Be(tenantId);
+        team.Name.Should().Be("Engineering");
+        team.Description.Should().Be("Core squad");
+        team.ParentTeamId.Should().BeNull();
+        team.IsDeleted.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Create_TrimsDescription()
+    {
+        var team = new TeamBuilder().WithDescription("  Squad  ").Build();
+
+        team.Description.Should().Be("Squad");
+    }
 }
