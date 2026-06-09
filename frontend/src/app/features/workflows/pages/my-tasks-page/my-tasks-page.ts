@@ -30,9 +30,11 @@ export class MyTasksPageComponent implements OnInit {
   readonly STEP_STATUS_CONFIG = STEP_INSTANCE_STATUS_CONFIG;
 
   // ── State ────────────────────────────────────────────────────────────────
-  readonly tasks        = signal<MyTask[]>([]);
-  readonly isLoading    = signal(true);
-  readonly errorMessage = signal<string | null>(null);
+  readonly tasks              = signal<MyTask[]>([]);
+  readonly isLoading          = signal(true);
+  readonly errorMessage       = signal<string | null>(null);
+  readonly quickCompletingId  = signal<string | null>(null);
+  readonly quickCompleteError = signal<string | null>(null);
 
   // ── Lifecycle ────────────────────────────────────────────────────────────
 
@@ -62,6 +64,32 @@ export class MyTasksPageComponent implements OnInit {
 
   openInstance(task: MyTask): void {
     this.router.navigate(['/workflows', 'instances', task.workflowInstanceId]);
+  }
+
+  // ── Quick complete ────────────────────────────────────────────────────────
+
+  quickComplete(task: MyTask, event: Event): void {
+    event.stopPropagation();
+    this.quickCompleteError.set(null);
+    this.quickCompletingId.set(task.stepInstanceId);
+
+    this.wfService
+      .completeStep(task.workflowInstanceId, task.stepInstanceId)
+      .pipe(
+        finalize(() => this.quickCompletingId.set(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next:  () => this.loadTasks(),
+        error: (err) => {
+          const msg = err?.error?.error ?? 'Could not complete step. Try opening the detail page.';
+          this.quickCompleteError.set(msg);
+        },
+      });
+  }
+
+  canQuickComplete(task: MyTask): boolean {
+    return task.stepStatus === 'Pending' || task.stepStatus === 'InProgress';
   }
 
   // ── Display helpers ──────────────────────────────────────────────────────
