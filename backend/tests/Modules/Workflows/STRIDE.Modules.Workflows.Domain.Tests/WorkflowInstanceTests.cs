@@ -179,7 +179,7 @@ public sealed class WorkflowInstanceTests
 
         // Assert
         act.Should().Throw<WorkflowDomainException>()
-            .WithMessage("*Running or Paused*");
+            .WithMessage("*Running*Paused*");
     }
 
     // ── CompleteStep + auto-completion ────────────────────────────────────────

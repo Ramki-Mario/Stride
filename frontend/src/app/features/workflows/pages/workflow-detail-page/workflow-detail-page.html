@@ -311,6 +311,15 @@
                     }
                   </div>
 
+                  @if (canResumeFromHalt()) {
+                    <button
+                      class="wfd-btn wfd-btn-warning wfd-btn-sm"
+                      (click)="resumeFromHalt()"
+                    >
+                      <span class="pi pi-play"></span> Resume from Halt
+                    </button>
+                  }
+
                   @if (canCancel()) {
                     <button
                       class="wfd-btn wfd-btn-danger wfd-btn-sm"

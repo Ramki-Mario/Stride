@@ -26,4 +26,7 @@ public enum StepStatus
 
     /// <summary>Approval was rejected by the authorised reviewer.</summary>
     Rejected = 7,
+
+    /// <summary>Step was reverted (reset by a subsequent rejection with RevertToStep handling).</summary>
+    Reverted = 8,
 }

@@ -147,6 +147,89 @@ internal sealed class StepOverdueActivityHandler
     }
 }
 
+internal sealed class StepApprovedActivityHandler
+    : INotificationHandler<DomainEventNotification<StepApprovedEvent>>
+{
+    private readonly IWorkflowActivityRepository _activity;
+
+    public StepApprovedActivityHandler(IWorkflowActivityRepository activity)
+        => _activity = activity;
+
+    public async Task Handle(
+        DomainEventNotification<StepApprovedEvent> notification,
+        CancellationToken cancellationToken)
+    {
+        var e = notification.DomainEvent;
+        var payload = StepPayloadHelper.BuildPayload(stepName: e.StepName);
+
+        var record = WorkflowActivityEvent.Create(
+            e.WorkflowInstanceId,
+            e.TenantId,
+            ActivityEventType.StepApproved,
+            e.ApprovedBy,
+            payload);
+
+        await _activity.AddAsync(record, cancellationToken);
+        await _activity.SaveChangesAsync(cancellationToken);
+    }
+}
+
+internal sealed class StepRejectedActivityHandler
+    : INotificationHandler<DomainEventNotification<StepRejectedEvent>>
+{
+    private readonly IWorkflowActivityRepository _activity;
+
+    public StepRejectedActivityHandler(IWorkflowActivityRepository activity)
+        => _activity = activity;
+
+    public async Task Handle(
+        DomainEventNotification<StepRejectedEvent> notification,
+        CancellationToken cancellationToken)
+    {
+        var e = notification.DomainEvent;
+        var payload = StepPayloadHelper.BuildPayload(stepName: e.StepName);
+
+        var record = WorkflowActivityEvent.Create(
+            e.WorkflowInstanceId,
+            e.TenantId,
+            ActivityEventType.StepRejected,
+            e.RejectedBy,
+            payload);
+
+        await _activity.AddAsync(record, cancellationToken);
+        await _activity.SaveChangesAsync(cancellationToken);
+    }
+}
+
+internal sealed class StepsRevertedActivityHandler
+    : INotificationHandler<DomainEventNotification<StepsRevertedEvent>>
+{
+    private readonly IWorkflowActivityRepository _activity;
+
+    public StepsRevertedActivityHandler(IWorkflowActivityRepository activity)
+        => _activity = activity;
+
+    public async Task Handle(
+        DomainEventNotification<StepsRevertedEvent> notification,
+        CancellationToken cancellationToken)
+    {
+        var e = notification.DomainEvent;
+        var payload = StepPayloadHelper.BuildPayload(
+            stepName: e.RejectedStepName,
+            reason:   e.Comment);
+
+        var record = WorkflowActivityEvent.Create(
+            e.WorkflowInstanceId,
+            e.TenantId,
+            ActivityEventType.StepsReverted,
+            e.RejectedBy,
+            payload);
+
+        await _activity.AddAsync(record, cancellationToken);
+        await _activity.SaveChangesAsync(cancellationToken);
+    }
+}
+
 // ── Shared helpers ─────────────────────────────────────────────────────────
 
 file static class StepPayloadHelper

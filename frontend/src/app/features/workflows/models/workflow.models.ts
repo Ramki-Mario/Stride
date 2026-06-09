@@ -97,7 +97,15 @@ export interface FieldValueInput {
 
 // ─── Step instance ────────────────────────────────────────────────────────────
 
-export type StepInstanceStatus = 'Pending' | 'InProgress' | 'Completed' | 'Failed' | 'Skipped' | 'AwaitingApproval' | 'Rejected';
+export type StepInstanceStatus =
+  | 'Pending'
+  | 'InProgress'
+  | 'Completed'
+  | 'Failed'
+  | 'Skipped'
+  | 'AwaitingApproval'
+  | 'Rejected'
+  | 'Reverted';
 
 export interface StepInstance {
   id: string;
@@ -134,8 +142,9 @@ export const STEP_INSTANCE_STATUS_CONFIG: Record<
   Completed:        { label: 'Completed',         cssClass: 'ssi-completed',        icon: 'pi-check-circle'    },
   Failed:           { label: 'Failed',            cssClass: 'ssi-failed',           icon: 'pi-times-circle'    },
   Skipped:          { label: 'Skipped',           cssClass: 'ssi-skipped',          icon: 'pi-minus-circle'    },
-  AwaitingApproval: { label: 'Awaiting Approval', cssClass: 'ssi-awaiting-approval', icon: 'pi-user-check'     },
+  AwaitingApproval: { label: 'Awaiting Approval', cssClass: 'ssi-awaiting-approval', icon: 'pi-shield'          },
   Rejected:         { label: 'Rejected',          cssClass: 'ssi-rejected',         icon: 'pi-ban'             },
+  Reverted:         { label: 'Reverted',          cssClass: 'ssi-reverted',         icon: 'pi-undo'            },
 };
 
 // ─── Instance detail (GET /bff/workflows/instances/:id) ──────────────────────
@@ -218,12 +227,15 @@ export interface FieldDefinitionRequest {
 // ─── Form request payloads ────────────────────────────────────────────────────
 
 export interface StepRequest {
-  name:             string;
-  description:      string | null;
-  isRequired:       boolean;
-  requiredRoleId:   string | null;
-  dueOffsetHours:   number | null;
-  fieldDefinitions: FieldDefinitionRequest[];
+  name:              string;
+  description:       string | null;
+  isRequired:        boolean;
+  requiredRoleId:    string | null;
+  dueOffsetHours:    number | null;
+  fieldDefinitions:  FieldDefinitionRequest[];
+  stepType:          'Standard' | 'Approval';
+  rejectionHandling: 'HaltWorkflow' | 'RevertToStep';
+  revertToStepOrder: number | null;
 }
 
 export interface CreateWorkflowRequest {
@@ -308,14 +320,17 @@ export interface RoleDto {
 }
 
 export interface StepDefinition {
-  id:              string;
-  name:            string;
-  description:     string | null;
-  order:           number;
-  isRequired:      boolean;
-  requiredRoleId:  string | null;
-  dueOffsetHours:  number | null;
-  fields:          FieldDefinition[];
+  id:               string;
+  name:             string;
+  description:      string | null;
+  order:            number;
+  isRequired:       boolean;
+  requiredRoleId:   string | null;
+  dueOffsetHours:   number | null;
+  fields:           FieldDefinition[];
+  stepType:         'Standard' | 'Approval';
+  rejectionHandling: 'HaltWorkflow' | 'RevertToStep';
+  revertToStepOrder: number | null;
 }
 
 export interface WorkflowDefinitionDetail {

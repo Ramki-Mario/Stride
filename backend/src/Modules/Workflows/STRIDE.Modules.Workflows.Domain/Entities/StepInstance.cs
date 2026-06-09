@@ -237,6 +237,14 @@ public sealed class StepInstance : BaseEntity<Guid>
         FailureReason = null;
     }
 
+    /// <summary>Marks a step as Reverted — it was superseded by a RevertToStep rejection downstream.</summary>
+    internal void MarkReverted()
+    {
+        Status      = StepStatus.Reverted;
+        CompletedAt = DateTime.UtcNow;
+    }
+
     internal bool IsTerminal =>
-        Status is StepStatus.Completed or StepStatus.Skipped or StepStatus.Failed or StepStatus.Rejected;
+        Status is StepStatus.Completed or StepStatus.Skipped or StepStatus.Failed
+                or StepStatus.Rejected or StepStatus.Reverted;
 }

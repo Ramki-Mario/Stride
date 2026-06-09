@@ -23,7 +23,10 @@ public sealed record StepRequest(
     bool IsRequired = true,
     Guid? RequiredRoleId = null,
     IReadOnlyList<FieldDefinitionRequest>? FieldDefinitions = null,
-    decimal? DueOffsetHours = null);
+    decimal? DueOffsetHours = null,
+    StepType StepType = StepType.Standard,
+    RejectionHandling RejectionHandling = RejectionHandling.HaltWorkflow,
+    int? RevertToStepOrder = null);
 
 /// <summary>
 /// Defines a single data-capture field on a step.

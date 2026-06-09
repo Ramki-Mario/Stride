@@ -111,6 +111,13 @@
     &:hover { background: var(--stride-error); color: var(--stride-text-inverse); }
   }
 
+  &-warning {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+    &:hover { background: #c2410c; color: #fff; }
+  }
+
   &-sm { padding: 0.25rem 0.625rem; font-size: 0.75rem; }
 }
 
@@ -266,7 +273,7 @@
   &.badge-paused    { background: var(--stride-warning-bg);     color: var(--stride-warning); border-color: transparent; }
   &.badge-failed    { background: var(--stride-error-bg);       color: var(--stride-error);   border-color: transparent; }
   &.badge-cancelled { background: var(--stride-error-bg);       color: var(--stride-error);   border-color: transparent; }
-  &.badge-halted    { background: #fff7ed;                      color: #c2410c;               border-color: transparent; }
+  &.badge-halted    { background: #fff7ed;                      color: #c2410c;               border-color: #fed7aa; }
 }
 
 .wfd-badge-dot {
@@ -742,13 +749,14 @@
   flex-shrink: 0;
   transition: background 0.2s, border-color 0.2s;
 
-  &.ssi-pending           { border-color: var(--stride-border); color: var(--stride-text-muted); }
-  &.ssi-inprogress        { border-color: var(--stride-primary); color: var(--stride-primary); background: var(--stride-primary-subtle); }
-  &.ssi-completed         { border-color: var(--stride-success); color: var(--stride-success); background: var(--stride-success-bg); }
-  &.ssi-failed            { border-color: var(--stride-error);   color: var(--stride-error);   background: var(--stride-error-bg); }
-  &.ssi-skipped           { border-color: var(--stride-text-muted); color: var(--stride-text-muted); opacity: 0.6; }
-  &.ssi-awaiting-approval { border-color: #d97706; color: #d97706; background: #fffbeb; }
-  &.ssi-rejected          { border-color: var(--stride-error); color: var(--stride-error); background: var(--stride-error-bg); opacity: 0.8; }
+  &.ssi-pending            { border-color: var(--stride-border); color: var(--stride-text-muted); }
+  &.ssi-inprogress         { border-color: var(--stride-primary); color: var(--stride-primary); background: var(--stride-primary-subtle); }
+  &.ssi-completed          { border-color: var(--stride-success); color: var(--stride-success); background: var(--stride-success-bg); }
+  &.ssi-failed             { border-color: var(--stride-error);   color: var(--stride-error);   background: var(--stride-error-bg); }
+  &.ssi-skipped            { border-color: var(--stride-text-muted); color: var(--stride-text-muted); opacity: 0.6; }
+  &.ssi-awaiting-approval  { border-color: #d97706; color: #d97706; background: #fffbeb; }
+  &.ssi-rejected           { border-color: var(--stride-error); color: var(--stride-error); background: var(--stride-error-bg); }
+  &.ssi-reverted           { border-color: #7c3aed; color: #7c3aed; background: #f5f3ff; opacity: 0.8; }
 }
 
 .wfd-inst-step-line {
@@ -787,13 +795,14 @@
   padding: 0.125rem 0.5rem;
   border-radius: 999px;
 
-  &.ssi-pending           { background: var(--stride-surface-hover); color: var(--stride-text-muted); }
-  &.ssi-inprogress        { background: var(--stride-primary-subtle); color: var(--stride-primary); }
-  &.ssi-completed         { background: var(--stride-success-bg); color: var(--stride-success); }
-  &.ssi-failed            { background: var(--stride-error-bg);   color: var(--stride-error); }
-  &.ssi-skipped           { background: var(--stride-surface-hover); color: var(--stride-text-muted); }
-  &.ssi-awaiting-approval { background: #fffbeb; color: #d97706; }
-  &.ssi-rejected          { background: var(--stride-error-bg); color: var(--stride-error); }
+  &.ssi-pending            { background: var(--stride-surface-hover); color: var(--stride-text-muted); }
+  &.ssi-inprogress         { background: var(--stride-primary-subtle); color: var(--stride-primary); }
+  &.ssi-completed          { background: var(--stride-success-bg); color: var(--stride-success); }
+  &.ssi-failed             { background: var(--stride-error-bg);   color: var(--stride-error); }
+  &.ssi-skipped            { background: var(--stride-surface-hover); color: var(--stride-text-muted); }
+  &.ssi-awaiting-approval  { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+  &.ssi-rejected           { background: var(--stride-error-bg); color: var(--stride-error); }
+  &.ssi-reverted           { background: #f5f3ff; color: #7c3aed; opacity: 0.8; }
 }
 
 // ── Step action buttons ────────────────────────────────────────────────────

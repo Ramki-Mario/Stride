@@ -21,7 +21,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
 import { WorkflowService } from '../../services/workflow.service';
-import { FieldType, FIELD_TYPES, FIELD_TYPE_LABELS, RoleDto } from '../../models/workflow.models';
+import { FieldType, FIELD_TYPES, FIELD_TYPE_LABELS, RoleDto, StepRequest } from '../../models/workflow.models';
 
 @Component({
   selector: 'app-workflow-form-page',
@@ -134,14 +134,32 @@ export class WorkflowFormPageComponent implements OnInit {
 
   addStep(): void {
     const stepGroup = this.fb.group({
-      name:           ['', [Validators.required, Validators.maxLength(100)]],
-      description:    [''],
-      isRequired:     [true],
-      requiredRoleId: [null as string | null],
-      dueOffsetHours: [null as number | null, [Validators.min(0.01)]],
-      fields:          this.fb.array([] as AbstractControl[]),
+      name:              ['', [Validators.required, Validators.maxLength(100)]],
+      description:       [''],
+      isRequired:        [true],
+      requiredRoleId:    [null as string | null],
+      dueOffsetHours:    [null as number | null, [Validators.min(0.01)]],
+      fields:            this.fb.array([] as AbstractControl[]),
+      stepType:          ['Standard' as 'Standard' | 'Approval'],
+      rejectionHandling: ['HaltWorkflow' as 'HaltWorkflow' | 'RevertToStep'],
+      revertToStepOrder: [null as number | null],
     });
     this.stepsArray.push(stepGroup);
+  }
+
+  isApprovalStep(stepIndex: number): boolean {
+    return this.stepsArray.at(stepIndex)?.get('stepType')?.value === 'Approval';
+  }
+
+  isRevertToStep(stepIndex: number): boolean {
+    return this.stepsArray.at(stepIndex)?.get('rejectionHandling')?.value === 'RevertToStep';
+  }
+
+  /** Returns the steps that can be used as revert targets (all steps before stepIndex). */
+  priorSteps(stepIndex: number): { index: number; name: string }[] {
+    return this.steps
+      .slice(0, stepIndex)
+      .map((s, i) => ({ index: i, name: s.get('name')?.value || `Step ${i + 1}` }));
   }
 
   // ── Field management within a step ───────────────────────────────────────
@@ -246,7 +264,7 @@ export class WorkflowFormPageComponent implements OnInit {
           error: (err) => this.saveError.set(this.mapError(err)),
         });
     } else {
-      const steps = this.stepsArray.value.map(
+      const steps: StepRequest[] = this.stepsArray.value.map(
         (s: {
           name: string;
           description: string;
@@ -254,12 +272,20 @@ export class WorkflowFormPageComponent implements OnInit {
           requiredRoleId: string | null;
           dueOffsetHours: number | null;
           fields: { label: string; fieldType: FieldType; isRequired: boolean; helpText: string; dropdownOptions: string }[];
+          stepType: 'Standard' | 'Approval';
+          rejectionHandling: 'HaltWorkflow' | 'RevertToStep';
+          revertToStepOrder: number | null;
         }) => ({
-          name:           s.name,
-          description:    s.description?.trim() || null,
-          isRequired:     s.isRequired,
-          requiredRoleId: s.requiredRoleId || null,
-          dueOffsetHours: s.dueOffsetHours ?? null,
+          name:              s.name,
+          description:       s.description?.trim() || null,
+          isRequired:        s.isRequired,
+          requiredRoleId:    s.requiredRoleId || null,
+          dueOffsetHours:    s.dueOffsetHours ?? null,
+          stepType:          s.stepType ?? 'Standard',
+          rejectionHandling: s.stepType === 'Approval' ? (s.rejectionHandling ?? 'HaltWorkflow') : 'HaltWorkflow',
+          revertToStepOrder: s.stepType === 'Approval' && s.rejectionHandling === 'RevertToStep'
+            ? s.revertToStepOrder
+            : null,
           fieldDefinitions: (s.fields ?? []).map(f => ({
             label:           f.label.trim(),
             fieldType:       f.fieldType,

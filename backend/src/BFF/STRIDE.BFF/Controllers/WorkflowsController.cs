@@ -190,6 +190,15 @@ public sealed class WorkflowsController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 
+    [HttpPost("instances/{instanceId:guid}/resume-from-halt")]
+    public async Task<IActionResult> ResumeFromHalt(Guid instanceId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        var response = await _workflows.ResumeFromHaltAsync(instanceId, token, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
+    }
+
     // ── Steps ─────────────────────────────────────────────────────────────
 
     [HttpPost("instances/{instanceId:guid}/steps/{stepId:guid}/assign")]

@@ -5,11 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Workflows.API.Dtos;
 using STRIDE.Modules.Workflows.Application.Commands.ActivateWorkflow;
+using STRIDE.Modules.Workflows.Application.Commands.ApproveStep;
 using STRIDE.Modules.Workflows.Application.Commands.AssignTeamToWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.CancelWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.CreateWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.DeleteWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.PauseWorkflow;
+using STRIDE.Modules.Workflows.Application.Commands.RejectStep;
+using STRIDE.Modules.Workflows.Application.Commands.ResumeFromHalt;
 using STRIDE.Modules.Workflows.Application.Commands.ResumeWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.StartWorkflow;
 using STRIDE.Modules.Workflows.Application.Commands.UpdateWorkflow;
@@ -118,7 +121,10 @@ public sealed class WorkflowsController : ControllerBase
                         f.DropdownOptions))
                     .ToList()
                     .AsReadOnly(),
-                s.DueOffsetHours))
+                s.DueOffsetHours,
+                s.StepType,
+                s.RejectionHandling,
+                s.RevertToStepOrder))
             .ToList()
             .AsReadOnly();
 
@@ -429,7 +435,7 @@ public sealed class WorkflowsController : ControllerBase
     }
 
     /// <summary>
-    /// Cancel a Running or Paused workflow instance.
+    /// Cancel a Running, Paused, or Halted workflow instance.
     /// POST /api/workflows/instances/{instanceId}/cancel
     /// </summary>
     [HttpPost("instances/{instanceId:guid}/cancel")]
@@ -442,6 +448,33 @@ public sealed class WorkflowsController : ControllerBase
             new CancelWorkflowCommand(
                 WorkflowInstanceId: instanceId,
                 CancelledBy: _currentUser.UserId),
+            cancellationToken);
+
+        if (result.IsFailure)
+        {
+            if (result.Error!.Contains(NotFoundFragment, StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { error = result.Error });
+
+            return BadRequest(new { error = result.Error });
+        }
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Resume a Halted workflow instance back to Running.
+    /// POST /api/workflows/instances/{instanceId}/resume-from-halt
+    /// </summary>
+    [HttpPost("instances/{instanceId:guid}/resume-from-halt")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ResumeFromHalt(Guid instanceId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new ResumeFromHaltCommand(
+                WorkflowInstanceId: instanceId,
+                ResumedBy: _currentUser.UserId),
             cancellationToken);
 
         if (result.IsFailure)

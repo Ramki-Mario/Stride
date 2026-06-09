@@ -125,6 +125,13 @@ public sealed class WorkflowApiClient
         return _client.SendAsync(req, cancellationToken);
     }
 
+    public Task<HttpResponseMessage> ResumeFromHaltAsync(Guid instanceId, string token, CancellationToken cancellationToken = default)
+    {
+        var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/resume-from-halt", token);
+        req.Content = new StringContent(EmptyJson, System.Text.Encoding.UTF8, AppJson);
+        return _client.SendAsync(req, cancellationToken);
+    }
+
     // ── Steps ─────────────────────────────────────────────────────────────
 
     public Task<HttpResponseMessage> AssignStepAsync(Guid instanceId, Guid stepId, HttpContent body, string token, CancellationToken cancellationToken = default)
