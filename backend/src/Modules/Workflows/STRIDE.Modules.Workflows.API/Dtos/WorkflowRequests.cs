@@ -20,6 +20,12 @@ public sealed record UpdateWorkflowRequest(
     string Name,
     string? Description);
 
+/// <summary>
+/// Body for PUT /api/workflows/instances/{id}/assign-team.
+/// Pass a null <see cref="TeamId"/> to clear the current assignment.
+/// </summary>
+public sealed record AssignTeamRequest(Guid? TeamId);
+
 /// <summary>A single step included in a create-workflow request.</summary>
 public sealed record StepRequestDto(
     string Name,

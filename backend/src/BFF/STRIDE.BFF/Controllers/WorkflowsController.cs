@@ -24,7 +24,9 @@ namespace STRIDE.BFF.Controllers;
 /// Instances:
 ///   GET    /bff/workflows/my-tasks
 ///   GET    /bff/workflows/instances
+///   GET    /bff/workflows/instances?teamId={guid}
 ///   GET    /bff/workflows/instances/{instanceId}
+///   PUT    /bff/workflows/instances/{instanceId}/assign-team
 ///   POST   /bff/workflows/instances/{instanceId}/pause
 ///   POST   /bff/workflows/instances/{instanceId}/resume
 ///   POST   /bff/workflows/instances/{instanceId}/cancel
@@ -132,11 +134,13 @@ public sealed class WorkflowsController : ControllerBase
     }
 
     [HttpGet("instances")]
-    public async Task<IActionResult> GetAllInstances(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllInstances(
+        [FromQuery] Guid? teamId = null,
+        CancellationToken cancellationToken = default)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
-        return await ProxyAsync(await _workflows.GetAllInstancesAsync(token, cancellationToken), cancellationToken: cancellationToken);
+        return await ProxyAsync(await _workflows.GetAllInstancesAsync(token, teamId, cancellationToken), cancellationToken: cancellationToken);
     }
 
     [HttpGet("instances/{instanceId:guid}")]
@@ -145,6 +149,16 @@ public sealed class WorkflowsController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         return await ProxyAsync(await _workflows.GetInstanceAsync(instanceId, token, cancellationToken), cancellationToken: cancellationToken);
+    }
+
+    [HttpPut("instances/{instanceId:guid}/assign-team")]
+    public async Task<IActionResult> AssignTeam(Guid instanceId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        using var body = JsonBody();
+        var response = await _workflows.AssignTeamToInstanceAsync(instanceId, body, token, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 
     [HttpPost("instances/{instanceId:guid}/pause")]

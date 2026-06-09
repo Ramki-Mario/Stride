@@ -71,12 +71,15 @@ export class WorkflowService {
     );
   }
 
-  /** List all workflow instances, optionally filtered by definition. */
-  getInstances(definitionId?: string): Observable<WorkflowInstanceSummary[]> {
-    const url = definitionId
-      ? `${this.base}/definitions/${definitionId}/instances`
-      : `${this.base}/instances`;
-    return this.http.get<WorkflowInstanceSummary[]>(url);
+  /** List all workflow instances, optionally filtered by definition or team. */
+  getInstances(definitionId?: string, teamId?: string): Observable<WorkflowInstanceSummary[]> {
+    if (definitionId) {
+      return this.http.get<WorkflowInstanceSummary[]>(
+        `${this.base}/definitions/${definitionId}/instances`,
+      );
+    }
+    const params = teamId ? new HttpParams().set('teamId', teamId) : undefined;
+    return this.http.get<WorkflowInstanceSummary[]>(`${this.base}/instances`, { params });
   }
 
   /** Create a new workflow definition (Draft status). */
@@ -92,6 +95,17 @@ export class WorkflowService {
   /** Soft-delete a workflow definition. */
   deleteDefinition(id: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/definitions/${id}`);
+  }
+
+  /**
+   * Assigns (or clears) a team on a workflow instance.
+   * Pass null to remove the current team assignment.
+   */
+  assignTeam(instanceId: string, teamId: string | null): Observable<void> {
+    return this.http.put<void>(
+      `${this.base}/instances/${instanceId}/assign-team`,
+      { teamId },
+    );
   }
 
   /** Cancel a running workflow instance. */

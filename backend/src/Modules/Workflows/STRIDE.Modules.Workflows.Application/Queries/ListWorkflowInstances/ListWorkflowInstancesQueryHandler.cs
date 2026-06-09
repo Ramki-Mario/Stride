@@ -23,6 +23,7 @@ internal sealed class ListWorkflowInstancesQueryHandler
             : await _instances.GetAllAsync(cancellationToken);
 
         var summaries = instances
+            .Where(i => !request.TeamId.HasValue || i.TeamId == request.TeamId)
             .OrderByDescending(i => i.UpdatedAt)
             .Select(i =>
             {
@@ -40,7 +41,8 @@ internal sealed class ListWorkflowInstancesQueryHandler
                     i.CompletedAt,
                     i.DeadlineAt,
                     SlaStatusComputer.Compute(i.CreatedAt, i.DeadlineAt, i.CompletedAt),
-                    i.IsSlaBreached);
+                    i.IsSlaBreached,
+                    i.TeamId);
             })
             .ToList()
             .AsReadOnly();

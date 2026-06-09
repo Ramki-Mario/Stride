@@ -26,6 +26,9 @@ public static class AuditActions
     public const string ClientDeactivated = "client.deactivated";
     public const string ClientReactivated = "client.reactivated";
 
+    // ── Workflows ─────────────────────────────────────────────────────────────
+    public const string WorkflowTeamAssigned = "workflow.team_assigned";
+
     // ── Tenant settings ───────────────────────────────────────────────────────
     public const string TenantSettingsUpdated = "tenant_settings.updated";
 

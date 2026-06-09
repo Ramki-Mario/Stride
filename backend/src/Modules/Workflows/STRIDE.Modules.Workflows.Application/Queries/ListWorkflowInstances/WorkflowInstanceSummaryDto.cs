@@ -17,4 +17,5 @@ public sealed record WorkflowInstanceSummaryDto(
     DateTime? CompletedAt,
     DateTime? DeadlineAt,
     SlaStatus? SlaStatus,
-    bool IsSlaBreached);
+    bool IsSlaBreached,
+    Guid? TeamId = null);

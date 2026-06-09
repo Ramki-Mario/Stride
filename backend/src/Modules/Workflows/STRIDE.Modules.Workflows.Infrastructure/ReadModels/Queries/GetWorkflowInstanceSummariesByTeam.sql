@@ -14,7 +14,7 @@ LEFT JOIN workflows.StepInstances s ON s.WorkflowInstanceId = i.Id
 LEFT JOIN teams.Teams tm ON tm.Id = i.TeamId AND tm.IsDeleted = 0
 WHERE i.TenantId = @TenantId
   AND i.IsDeleted = 0
-  AND i.WorkflowDefinitionId = @DefinitionId
+  AND i.TeamId = @TeamId
 GROUP BY i.Id, i.WorkflowDefinitionId, i.WorkflowName, i.Status, i.CreatedAt, i.CompletedAt,
          i.TeamId, tm.Name
 ORDER BY i.CreatedAt DESC

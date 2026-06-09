@@ -38,6 +38,7 @@ export interface WorkflowInstanceSummary {
   deadlineAt:   string | null;
   slaStatus:    SlaStatus | null;
   isSlaBreached: boolean;
+  teamId:    string | null;
 }
 
 // ─── UI helpers ──────────────────────────────────────────────────────────────
@@ -146,6 +147,7 @@ export interface WorkflowInstanceDetail {
   isSlaBreached: boolean;
   steps: StepInstance[];
   billableTotal: number;
+  teamId:    string | null;
   // Note: totalSteps and completedSteps are not in the backend DTO.
   // Compute them from steps.length and steps.filter(s => s.status === 'Completed').length.
 }
