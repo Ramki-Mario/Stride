@@ -43,6 +43,9 @@ builder.Services.AddHttpClient<InvoicingApiClient>(client =>
 builder.Services.AddHttpClient<ClientsApiClient>(client =>
     client.BaseAddress = new Uri(hostBaseUrl));
 
+builder.Services.AddHttpClient<TeamsApiClient>(client =>
+    client.BaseAddress = new Uri(hostBaseUrl));
+
 builder.Services.AddHttpClient<TenantSettingsApiClient>(client =>
     client.BaseAddress = new Uri(hostBaseUrl));
 

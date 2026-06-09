@@ -23,7 +23,7 @@ import {
  *   PUT  /bff/teams/:id/deactivate → PUT /api/teams/:id/deactivate
  *   PUT  /bff/teams/:id/reactivate → PUT /api/teams/:id/reactivate
  *
- * Note: The /bff/teams endpoints are provided by the Teams module (EP-055/US-168).
+ * Note: The /bff/teams endpoints are provided by the Teams module (EP-062/US-187).
  */
 @Injectable({ providedIn: 'root' })
 export class TeamsService {
