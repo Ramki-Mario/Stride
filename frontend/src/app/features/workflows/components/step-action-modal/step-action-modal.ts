@@ -6,7 +6,6 @@ import {
   Input,
   OnChanges,
   Output,
-  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -25,6 +24,7 @@ import {
   FieldValueInput,
 } from '../../models/workflow.models';
 import { WorkflowService } from '../../services/workflow.service';
+import { AttachmentService } from '../../services/attachment.service';
 
 /**
  * StepActionModalComponent
@@ -55,9 +55,10 @@ import { WorkflowService } from '../../services/workflow.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StepActionModalComponent implements OnChanges {
-  private readonly fb         = inject(FormBuilder);
-  private readonly wfService  = inject(WorkflowService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly fb              = inject(FormBuilder);
+  private readonly wfService       = inject(WorkflowService);
+  private readonly attachmentSvc   = inject(AttachmentService);
+  private readonly destroyRef      = inject(DestroyRef);
 
   // ── Inputs ────────────────────────────────────────────────────────────────
 
@@ -72,8 +73,13 @@ export class StepActionModalComponent implements OnChanges {
 
   // ── State ─────────────────────────────────────────────────────────────────
 
-  readonly isSubmitting = signal(false);
-  readonly submitError  = signal<string | null>(null);
+  readonly isSubmitting     = signal(false);
+  readonly submitError      = signal<string | null>(null);
+
+  // Photo capture — files queued for upload after step completion
+  readonly pendingPhotos    = signal<File[]>([]);
+  readonly isUploadingPhotos = signal(false);
+  readonly photoUploadError  = signal<string | null>(null);
 
   // ── Forms ─────────────────────────────────────────────────────────────────
 
@@ -138,6 +144,55 @@ export class StepActionModalComponent implements OnChanges {
     this.billableRunningTotal.set(total);
   }
 
+  // ── Photo capture ─────────────────────────────────────────────────────────
+
+  onPhotosSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files) return;
+    const files = Array.from(input.files);
+    this.pendingPhotos.update(prev => [...prev, ...files]);
+    input.value = '';
+  }
+
+  removePhoto(index: number): void {
+    this.pendingPhotos.update(prev => prev.filter((_, i) => i !== index));
+  }
+
+  photoPreviewUrl(file: File): string {
+    return URL.createObjectURL(file);
+  }
+
+  private uploadPendingPhotos(): void {
+    const photos = this.pendingPhotos();
+    if (!photos.length) return;
+
+    this.isUploadingPhotos.set(true);
+    this.photoUploadError.set(null);
+
+    let remaining = photos.length;
+    const errors: string[] = [];
+
+    for (const file of photos) {
+      this.attachmentSvc
+        .uploadStepAttachment(this.instanceId, this.step.id, file)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            remaining--;
+            if (remaining === 0) this.isUploadingPhotos.set(false);
+          },
+          error: () => {
+            errors.push(file.name);
+            remaining--;
+            if (remaining === 0) {
+              this.isUploadingPhotos.set(false);
+              this.photoUploadError.set(`Failed to upload: ${errors.join(', ')}`);
+            }
+          },
+        });
+    }
+  }
+
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   ngOnChanges(): void {
@@ -149,6 +204,8 @@ export class StepActionModalComponent implements OnChanges {
     this.buildFieldValueControls();
     this.billableRunningTotal.set(0);
     this.submitError.set(null);
+    this.pendingPhotos.set([]);
+    this.photoUploadError.set(null);
   }
 
   private buildFieldValueControls(): void {
@@ -274,12 +331,15 @@ export class StepActionModalComponent implements OnChanges {
 
     const fieldValues = this.buildFieldValuePayload();
 
-    this.dispatch(this.wfService.completeStep(
-      this.instanceId,
-      this.step.id,
-      items.length ? items : undefined,
-      fieldValues.length ? fieldValues : undefined,
-    ));
+    this.dispatch(
+      this.wfService.completeStep(
+        this.instanceId,
+        this.step.id,
+        items.length ? items : undefined,
+        fieldValues.length ? fieldValues : undefined,
+      ),
+      /* uploadPhotos */ true,
+    );
   }
 
   private buildFieldValuePayload(): FieldValueInput[] {
@@ -318,7 +378,7 @@ export class StepActionModalComponent implements OnChanges {
     this.dispatch(this.wfService.skipStep(this.instanceId, this.step.id));
   }
 
-  private dispatch(obs$: ReturnType<typeof this.wfService.completeStep>): void {
+  private dispatch(obs$: ReturnType<typeof this.wfService.completeStep>, uploadPhotos = false): void {
     this.isSubmitting.set(true);
     obs$
       .pipe(
@@ -326,7 +386,10 @@ export class StepActionModalComponent implements OnChanges {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next:  () => this.actionCompleted.emit(),
+        next: () => {
+          if (uploadPhotos) this.uploadPendingPhotos();
+          this.actionCompleted.emit();
+        },
         error: (err) => this.submitError.set(this.mapError(err)),
       });
   }

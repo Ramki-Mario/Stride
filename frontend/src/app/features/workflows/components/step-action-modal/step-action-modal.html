@@ -188,6 +188,73 @@
         </div>
       }
 
+      <!-- Photo Capture Section -->
+      <div class="sam-photo-section">
+        <div class="sam-photo-header">
+          <span class="sam-photo-label">Photos</span>
+          <div class="sam-photo-actions">
+            <!-- Camera button — opens rear camera on mobile, file picker on desktop -->
+            <label class="sam-photo-btn" role="button" tabindex="0">
+              <span class="pi pi-camera"></span> Camera
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                multiple
+                style="display:none"
+                (change)="onPhotosSelected($event)"
+                aria-label="Capture photo"
+              />
+            </label>
+            <!-- Gallery button — always shows file picker regardless of device -->
+            <label class="sam-photo-btn" role="button" tabindex="0">
+              <span class="pi pi-images"></span> Gallery
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                style="display:none"
+                (change)="onPhotosSelected($event)"
+                aria-label="Choose from gallery"
+              />
+            </label>
+          </div>
+        </div>
+
+        @if (pendingPhotos().length === 0) {
+          <p class="sam-photo-hint">Optional — attach photos before completing this step.</p>
+        }
+
+        @if (pendingPhotos().length > 0) {
+          <div class="sam-photo-previews">
+            @for (photo of pendingPhotos(); track photo.name; let pi = $index) {
+              <div class="sam-photo-thumb">
+                <img [src]="photoPreviewUrl(photo)" [alt]="photo.name" />
+                <button
+                  type="button"
+                  class="sam-photo-remove"
+                  (click)="removePhoto(pi)"
+                  [attr.aria-label]="'Remove ' + photo.name"
+                >
+                  <span class="pi pi-times"></span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        @if (isUploadingPhotos()) {
+          <div class="sam-upload-status">
+            <span class="sam-upload-spinner" aria-hidden="true"></span>
+            Uploading photos…
+          </div>
+        }
+
+        @if (photoUploadError()) {
+          <p class="sam-error-msg" role="alert">{{ photoUploadError() }}</p>
+        }
+      </div>
+
       <!-- Billable Items Section -->
       <div class="sam-billable-section">
         <div class="sam-billable-header">

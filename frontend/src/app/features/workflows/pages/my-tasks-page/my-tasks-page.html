@@ -44,6 +44,15 @@
     </div>
   }
 
+  <!-- ── Quick complete error ──────────────────────────────────────────────── -->
+  @else if (quickCompleteError()) {
+    <div class="mt-error-banner" role="alert">
+      <i class="pi pi-exclamation-triangle"></i>
+      <span>{{ quickCompleteError() }}</span>
+      <button class="mt-retry" (click)="quickCompleteError.set(null)">Dismiss</button>
+    </div>
+  }
+
   <!-- ── Task list ────────────────────────────────────────────────────────── -->
   @else {
     <ul class="mt-list">
@@ -76,14 +85,33 @@
               </div>
             </div>
 
-            <!-- Status badge -->
-            <span class="mt-status-badge ssi-badge" [ngClass]="stepStatusClass(task.stepStatus)">
+            <!-- Status badge (hidden on mobile — quick-complete btn takes that slot) -->
+            <span class="mt-status-badge ssi-badge mt-status-badge--desktop" [ngClass]="stepStatusClass(task.stepStatus)">
               {{ stepStatusLabel(task.stepStatus) }}
             </span>
 
-            <!-- Arrow -->
-            <i class="pi pi-chevron-right mt-arrow"></i>
+            <!-- Arrow (hidden on mobile) -->
+            <i class="pi pi-chevron-right mt-arrow mt-arrow--desktop"></i>
           </button>
+
+          <!-- Quick complete — prominent on mobile, subtle on desktop -->
+          @if (canQuickComplete(task)) {
+            <button
+              type="button"
+              class="mt-quick-complete"
+              [class.mt-quick-complete--loading]="quickCompletingId() === task.stepInstanceId"
+              (click)="quickComplete(task, $event)"
+              [disabled]="quickCompletingId() !== null"
+              [attr.aria-label]="'Quick complete ' + task.stepName"
+              title="Quick complete (no fields or attachments)"
+            >
+              @if (quickCompletingId() === task.stepInstanceId) {
+                <span class="mt-qc-spinner" aria-hidden="true"></span>
+              } @else {
+                <i class="pi pi-check"></i>
+              }
+            </button>
+          }
         </li>
       }
     </ul>
