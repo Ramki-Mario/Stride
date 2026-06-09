@@ -266,6 +266,7 @@
   &.badge-paused    { background: var(--stride-warning-bg);     color: var(--stride-warning); border-color: transparent; }
   &.badge-failed    { background: var(--stride-error-bg);       color: var(--stride-error);   border-color: transparent; }
   &.badge-cancelled { background: var(--stride-error-bg);       color: var(--stride-error);   border-color: transparent; }
+  &.badge-halted    { background: #fff7ed;                      color: #c2410c;               border-color: transparent; }
 }
 
 .wfd-badge-dot {
@@ -741,11 +742,13 @@
   flex-shrink: 0;
   transition: background 0.2s, border-color 0.2s;
 
-  &.ssi-pending    { border-color: var(--stride-border); color: var(--stride-text-muted); }
-  &.ssi-inprogress { border-color: var(--stride-primary); color: var(--stride-primary); background: var(--stride-primary-subtle); }
-  &.ssi-completed  { border-color: var(--stride-success); color: var(--stride-success); background: var(--stride-success-bg); }
-  &.ssi-failed     { border-color: var(--stride-error);   color: var(--stride-error);   background: var(--stride-error-bg); }
-  &.ssi-skipped    { border-color: var(--stride-text-muted); color: var(--stride-text-muted); opacity: 0.6; }
+  &.ssi-pending           { border-color: var(--stride-border); color: var(--stride-text-muted); }
+  &.ssi-inprogress        { border-color: var(--stride-primary); color: var(--stride-primary); background: var(--stride-primary-subtle); }
+  &.ssi-completed         { border-color: var(--stride-success); color: var(--stride-success); background: var(--stride-success-bg); }
+  &.ssi-failed            { border-color: var(--stride-error);   color: var(--stride-error);   background: var(--stride-error-bg); }
+  &.ssi-skipped           { border-color: var(--stride-text-muted); color: var(--stride-text-muted); opacity: 0.6; }
+  &.ssi-awaiting-approval { border-color: #d97706; color: #d97706; background: #fffbeb; }
+  &.ssi-rejected          { border-color: var(--stride-error); color: var(--stride-error); background: var(--stride-error-bg); opacity: 0.8; }
 }
 
 .wfd-inst-step-line {
@@ -784,11 +787,13 @@
   padding: 0.125rem 0.5rem;
   border-radius: 999px;
 
-  &.ssi-pending    { background: var(--stride-surface-hover); color: var(--stride-text-muted); }
-  &.ssi-inprogress { background: var(--stride-primary-subtle); color: var(--stride-primary); }
-  &.ssi-completed  { background: var(--stride-success-bg); color: var(--stride-success); }
-  &.ssi-failed     { background: var(--stride-error-bg);   color: var(--stride-error); }
-  &.ssi-skipped    { background: var(--stride-surface-hover); color: var(--stride-text-muted); }
+  &.ssi-pending           { background: var(--stride-surface-hover); color: var(--stride-text-muted); }
+  &.ssi-inprogress        { background: var(--stride-primary-subtle); color: var(--stride-primary); }
+  &.ssi-completed         { background: var(--stride-success-bg); color: var(--stride-success); }
+  &.ssi-failed            { background: var(--stride-error-bg);   color: var(--stride-error); }
+  &.ssi-skipped           { background: var(--stride-surface-hover); color: var(--stride-text-muted); }
+  &.ssi-awaiting-approval { background: #fffbeb; color: #d97706; }
+  &.ssi-rejected          { background: var(--stride-error-bg); color: var(--stride-error); }
 }
 
 // ── Step action buttons ────────────────────────────────────────────────────
@@ -831,6 +836,14 @@
   &.skip {
     color: var(--stride-text-muted);
     &:hover { background: var(--stride-surface-hover); border-color: var(--stride-text-muted); }
+  }
+  &.approve {
+    color: var(--stride-success);
+    &:hover { background: var(--stride-success-bg); border-color: var(--stride-success); }
+  }
+  &.reject {
+    color: var(--stride-error);
+    &:hover { background: var(--stride-error-bg); border-color: var(--stride-error); }
   }
 }
 

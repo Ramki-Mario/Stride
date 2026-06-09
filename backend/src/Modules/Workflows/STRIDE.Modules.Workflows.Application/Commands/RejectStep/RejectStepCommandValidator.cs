@@ -16,7 +16,8 @@ public sealed class RejectStepCommandValidator : AbstractValidator<RejectStepCom
             .NotEmpty().WithMessage("RejectedBy (user ID) is required.");
 
         RuleFor(x => x.Comment)
-            .MaximumLength(1000).WithMessage("Comment must not exceed 1000 characters.")
-            .When(x => x.Comment is not null);
+            .NotEmpty().WithMessage("A comment explaining your decision is required.")
+            .MinimumLength(10).WithMessage("Comment must be at least 10 characters.")
+            .MaximumLength(1000).WithMessage("Comment must not exceed 1000 characters.");
     }
 }

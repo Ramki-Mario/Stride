@@ -95,6 +95,11 @@ export class StepActionModalComponent implements OnChanges {
     reason: ['', [Validators.required, Validators.maxLength(500)]],
   });
 
+  /** Used for Approve / Reject actions — mandatory comment (min 10 chars). */
+  readonly approvalForm: FormGroup = this.fb.group({
+    comment: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
+  });
+
   /** Used for Complete action — optional billable items list. */
   readonly billableItemsArray = this.fb.array<FormGroup>([]);
   readonly fieldValuesArray = this.fb.array<FormGroup>([]);
@@ -199,6 +204,7 @@ export class StepActionModalComponent implements OnChanges {
     // Reset form state whenever the modal is re-opened for a new step/action
     this.assignForm.reset();
     this.failForm.reset();
+    this.approvalForm.reset();
     this.billableItemsArray.clear();
     this.fieldValuesArray.clear();
     this.buildFieldValueControls();
@@ -236,17 +242,21 @@ export class StepActionModalComponent implements OnChanges {
       case 'complete': return 'Complete Step';
       case 'fail':     return 'Fail Step';
       case 'skip':     return 'Skip Step';
+      case 'approve':  return 'Approve Step';
+      case 'reject':   return 'Reject Step';
       default:         return '';
     }
   }
 
   get iconClass(): string {
     switch (this.action) {
-      case 'assign':   return 'pi pi-user-plus  modal-icon-primary';
-      case 'claim':    return 'pi pi-hand-paper  modal-icon-primary';
+      case 'assign':   return 'pi pi-user-plus   modal-icon-primary';
+      case 'claim':    return 'pi pi-hand-paper   modal-icon-primary';
       case 'complete': return 'pi pi-check-circle modal-icon-success';
       case 'fail':     return 'pi pi-times-circle modal-icon-error';
       case 'skip':     return 'pi pi-forward      modal-icon-warning';
+      case 'approve':  return 'pi pi-thumbs-up    modal-icon-success';
+      case 'reject':   return 'pi pi-thumbs-down  modal-icon-error';
       default:         return '';
     }
   }
@@ -258,6 +268,8 @@ export class StepActionModalComponent implements OnChanges {
       case 'complete': return 'Mark Complete';
       case 'fail':     return 'Mark Failed';
       case 'skip':     return 'Skip Step';
+      case 'approve':  return 'Approve';
+      case 'reject':   return 'Reject';
       default:         return '';
     }
   }
@@ -269,6 +281,8 @@ export class StepActionModalComponent implements OnChanges {
       case 'complete': return 'sam-btn-success';
       case 'fail':     return 'sam-btn-danger';
       case 'skip':     return 'sam-btn-warning';
+      case 'approve':  return 'sam-btn-success';
+      case 'reject':   return 'sam-btn-danger';
       default:         return '';
     }
   }
@@ -283,6 +297,20 @@ export class StepActionModalComponent implements OnChanges {
   isReasonInvalid(): boolean {
     const c = this.failForm.get('reason');
     return !!(c?.invalid && c.touched);
+  }
+
+  isApprovalCommentInvalid(): boolean {
+    const c = this.approvalForm.get('comment');
+    return !!(c?.invalid && c.touched);
+  }
+
+  approvalCommentError(): string {
+    const c = this.approvalForm.get('comment');
+    if (!c?.touched) return '';
+    if (c.hasError('required')) return 'A decision comment is required.';
+    if (c.hasError('minlength')) return 'Comment must be at least 10 characters.';
+    if (c.hasError('maxlength')) return 'Comment must not exceed 1000 characters.';
+    return '';
   }
 
   isFieldInvalid(index: number): boolean {
@@ -301,6 +329,8 @@ export class StepActionModalComponent implements OnChanges {
       case 'complete': this.submitComplete(); break;
       case 'fail':     this.submitFail();     break;
       case 'skip':     this.submitSkip();     break;
+      case 'approve':  this.submitApprove();  break;
+      case 'reject':   this.submitReject();   break;
     }
   }
 
@@ -376,6 +406,20 @@ export class StepActionModalComponent implements OnChanges {
 
   private submitSkip(): void {
     this.dispatch(this.wfService.skipStep(this.instanceId, this.step.id));
+  }
+
+  private submitApprove(): void {
+    this.approvalForm.markAllAsTouched();
+    if (this.approvalForm.invalid) return;
+    const { comment } = this.approvalForm.getRawValue() as { comment: string };
+    this.dispatch(this.wfService.approveStep(this.instanceId, this.step.id, comment));
+  }
+
+  private submitReject(): void {
+    this.approvalForm.markAllAsTouched();
+    if (this.approvalForm.invalid) return;
+    const { comment } = this.approvalForm.getRawValue() as { comment: string };
+    this.dispatch(this.wfService.rejectStep(this.instanceId, this.step.id, comment));
   }
 
   private dispatch(obs$: ReturnType<typeof this.wfService.completeStep>, uploadPhotos = false): void {

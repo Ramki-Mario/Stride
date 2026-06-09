@@ -439,5 +439,99 @@
       </div>
     }
 
+    <!-- ── APPROVE form ─────────────────────────────────────────────────── -->
+    @if (action === 'approve') {
+      <form [formGroup]="approvalForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="sam-confirm-body">
+          <p>
+            You are approving <strong>{{ step.stepName }}</strong>.
+            The step will be marked as Completed and the workflow will continue.
+          </p>
+        </div>
+
+        <div class="sam-field">
+          <label class="sam-label" for="sam-approval-comment">
+            Decision Comment <span class="sam-required" aria-hidden="true">*</span>
+          </label>
+          <textarea
+            id="sam-approval-comment"
+            formControlName="comment"
+            class="sam-textarea"
+            [ngClass]="{ 'sam-input-error': isApprovalCommentInvalid() }"
+            rows="3"
+            placeholder="Explain your approval decision (min 10 characters)…"
+            maxlength="1000"
+          ></textarea>
+          @if (isApprovalCommentInvalid()) {
+            <p class="sam-error-msg" role="alert">{{ approvalCommentError() }}</p>
+          }
+        </div>
+
+        <div class="sam-footer">
+          <button type="button" class="sam-btn sam-btn-ghost" (click)="dismiss()">Cancel</button>
+          <button
+            type="submit"
+            class="sam-btn {{ submitClass }}"
+            [disabled]="isSubmitting()"
+          >
+            @if (isSubmitting()) {
+              <span class="sam-spinner" aria-hidden="true"></span> Saving…
+            } @else {
+              <span class="pi pi-thumbs-up"></span> {{ submitLabel }}
+            }
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- ── REJECT form ───────────────────────────────────────────────────── -->
+    @if (action === 'reject') {
+      <form [formGroup]="approvalForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="sam-confirm-body">
+          <div class="sam-warning-notice">
+            <span class="pi pi-exclamation-triangle"></span>
+            Rejecting this step may halt the workflow or revert it to an earlier step,
+            depending on the workflow configuration.
+          </div>
+          <p>
+            Reject <strong>{{ step.stepName }}</strong>?
+          </p>
+        </div>
+
+        <div class="sam-field">
+          <label class="sam-label" for="sam-rejection-comment">
+            Decision Comment <span class="sam-required" aria-hidden="true">*</span>
+          </label>
+          <textarea
+            id="sam-rejection-comment"
+            formControlName="comment"
+            class="sam-textarea"
+            [ngClass]="{ 'sam-input-error': isApprovalCommentInvalid() }"
+            rows="3"
+            placeholder="Explain your rejection decision (min 10 characters)…"
+            maxlength="1000"
+          ></textarea>
+          @if (isApprovalCommentInvalid()) {
+            <p class="sam-error-msg" role="alert">{{ approvalCommentError() }}</p>
+          }
+        </div>
+
+        <div class="sam-footer">
+          <button type="button" class="sam-btn sam-btn-ghost" (click)="dismiss()">Cancel</button>
+          <button
+            type="submit"
+            class="sam-btn {{ submitClass }}"
+            [disabled]="isSubmitting()"
+          >
+            @if (isSubmitting()) {
+              <span class="sam-spinner sam-spinner-light" aria-hidden="true"></span> Saving…
+            } @else {
+              <span class="pi pi-thumbs-down"></span> {{ submitLabel }}
+            }
+          </button>
+        </div>
+      </form>
+    }
+
   </div><!-- /sam-body -->
 </dialog><!-- /sam-dialog -->

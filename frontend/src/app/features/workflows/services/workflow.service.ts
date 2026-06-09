@@ -184,6 +184,22 @@ export class WorkflowService {
     );
   }
 
+  /** Approve a pending approval-gate step, providing a mandatory decision comment. */
+  approveStep(instanceId: string, stepId: string, comment: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.base}/instances/${instanceId}/steps/${stepId}/approve`,
+      { comment },
+    );
+  }
+
+  /** Reject a pending approval-gate step, providing a mandatory decision comment. */
+  rejectStep(instanceId: string, stepId: string, comment: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.base}/instances/${instanceId}/steps/${stepId}/reject`,
+      { comment },
+    );
+  }
+
   // ── Comment thread ─────────────────────────────────────────────────────────
 
   /** Returns a page of comments for a workflow instance (chronological order). */

@@ -549,6 +549,14 @@ export class WorkflowDetailPageComponent implements OnInit {
     return step.status === 'Pending' && !step.assigneeId;
   }
 
+  canApprove(step: StepInstance): boolean {
+    return step.stepType === 'Approval' && step.status === 'AwaitingApproval';
+  }
+
+  canReject(step: StepInstance): boolean {
+    return step.stepType === 'Approval' && step.status === 'AwaitingApproval';
+  }
+
   stepInstanceStatusClass(status: string): string {
     return STEP_INSTANCE_STATUS_CONFIG[status as keyof typeof STEP_INSTANCE_STATUS_CONFIG]?.cssClass ?? 'ssi-pending';
   }
