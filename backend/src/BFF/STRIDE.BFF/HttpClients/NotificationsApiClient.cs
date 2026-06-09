@@ -36,6 +36,25 @@ public sealed class NotificationsApiClient
     public Task<HttpResponseMessage> DeleteNotificationAsync(Guid id, string token, CancellationToken cancellationToken = default)
         => _client.SendAsync(Build(HttpMethod.Delete, $"/api/notifications/{id}", token), cancellationToken);
 
+    // ── Web Push ──────────────────────────────────────────────────────────────
+
+    public Task<HttpResponseMessage> GetVapidPublicKeyAsync(CancellationToken cancellationToken = default)
+        => _client.GetAsync("/api/notifications/push/vapid-key", cancellationToken);
+
+    public Task<HttpResponseMessage> SubscribePushAsync(string token, string body, CancellationToken cancellationToken = default)
+    {
+        var req = Build(HttpMethod.Post, "/api/notifications/push/subscribe", token);
+        req.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+        return _client.SendAsync(req, cancellationToken);
+    }
+
+    public Task<HttpResponseMessage> UnsubscribePushAsync(string token, string body, CancellationToken cancellationToken = default)
+    {
+        var req = Build(HttpMethod.Post, "/api/notifications/push/unsubscribe", token);
+        req.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+        return _client.SendAsync(req, cancellationToken);
+    }
+
     private static HttpRequestMessage Build(HttpMethod method, string uri, string token)
     {
         var req = new HttpRequestMessage(method, uri);

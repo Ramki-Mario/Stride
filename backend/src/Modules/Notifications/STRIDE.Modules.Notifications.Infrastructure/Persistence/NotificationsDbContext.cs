@@ -16,7 +16,8 @@ public sealed class NotificationsDbContext : DbContext
         _publisher = publisher;
     }
 
-    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<Notification>        Notifications      => Set<Notification>();
+    public DbSet<PushSubscription>    PushSubscriptions  => Set<PushSubscription>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

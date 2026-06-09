@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using STRIDE.Modules.Notifications.Application;
 using STRIDE.Modules.Notifications.Application.Repositories;
 using STRIDE.Modules.Notifications.Infrastructure.Persistence;
 using STRIDE.Modules.Notifications.Infrastructure.Persistence.Repositories;
+using STRIDE.Modules.Notifications.Infrastructure.Services;
 
 namespace STRIDE.Modules.Notifications.Infrastructure;
 
@@ -22,6 +24,10 @@ public static class NotificationsInfrastructureExtensions
 
         // ── Repositories ───────────────────────────────────────────────────────
         services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<IPushSubscriptionRepository, PushSubscriptionRepository>();
+
+        // ── Web Push ───────────────────────────────────────────────────────────
+        services.AddSingleton<IWebPushService, WebPushService>();
 
         return services;
     }

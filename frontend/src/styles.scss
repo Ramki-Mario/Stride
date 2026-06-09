@@ -1364,6 +1364,88 @@ body {
   }
 }
 
+/* ── PWA status banners (offline / sync / install) ─────────────────────── */
+
+%pwa-banner-base {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.stride-offline-banner {
+  @extend %pwa-banner-base;
+  background: #92400e;          /* amber-800 */
+  color: #fef3c7;               /* amber-100 */
+  border-bottom: 1px solid #b45309;
+}
+
+.stride-sync-banner {
+  @extend %pwa-banner-base;
+  background: #1e3a5f;
+  color: #bae6fd;
+  border-bottom: 1px solid #0369a1;
+
+  .stride-sync-spinner {
+    width: 0.875rem;
+    height: 0.875rem;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: stride-spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+}
+
+.stride-sync-error-banner {
+  @extend %pwa-banner-base;
+  background: #450a0a;
+  color: #fecaca;
+  border-bottom: 1px solid #7f1d1d;
+}
+
+.stride-install-banner {
+  @extend %pwa-banner-base;
+  background: var(--stride-nav-bg);
+  color: var(--stride-text);
+  border-bottom: 1px solid var(--stride-border);
+  flex-wrap: wrap;
+}
+
+.stride-install-btn {
+  margin-left: auto;
+  padding: 0.25rem 0.875rem;
+  border-radius: 0.375rem;
+  background: var(--stride-primary);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+
+  &:hover { filter: brightness(1.1); }
+}
+
+.stride-banner-dismiss {
+  margin-left: 0.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  font-size: 1rem;
+  flex-shrink: 0;
+
+  &:hover { opacity: 1; }
+}
+
 /* ── Touch targets — minimum 44 × 44 px on mobile ──────────────────────── */
 
 @media (max-width: 639px) {

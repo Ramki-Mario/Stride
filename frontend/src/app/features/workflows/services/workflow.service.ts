@@ -1,7 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ConnectivityService } from '../../../core/pwa/connectivity.service';
+import { OfflineQueueService } from '../../../core/pwa/offline-queue.service';
 import {
   WorkflowDefinitionSummary,
   WorkflowDefinitionDetail,
@@ -34,9 +36,11 @@ import {
  */
 @Injectable({ providedIn: 'root' })
 export class WorkflowService {
-  private readonly http = inject(HttpClient);
+  private readonly http         = inject(HttpClient);
+  private readonly connectivity = inject(ConnectivityService);
+  private readonly queue        = inject(OfflineQueueService);
 
-  private readonly base       = '/bff/workflows';
+  private readonly base         = '/bff/workflows';
   private readonly identityBase = '/bff/identity';
 
   /** Returns all active roles for the tenant, used by the workflow builder role dropdown. */
@@ -134,7 +138,8 @@ export class WorkflowService {
     );
   }
 
-  /** Mark a step instance as completed, optionally with billable items. */
+  /** Mark a step instance as completed, optionally with billable items.
+   *  When offline, queues the completion in IndexedDB for later sync. */
   completeStep(
     instanceId: string,
     stepId: string,
@@ -144,6 +149,18 @@ export class WorkflowService {
     const body: { billableItems?: BillableItemInput[]; fieldValues?: FieldValueInput[] } = {};
     if (billableItems?.length) body.billableItems = billableItems;
     if (fieldValues?.length) body.fieldValues = fieldValues;
+
+    if (!this.connectivity.isOnline()) {
+      // Queue for later and report success immediately so the UI can move on.
+      const queued = from(this.queue.enqueue({
+        id:         crypto.randomUUID(),
+        instanceId,
+        stepId,
+        payload:    JSON.stringify(body),
+        queuedAt:   Date.now(),
+      })).pipe(map(() => undefined as void));
+      return queued;
+    }
 
     return this.http.post<void>(
       `${this.base}/instances/${instanceId}/steps/${stepId}/complete`,
