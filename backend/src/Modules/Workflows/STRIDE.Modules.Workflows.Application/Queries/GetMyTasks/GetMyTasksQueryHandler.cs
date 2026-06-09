@@ -30,7 +30,8 @@ internal sealed class GetMyTasksQueryHandler
                 t.WorkflowInstanceId,
                 t.WorkflowName,
                 t.WorkflowStatus,
-                t.ClientName))
+                t.ClientName,
+                t.IsApprovalTask))
             .ToList()
             .AsReadOnly();
 

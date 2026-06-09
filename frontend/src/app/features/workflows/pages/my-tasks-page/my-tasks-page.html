@@ -85,17 +85,23 @@
               </div>
             </div>
 
-            <!-- Status badge (hidden on mobile — quick-complete btn takes that slot) -->
-            <span class="mt-status-badge ssi-badge mt-status-badge--desktop" [ngClass]="stepStatusClass(task.stepStatus)">
-              {{ stepStatusLabel(task.stepStatus) }}
-            </span>
+            <!-- Status / type badge -->
+            @if (task.isApprovalTask) {
+              <span class="mt-status-badge ssi-badge mt-approval-badge">
+                <i class="pi pi-user-check"></i> Awaiting Approval
+              </span>
+            } @else {
+              <span class="mt-status-badge ssi-badge mt-status-badge--desktop" [ngClass]="stepStatusClass(task.stepStatus)">
+                {{ stepStatusLabel(task.stepStatus) }}
+              </span>
+            }
 
             <!-- Arrow (hidden on mobile) -->
             <i class="pi pi-chevron-right mt-arrow mt-arrow--desktop"></i>
           </button>
 
-          <!-- Quick complete — prominent on mobile, subtle on desktop -->
-          @if (canQuickComplete(task)) {
+          <!-- Quick complete — only for non-approval standard tasks -->
+          @if (!task.isApprovalTask && canQuickComplete(task)) {
             <button
               type="button"
               class="mt-quick-complete"

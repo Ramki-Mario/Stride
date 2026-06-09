@@ -75,7 +75,8 @@ public sealed record MyTaskReadModel(
     Guid     WorkflowInstanceId,
     string   WorkflowName,
     string   WorkflowStatus,
-    string?  ClientName);
+    string?  ClientName,
+    bool     IsApprovalTask = false);
 
 public sealed record WorkflowDashboardStats(
     int TotalDefinitions,

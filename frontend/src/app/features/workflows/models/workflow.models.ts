@@ -8,7 +8,8 @@ export type WorkflowStatus =
   | 'Completed'
   | 'Cancelled'
   | 'Failed'
-  | 'Archived';
+  | 'Archived'
+  | 'Halted';
 
 export type SlaStatus = 'OnTime' | 'AtRisk' | 'Breached';
 
@@ -57,6 +58,7 @@ export const STATUS_CONFIG: Record<WorkflowStatus, StatusConfig> = {
   Cancelled: { label: 'Cancelled', cssClass: 'badge-cancelled' },
   Failed:    { label: 'Failed',    cssClass: 'badge-failed'    },
   Archived:  { label: 'Archived',  cssClass: 'badge-archived'  },
+  Halted:    { label: 'Halted',    cssClass: 'badge-halted'    },
 };
 
 export type SortKey = 'name' | 'status' | 'stepCount' | 'updatedAt' | 'createdAt';
@@ -95,7 +97,7 @@ export interface FieldValueInput {
 
 // ─── Step instance ────────────────────────────────────────────────────────────
 
-export type StepInstanceStatus = 'Pending' | 'InProgress' | 'Completed' | 'Failed' | 'Skipped';
+export type StepInstanceStatus = 'Pending' | 'InProgress' | 'Completed' | 'Failed' | 'Skipped' | 'AwaitingApproval' | 'Rejected';
 
 export interface StepInstance {
   id: string;
@@ -105,6 +107,8 @@ export interface StepInstance {
   order:          number;
   isRequired:     boolean;
   status:         StepInstanceStatus;
+  /** 'Standard' | 'Approval' — determines whether approve/reject actions apply. */
+  stepType:       'Standard' | 'Approval';
   /** Matches backend StepInstanceDto.AssigneeId → JSON "assigneeId". */
   assigneeId:     string | null;
   assignedAt:     string | null;
@@ -125,11 +129,13 @@ export const STEP_INSTANCE_STATUS_CONFIG: Record<
   StepInstanceStatus,
   { label: string; cssClass: string; icon: string }
 > = {
-  Pending:    { label: 'Pending',     cssClass: 'ssi-pending',    icon: 'pi-clock'         },
-  InProgress: { label: 'In Progress', cssClass: 'ssi-inprogress', icon: 'pi-spin pi-spinner' },
-  Completed:  { label: 'Completed',   cssClass: 'ssi-completed',  icon: 'pi-check-circle'  },
-  Failed:     { label: 'Failed',      cssClass: 'ssi-failed',     icon: 'pi-times-circle'  },
-  Skipped:    { label: 'Skipped',     cssClass: 'ssi-skipped',    icon: 'pi-minus-circle'  },
+  Pending:          { label: 'Pending',          cssClass: 'ssi-pending',          icon: 'pi-clock'           },
+  InProgress:       { label: 'In Progress',      cssClass: 'ssi-inprogress',       icon: 'pi-spin pi-spinner' },
+  Completed:        { label: 'Completed',         cssClass: 'ssi-completed',        icon: 'pi-check-circle'    },
+  Failed:           { label: 'Failed',            cssClass: 'ssi-failed',           icon: 'pi-times-circle'    },
+  Skipped:          { label: 'Skipped',           cssClass: 'ssi-skipped',          icon: 'pi-minus-circle'    },
+  AwaitingApproval: { label: 'Awaiting Approval', cssClass: 'ssi-awaiting-approval', icon: 'pi-user-check'     },
+  Rejected:         { label: 'Rejected',          cssClass: 'ssi-rejected',         icon: 'pi-ban'             },
 };
 
 // ─── Instance detail (GET /bff/workflows/instances/:id) ──────────────────────
@@ -154,7 +160,7 @@ export interface WorkflowInstanceDetail {
 
 // ─── Step action types ────────────────────────────────────────────────────────
 
-export type StepAction = 'assign' | 'claim' | 'complete' | 'fail' | 'skip';
+export type StepAction = 'assign' | 'claim' | 'complete' | 'fail' | 'skip' | 'approve' | 'reject';
 
 // ─── Step field definitions ───────────────────────────────────────────────────
 
@@ -243,6 +249,7 @@ export interface MyTask {
   workflowName:      string;
   workflowStatus:    WorkflowStatus;
   clientName:        string | null;
+  isApprovalTask:    boolean;
 }
 
 // ─── Comments (GET/POST/PUT/DELETE /bff/workflows/instances/:id/comments) ─────

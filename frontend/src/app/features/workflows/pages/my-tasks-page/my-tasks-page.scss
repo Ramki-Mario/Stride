@@ -124,11 +124,13 @@
   font-size: 1rem;
   flex-shrink: 0;
 
-  &.ssi-pending    { background: var(--stride-surface-secondary); color: var(--stride-text-muted); }
-  &.ssi-inprogress { background: var(--stride-info-bg);           color: var(--stride-info);       }
-  &.ssi-completed  { background: var(--stride-success-bg);        color: var(--stride-success);    }
-  &.ssi-failed     { background: var(--stride-error-bg);          color: var(--stride-error);      }
-  &.ssi-skipped    { background: var(--stride-surface-secondary); color: var(--stride-text-muted); }
+  &.ssi-pending           { background: var(--stride-surface-secondary); color: var(--stride-text-muted); }
+  &.ssi-inprogress        { background: var(--stride-info-bg);           color: var(--stride-info);       }
+  &.ssi-completed         { background: var(--stride-success-bg);        color: var(--stride-success);    }
+  &.ssi-failed            { background: var(--stride-error-bg);          color: var(--stride-error);      }
+  &.ssi-skipped           { background: var(--stride-surface-secondary); color: var(--stride-text-muted); }
+  &.ssi-awaiting-approval { background: #fffbeb;                         color: #d97706;                  }
+  &.ssi-rejected          { background: var(--stride-error-bg);          color: var(--stride-error);      }
 }
 
 /* ── Card body ────────────────────────────────────────────────────────────── */
@@ -171,11 +173,29 @@
   font-weight: 600;
   white-space: nowrap;
 
-  &.ssi-pending    { background: var(--stride-surface-secondary); color: var(--stride-text-muted);    }
-  &.ssi-inprogress { background: var(--stride-info-bg);           color: var(--stride-info);          }
-  &.ssi-completed  { background: var(--stride-success-bg);        color: var(--stride-success);       }
-  &.ssi-failed     { background: var(--stride-error-bg);          color: var(--stride-error);         }
-  &.ssi-skipped    { background: var(--stride-surface-secondary); color: var(--stride-text-muted);    }
+  &.ssi-pending           { background: var(--stride-surface-secondary); color: var(--stride-text-muted);    }
+  &.ssi-inprogress        { background: var(--stride-info-bg);           color: var(--stride-info);          }
+  &.ssi-completed         { background: var(--stride-success-bg);        color: var(--stride-success);       }
+  &.ssi-failed            { background: var(--stride-error-bg);          color: var(--stride-error);         }
+  &.ssi-skipped           { background: var(--stride-surface-secondary); color: var(--stride-text-muted);    }
+  &.ssi-awaiting-approval { background: #fffbeb;                         color: #d97706;                     }
+  &.ssi-rejected          { background: var(--stride-error-bg);          color: var(--stride-error);         }
+}
+
+/* ── Approval task badge ──────────────────────────────────────────────────── */
+
+.mt-approval-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+  padding: 0.2rem 0.625rem;
+  border-radius: var(--stride-radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* ── Arrow ────────────────────────────────────────────────────────────────── */

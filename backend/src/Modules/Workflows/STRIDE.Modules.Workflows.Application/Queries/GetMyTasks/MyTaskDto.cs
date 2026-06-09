@@ -12,4 +12,5 @@ public sealed record MyTaskDto(
     Guid      WorkflowInstanceId,
     string    WorkflowName,
     string    WorkflowStatus,
-    string?   ClientName);
+    string?   ClientName,
+    bool      IsApprovalTask = false);
