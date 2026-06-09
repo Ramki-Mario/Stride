@@ -267,7 +267,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 ### Milestone #11 — Product Layer Gaps (EP-048–061)
 
-**Board status (2026-06-09):** EP-048–EP-054 ✅ Done. EP-055 Mobile-First 🔵 In Progress (US-168 ✅ Done, US-169 🔵 In Progress). Extra Teams module (EP-062) delivered and closed. PRs #323 #324 #325 all merged.
+**Board status (2026-06-09):** EP-048–EP-054 ✅ Done. EP-055 Mobile-First 🔵 In Progress (US-168 ✅ Done, US-169 🔵 PR #331 open, US-170 🔵 PR #332 open). Extra Teams module (EP-062) delivered and closed. PRs #323 #324 #325 all merged.
 
 **Epic → Issue → Story mapping — Milestone #11 original plan (✅ = Done, ⏳ = Next/Backlog):**
 - EP-048 #263 → US-147–149 (#277–279) — Step Ownership & Assignment ✅
@@ -277,7 +277,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - EP-052 #267 → US-159–161 (#289–291) — Advanced Step Types ✅
 - EP-053 #268 → US-162–164 (#292–294) — SLA & Deadline Tracking ✅
 - EP-054 #269 → US-165–167 (#295–297) — Comments & Activity Log ✅ (PRs #320 #321 #322)
-- EP-055 #270 → US-168–170 (#298–300) — Mobile-First Experience 🔵 In Progress (US-168 ✅ #298 closed, US-169 🔵 In Progress)
+- EP-055 #270 → US-168–170 (#298–300) — Mobile-First Experience 🔵 In Progress (US-168 ✅ #298 closed, US-169 🔵 PR #331, US-170 🔵 PR #332)
 - EP-056 #271 → US-171–173 (#301–303) — Approval Gates ⏳
 - EP-057 #272 → US-174–176 (#304–306) — Actionable Dashboard ⏳
 - EP-058 #273 → US-177–179 (#307–309) — External Customer-Facing Link ⏳
@@ -288,7 +288,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 **Extra work delivered outside original plan:**
 - EP-062 #327 → US-187 (#326) / US-188 (#328) / US-189 (#329) — Teams / Department Entity ✅ (PRs #323 #324 #325 — all closed, board=Done)
 
-**Next:** EP-055 Mobile-First Experience (#270) — US-169 mobile step completion 🔵 In Progress, US-170 queued
+**Next:** EP-055 Mobile-First Experience (#270) — US-169 🔵 PR #331 + US-170 🔵 PR #332 both open, pending merge. After EP-055: EP-056 Approval Gates (#271)
 
 ### EP-049 — Client/Customer Entity ✅ Done (#264, closed 2026-06-07)
 
@@ -357,7 +357,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 ### EP-055 — Mobile-First Experience 🔵 In Progress (#270)
 
-**GitHub:** Epic #270 | Stories: US-168 #298 ✅ / US-169 #299 🔵 / US-170 #300 ⏳
+**GitHub:** Epic #270 | Stories: US-168 #298 ✅ / US-169 #299 🔵 PR #331 / US-170 #300 🔵 PR #332
 
 #### US-168 — Responsive layout refactor ✅ Done (PR #330, GitHub #298 closed, board=Done)
 - Shell: `mobileNavOpen` signal; sidebar fixed off-canvas overlay at <640px, slides in from left; backdrop closes on tap
@@ -371,12 +371,37 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - Workflow Detail: step-action and hero button touch targets; breadcrumb wraps gracefully on mobile
 - **341 backend tests pass** ✅ · dev build clean ✅
 
-#### US-169 — Mobile-optimised step completion with camera capture 🔵 In Progress (PR #331, GitHub #299 board=In Progress)
+#### US-169 — Mobile-optimised step completion with camera capture 🔵 In Review (PR #331, GitHub #299 board=In Progress)
 - step-action-modal: bottom-sheet on mobile (<640px) — slides up from bottom, full width, 92dvh max, rounded top corners
 - step-action-modal: **Photos** section in complete action — Camera button (`accept="image/*" capture="environment"`) opens rear camera; Gallery button opens file picker; thumbnails with remove; uploads fire after step completes (non-blocking)
 - step-action-modal: billable items grid collapses 6-col → 2-col stacked on mobile; footer buttons go full-width 2.75rem
 - my-tasks-page: quick-complete ✓ button on Pending/InProgress tasks — always-visible on mobile (2.75rem), hover-visible on desktop; calls `completeStep` with no fields/billables, reloads list
 - **dev build clean** ✅
+
+#### US-170 — PWA setup (installable app, service worker, offline queue, Web Push) 🔵 In Review (PR #332)
+- `ngsw-config.json`: Angular SW app-shell prefetch + lazy assets caching; `serviceWorker` enabled in production `angular.json`
+- `manifest.webmanifest`: `display: standalone`, `theme_color: #B97AF9`, PNG icons (192/512), SVG icon, apple-touch-icon, My Tasks shortcut
+- `index.html`: manifest link, theme-color, apple-mobile-web-app meta tags
+- `ConnectivityService`: online/offline signal via `window` online/offline events
+- `OfflineQueueService`: IndexedDB store `stride-offline`/`step-completions` — `enqueue`, `dequeue`, `getAll`, `count`
+- `SyncService`: drains IndexedDB on `online` event using `fetch` with `credentials: include`; `pendingCount`, `isSyncing`, `lastError` signals
+- `InstallPromptService`: deferred `beforeinstallprompt` (Android native) + iOS `/iphone|ipad|ipod/` detection; `shouldShowBanner` getter
+- `PushNotificationService`: `SwPush.requestSubscription` → POST `/bff/notifications/push/subscribe`; `unsubscribe` removes endpoint
+- `WorkflowService.completeStep`: enqueues to IndexedDB when offline; resolves immediately
+- `ShellComponent`: offline banner, sync progress banner, sync error banner (with dismiss), Android install banner, iOS install instruction banner; drains queue on `ngOnInit` if online
+- `styles.scss`: PWA banner styles (offline amber, sync blue, error red, install)
+- Backend — Notifications module:
+  - `PushSubscription` entity (already existed from previous session) + `PushSubscriptionConfiguration` EF config
+  - Migration `20260609000000_AddPushSubscriptionsTable` (written manually — Host lacks EF Design pkg)
+  - `IPushSubscriptionRepository` + `PushSubscriptionRepository`
+  - `RegisterPushSubscriptionCommand` / `UnregisterPushSubscriptionCommand` (CQRS + validator)
+  - `GetVapidPublicKeyQuery` reads `Vapid:PublicKey` from config
+  - `IWebPushService` / `WebPushService` using `Lib.Net.Http.WebPush` + VAPID auth
+  - `StepAssignedNotificationHandler`: now also sends Web Push to all user subscriptions
+  - Host `PushController` (`GET vapid-key` [AllowAnonymous], `POST subscribe`, `POST unsubscribe`)
+  - BFF `NotificationsApiClient` extended; BFF `NotificationsController` adds push proxy endpoints
+  - `appsettings.json`: `Vapid.Subject` + `Vapid.PublicKey`; private key in gitignored `appsettings.Development.json`
+- **Backend + frontend builds clean** ✅ (only pre-existing Sass @import deprecation warning)
 
 ---
 
