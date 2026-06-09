@@ -58,7 +58,10 @@ internal sealed class CreateWorkflowCommandHandler
                     stepReq.IsRequired,
                     stepReq.RequiredRoleId,
                     fields,
-                    stepReq.DueOffsetHours);
+                    stepReq.DueOffsetHours,
+                    stepReq.StepType,
+                    stepReq.RejectionHandling,
+                    stepReq.RevertToStepOrder);
             }
 
             await _definitions.AddAsync(definition, cancellationToken);

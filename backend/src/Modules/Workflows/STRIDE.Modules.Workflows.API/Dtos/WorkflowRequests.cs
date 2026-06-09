@@ -33,7 +33,10 @@ public sealed record StepRequestDto(
     bool IsRequired = true,
     Guid? RequiredRoleId = null,
     IReadOnlyList<FieldDefinitionRequestDto>? FieldDefinitions = null,
-    decimal? DueOffsetHours = null);
+    decimal? DueOffsetHours = null,
+    StepType StepType = StepType.Standard,
+    RejectionHandling RejectionHandling = RejectionHandling.HaltWorkflow,
+    int? RevertToStepOrder = null);
 
 /// <summary>
 /// A single data-capture field on a step — submitted in the create-workflow request.

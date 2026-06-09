@@ -122,12 +122,26 @@ public sealed class WorkflowInstance : AuditableEntity
 
     public void Cancel(Guid cancelledBy)
     {
-        if (Status is not (WorkflowStatus.Running or WorkflowStatus.Paused))
-            throw new WorkflowDomainException("Only Running or Paused workflows can be cancelled.");
+        if (Status is not (WorkflowStatus.Running or WorkflowStatus.Paused or WorkflowStatus.Halted))
+            throw new WorkflowDomainException("Only Running, Paused, or Halted workflows can be cancelled.");
 
         Status = WorkflowStatus.Cancelled;
         UpdatedAt = DateTime.UtcNow;
         RaiseDomainEvent(new WorkflowCancelledEvent(Id, TenantId, cancelledBy));
+    }
+
+    /// <summary>
+    /// Resumes a Halted workflow (rejected with HaltWorkflow handling) back to Running.
+    /// Only managers should be permitted to call this; the role check belongs in the command handler.
+    /// </summary>
+    public void ResumeFromHalt(Guid resumedBy)
+    {
+        if (Status != WorkflowStatus.Halted)
+            throw new WorkflowDomainException("Only Halted workflows can be resumed from halt.");
+
+        Status = WorkflowStatus.Running;
+        UpdatedAt = DateTime.UtcNow;
+        RaiseDomainEvent(new WorkflowResumedEvent(Id, TenantId, resumedBy));
     }
 
     /// <summary>
@@ -269,7 +283,30 @@ public sealed class WorkflowInstance : AuditableEntity
         else // RevertToStep
         {
             var targetStep = _steps.FirstOrDefault(s => s.Order == request.RevertToStepOrder);
-            targetStep?.ResetToPending();
+            if (targetStep is null)
+                throw new WorkflowDomainException($"Revert target step (order {request.RevertToStepOrder}) not found.");
+
+            // Mark all completed intermediate steps (between target exclusive and rejected exclusive) as Reverted.
+            var intermediateSteps = _steps
+                .Where(s => s.Order > targetStep.Order && s.Order < step.Order && s.IsTerminal)
+                .ToList();
+
+            foreach (var intermediate in intermediateSteps)
+                intermediate.MarkReverted();
+
+            targetStep.ResetToPending();
+
+            if (intermediateSteps.Count > 0)
+            {
+                var revertedInfos = intermediateSteps
+                    .Select(s => (s.Id, s.StepName))
+                    .ToList()
+                    .AsReadOnly() as IReadOnlyList<(Guid StepInstanceId, string StepName)>;
+
+                RaiseDomainEvent(new StepsRevertedEvent(
+                    Id, TenantId, step.Id, step.StepName,
+                    targetStep.Order, revertedInfos!, rejectedBy, comment));
+            }
         }
     }
 

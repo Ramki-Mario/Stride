@@ -154,3 +154,27 @@ internal sealed class WorkflowResumedActivityHandler
         await _activity.SaveChangesAsync(cancellationToken);
     }
 }
+
+internal sealed class WorkflowHaltedActivityHandler
+    : INotificationHandler<DomainEventNotification<WorkflowHaltedEvent>>
+{
+    private readonly IWorkflowActivityRepository _activity;
+
+    public WorkflowHaltedActivityHandler(IWorkflowActivityRepository activity)
+        => _activity = activity;
+
+    public async Task Handle(
+        DomainEventNotification<WorkflowHaltedEvent> notification,
+        CancellationToken cancellationToken)
+    {
+        var e = notification.DomainEvent;
+        var record = WorkflowActivityEvent.Create(
+            e.WorkflowInstanceId,
+            e.TenantId,
+            ActivityEventType.WorkflowHalted,
+            e.HaltedBy);
+
+        await _activity.AddAsync(record, cancellationToken);
+        await _activity.SaveChangesAsync(cancellationToken);
+    }
+}
