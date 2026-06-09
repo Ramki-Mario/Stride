@@ -1,0 +1,15 @@
+global using Xunit;
+global using FluentAssertions;
+global using NSubstitute;
+global using MediatR;
+global using Microsoft.AspNetCore.Mvc;
+global using STRIDE.BuildingBlocks.Application.Abstractions;
+global using STRIDE.BuildingBlocks.Application.Results;
+global using STRIDE.Modules.Teams.Application.DTOs;
+global using STRIDE.Modules.Teams.Application.Commands.CreateTeam;
+global using STRIDE.Modules.Teams.Application.Commands.DeactivateTeam;
+global using STRIDE.Modules.Teams.Application.Commands.ReactivateTeam;
+global using STRIDE.Modules.Teams.Application.Commands.UpdateTeam;
+global using STRIDE.Modules.Teams.Application.Queries.GetTeamById;
+global using STRIDE.Modules.Teams.Application.Queries.GetTeams;
+global using STRIDE.Modules.Teams.API.Models;
