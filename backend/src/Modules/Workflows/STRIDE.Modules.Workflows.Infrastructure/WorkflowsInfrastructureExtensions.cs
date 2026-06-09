@@ -27,6 +27,7 @@ public static class WorkflowsInfrastructureExtensions
         // ── Repositories (EF Core writes) ──────────────────────────────────────
         services.AddScoped<IWorkflowDefinitionRepository, WorkflowDefinitionRepository>();
         services.AddScoped<IWorkflowInstanceRepository,   WorkflowInstanceRepository>();
+        services.AddScoped<IApprovalRequestRepository,    ApprovalRequestRepository>();
         services.AddScoped<IAttachmentRepository,         AttachmentRepository>();
         services.AddScoped<IWorkflowCommentRepository,    WorkflowCommentRepository>();
         services.AddScoped<IWorkflowActivityRepository,  WorkflowActivityRepository>();

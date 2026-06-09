@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using STRIDE.Modules.Workflows.Domain.Entities;
+using STRIDE.Modules.Workflows.Domain.Enums;
 
 namespace STRIDE.Modules.Workflows.Infrastructure.Persistence.Configurations;
 
@@ -28,6 +29,20 @@ internal sealed class StepDefinitionConfiguration : IEntityTypeConfiguration<Ste
 
         builder.Property(s => s.DueOffsetHours)
             .HasColumnType("decimal(6,2)");
+
+        builder.Property(s => s.StepType)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .HasDefaultValue(StepType.Standard);
+
+        builder.Property(s => s.RejectionHandling)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .HasDefaultValue(RejectionHandling.HaltWorkflow);
+
+        builder.Property(s => s.RevertToStepOrder);
 
         builder.HasIndex(s => new { s.WorkflowDefinitionId, s.Order });
 

@@ -7,7 +7,8 @@ namespace STRIDE.Modules.Workflows.Domain.Entities;
 
 public sealed class WorkflowInstance : AuditableEntity
 {
-    private readonly List<StepInstance> _steps = new();
+    private readonly List<StepInstance>     _steps           = new();
+    private readonly List<ApprovalRequest>  _approvalRequests = new();
 
     public Guid  WorkflowDefinitionId { get; private set; }
     public string WorkflowName { get; private set; } = string.Empty;
@@ -33,7 +34,8 @@ public sealed class WorkflowInstance : AuditableEntity
     /// <summary>Timestamp at which the SLA-breach notification was sent. Null until IsSlaBreached is set.</summary>
     public DateTime? SlaBreachedNotifiedAt { get; private set; }
 
-    public IReadOnlyList<StepInstance> Steps => _steps.AsReadOnly();
+    public IReadOnlyList<StepInstance>    Steps            => _steps.AsReadOnly();
+    public IReadOnlyList<ApprovalRequest> ApprovalRequests => _approvalRequests.AsReadOnly();
 
     private WorkflowInstance() { }
 
@@ -76,6 +78,16 @@ public sealed class WorkflowInstance : AuditableEntity
                 : (DateTime?)null;
 
             instance._steps.Add(StepInstance.Create(instance.Id, instance.TenantId, stepDef, dueAt));
+        }
+
+        // If the first step is an Approval gate, activate it immediately.
+        var firstStep = instance._steps.OrderBy(s => s.Order).FirstOrDefault();
+        if (firstStep?.StepType == StepType.Approval)
+        {
+            var request = firstStep.ActivateForApproval();
+            instance._approvalRequests.Add(request);
+            instance.RaiseDomainEvent(new ApprovalRequestedEvent(
+                firstStep.Id, instance.Id, instance.TenantId, firstStep.RequiredRoleId, firstStep.StepName));
         }
 
         instance.RaiseDomainEvent(new WorkflowStartedEvent(
@@ -169,6 +181,7 @@ public sealed class WorkflowInstance : AuditableEntity
         // When a step completes, recalculate the next pending step's due date
         // from this step's actual completion time (handles late completions).
         RecalculateNextStepDueDate(step);
+        ActivateNextApprovalStepIfNeeded(step);
 
         RaiseDomainEvent(new StepCompletedEvent(step.Id, Id, TenantId, completedBy, step.StepName));
         CheckCompletion();
@@ -200,8 +213,64 @@ public sealed class WorkflowInstance : AuditableEntity
         step.Skip();
         UpdatedAt = DateTime.UtcNow;
 
+        RecalculateNextStepDueDate(step);
+        ActivateNextApprovalStepIfNeeded(step);
+
         RaiseDomainEvent(new StepSkippedEvent(step.Id, Id, TenantId, skippedBy, step.StepName));
         CheckCompletion();
+    }
+
+    // ── Approval-gate operations ───────────────────────────────────────────────
+
+    /// <summary>
+    /// Approves the pending approval request on the given step.
+    /// The step transitions AwaitingApproval → Completed and the next step is activated.
+    /// </summary>
+    public void ApproveStep(Guid stepInstanceId, Guid approvedBy, string? comment = null)
+    {
+        EnsureRunning();
+
+        var step    = GetStep(stepInstanceId);
+        var request = GetPendingApprovalRequest(stepInstanceId);
+
+        request.Approve(approvedBy, comment);
+        step.MarkApproved();
+        UpdatedAt = DateTime.UtcNow;
+
+        RecalculateNextStepDueDate(step);
+        ActivateNextApprovalStepIfNeeded(step);
+
+        RaiseDomainEvent(new StepApprovedEvent(step.Id, Id, TenantId, approvedBy, step.StepName));
+        CheckCompletion();
+    }
+
+    /// <summary>
+    /// Rejects the pending approval request on the given step.
+    /// Depending on <see cref="RejectionHandling"/>, the workflow either halts or reverts to an earlier step.
+    /// </summary>
+    public void RejectStep(Guid stepInstanceId, Guid rejectedBy, string? comment = null)
+    {
+        EnsureRunning();
+
+        var step    = GetStep(stepInstanceId);
+        var request = GetPendingApprovalRequest(stepInstanceId);
+
+        request.Reject(rejectedBy, comment);
+        step.MarkRejected();
+        UpdatedAt = DateTime.UtcNow;
+
+        RaiseDomainEvent(new StepRejectedEvent(step.Id, Id, TenantId, rejectedBy, step.StepName));
+
+        if (request.RejectionHandling == RejectionHandling.HaltWorkflow)
+        {
+            Status = WorkflowStatus.Halted;
+            RaiseDomainEvent(new WorkflowHaltedEvent(Id, TenantId, step.Id, rejectedBy));
+        }
+        else // RevertToStep
+        {
+            var targetStep = _steps.FirstOrDefault(s => s.Order == request.RevertToStepOrder);
+            targetStep?.ResetToPending();
+        }
     }
 
     // ── Deadline / overdue tracking ────────────────────────────────────────────
@@ -257,6 +326,26 @@ public sealed class WorkflowInstance : AuditableEntity
             nextStep.SetDueAt(completedStep.CompletedAt.Value.AddHours((double)nextStep.DueOffsetHours.Value));
     }
 
+    /// <summary>
+    /// After a step becomes terminal, checks if the immediately next Pending step is an
+    /// Approval gate and auto-activates it by creating an ApprovalRequest.
+    /// </summary>
+    private void ActivateNextApprovalStepIfNeeded(StepInstance completedStep)
+    {
+        var nextStep = _steps
+            .Where(s => s.Order > completedStep.Order && s.Status == StepStatus.Pending)
+            .OrderBy(s => s.Order)
+            .FirstOrDefault();
+
+        if (nextStep?.StepType == StepType.Approval)
+        {
+            var request = nextStep.ActivateForApproval();
+            _approvalRequests.Add(request);
+            RaiseDomainEvent(new ApprovalRequestedEvent(
+                nextStep.Id, Id, TenantId, nextStep.RequiredRoleId, nextStep.StepName));
+        }
+    }
+
     private void EnsureRunning()
     {
         if (Status != WorkflowStatus.Running)
@@ -266,6 +355,10 @@ public sealed class WorkflowInstance : AuditableEntity
     private StepInstance GetStep(Guid stepInstanceId) =>
         _steps.FirstOrDefault(s => s.Id == stepInstanceId)
             ?? throw new WorkflowDomainException($"Step instance '{stepInstanceId}' not found in this workflow.");
+
+    private ApprovalRequest GetPendingApprovalRequest(Guid stepInstanceId) =>
+        _approvalRequests.FirstOrDefault(a => a.StepInstanceId == stepInstanceId && a.Status == ApprovalStatus.Pending)
+            ?? throw new WorkflowDomainException($"No pending approval request found for step '{stepInstanceId}'.");
 
     private void CheckCompletion()
     {

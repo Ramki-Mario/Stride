@@ -36,6 +36,8 @@ namespace STRIDE.BFF.Controllers;
 ///   POST   /bff/workflows/instances/{instanceId}/steps/{stepId}/complete
 ///   POST   /bff/workflows/instances/{instanceId}/steps/{stepId}/fail
 ///   POST   /bff/workflows/instances/{instanceId}/steps/{stepId}/skip
+///   POST   /bff/workflows/instances/{instanceId}/steps/{stepId}/approve
+///   POST   /bff/workflows/instances/{instanceId}/steps/{stepId}/reject
 /// </summary>
 [ApiController]
 [Authorize]
@@ -243,6 +245,26 @@ public sealed class WorkflowsController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         var response = await _workflows.ClaimStepAsync(instanceId, stepId, token, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
+    }
+
+    [HttpPost("instances/{instanceId:guid}/steps/{stepId:guid}/approve")]
+    public async Task<IActionResult> ApproveStep(Guid instanceId, Guid stepId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        using var body = JsonBody();
+        var response = await _workflows.ApproveStepAsync(instanceId, stepId, body, token, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
+    }
+
+    [HttpPost("instances/{instanceId:guid}/steps/{stepId:guid}/reject")]
+    public async Task<IActionResult> RejectStep(Guid instanceId, Guid stepId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        using var body = JsonBody();
+        var response = await _workflows.RejectStepAsync(instanceId, stepId, body, token, cancellationToken);
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 

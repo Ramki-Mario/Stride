@@ -85,13 +85,18 @@ public sealed class WorkflowDefinition : AuditableEntity
         bool isRequired = true,
         Guid? requiredRoleId = null,
         IReadOnlyList<(string Label, StepFieldType FieldType, bool IsRequired, string? HelpText, IReadOnlyList<string>? DropdownOptions)>? fields = null,
-        decimal? dueOffsetHours = null)
+        decimal? dueOffsetHours = null,
+        StepType stepType = StepType.Standard,
+        RejectionHandling rejectionHandling = RejectionHandling.HaltWorkflow,
+        int? revertToStepOrder = null)
     {
         if (Status != WorkflowStatus.Draft)
             throw new WorkflowDomainException("Steps can only be added to Draft workflows.");
 
         var order = _steps.Count;
-        var step  = StepDefinition.Create(Id, name, description, order, isRequired, requiredRoleId, dueOffsetHours);
+        var step  = StepDefinition.Create(
+            Id, name, description, order, isRequired, requiredRoleId, dueOffsetHours,
+            stepType, rejectionHandling, revertToStepOrder);
 
         if (fields is { Count: > 0 })
         {
@@ -110,7 +115,10 @@ public sealed class WorkflowDefinition : AuditableEntity
         string? description,
         bool isRequired,
         Guid? requiredRoleId = null,
-        decimal? dueOffsetHours = null)
+        decimal? dueOffsetHours = null,
+        StepType stepType = StepType.Standard,
+        RejectionHandling rejectionHandling = RejectionHandling.HaltWorkflow,
+        int? revertToStepOrder = null)
     {
         if (Status != WorkflowStatus.Draft)
             throw new WorkflowDomainException("Steps can only be edited on Draft workflows.");
@@ -118,7 +126,8 @@ public sealed class WorkflowDefinition : AuditableEntity
         var step = _steps.FirstOrDefault(s => s.Id == stepId)
             ?? throw new WorkflowDomainException($"Step '{stepId}' not found.");
 
-        step.Update(name, description, isRequired, requiredRoleId, dueOffsetHours);
+        step.Update(name, description, isRequired, requiredRoleId, dueOffsetHours,
+            stepType, rejectionHandling, revertToStepOrder);
         UpdatedAt = DateTime.UtcNow;
     }
 
