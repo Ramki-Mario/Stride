@@ -20,4 +20,10 @@ public enum StepStatus
 
     /// <summary>Step could not be completed due to an error or blocker.</summary>
     Failed = 5,
+
+    /// <summary>Approval-gate step is waiting for an authorised user to approve or reject.</summary>
+    AwaitingApproval = 6,
+
+    /// <summary>Approval was rejected by the authorised reviewer.</summary>
+    Rejected = 7,
 }

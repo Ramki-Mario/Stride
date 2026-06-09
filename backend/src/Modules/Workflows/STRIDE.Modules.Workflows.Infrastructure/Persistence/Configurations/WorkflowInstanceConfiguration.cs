@@ -59,6 +59,15 @@ internal sealed class WorkflowInstanceConfiguration : IEntityTypeConfiguration<W
             .HasField("_steps")
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
+        builder.HasMany(i => i.ApprovalRequests)
+            .WithOne()
+            .HasForeignKey(a => a.WorkflowInstanceId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(i => i.ApprovalRequests)
+            .HasField("_approvalRequests")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
         builder.ToTable("WorkflowInstances");
     }
 }

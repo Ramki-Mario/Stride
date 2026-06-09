@@ -14,8 +14,8 @@ internal sealed class WorkflowInstanceRepository
         : base(context, tenant) { }
 
     /// <summary>
-    /// Always eagerly loads step instances — required for all step-level operations
-    /// performed through the WorkflowInstance aggregate root.
+    /// Always eagerly loads step instances and approval requests — required for all step-level
+    /// operations performed through the WorkflowInstance aggregate root.
     /// </summary>
     public async Task<WorkflowInstance?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => await Query
@@ -23,6 +23,7 @@ internal sealed class WorkflowInstanceRepository
                 .ThenInclude(s => s.BillableItems)
             .Include(i => i.Steps)
                 .ThenInclude(s => s.FieldValues)
+            .Include(i => i.ApprovalRequests)
             .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
 
     public async Task<IReadOnlyList<WorkflowInstance>> GetByDefinitionIdAsync(
@@ -33,6 +34,7 @@ internal sealed class WorkflowInstanceRepository
                 .ThenInclude(s => s.BillableItems)
             .Include(i => i.Steps)
                 .ThenInclude(s => s.FieldValues)
+            .Include(i => i.ApprovalRequests)
             .Where(i => i.WorkflowDefinitionId == definitionId)
             .OrderByDescending(i => i.CreatedAt)
             .ToListAsync(cancellationToken);
@@ -43,6 +45,7 @@ internal sealed class WorkflowInstanceRepository
                 .ThenInclude(s => s.BillableItems)
             .Include(i => i.Steps)
                 .ThenInclude(s => s.FieldValues)
+            .Include(i => i.ApprovalRequests)
             .OrderByDescending(i => i.UpdatedAt)
             .ToListAsync(cancellationToken);
 

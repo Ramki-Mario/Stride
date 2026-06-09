@@ -7,7 +7,9 @@ using STRIDE.Modules.Workflows.API.Dtos;
 using STRIDE.Modules.Workflows.Application.Commands.AssignStep;
 using STRIDE.Modules.Workflows.Application.Commands.ClaimStep;
 using STRIDE.Modules.Workflows.Application.Commands.CompleteStep;
+using STRIDE.Modules.Workflows.Application.Commands.ApproveStep;
 using STRIDE.Modules.Workflows.Application.Commands.FailStep;
+using STRIDE.Modules.Workflows.Application.Commands.RejectStep;
 using STRIDE.Modules.Workflows.Application.Commands.SkipStep;
 using STRIDE.Modules.Workflows.Domain.Enums;
 
@@ -20,9 +22,11 @@ namespace STRIDE.Modules.Workflows.API.Controllers;
 ///   POST /api/workflows/instances/{instanceId}/steps/{stepId}/complete  — mark complete
 ///   POST /api/workflows/instances/{instanceId}/steps/{stepId}/fail      — mark failed (with reason)
 ///   POST /api/workflows/instances/{instanceId}/steps/{stepId}/skip      — skip a step
+///   POST /api/workflows/instances/{instanceId}/steps/{stepId}/approve   — approve a pending approval gate
+///   POST /api/workflows/instances/{instanceId}/steps/{stepId}/reject    — reject a pending approval gate
 ///
 /// All mutations require an authenticated user; the caller's identity is used as the
-/// acting-user argument (assignedBy / completedBy / failedBy / skippedBy).
+/// acting-user argument (assignedBy / completedBy / failedBy / skippedBy / approvedBy / rejectedBy).
 /// </summary>
 [ApiController]
 [Authorize]
@@ -199,6 +203,72 @@ public sealed class StepsController : ControllerBase
                 WorkflowInstanceId: instanceId,
                 StepInstanceId:     stepId,
                 SkippedBy:          _currentUser.UserId),
+            cancellationToken);
+
+        if (result.IsFailure)
+        {
+            if (result.Error!.Contains(NotFoundFragment, StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { error = result.Error });
+
+            return BadRequest(new { error = result.Error });
+        }
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Approve a pending approval-gate step. The caller must hold the role required by the step.
+    /// POST /api/workflows/instances/{instanceId}/steps/{stepId}/approve
+    /// </summary>
+    [HttpPost("{stepId:guid}/approve")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Approve(
+        Guid instanceId,
+        Guid stepId,
+        [FromBody] ApproveStepRequest? request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new ApproveStepCommand(
+                WorkflowInstanceId: instanceId,
+                StepInstanceId:     stepId,
+                ApprovedBy:         _currentUser.UserId,
+                Comment:            request?.Comment),
+            cancellationToken);
+
+        if (result.IsFailure)
+        {
+            if (result.Error!.Contains(NotFoundFragment, StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { error = result.Error });
+
+            return BadRequest(new { error = result.Error });
+        }
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Reject a pending approval-gate step. The caller must hold the role required by the step.
+    /// POST /api/workflows/instances/{instanceId}/steps/{stepId}/reject
+    /// </summary>
+    [HttpPost("{stepId:guid}/reject")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Reject(
+        Guid instanceId,
+        Guid stepId,
+        [FromBody] RejectStepRequest? request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new RejectStepCommand(
+                WorkflowInstanceId: instanceId,
+                StepInstanceId:     stepId,
+                RejectedBy:         _currentUser.UserId,
+                Comment:            request?.Comment),
             cancellationToken);
 
         if (result.IsFailure)

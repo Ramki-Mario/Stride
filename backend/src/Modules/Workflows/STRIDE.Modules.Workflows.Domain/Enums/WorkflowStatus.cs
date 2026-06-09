@@ -29,4 +29,7 @@ public enum WorkflowStatus
 
     /// <summary>A definition is retired and can no longer be started.</summary>
     Archived = 7,
+
+    /// <summary>An instance was stopped because an approval step was rejected with HaltWorkflow handling.</summary>
+    Halted = 8,
 }

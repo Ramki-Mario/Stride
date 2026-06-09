@@ -30,3 +30,9 @@ public sealed record BillableItemRequest(
 public sealed record FieldValueRequest(
     Guid StepFieldDefinitionId,
     string Value);
+
+/// <summary>Optional body for POST .../steps/{stepId}/approve</summary>
+public sealed record ApproveStepRequest(string? Comment = null);
+
+/// <summary>Optional body for POST .../steps/{stepId}/reject</summary>
+public sealed record RejectStepRequest(string? Comment = null);

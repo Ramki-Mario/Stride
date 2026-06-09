@@ -26,6 +26,21 @@ public sealed class StepDefinition : BaseEntity<Guid>
     /// </summary>
     public decimal? DueOffsetHours { get; private set; }
 
+    /// <summary>Standard work step or an Approval gate that requires an authorised reviewer.</summary>
+    public StepType StepType { get; private set; }
+
+    /// <summary>
+    /// Determines what happens when this approval step is rejected.
+    /// Only meaningful when <see cref="StepType"/> is <see cref="StepType.Approval"/>.
+    /// </summary>
+    public RejectionHandling RejectionHandling { get; private set; }
+
+    /// <summary>
+    /// The <see cref="StepDefinition.Order"/> of the step to reset when rejection handling is
+    /// <see cref="RejectionHandling.RevertToStep"/>. Null for HaltWorkflow handling.
+    /// </summary>
+    public int? RevertToStepOrder { get; private set; }
+
     /// <summary>
     /// Ordered list of data-capture fields defined on this step.
     /// Populated at workflow-definition time; rendered as a form at step-completion time.
@@ -41,7 +56,10 @@ public sealed class StepDefinition : BaseEntity<Guid>
         int order,
         bool isRequired = true,
         Guid? requiredRoleId = null,
-        decimal? dueOffsetHours = null)
+        decimal? dueOffsetHours = null,
+        StepType stepType = StepType.Standard,
+        RejectionHandling rejectionHandling = RejectionHandling.HaltWorkflow,
+        int? revertToStepOrder = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new WorkflowDomainException("Step name cannot be empty.");
@@ -51,6 +69,9 @@ public sealed class StepDefinition : BaseEntity<Guid>
 
         if (dueOffsetHours.HasValue && dueOffsetHours.Value <= 0)
             throw new WorkflowDomainException("Due offset hours must be greater than zero.");
+
+        if (stepType == StepType.Approval && rejectionHandling == RejectionHandling.RevertToStep && revertToStepOrder is null)
+            throw new WorkflowDomainException("RevertToStepOrder is required when RejectionHandling is RevertToStep.");
 
         return new StepDefinition
         {
@@ -62,6 +83,9 @@ public sealed class StepDefinition : BaseEntity<Guid>
             IsRequired           = isRequired,
             RequiredRoleId       = requiredRoleId,
             DueOffsetHours       = dueOffsetHours,
+            StepType             = stepType,
+            RejectionHandling    = rejectionHandling,
+            RevertToStepOrder    = revertToStepOrder,
         };
     }
 
@@ -70,7 +94,10 @@ public sealed class StepDefinition : BaseEntity<Guid>
         string? description,
         bool isRequired,
         Guid? requiredRoleId = null,
-        decimal? dueOffsetHours = null)
+        decimal? dueOffsetHours = null,
+        StepType stepType = StepType.Standard,
+        RejectionHandling rejectionHandling = RejectionHandling.HaltWorkflow,
+        int? revertToStepOrder = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new WorkflowDomainException("Step name cannot be empty.");
@@ -78,11 +105,17 @@ public sealed class StepDefinition : BaseEntity<Guid>
         if (dueOffsetHours.HasValue && dueOffsetHours.Value <= 0)
             throw new WorkflowDomainException("Due offset hours must be greater than zero.");
 
-        Name           = name.Trim();
-        Description    = description?.Trim();
-        IsRequired     = isRequired;
-        RequiredRoleId = requiredRoleId;
-        DueOffsetHours = dueOffsetHours;
+        if (stepType == StepType.Approval && rejectionHandling == RejectionHandling.RevertToStep && revertToStepOrder is null)
+            throw new WorkflowDomainException("RevertToStepOrder is required when RejectionHandling is RevertToStep.");
+
+        Name              = name.Trim();
+        Description       = description?.Trim();
+        IsRequired        = isRequired;
+        RequiredRoleId    = requiredRoleId;
+        DueOffsetHours    = dueOffsetHours;
+        StepType          = stepType;
+        RejectionHandling = rejectionHandling;
+        RevertToStepOrder = revertToStepOrder;
     }
 
     // ── Field definition management ──────────────────────────────────────────
