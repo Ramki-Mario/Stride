@@ -6,6 +6,7 @@ using STRIDE.Modules.Reporting.Application.Abstractions;
 using STRIDE.Modules.Reporting.Infrastructure.Persistence;
 using STRIDE.Modules.Reporting.Infrastructure.Persistence.Repositories;
 using STRIDE.Modules.Reporting.Infrastructure.ReadModels;
+using STRIDE.Modules.Reporting.Infrastructure.Realtime;
 
 namespace STRIDE.Modules.Reporting.Infrastructure;
 
@@ -26,6 +27,10 @@ public static class ReportingInfrastructureExtensions
 
         services.AddScoped<IReportingReadService, ReportingReadService>();
         services.AddScoped<IReportRepository, ReportRepository>();
+
+        // Real-time dashboard push (US-176) — singleton: holds no state beyond the
+        // shared IConnectionMultiplexer, which is itself a singleton in the Host.
+        services.AddSingleton<IDashboardNotifier, RedisDashboardNotifier>();
 
         return services;
     }

@@ -4,18 +4,20 @@ import {
   DestroyRef,
   OnInit,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize } from 'rxjs/operators';
-import { forkJoin } from 'rxjs';
+import { debounceTime, finalize } from 'rxjs/operators';
+import { Subscription, forkJoin, interval } from 'rxjs';
 import { ChartModule } from 'primeng/chart';
 
 import { ReportingService } from '../../../reporting/services/reporting.service';
 import { DashboardService } from '../../services/dashboard.service';
+import { DashboardRealtimeService } from '../../services/dashboard-realtime.service';
 import { ChartThemeService } from '../../../../core/chart/chart-theme.service';
 import { DashboardKpiDto, WorkflowTrendDto } from '../../../reporting/models/reporting.models';
 import { DashboardAlertSummary } from '../../models/dashboard-alert.models';
@@ -39,9 +41,29 @@ interface TrendWindow {
 export class DashboardPageComponent implements OnInit {
   private readonly reportingService  = inject(ReportingService);
   private readonly dashboardService  = inject(DashboardService);
+  private readonly realtime          = inject(DashboardRealtimeService);
   private readonly chartTheme        = inject(ChartThemeService);
   private readonly destroyRef        = inject(DestroyRef);
   private readonly router            = inject(Router);
+
+  // ── Real-time updates (US-176) ────────────────────────────────────────────
+
+  /** True while live pushes are flowing — shown as a "Live" indicator. */
+  readonly isLive = computed(() => this.realtime.state() === 'connected');
+
+  private pollSub: Subscription | null = null;
+
+  /**
+   * Fallback polling: when the hub is disconnected, refetch every 60s;
+   * the moment it (re)connects, stop polling and rely on pushes.
+   */
+  private readonly fallbackPolling = effect(() => {
+    if (this.realtime.state() === 'disconnected') {
+      this.startPolling();
+    } else {
+      this.stopPolling();
+    }
+  });
 
   // ── Server state ─────────────────────────────────────────────────────────
 
@@ -268,6 +290,18 @@ export class DashboardPageComponent implements OnInit {
     this.loadDashboard(this.selectedDays());
     this.loadAlerts();
     this.loadWorkload();
+
+    // Live updates: refetch affected panels when the hub pushes an event.
+    // Debounced so a burst (e.g. bulk completion) coalesces into one refresh.
+    this.realtime.start();
+    this.realtime.updates$
+      .pipe(debounceTime(750), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.refreshLive());
+
+    this.destroyRef.onDestroy(() => {
+      this.stopPolling();
+      this.realtime.stop();
+    });
   }
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -342,6 +376,39 @@ export class DashboardPageComponent implements OnInit {
         next:  data => this.workload.set(data),
         error: ()   => { /* workload failure is non-blocking */ },
       });
+  }
+
+  // ── Real-time refresh (US-176) ────────────────────────────────────────────
+
+  /**
+   * Silent refetch of the live panels (KPIs, alerts, workload) — no loading
+   * flags, so panels update in place without a skeleton flash. Trends are
+   * skipped: day-granularity history doesn't change meaningfully per event.
+   */
+  private refreshLive(): void {
+    this.reportingService.getDashboardKpis()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: k => this.kpi.set(k), error: () => {} });
+
+    this.dashboardService.getAlerts()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: a => this.alerts.set(a), error: () => {} });
+
+    this.dashboardService.getTeamWorkload()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: w => this.workload.set(w), error: () => {} });
+  }
+
+  private startPolling(): void {
+    if (this.pollSub) return;
+    this.pollSub = interval(60_000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.refreshLive());
+  }
+
+  private stopPolling(): void {
+    this.pollSub?.unsubscribe();
+    this.pollSub = null;
   }
 
   // ── Display helpers ───────────────────────────────────────────────────────

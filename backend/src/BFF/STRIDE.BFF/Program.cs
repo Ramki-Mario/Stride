@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Serilog;
 using StackExchange.Redis;
 using STRIDE.BFF.Auth;
+using STRIDE.BFF.Hubs;
 using STRIDE.BFF.HttpClients;
+using STRIDE.BFF.Realtime;
 using STRIDE.BuildingBlocks.Infrastructure.Correlation;
 using STRIDE.BuildingBlocks.Infrastructure.Extensions;
 
@@ -120,6 +122,12 @@ builder.Services.AddCors(opts => opts.AddPolicy("SPA", policy =>
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
+// ── Real-time dashboard (US-176) ──────────────────────────────────────────
+// SignalR hub authenticated by the session cookie; a hosted service bridges
+// Redis pub/sub messages from the Host into tenant-scoped hub groups.
+builder.Services.AddSignalR();
+builder.Services.AddHostedService<DashboardRedisSubscriber>();
+
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
@@ -130,5 +138,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
+app.MapHub<DashboardHub>("/bff/hubs/dashboard");
 
 await app.RunAsync();

@@ -3,6 +3,12 @@
   <ItemGroup>
     <ProjectReference Include="..\STRIDE.Modules.Reporting.Domain\STRIDE.Modules.Reporting.Domain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\STRIDE.BuildingBlocks.Application\STRIDE.BuildingBlocks.Application.csproj" />
+    <!-- DomainEventNotification<T> wrapper (same pattern as Workflows.Application, US-166) -->
+    <ProjectReference Include="..\..\..\BuildingBlocks\STRIDE.BuildingBlocks.Infrastructure\STRIDE.BuildingBlocks.Infrastructure.csproj" />
+    <!-- Cross-module domain events consumed by the dashboard update handlers (US-176).
+         Same precedent as Invoicing.Application → Workflows.Domain (US-154). -->
+    <ProjectReference Include="..\..\Workflows\STRIDE.Modules.Workflows.Domain\STRIDE.Modules.Workflows.Domain.csproj" />
+    <ProjectReference Include="..\..\Invoicing\STRIDE.Modules.Invoicing.Domain\STRIDE.Modules.Invoicing.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
