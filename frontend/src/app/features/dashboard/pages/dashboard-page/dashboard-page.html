@@ -270,6 +270,12 @@
       </div><!-- /alerts-grid -->
     </div><!-- /alerts-section -->
 
+    <!-- Team Workload panel -->
+    <app-workload-panel
+      [items]="workload()"
+      [isLoading]="workloadLoading()">
+    </app-workload-panel>
+
   }<!-- /!isLoading -->
 
 </div><!-- /dashboard-page -->

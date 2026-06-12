@@ -43,6 +43,15 @@ public sealed class ReportingApiClient
         return _client.SendAsync(request, cancellationToken);
     }
 
+    /// <summary>Proxies GET /api/reporting/dashboard/team-workload.</summary>
+    public Task<HttpResponseMessage> GetDashboardTeamWorkloadAsync(
+        string accessToken,
+        CancellationToken cancellationToken = default)
+    {
+        var request = BuildRequest(HttpMethod.Get, "/api/reporting/dashboard/team-workload", accessToken);
+        return _client.SendAsync(request, cancellationToken);
+    }
+
     /// <summary>Proxies GET /api/reporting/dashboard/trends?days=N.</summary>
     public Task<HttpResponseMessage> GetWorkflowTrendsAsync(
         int days,

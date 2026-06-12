@@ -43,4 +43,13 @@ public interface IReportingReadService
     Task<DashboardAlertSummaryDto> GetDashboardAlertsAsync(
         Guid tenantId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns the team workload view: all active tenant users with their current step
+    /// assignment counts and up to 3 top steps each (overdue first, then by due date).
+    /// Users with zero assignments are included and sorted to the bottom.
+    /// </summary>
+    Task<IReadOnlyList<TeamWorkloadItemDto>> GetTeamWorkloadAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken = default);
 }

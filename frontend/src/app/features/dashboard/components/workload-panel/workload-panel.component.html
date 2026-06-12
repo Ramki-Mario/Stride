@@ -1,0 +1,114 @@
+<div class="workload-panel">
+  <!-- Header -->
+  <div class="workload-panel__header">
+    <div class="workload-panel__title-group">
+      <h3 class="workload-panel__title">
+        <i class="pi pi-users"></i>
+        Team Workload
+      </h3>
+      @if (!isLoading) {
+        <span class="workload-panel__subtitle">
+          {{ items.length }} member{{ items.length === 1 ? '' : 's' }}
+          &nbsp;·&nbsp;
+          {{ items.reduce((s, m) => s + m.activeStepCount, 0) }} active steps
+        </span>
+      }
+    </div>
+  </div>
+
+  <!-- Skeleton -->
+  @if (isLoading) {
+    <div class="workload-panel__body">
+      @for (row of [1, 2, 3]; track row) {
+        <div class="workload-row workload-row--skeleton">
+          <div class="wl-avatar wl-avatar--skeleton"></div>
+          <div class="wl-user">
+            <div class="wl-skeleton wl-skeleton--name"></div>
+            <div class="wl-skeleton wl-skeleton--email"></div>
+          </div>
+          <div class="wl-steps">
+            <div class="wl-skeleton wl-skeleton--step"></div>
+          </div>
+          <div class="wl-badge-wrap">
+            <div class="wl-skeleton wl-skeleton--badge"></div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Empty state: everyone available -->
+  @if (!isLoading && items.length === 0) {
+    <div class="workload-panel__empty">
+      <i class="pi pi-check-circle"></i>
+      <span>No active users found.</span>
+    </div>
+  }
+
+  <!-- User rows -->
+  @if (!isLoading && items.length > 0) {
+    <div class="workload-panel__body">
+      @for (member of items; track member.userId) {
+        <div class="workload-row" [ngClass]="{ 'workload-row--overdue': member.hasOverdueSteps }">
+
+          <!-- Avatar -->
+          <div class="wl-avatar" [ngClass]="{ 'wl-avatar--overdue': member.hasOverdueSteps }">
+            {{ initials(member.displayName) }}
+          </div>
+
+          <!-- Name + email -->
+          <div class="wl-user">
+            <span class="wl-user__name">{{ member.displayName }}</span>
+            <span class="wl-user__email">{{ member.email }}</span>
+          </div>
+
+          <!-- Top steps -->
+          <div class="wl-steps">
+            @if (member.activeStepCount === 0) {
+              <span class="wl-available">Available</span>
+            } @else {
+              @for (step of member.topSteps; track step.stepId) {
+                <div class="wl-step" [ngClass]="{ 'wl-step--overdue': step.isOverdue }">
+                  <span class="wl-step__name">
+                    <span class="wl-step__workflow">{{ step.workflowName }}</span>
+                    <i class="pi pi-angle-right wl-step__sep"></i>
+                    {{ step.stepName }}
+                  </span>
+                  <span class="wl-step__due" [ngClass]="{ 'wl-step__due--overdue': step.isOverdue }">
+                    @if (step.isOverdue) {
+                      <i class="pi pi-exclamation-triangle"></i> Overdue
+                    } @else if (step.dueAt) {
+                      Due {{ formatDue(step.dueAt) }}
+                    }
+                  </span>
+                  <button
+                    class="wl-step__action"
+                    (click)="navigateToInstance(step.workflowInstanceId)"
+                    title="Open workflow instance to reassign">
+                    <i class="pi pi-user-edit"></i>
+                    Reassign
+                  </button>
+                </div>
+              }
+              @if (member.activeStepCount > 3) {
+                <span class="wl-more">+{{ member.activeStepCount - 3 }} more</span>
+              }
+            }
+          </div>
+
+          <!-- Step count badge -->
+          <div class="wl-badge-wrap">
+            @if (member.activeStepCount === 0) {
+              <span class="wl-badge wl-badge--available">0</span>
+            } @else if (member.hasOverdueSteps) {
+              <span class="wl-badge wl-badge--danger">{{ member.activeStepCount }}</span>
+            } @else {
+              <span class="wl-badge wl-badge--warning">{{ member.activeStepCount }}</span>
+            }
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+</div>

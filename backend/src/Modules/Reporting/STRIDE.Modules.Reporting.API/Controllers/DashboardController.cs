@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Reporting.Application.Queries.GetDashboardAlerts;
 using STRIDE.Modules.Reporting.Application.Queries.GetDashboardKpis;
+using STRIDE.Modules.Reporting.Application.Queries.GetTeamWorkload;
 using STRIDE.Modules.Reporting.Application.Queries.GetWorkflowTrends;
 using STRIDE.Modules.Reporting.Application.ReadModels;
 
@@ -78,6 +79,21 @@ public sealed class DashboardController : ControllerBase
     {
         var result = await _mediator.Send(
             new GetDashboardAlertsQuery(_tenantContext.TenantId), cancellationToken);
+
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Returns the team workload view: all active users with their active step counts
+    /// and top 3 current assignments (overdue first, then by due date).
+    /// GET /api/reporting/dashboard/team-workload
+    /// </summary>
+    [HttpGet("team-workload")]
+    [ProducesResponseType(typeof(IReadOnlyList<TeamWorkloadItemDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetTeamWorkload(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetTeamWorkloadQuery(_tenantContext.TenantId), cancellationToken);
 
         return Ok(result.Value);
     }
