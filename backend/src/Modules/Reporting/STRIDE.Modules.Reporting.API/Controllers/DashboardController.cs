@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BuildingBlocks.Application.Abstractions;
+using STRIDE.Modules.Reporting.Application.Queries.GetDashboardAlerts;
 using STRIDE.Modules.Reporting.Application.Queries.GetDashboardKpis;
 using STRIDE.Modules.Reporting.Application.Queries.GetWorkflowTrends;
 using STRIDE.Modules.Reporting.Application.ReadModels;
@@ -10,11 +11,11 @@ using STRIDE.Modules.Reporting.Application.ReadModels;
 namespace STRIDE.Modules.Reporting.API.Controllers;
 
 /// <summary>
-/// Dashboard read endpoints — KPI snapshot and trend time series.
+/// Dashboard read endpoints — KPI snapshot, trend time series, and actionable alert panels.
 ///
 ///   GET /api/reporting/dashboard/kpis        — aggregated KPI counts for the header row
 ///   GET /api/reporting/dashboard/trends      — daily workflow activity trend (last N days)
-///   GET /api/reporting/dashboard/trends?days=90
+///   GET /api/reporting/dashboard/alerts      — four actionable alert panels
 /// </summary>
 [ApiController]
 [Authorize]
@@ -62,6 +63,21 @@ public sealed class DashboardController : ControllerBase
 
         if (result.IsFailure)
             return BadRequest(new { error = result.Error });
+
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Returns all four actionable alert panels: overdue, unassigned steps, SLA at-risk,
+    /// and workflow instances ready to invoice.
+    /// GET /api/reporting/dashboard/alerts
+    /// </summary>
+    [HttpGet("alerts")]
+    [ProducesResponseType(typeof(DashboardAlertSummaryDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAlerts(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetDashboardAlertsQuery(_tenantContext.TenantId), cancellationToken);
 
         return Ok(result.Value);
     }

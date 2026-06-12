@@ -148,6 +148,128 @@
 
     </div><!-- /charts-row -->
 
+    <!-- ── Alert panels ─────────────────────────────────────────────────── -->
+    <div class="alerts-section">
+      <h2 class="alerts-section__title">
+        <i class="pi pi-bell"></i>
+        Requires Attention
+      </h2>
+
+      <div class="alerts-grid">
+
+        <!-- Overdue -->
+        <app-alert-panel
+          title="Overdue"
+          icon="pi-clock"
+          accent="overdue"
+          [count]="alerts()?.overdue?.length ?? 0"
+          [isLoading]="alertsLoading()">
+          @for (item of alerts()?.overdue ?? []; track item.id) {
+            <div class="alert-item">
+              <div class="alert-item__main">
+                <button
+                  type="button"
+                  class="alert-item__name"
+                  (click)="navigateToInstance(item.id)">
+                  {{ item.workflowName }}
+                </button>
+                @if (item.clientName) {
+                  <span class="alert-item__sub">{{ item.clientName }}</span>
+                }
+              </div>
+              <span class="alert-item__badge alert-item__badge--danger">
+                {{ formatDuration(item.minutesOverdue) }} overdue
+              </span>
+            </div>
+          }
+        </app-alert-panel>
+
+        <!-- Unassigned Steps -->
+        <app-alert-panel
+          title="Unassigned Steps"
+          icon="pi-user-minus"
+          accent="unassigned"
+          [count]="alerts()?.unassignedSteps?.length ?? 0"
+          [isLoading]="alertsLoading()">
+          @for (item of alerts()?.unassignedSteps ?? []; track item.stepId) {
+            <div class="alert-item">
+              <div class="alert-item__main">
+                <button
+                  type="button"
+                  class="alert-item__name"
+                  (click)="navigateToInstance(item.workflowInstanceId)">
+                  {{ item.stepName }}
+                </button>
+                <span class="alert-item__sub">{{ item.workflowName }}</span>
+              </div>
+              <span class="alert-item__badge alert-item__badge--warning">
+                {{ formatDuration(item.minutesWaiting) }}
+              </span>
+            </div>
+          }
+        </app-alert-panel>
+
+        <!-- SLA At Risk -->
+        <app-alert-panel
+          title="SLA At Risk"
+          icon="pi-exclamation-triangle"
+          accent="at-risk"
+          [count]="alerts()?.slaAtRisk?.length ?? 0"
+          [isLoading]="alertsLoading()">
+          @for (item of alerts()?.slaAtRisk ?? []; track item.id) {
+            <div class="alert-item">
+              <div class="alert-item__main">
+                <button
+                  type="button"
+                  class="alert-item__name"
+                  (click)="navigateToInstance(item.id)">
+                  {{ item.workflowName }}
+                </button>
+                @if (item.clientName) {
+                  <span class="alert-item__sub">{{ item.clientName }}</span>
+                }
+              </div>
+              <span class="alert-item__badge alert-item__badge--warning">
+                {{ formatDuration(item.minutesRemaining) }} left
+              </span>
+            </div>
+          }
+        </app-alert-panel>
+
+        <!-- Ready to Invoice -->
+        <app-alert-panel
+          title="Ready to Invoice"
+          icon="pi-file-check"
+          accent="invoice"
+          [count]="alerts()?.readyToInvoice?.length ?? 0"
+          [isLoading]="alertsLoading()">
+          @for (item of alerts()?.readyToInvoice ?? []; track item.id) {
+            <div class="alert-item">
+              <div class="alert-item__main">
+                <button
+                  type="button"
+                  class="alert-item__name"
+                  (click)="navigateToInstance(item.id)">
+                  {{ item.workflowName }}
+                </button>
+                @if (item.clientName) {
+                  <span class="alert-item__sub">{{ item.clientName }}</span>
+                }
+              </div>
+              <button
+                type="button"
+                class="alert-item__action"
+                (click)="navigateToInvoiceCreate(item.id)">
+                <i class="pi pi-plus"></i>
+                Invoice
+              </button>
+            </div>
+          }
+        </app-alert-panel>
+
+      </div><!-- /alerts-grid -->
+    </div><!-- /alerts-section -->
+
   }<!-- /!isLoading -->
 
 </div><!-- /dashboard-page -->

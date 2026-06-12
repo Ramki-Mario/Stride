@@ -15,8 +15,11 @@ import { forkJoin } from 'rxjs';
 import { ChartModule } from 'primeng/chart';
 
 import { ReportingService } from '../../../reporting/services/reporting.service';
+import { DashboardService } from '../../services/dashboard.service';
 import { ChartThemeService } from '../../../../core/chart/chart-theme.service';
 import { DashboardKpiDto, WorkflowTrendDto } from '../../../reporting/models/reporting.models';
+import { DashboardAlertSummary } from '../../models/dashboard-alert.models';
+import { AlertPanelComponent } from '../../components/alert-panel/alert-panel.component';
 
 interface TrendWindow {
   label: string;
@@ -26,23 +29,26 @@ interface TrendWindow {
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [NgClass, ChartModule],
+  imports: [NgClass, ChartModule, AlertPanelComponent],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardPageComponent implements OnInit {
-  private readonly reportingService = inject(ReportingService);
-  private readonly chartTheme       = inject(ChartThemeService);
-  private readonly destroyRef       = inject(DestroyRef);
-  private readonly router           = inject(Router);
+  private readonly reportingService  = inject(ReportingService);
+  private readonly dashboardService  = inject(DashboardService);
+  private readonly chartTheme        = inject(ChartThemeService);
+  private readonly destroyRef        = inject(DestroyRef);
+  private readonly router            = inject(Router);
 
   // ── Server state ─────────────────────────────────────────────────────────
 
-  readonly kpi          = signal<DashboardKpiDto | null>(null);
-  readonly trends       = signal<WorkflowTrendDto[]>([]);
-  readonly isLoading    = signal(true);
-  readonly errorMessage = signal<string | null>(null);
+  readonly kpi           = signal<DashboardKpiDto | null>(null);
+  readonly trends        = signal<WorkflowTrendDto[]>([]);
+  readonly alerts        = signal<DashboardAlertSummary | null>(null);
+  readonly isLoading     = signal(true);
+  readonly alertsLoading = signal(true);
+  readonly errorMessage  = signal<string | null>(null);
 
   // ── Trend window selection ────────────────────────────────────────────────
 
@@ -256,6 +262,7 @@ export class DashboardPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDashboard(this.selectedDays());
+    this.loadAlerts();
   }
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -304,6 +311,20 @@ export class DashboardPageComponent implements OnInit {
       });
   }
 
+  private loadAlerts(): void {
+    this.alertsLoading.set(true);
+    this.dashboardService
+      .getAlerts()
+      .pipe(
+        finalize(() => this.alertsLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next:  data => this.alerts.set(data),
+        error: ()   => { /* alert load failure is non-blocking — KPIs remain visible */ },
+      });
+  }
+
   // ── Display helpers ───────────────────────────────────────────────────────
 
   private formatTrendDate(iso: string): string {
@@ -318,5 +339,20 @@ export class DashboardPageComponent implements OnInit {
 
   formatNumber(n: number): string {
     return n.toLocaleString('en-US');
+  }
+
+  formatDuration(minutes: number): string {
+    if (minutes < 60) return `${minutes}m`;
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  }
+
+  navigateToInstance(id: string): void {
+    this.router.navigate(['/workflows', 'instances', id]);
+  }
+
+  navigateToInvoiceCreate(workflowInstanceId: string): void {
+    this.router.navigate(['/invoicing'], { queryParams: { workflowInstanceId } });
   }
 }

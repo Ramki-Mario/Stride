@@ -35,4 +35,12 @@ public interface IReportingReadService
     Task<IReadOnlyList<WorkflowSummaryReportRowDto>> GetWorkflowSummaryAsync(
         Guid tenantId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns the four actionable alert panels: overdue, unassigned steps, SLA at-risk,
+    /// and workflow instances ready to invoice. Results are capped at 50 per panel.
+    /// </summary>
+    Task<DashboardAlertSummaryDto> GetDashboardAlertsAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken = default);
 }

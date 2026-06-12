@@ -1,0 +1,40 @@
+<div class="alert-panel" [ngClass]="'alert-panel--' + accent">
+
+  <!-- Header -->
+  <div class="alert-panel__header">
+    <div class="alert-panel__title-group">
+      <div class="alert-panel__icon">
+        <i [class]="'pi ' + icon"></i>
+      </div>
+      <span class="alert-panel__title">{{ title }}</span>
+    </div>
+
+    @if (!isLoading) {
+      <span class="alert-panel__badge" [ngClass]="count > 0 ? 'alert-panel__badge--active' : 'alert-panel__badge--clear'">
+        {{ count }}
+      </span>
+    } @else {
+      <span class="alert-panel__badge-skeleton"></span>
+    }
+  </div>
+
+  <!-- Body -->
+  <div class="alert-panel__body">
+    @if (isLoading) {
+      @for (n of [1, 2, 3]; track n) {
+        <div class="alert-panel__skeleton-row">
+          <div class="alert-panel__skeleton-line alert-panel__skeleton-line--long"></div>
+          <div class="alert-panel__skeleton-line alert-panel__skeleton-line--short"></div>
+        </div>
+      }
+    } @else if (count === 0) {
+      <div class="alert-panel__clear">
+        <i class="pi pi-check-circle"></i>
+        <span>All clear</span>
+      </div>
+    } @else {
+      <ng-content></ng-content>
+    }
+  </div>
+
+</div>

@@ -38,4 +38,8 @@ internal static partial class Log
     [LoggerMessage(Level = LogLevel.Information,
         Message = "GetWorkflowTrends: fetching {Days}-day trend for tenant {TenantId}")]
     internal static partial void GetWorkflowTrends(this ILogger logger, int days, Guid tenantId);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "GetDashboardAlerts: fetching alert panels for tenant {TenantId}")]
+    internal static partial void GetDashboardAlerts(this ILogger logger, Guid tenantId);
 }

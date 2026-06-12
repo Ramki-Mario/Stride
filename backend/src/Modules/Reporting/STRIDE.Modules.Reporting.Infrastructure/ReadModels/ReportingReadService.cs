@@ -27,6 +27,22 @@ internal sealed class ReportingReadService : IReportingReadService
         SqlLoader.Load(typeof(ReportingReadService).Assembly,
             "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetWorkflowSummary.sql");
 
+    private static readonly string SqlGetOverdueAlerts =
+        SqlLoader.Load(typeof(ReportingReadService).Assembly,
+            "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetOverdueAlerts.sql");
+
+    private static readonly string SqlGetUnassignedStepAlerts =
+        SqlLoader.Load(typeof(ReportingReadService).Assembly,
+            "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetUnassignedStepAlerts.sql");
+
+    private static readonly string SqlGetSlaAtRiskAlerts =
+        SqlLoader.Load(typeof(ReportingReadService).Assembly,
+            "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetSlaAtRiskAlerts.sql");
+
+    private static readonly string SqlGetReadyToInvoiceAlerts =
+        SqlLoader.Load(typeof(ReportingReadService).Assembly,
+            "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetReadyToInvoiceAlerts.sql");
+
     private readonly IDbConnectionFactory _db;
 
     public ReportingReadService(IDbConnectionFactory db) => _db = db;
@@ -87,6 +103,36 @@ internal sealed class ReportingReadService : IReportingReadService
                 commandTimeout: 30,
                 cancellationToken: cancellationToken));
 
+        return results.ToList().AsReadOnly();
+    }
+
+    public async Task<DashboardAlertSummaryDto> GetDashboardAlertsAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken = default)
+    {
+        var param = new { TenantId = tenantId };
+
+        // Each query gets its own pooled connection — no MARS required.
+        var overdueTask    = QueryListAsync<OverdueAlertItemDto>(SqlGetOverdueAlerts,        param, cancellationToken);
+        var unassignedTask = QueryListAsync<UnassignedStepAlertItemDto>(SqlGetUnassignedStepAlerts, param, cancellationToken);
+        var slaTask        = QueryListAsync<SlaAtRiskAlertItemDto>(SqlGetSlaAtRiskAlerts,    param, cancellationToken);
+        var invoiceTask    = QueryListAsync<ReadyToInvoiceAlertItemDto>(SqlGetReadyToInvoiceAlerts, param, cancellationToken);
+
+        await Task.WhenAll(overdueTask, unassignedTask, slaTask, invoiceTask);
+
+        return new DashboardAlertSummaryDto(
+            Overdue:         await overdueTask,
+            UnassignedSteps: await unassignedTask,
+            SlaAtRisk:       await slaTask,
+            ReadyToInvoice:  await invoiceTask);
+    }
+
+    private async Task<IReadOnlyList<T>> QueryListAsync<T>(
+        string sql, object param, CancellationToken cancellationToken)
+    {
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
+        var results = await conn.QueryAsync<T>(
+            new CommandDefinition(sql, param, commandTimeout: 30, cancellationToken: cancellationToken));
         return results.ToList().AsReadOnly();
     }
 }

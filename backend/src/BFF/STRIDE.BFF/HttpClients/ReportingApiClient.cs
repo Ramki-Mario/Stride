@@ -12,6 +12,7 @@ namespace STRIDE.BFF.HttpClients;
 /// Routes proxied:
 ///   GET /api/reporting/dashboard/kpis
 ///   GET /api/reporting/dashboard/trends?days=N
+///   GET /api/reporting/dashboard/alerts
 ///   GET /api/reporting/reports
 ///   POST /api/reporting/reports/generate
 ///   GET /api/reporting/reports/{id}/export
@@ -30,6 +31,15 @@ public sealed class ReportingApiClient
         CancellationToken cancellationToken = default)
     {
         var request = BuildRequest(HttpMethod.Get, "/api/reporting/dashboard/kpis", accessToken);
+        return _client.SendAsync(request, cancellationToken);
+    }
+
+    /// <summary>Proxies GET /api/reporting/dashboard/alerts.</summary>
+    public Task<HttpResponseMessage> GetDashboardAlertsAsync(
+        string accessToken,
+        CancellationToken cancellationToken = default)
+    {
+        var request = BuildRequest(HttpMethod.Get, "/api/reporting/dashboard/alerts", accessToken);
         return _client.SendAsync(request, cancellationToken);
     }
 
