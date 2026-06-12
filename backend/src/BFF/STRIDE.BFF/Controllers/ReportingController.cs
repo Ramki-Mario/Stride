@@ -59,6 +59,17 @@ public sealed class ReportingController : ControllerBase
         return await ProxyJsonResponseAsync(response, cancellationToken: cancellationToken);
     }
 
+    /// <summary>GET /bff/reporting/dashboard/team-workload</summary>
+    [HttpGet("dashboard/team-workload")]
+    public async Task<IActionResult> GetDashboardTeamWorkload(CancellationToken cancellationToken)
+    {
+        var token = await GetAccessTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _reporting.GetDashboardTeamWorkloadAsync(token, cancellationToken);
+        return await ProxyJsonResponseAsync(response, cancellationToken: cancellationToken);
+    }
+
     /// <summary>GET /bff/reporting/dashboard/trends?days=N</summary>
     [HttpGet("dashboard/trends")]
     public async Task<IActionResult> GetWorkflowTrends(

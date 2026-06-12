@@ -43,6 +43,14 @@ internal sealed class ReportingReadService : IReportingReadService
         SqlLoader.Load(typeof(ReportingReadService).Assembly,
             "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetReadyToInvoiceAlerts.sql");
 
+    private static readonly string SqlGetTeamWorkloadSummary =
+        SqlLoader.Load(typeof(ReportingReadService).Assembly,
+            "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetTeamWorkloadSummary.sql");
+
+    private static readonly string SqlGetTeamWorkloadSteps =
+        SqlLoader.Load(typeof(ReportingReadService).Assembly,
+            "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetTeamWorkloadSteps.sql");
+
     private readonly IDbConnectionFactory _db;
 
     public ReportingReadService(IDbConnectionFactory db) => _db = db;
@@ -127,6 +135,41 @@ internal sealed class ReportingReadService : IReportingReadService
             ReadyToInvoice:  await invoiceTask);
     }
 
+    public async Task<IReadOnlyList<TeamWorkloadItemDto>> GetTeamWorkloadAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken = default)
+    {
+        var param = new { TenantId = tenantId };
+
+        var summaryTask = QueryListAsync<TeamWorkloadSummaryRow>(SqlGetTeamWorkloadSummary, param, cancellationToken);
+        var stepsTask   = QueryListAsync<TeamMemberStepRow>(SqlGetTeamWorkloadSteps, param, cancellationToken);
+
+        await Task.WhenAll(summaryTask, stepsTask);
+
+        var stepsByUser = (await stepsTask)
+            .GroupBy(s => s.UserId)
+            .ToDictionary(
+                g => g.Key,
+                g => (IReadOnlyList<TeamMemberStepDto>)g
+                    .Select(s => new TeamMemberStepDto(
+                        s.StepId, s.StepName, s.WorkflowInstanceId, s.WorkflowName, s.DueAt, s.IsOverdue))
+                    .ToList()
+                    .AsReadOnly());
+
+        return (await summaryTask)
+            .Select(u => new TeamWorkloadItemDto(
+                UserId:          u.UserId,
+                DisplayName:     u.DisplayName,
+                Email:           u.Email,
+                ActiveStepCount: u.ActiveStepCount,
+                HasOverdueSteps: u.HasOverdueSteps,
+                TopSteps:        stepsByUser.TryGetValue(u.UserId, out var steps)
+                                 ? steps
+                                 : Array.Empty<TeamMemberStepDto>()))
+            .ToList()
+            .AsReadOnly();
+    }
+
     private async Task<IReadOnlyList<T>> QueryListAsync<T>(
         string sql, object param, CancellationToken cancellationToken)
     {
@@ -135,4 +178,22 @@ internal sealed class ReportingReadService : IReportingReadService
             new CommandDefinition(sql, param, commandTimeout: 30, cancellationToken: cancellationToken));
         return results.ToList().AsReadOnly();
     }
+
+    // ── Private row types (Dapper projection targets) ─────────────────────────
+
+    private sealed record TeamWorkloadSummaryRow(
+        Guid   UserId,
+        string DisplayName,
+        string Email,
+        int    ActiveStepCount,
+        bool   HasOverdueSteps);
+
+    private sealed record TeamMemberStepRow(
+        Guid      UserId,
+        Guid      StepId,
+        string    StepName,
+        Guid      WorkflowInstanceId,
+        string    WorkflowName,
+        DateTime? DueAt,
+        bool      IsOverdue);
 }

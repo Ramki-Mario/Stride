@@ -19,7 +19,9 @@ import { DashboardService } from '../../services/dashboard.service';
 import { ChartThemeService } from '../../../../core/chart/chart-theme.service';
 import { DashboardKpiDto, WorkflowTrendDto } from '../../../reporting/models/reporting.models';
 import { DashboardAlertSummary } from '../../models/dashboard-alert.models';
+import { TeamWorkloadItem } from '../../models/dashboard-workload.models';
 import { AlertPanelComponent } from '../../components/alert-panel/alert-panel.component';
+import { WorkloadPanelComponent } from '../../components/workload-panel/workload-panel.component';
 
 interface TrendWindow {
   label: string;
@@ -29,7 +31,7 @@ interface TrendWindow {
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [NgClass, ChartModule, AlertPanelComponent],
+  imports: [NgClass, ChartModule, AlertPanelComponent, WorkloadPanelComponent],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,10 +47,12 @@ export class DashboardPageComponent implements OnInit {
 
   readonly kpi           = signal<DashboardKpiDto | null>(null);
   readonly trends        = signal<WorkflowTrendDto[]>([]);
-  readonly alerts        = signal<DashboardAlertSummary | null>(null);
-  readonly isLoading     = signal(true);
-  readonly alertsLoading = signal(true);
-  readonly errorMessage  = signal<string | null>(null);
+  readonly alerts          = signal<DashboardAlertSummary | null>(null);
+  readonly workload        = signal<TeamWorkloadItem[]>([]);
+  readonly isLoading       = signal(true);
+  readonly alertsLoading   = signal(true);
+  readonly workloadLoading = signal(true);
+  readonly errorMessage    = signal<string | null>(null);
 
   // ── Trend window selection ────────────────────────────────────────────────
 
@@ -263,6 +267,7 @@ export class DashboardPageComponent implements OnInit {
   ngOnInit(): void {
     this.loadDashboard(this.selectedDays());
     this.loadAlerts();
+    this.loadWorkload();
   }
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -322,6 +327,20 @@ export class DashboardPageComponent implements OnInit {
       .subscribe({
         next:  data => this.alerts.set(data),
         error: ()   => { /* alert load failure is non-blocking — KPIs remain visible */ },
+      });
+  }
+
+  private loadWorkload(): void {
+    this.workloadLoading.set(true);
+    this.dashboardService
+      .getTeamWorkload()
+      .pipe(
+        finalize(() => this.workloadLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next:  data => this.workload.set(data),
+        error: ()   => { /* workload failure is non-blocking */ },
       });
   }
 
