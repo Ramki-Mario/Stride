@@ -290,6 +290,61 @@
                           Leave blank for no deadline.
                         </p>
                       </div>
+
+                      <!-- ── Step type ───────────────────────────────── -->
+                      <div class="wff-field wff-field-compact">
+                        <label class="wff-label" [for]="'step-type-' + si">Step Type</label>
+                        <select
+                          [id]="'step-type-' + si"
+                          [formControl]="$any(stepsArray.at(si).get('stepType'))"
+                          class="wff-select"
+                        >
+                          <option value="Standard">Standard</option>
+                          <option value="Approval">Approval Gate</option>
+                        </select>
+                        <p class="wff-hint">Approval steps pause the workflow until an authorised reviewer approves or rejects.</p>
+                      </div>
+
+                      <!-- ── Rejection handling (Approval steps only) ── -->
+                      @if (isApprovalStep(si)) {
+                        <div class="wff-field wff-field-compact">
+                          <label class="wff-label" [for]="'step-rejection-' + si">On Rejection</label>
+                          <select
+                            [id]="'step-rejection-' + si"
+                            [formControl]="$any(stepsArray.at(si).get('rejectionHandling'))"
+                            class="wff-select"
+                          >
+                            <option value="HaltWorkflow">Halt Workflow</option>
+                            <option value="RevertToStep">Revert to an Earlier Step</option>
+                          </select>
+                          <p class="wff-hint">
+                            Halt Workflow — stops the instance until a manager resumes or cancels it.
+                            Revert — resets a prior step so work can be corrected and re-submitted.
+                          </p>
+                        </div>
+
+                        @if (isRevertToStep(si)) {
+                          <div class="wff-field wff-field-compact">
+                            <label class="wff-label" [for]="'step-revert-' + si">
+                              Revert to Step <span class="wff-required" aria-hidden="true">*</span>
+                            </label>
+                            @if (priorSteps(si).length === 0) {
+                              <p class="wff-error-msg">No prior steps available. Add steps before this one first.</p>
+                            } @else {
+                              <select
+                                [id]="'step-revert-' + si"
+                                [formControl]="$any(stepsArray.at(si).get('revertToStepOrder'))"
+                                class="wff-select"
+                              >
+                                <option [ngValue]="null">— Select a step —</option>
+                                @for (prior of priorSteps(si); track prior.index) {
+                                  <option [ngValue]="prior.index">{{ prior.index + 1 }}. {{ prior.name }}</option>
+                                }
+                              </select>
+                            }
+                          </div>
+                        }
+                      }
                     </div>
 
                     <!-- ── Field definitions ──────────────────────────── -->

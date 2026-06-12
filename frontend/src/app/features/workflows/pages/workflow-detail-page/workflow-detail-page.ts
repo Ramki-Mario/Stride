@@ -149,7 +149,7 @@ export class WorkflowDetailPageComponent implements OnInit {
 
   readonly canCancel = computed(() => {
     const s = this.instance()?.status;
-    return s === 'Running' || s === 'Paused';
+    return s === 'Running' || s === 'Paused' || s === 'Halted';
   });
 
   readonly instanceBillableTotal = computed(() => this.instance()?.billableTotal ?? 0);
@@ -463,7 +463,7 @@ export class WorkflowDetailPageComponent implements OnInit {
   cancelInstance(): void {
     const inst = this.instance();
     if (!inst) return;
-    if (!confirm('Cancel this running instance? This cannot be undone.')) return;
+    if (!confirm('Cancel this instance? This cannot be undone.')) return;
 
     this.actionPending.set('Cancelling…');
     this.actionError.set(null);
@@ -477,6 +477,29 @@ export class WorkflowDetailPageComponent implements OnInit {
       .subscribe({
         next:  () => this.loadInstance(inst.id),
         error: () => this.actionError.set('Could not cancel instance. Please try again.'),
+      });
+  }
+
+  canResumeFromHalt(): boolean {
+    return this.instance()?.status === 'Halted';
+  }
+
+  resumeFromHalt(): void {
+    const inst = this.instance();
+    if (!inst) return;
+
+    this.actionPending.set('Resuming…');
+    this.actionError.set(null);
+
+    this.wfService
+      .resumeFromHalt(inst.id)
+      .pipe(
+        finalize(() => this.actionPending.set(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next:  () => this.loadInstance(inst.id),
+        error: () => this.actionError.set('Could not resume from halt. Please try again.'),
       });
   }
 

@@ -13,6 +13,7 @@ public enum ActivityEventType
     WorkflowSlaBreached = 4,
     WorkflowPaused      = 5,
     WorkflowResumed     = 6,
+    WorkflowHalted      = 7,
 
     // ── Step lifecycle ────────────────────────────────────────────────────
     StepAssigned  = 10,
@@ -20,6 +21,9 @@ public enum ActivityEventType
     StepFailed    = 13,
     StepSkipped   = 14,
     StepOverdue   = 15,
+    StepApproved  = 16,
+    StepRejected  = 17,
+    StepsReverted = 18,
 
     // ── Content ───────────────────────────────────────────────────────────
     CommentPosted      = 20,

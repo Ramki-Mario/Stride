@@ -112,9 +112,14 @@ export class WorkflowService {
     );
   }
 
-  /** Cancel a running workflow instance. */
+  /** Cancel a running, paused, or halted workflow instance. */
   cancelInstance(instanceId: string): Observable<void> {
     return this.http.post<void>(`${this.base}/instances/${instanceId}/cancel`, {});
+  }
+
+  /** Resume a Halted workflow instance back to Running. */
+  resumeFromHalt(instanceId: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/instances/${instanceId}/resume-from-halt`, {});
   }
 
   /** Get a single workflow instance with all step instances and their status. */
