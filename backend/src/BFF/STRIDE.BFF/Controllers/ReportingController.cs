@@ -14,6 +14,7 @@ namespace STRIDE.BFF.Controllers;
 /// Routes:
 ///   GET  /bff/reporting/dashboard/kpis             → GET  /api/reporting/dashboard/kpis
 ///   GET  /bff/reporting/dashboard/trends?days=N    → GET  /api/reporting/dashboard/trends?days=N
+///   GET  /bff/reporting/dashboard/alerts           → GET  /api/reporting/dashboard/alerts
 ///   GET  /bff/reporting/reports                    → GET  /api/reporting/reports
 ///   POST /bff/reporting/reports/generate            → POST /api/reporting/reports/generate
 ///   GET  /bff/reporting/reports/{id}/export         → GET  /api/reporting/reports/{id}/export
@@ -44,6 +45,17 @@ public sealed class ReportingController : ControllerBase
         if (token is null) return Unauthorized();
 
         var response = await _reporting.GetDashboardKpisAsync(token, cancellationToken);
+        return await ProxyJsonResponseAsync(response, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>GET /bff/reporting/dashboard/alerts</summary>
+    [HttpGet("dashboard/alerts")]
+    public async Task<IActionResult> GetDashboardAlerts(CancellationToken cancellationToken)
+    {
+        var token = await GetAccessTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _reporting.GetDashboardAlertsAsync(token, cancellationToken);
         return await ProxyJsonResponseAsync(response, cancellationToken: cancellationToken);
     }
 
