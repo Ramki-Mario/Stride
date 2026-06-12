@@ -267,7 +267,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 
 ### Milestone #11 — Product Layer Gaps (EP-048–061)
 
-**Board status (2026-06-09):** EP-048–EP-054 ✅ Done. EP-055 Mobile-First 🔵 In Progress (US-168 ✅, US-169 🔵 PR #331 open, US-170 ✅ PR #332 merged). Extra Teams module (EP-062) delivered and closed. PRs #323 #324 #325 all merged.
+**Board status (2026-06-09):** EP-048–EP-054 ✅ Done. EP-056 Approval Gates ✅ Done (US-171 PR #333, US-172 PR #334, US-173 PR #335 — all merged, issues #301–303 + epic #271 closed). EP-055 Mobile-First 🔵 In Progress (US-168 ✅, US-169 🔵 PR #331 open, US-170 ✅ PR #332 merged). Extra Teams module (EP-062) delivered and closed. PRs #323 #324 #325 all merged.
 
 **Epic → Issue → Story mapping — Milestone #11 original plan (✅ = Done, ⏳ = Next/Backlog):**
 - EP-048 #263 → US-147–149 (#277–279) — Step Ownership & Assignment ✅
@@ -278,7 +278,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - EP-053 #268 → US-162–164 (#292–294) — SLA & Deadline Tracking ✅
 - EP-054 #269 → US-165–167 (#295–297) — Comments & Activity Log ✅ (PRs #320 #321 #322)
 - EP-055 #270 → US-168–170 (#298–300) — Mobile-First Experience 🔵 In Progress (US-168 ✅ #298 closed, US-169 🔵 PR #331, US-170 ✅ #300 closed PR #332)
-- EP-056 #271 → US-171–173 (#301–303) — Approval Gates ⏳
+- EP-056 #271 → US-171–173 (#301–303) — Approval Gates ✅ (PRs #333 #334 #335, epic closed 2026-06-09)
 - EP-057 #272 → US-174–176 (#304–306) — Actionable Dashboard ⏳
 - EP-058 #273 → US-177–179 (#307–309) — External Customer-Facing Link ⏳
 - EP-059 #274 → US-180–182 (#310–312) — Webhooks and Integrations ⏳
@@ -288,7 +288,7 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 **Extra work delivered outside original plan:**
 - EP-062 #327 → US-187 (#326) / US-188 (#328) / US-189 (#329) — Teams / Department Entity ✅ (PRs #323 #324 #325 — all closed, board=Done)
 
-**Next:** EP-055 US-169 🔵 PR #331 pending merge (last story of EP-055). Then EP-056 Approval Gates (#271)
+**Next:** EP-055 US-169 🔵 PR #331 pending merge (last story of EP-055). Then EP-057 Actionable Dashboard (#272)
 
 ### EP-049 — Client/Customer Entity ✅ Done (#264, closed 2026-06-07)
 
@@ -427,6 +427,31 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - `/teams` lazy route + sidebar nav link; KPI cards, debounced search, status filter, pagination
 - Create/Edit modal: name, description, parent team picker (excludes self); row actions: Edit, Deactivate, Reactivate
 - `TeamsService` full CRUD signals; `PagedResult<T>.items` mapping fix; numeric `TeamStatus` model fix
+
+---
+
+### EP-056 — Approval Gates ✅ Done (#271, closed 2026-06-09)
+
+**GitHub:** Epic #271 (closed) | Stories: US-171 #301 ✅ / US-172 #302 ✅ / US-173 #303 ✅ | PRs #333 #334 #335 all squash-merged to develop
+
+#### US-171 — Approval step type, approval request, progression blocking ✅ Done (PR #333, #301 closed)
+- `StepType` enum (Standard=0/Approval=1) on `StepDefinition` + snapshot on `StepInstance`; `RejectionHandling` enum (HaltWorkflow=0/RevertToStep=1) + `RevertToStepOrder`
+- `ApprovalRequest` entity (Pending/Approved/Rejected, DecisionByUserId, DecisionAt, Comment); `StepStatus.AwaitingApproval`/`Rejected`; `WorkflowStatus.Halted`
+- `ApproveStep`/`RejectStep` commands + `StepsController` endpoints; migration `AddApprovalGates`; `ApprovalGateTests`
+
+#### US-172 — Approve/reject actions, mandatory comment, notifications ✅ Done (PR #334, #302 closed, merged 2026-06-09 commit `70a2f08`)
+- `ApprovalRequestedNotificationHandler` notifies all users holding the step's required role (new `IUserRoleQueryService` in Notifications module); `NotificationType.ApprovalRequested`
+- My Tasks: `isApprovalTask` flag, `GetMyTasks.sql` includes AwaitingApproval steps for eligible approvers
+- step-action-modal: approve/reject panel with mandatory decision comment; My Tasks approval badge styling
+- BFF approve/reject proxy endpoints; mandatory-comment validators
+- Note: PR had conflicts with develop (US-171 squash) — resolved by rebase onto origin/develop + force-push
+
+#### US-173 — Rejection handling: halt or revert to prior step ✅ Done (PR #335, #303 closed, merged 2026-06-09 commit `9ab83bc`)
+- `StepStatus.Reverted=8`; `RejectStep()` RevertToStep branch marks intermediate completed steps Reverted + resets target to Pending; `StepsRevertedEvent`
+- `ResumeFromHalt()` domain method (Halted→Running) + `ResumeFromHaltCommand` + API `POST instances/{id}/resume-from-halt` + BFF proxy + UI button; `Cancel()` accepts Halted
+- `ActivityEventType`: WorkflowHalted=7, StepApproved=16, StepRejected=17, StepsReverted=18 + activity handlers
+- Workflow builder: step type dropdown, rejection handling dropdown, revert-to-step picker; `StepRequest`/`StepRequestDto` carry new fields
+- Note: PR conflicted with US-172 merge (workflow.models.ts, workflow-detail-page.scss) — rebased + resolved + force-pushed
 
 ---
 

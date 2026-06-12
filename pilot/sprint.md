@@ -1105,7 +1105,7 @@ EP-036 (Invoicing)             ← parallel with EP-037 after EP-035 done
 | EP-053 SLA & Deadline Tracking | US-162–164 (#292–294) | #317 #318 #319 | [x] Done |
 | EP-054 Comments & Activity Log | US-165–167 (#295–297) | #320 #321 #322 | [x] Done |
 | EP-055 Mobile-First Experience | US-168 (#298) / US-169 (#299) / US-170 (#300) | — | [ ] Next |
-| EP-056 Approval Gates | US-171 (#301) / US-172 (#302) / US-173 (#303) | — | [ ] Backlog |
+| EP-056 Approval Gates | US-171 (#301) / US-172 (#302) / US-173 (#303) | #333 #334 #335 | [x] Done — 2026-06-09 |
 | EP-057–EP-061 | per board | — | [ ] Backlog |
 | EP-062 Teams / Dept Entity (extra) | US-187 (#326) / US-188 (#328) / US-189 (#329) | #323 #324 #325 | [x] Done — 2026-06-09 |
 
