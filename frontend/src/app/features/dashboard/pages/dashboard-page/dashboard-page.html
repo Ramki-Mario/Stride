@@ -6,6 +6,13 @@
       <h1 class="page-title">Dashboard</h1>
       <p class="page-subtitle">Real-time operational overview for your tenant</p>
     </div>
+    <span
+      class="live-badge"
+      [ngClass]="isLive() ? 'live-badge--on' : 'live-badge--off'"
+      [title]="isLive() ? 'Connected — updates appear automatically' : 'Reconnecting — refreshing every 60s'">
+      <span class="live-badge__dot"></span>
+      {{ isLive() ? 'Live' : 'Polling' }}
+    </span>
   </div>
 
   <!-- ── Error banner ─────────────────────────────────────────────────────── -->
