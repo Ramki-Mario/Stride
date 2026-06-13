@@ -6,11 +6,10 @@ SELECT
     u.Email,
     COUNT(si.Id)                                                      AS ActiveStepCount,
     CAST(MAX(CASE WHEN si.IsOverdue = 1 THEN 1 ELSE 0 END) AS BIT)   AS HasOverdueSteps
-FROM identity.Users u
-LEFT JOIN workflows.StepInstances si
+FROM [identity].[Users] u
+LEFT JOIN [workflows].[StepInstances] si
     ON  si.AssigneeId = u.Id
     AND si.TenantId   = @TenantId
-    AND si.IsDeleted  = 0
     AND si.Status IN ('Assigned', 'InProgress', 'Pending')
 WHERE u.TenantId  = @TenantId
   AND u.IsDeleted = 0
