@@ -143,6 +143,38 @@ public sealed class ReportingApiClient
         return _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
     }
 
+    /// <summary>Proxies GET /api/analytics/team/performance.</summary>
+    public Task<HttpResponseMessage> GetTeamPerformanceAsync(
+        string   fromDate,
+        string   toDate,
+        string?  roleId,
+        string   accessToken,
+        CancellationToken cancellationToken = default)
+    {
+        var qs = $"?fromDate={Uri.EscapeDataString(fromDate)}&toDate={Uri.EscapeDataString(toDate)}";
+        if (!string.IsNullOrEmpty(roleId))
+            qs += $"&roleId={Uri.EscapeDataString(roleId)}";
+
+        var request = BuildRequest(HttpMethod.Get, $"/api/analytics/team/performance{qs}", accessToken);
+        return _client.SendAsync(request, cancellationToken);
+    }
+
+    /// <summary>Proxies GET /api/analytics/team/performance/export (CSV download).</summary>
+    public Task<HttpResponseMessage> ExportTeamPerformanceAsync(
+        string   fromDate,
+        string   toDate,
+        string?  roleId,
+        string   accessToken,
+        CancellationToken cancellationToken = default)
+    {
+        var qs = $"?fromDate={Uri.EscapeDataString(fromDate)}&toDate={Uri.EscapeDataString(toDate)}";
+        if (!string.IsNullOrEmpty(roleId))
+            qs += $"&roleId={Uri.EscapeDataString(roleId)}";
+
+        var request = BuildRequest(HttpMethod.Get, $"/api/analytics/team/performance/export{qs}", accessToken);
+        return _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────
 
     private static HttpRequestMessage BuildRequest(

@@ -31,6 +31,10 @@ internal sealed class AnalyticsReadService : IAnalyticsReadService
         SqlLoader.Load(typeof(AnalyticsReadService).Assembly,
             "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetCompletionTimesExport.sql");
 
+    private static readonly string SqlGetTeamPerformance =
+        SqlLoader.Load(typeof(AnalyticsReadService).Assembly,
+            "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetTeamPerformance.sql");
+
     private readonly IDbConnectionFactory _db;
 
     public AnalyticsReadService(IDbConnectionFactory db) => _db = db;
@@ -92,6 +96,25 @@ internal sealed class AnalyticsReadService : IAnalyticsReadService
                 FromDate             = fromDate,
                 ToDate               = toDate,
                 WorkflowDefinitionId = workflowDefinitionId,
+            },
+            cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<TeamMemberPerformanceDto>> GetTeamPerformanceAsync(
+        Guid      tenantId,
+        DateTime  fromDate,
+        DateTime  toDate,
+        Guid?     roleId = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await QueryListAsync<TeamMemberPerformanceDto>(
+            SqlGetTeamPerformance,
+            new
+            {
+                TenantId = tenantId,
+                FromDate = fromDate,
+                ToDate   = toDate,
+                RoleId   = roleId,
             },
             cancellationToken);
     }

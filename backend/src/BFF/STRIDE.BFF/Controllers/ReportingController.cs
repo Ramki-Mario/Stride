@@ -160,6 +160,47 @@ public sealed class ReportingController : ControllerBase
         return await ProxyJsonResponseAsync(response, cancellationToken: cancellationToken);
     }
 
+    /// <summary>GET /bff/analytics/team/performance</summary>
+    [HttpGet("/bff/analytics/team/performance")]
+    public async Task<IActionResult> GetTeamPerformance(
+        [FromQuery] string  fromDate,
+        [FromQuery] string  toDate,
+        [FromQuery] string? roleId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var token = await GetAccessTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _reporting.GetTeamPerformanceAsync(
+            fromDate, toDate, roleId, token, cancellationToken);
+        return await ProxyJsonResponseAsync(response, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>GET /bff/analytics/team/performance/export — streams CSV to browser.</summary>
+    [HttpGet("/bff/analytics/team/performance/export")]
+    public async Task<IActionResult> ExportTeamPerformance(
+        [FromQuery] string  fromDate,
+        [FromQuery] string  toDate,
+        [FromQuery] string? roleId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var token = await GetAccessTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _reporting.ExportTeamPerformanceAsync(
+            fromDate, toDate, roleId, token, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+            return StatusCode((int)response.StatusCode);
+
+        var content     = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+        var contentType = response.Content.Headers.ContentType?.ToString() ?? "text/csv; charset=utf-8";
+        var fileName    = response.Content.Headers.ContentDisposition?.FileName
+                          ?? $"team-performance-{fromDate}-to-{toDate}.csv";
+
+        return File(content, contentType, fileName);
+    }
+
     /// <summary>GET /bff/analytics/completion-times/export — streams CSV to browser.</summary>
     [HttpGet("/bff/analytics/completion-times/export")]
     public async Task<IActionResult> ExportCompletionTimes(

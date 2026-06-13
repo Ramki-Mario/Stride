@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Reporting.Application.Abstractions;
 using STRIDE.Modules.Reporting.Application.Queries.GetCompletionTimeAnalytics;
+using STRIDE.Modules.Reporting.Application.Queries.GetTeamPerformance;
 using STRIDE.Modules.Reporting.Application.ReadModels;
 
 namespace STRIDE.Modules.Reporting.API.Controllers;
@@ -106,6 +107,63 @@ public sealed class AnalyticsController : ControllerBase
         return File(Encoding.UTF8.GetBytes(csv), "text/csv; charset=utf-8", fileName);
     }
 
+    /// <summary>
+    /// Returns team performance metrics — one row per user with at least one
+    /// completed step assigned in the date range.
+    /// GET /api/analytics/team/performance?fromDate=YYYY-MM-DD&amp;toDate=YYYY-MM-DD[&amp;roleId=GUID]
+    /// </summary>
+    [HttpGet("team/performance")]
+    [ProducesResponseType(typeof(IReadOnlyList<TeamMemberPerformanceDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetTeamPerformance(
+        [FromQuery] DateTime fromDate,
+        [FromQuery] DateTime toDate,
+        [FromQuery] Guid?    roleId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(
+            new GetTeamPerformanceQuery(
+                _tenantContext.TenantId,
+                fromDate.ToUniversalTime(),
+                toDate.ToUniversalTime(),
+                roleId),
+            cancellationToken);
+
+        if (result.IsFailure)
+            return BadRequest(new { error = result.Error });
+
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Returns a CSV file of team performance for the given date range.
+    /// GET /api/analytics/team/performance/export?fromDate=YYYY-MM-DD&amp;toDate=YYYY-MM-DD
+    /// </summary>
+    [HttpGet("team/performance/export")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ExportTeamPerformance(
+        [FromQuery] DateTime fromDate,
+        [FromQuery] DateTime toDate,
+        [FromQuery] Guid?    roleId = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (toDate <= fromDate)
+            return BadRequest(new { error = "ToDate must be after FromDate." });
+
+        var rows = await _analyticsReadService.GetTeamPerformanceAsync(
+            _tenantContext.TenantId,
+            fromDate.ToUniversalTime(),
+            toDate.ToUniversalTime(),
+            roleId,
+            cancellationToken);
+
+        var csv      = BuildTeamPerformanceCsv(rows);
+        var fileName = $"team-performance-{fromDate:yyyy-MM-dd}-to-{toDate:yyyy-MM-dd}.csv";
+
+        return File(Encoding.UTF8.GetBytes(csv), "text/csv; charset=utf-8", fileName);
+    }
+
     private static string BuildCsv(IReadOnlyList<CompletionTimeExportRowDto> rows)
     {
         var sb = new StringBuilder();
@@ -119,6 +177,26 @@ public sealed class AnalyticsController : ControllerBase
                 r.StartedAt.ToString("o", CultureInfo.InvariantCulture),
                 r.CompletedAt.ToString("o", CultureInfo.InvariantCulture),
                 r.DurationMinutes.ToString("F1", CultureInfo.InvariantCulture)));
+        }
+
+        return sb.ToString();
+    }
+
+    private static string BuildTeamPerformanceCsv(IReadOnlyList<TeamMemberPerformanceDto> rows)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("DisplayName,Email,Role,CompletedSteps,CompletedWorkflows,AvgStepDurationMinutes,OverdueRate");
+
+        foreach (var r in rows)
+        {
+            sb.AppendLine(string.Join(',',
+                $"\"{r.DisplayName.Replace("\"", "\"\"")}\"",
+                $"\"{r.Email.Replace("\"", "\"\"")}\"",
+                $"\"{r.Role.Replace("\"", "\"\"")}\"",
+                r.CompletedSteps,
+                r.CompletedWorkflows,
+                r.AvgStepDurationMinutes.ToString("F1", CultureInfo.InvariantCulture),
+                r.OverdueRate.ToString("F1", CultureInfo.InvariantCulture)));
         }
 
         return sb.ToString();

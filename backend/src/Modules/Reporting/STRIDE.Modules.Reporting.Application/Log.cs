@@ -51,4 +51,9 @@ internal static partial class Log
         Message = "GetCompletionTimeAnalytics: fetching completion times for tenant {TenantId} ({FromDate} – {ToDate})")]
     internal static partial void GetCompletionTimeAnalytics(
         this ILogger logger, Guid tenantId, DateTime fromDate, DateTime toDate);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "GetTeamPerformance: fetching team performance for tenant {TenantId} ({FromDate} – {ToDate})")]
+    internal static partial void GetTeamPerformance(
+        this ILogger logger, Guid tenantId, DateTime fromDate, DateTime toDate);
 }

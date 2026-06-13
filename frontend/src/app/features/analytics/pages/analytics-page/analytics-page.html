@@ -1,6 +1,6 @@
 <div class="an-page">
 
-  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <!-- ── Completion Time Analytics ──────────────────────────────────────── -->
   <div class="an-header">
     <div>
       <h1 class="an-title">Completion Time Analytics</h1>
@@ -11,7 +11,7 @@
     </button>
   </div>
 
-  <!-- ── Filters ─────────────────────────────────────────────────────────── -->
+  <!-- ── Completion-time Filters ─────────────────────────────────────────── -->
   <div class="an-filters">
     <div class="an-filter-group">
       <label class="an-label" for="an-from">From</label>
@@ -94,6 +94,120 @@
       }
 
     </div>
+  }
+
+  <!-- ── Team Performance ────────────────────────────────────────────────── -->
+  <div class="an-header an-header--section">
+    <div>
+      <h2 class="an-title">Team Performance</h2>
+      <p class="an-subtitle">Per-member throughput and completion metrics for the selected date range.</p>
+    </div>
+    <button class="stride-btn" (click)="exportTeam()"
+            [disabled]="isTeamLoading() || !teamMembers()?.length">
+      Export CSV
+    </button>
+  </div>
+
+  <!-- ── Team Filters ────────────────────────────────────────────────────── -->
+  <div class="an-filters">
+    <div class="an-filter-group">
+      <label class="an-label" for="tm-from">From</label>
+      <input id="tm-from" class="an-input" type="date"
+             [ngModel]="teamFromDate()" (ngModelChange)="teamFromDate.set($event)" />
+    </div>
+    <div class="an-filter-group">
+      <label class="an-label" for="tm-to">To</label>
+      <input id="tm-to" class="an-input" type="date"
+             [ngModel]="teamToDate()" (ngModelChange)="teamToDate.set($event)" />
+    </div>
+    <div class="an-filter-group">
+      <label class="an-label" for="tm-role">Role</label>
+      <select id="tm-role" class="an-input"
+              [ngModel]="selectedRoleId()" (ngModelChange)="selectedRoleId.set($event)">
+        <option value="">All roles</option>
+        @for (r of roles(); track r.id) {
+          <option [value]="r.id">{{ r.name }}</option>
+        }
+      </select>
+    </div>
+    <button class="stride-btn stride-btn-primary an-apply" (click)="loadTeam()" [disabled]="isTeamLoading()">
+      {{ isTeamLoading() ? 'Loading…' : 'Apply' }}
+    </button>
+  </div>
+
+  <!-- ── Team Error ──────────────────────────────────────────────────────── -->
+  @if (teamError()) {
+    <div class="an-error">{{ teamError() }}</div>
+  }
+
+  <!-- ── Team Loading ────────────────────────────────────────────────────── -->
+  @if (isTeamLoading()) {
+    <div class="an-loading">Loading team performance…</div>
+  }
+
+  <!-- ── Team Leaderboard ────────────────────────────────────────────────── -->
+  @if (!isTeamLoading() && teamMembers() !== null) {
+    @if (sortedTeam().length === 0) {
+      <div class="an-empty">
+        <p>No team members with completed steps in the selected date range.</p>
+        <p class="an-empty-hint">Try expanding the date range or selecting a different role.</p>
+      </div>
+    } @else {
+      <div class="an-card an-leaderboard">
+        <div class="an-table-wrap">
+          <table class="an-table">
+            <thead>
+              <tr>
+                <th class="an-th an-th--rank">#</th>
+                <th class="an-th an-th--sortable" (click)="sortBy('displayName')">
+                  Member <i class="pi {{ sortIcon('displayName') }}"></i>
+                </th>
+                <th class="an-th an-th--sortable" (click)="sortBy('role')">
+                  Role <i class="pi {{ sortIcon('role') }}"></i>
+                </th>
+                <th class="an-th an-th--num an-th--sortable" (click)="sortBy('completedSteps')">
+                  Steps <i class="pi {{ sortIcon('completedSteps') }}"></i>
+                </th>
+                <th class="an-th an-th--num an-th--sortable" (click)="sortBy('completedWorkflows')">
+                  Workflows <i class="pi {{ sortIcon('completedWorkflows') }}"></i>
+                </th>
+                <th class="an-th an-th--num an-th--sortable" (click)="sortBy('avgStepDurationMinutes')">
+                  Avg. Time (min) <i class="pi {{ sortIcon('avgStepDurationMinutes') }}"></i>
+                </th>
+                <th class="an-th an-th--num an-th--sortable" (click)="sortBy('overdueRate')">
+                  Overdue % <i class="pi {{ sortIcon('overdueRate') }}"></i>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (m of sortedTeam(); track m.userId; let i = $index) {
+                <tr class="an-tr" [class.an-tr--top]="i < 3">
+                  <td class="an-td an-td--rank">
+                    @if (i === 0) { <span class="an-medal an-medal--gold">1</span> }
+                    @else if (i === 1) { <span class="an-medal an-medal--silver">2</span> }
+                    @else if (i === 2) { <span class="an-medal an-medal--bronze">3</span> }
+                    @else { <span class="an-rank-num">{{ i + 1 }}</span> }
+                  </td>
+                  <td class="an-td">
+                    <div class="an-member-name">{{ m.displayName }}</div>
+                    <div class="an-member-email">{{ m.email }}</div>
+                  </td>
+                  <td class="an-td">
+                    <span class="an-role-badge">{{ m.role }}</span>
+                  </td>
+                  <td class="an-td an-td--num">{{ m.completedSteps }}</td>
+                  <td class="an-td an-td--num">{{ m.completedWorkflows }}</td>
+                  <td class="an-td an-td--num">{{ m.avgStepDurationMinutes | number:'1.0-1' }}</td>
+                  <td class="an-td an-td--num" [class.an-td--overdue]="m.overdueRate > 20">
+                    {{ m.overdueRate | number:'1.0-1' }}%
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
   }
 
 </div>

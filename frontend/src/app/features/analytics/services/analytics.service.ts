@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import {
   AnalyticsWorkflowDefinitionDto,
   CompletionTimeAnalyticsDto,
+  RoleDto,
+  TeamMemberPerformanceDto,
 } from '../models/analytics.models';
 
 @Injectable({ providedIn: 'root' })
@@ -36,6 +38,35 @@ export class AnalyticsService {
     let url = `${this.base}/completion-times/export?fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}`;
     if (workflowDefinitionId) {
       url += `&workflowDefinitionId=${encodeURIComponent(workflowDefinitionId)}`;
+    }
+    return url;
+  }
+
+  getRoles(): Observable<RoleDto[]> {
+    return this.http.get<RoleDto[]>('/bff/identity/roles');
+  }
+
+  getTeamPerformance(
+    fromDate: string,
+    toDate: string,
+    roleId?: string,
+  ): Observable<TeamMemberPerformanceDto[]> {
+    let params = new HttpParams()
+      .set('fromDate', fromDate)
+      .set('toDate', toDate);
+
+    if (roleId) {
+      params = params.set('roleId', roleId);
+    }
+
+    return this.http.get<TeamMemberPerformanceDto[]>(
+      `${this.base}/team/performance`, { params });
+  }
+
+  getTeamPerformanceExportUrl(fromDate: string, toDate: string, roleId?: string): string {
+    let url = `${this.base}/team/performance/export?fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}`;
+    if (roleId) {
+      url += `&roleId=${encodeURIComponent(roleId)}`;
     }
     return url;
   }
