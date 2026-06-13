@@ -302,6 +302,21 @@ export interface PagedActivityDto {
   pageSize:   number;
 }
 
+// ─── Shareable client links (EP-058 / US-177) ───────────────────────────────
+
+/** A secure shareable link for a workflow instance, as seen by the workflow owner. */
+export interface SharedLink {
+  id:        string;
+  token:     string;
+  shareUrl:  string;
+  expiresAt: string;
+  revokedAt: string | null;
+  viewCount: number;
+  isExpired: boolean;
+  isActive:  boolean;
+  createdAt: string;
+}
+
 // ─── @mention autocomplete ───────────────────────────────────────────────────
 
 /** Minimal user record returned from the administration users search. */

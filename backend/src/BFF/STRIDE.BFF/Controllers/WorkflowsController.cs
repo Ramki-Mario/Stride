@@ -467,6 +467,39 @@ public sealed class WorkflowsController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 
+    // ── Shared links (EP-058 / US-177) ─────────────────────────────────────
+
+    [HttpGet("instances/{instanceId:guid}/share")]
+    public async Task<IActionResult> ListSharedLinks(Guid instanceId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(
+            await _workflows.ListSharedLinksAsync(instanceId, token, cancellationToken),
+            cancellationToken: cancellationToken);
+    }
+
+    [HttpPost("instances/{instanceId:guid}/share")]
+    public async Task<IActionResult> CreateSharedLink(Guid instanceId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        using var body = JsonBody();
+        return await ProxyAsync(
+            await _workflows.CreateSharedLinkAsync(instanceId, body, token, cancellationToken),
+            forwardStatusCode: true,
+            cancellationToken: cancellationToken);
+    }
+
+    [HttpDelete("instances/{instanceId:guid}/share/{linkId:guid}")]
+    public async Task<IActionResult> RevokeSharedLink(Guid instanceId, Guid linkId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        var response = await _workflows.RevokeSharedLinkAsync(instanceId, linkId, token, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
+    }
+
     // ── Activity ──────────────────────────────────────────────────────────
 
     [HttpGet("instances/{instanceId:guid}/activity")]

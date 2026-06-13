@@ -18,6 +18,7 @@ import {
   PagedCommentsDto,
   PagedActivityDto,
   MentionSuggestionDto,
+  SharedLink,
 } from '../models/workflow.models';
 
 /**
@@ -249,6 +250,26 @@ export class WorkflowService {
       `${this.base}/instances/${instanceId}/activity`,
       { params: { page, pageSize, order } },
     );
+  }
+
+  // ── Shareable client links (EP-058 / US-177) ───────────────────────────────
+
+  /** Lists the active shareable links for a workflow instance. */
+  listSharedLinks(instanceId: string): Observable<SharedLink[]> {
+    return this.http.get<SharedLink[]>(`${this.base}/instances/${instanceId}/share`);
+  }
+
+  /** Generates a new shareable link. Optional expiry in days (defaults to 30 server-side). */
+  createSharedLink(instanceId: string, expiryDays?: number): Observable<SharedLink> {
+    return this.http.post<SharedLink>(
+      `${this.base}/instances/${instanceId}/share`,
+      { expiryDays: expiryDays ?? null },
+    );
+  }
+
+  /** Revokes a shareable link, immediately invalidating it. */
+  revokeSharedLink(instanceId: string, linkId: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/instances/${instanceId}/share/${linkId}`);
   }
 
   // ── @mention autocomplete ──────────────────────────────────────────────────

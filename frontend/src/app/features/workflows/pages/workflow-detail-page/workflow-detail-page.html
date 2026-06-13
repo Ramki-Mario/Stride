@@ -14,6 +14,14 @@
   />
 }
 
+<!-- ── Share-with-client modal (US-177) ──────────────────────────────────── -->
+@if (shareModalOpen() && instance()) {
+  <app-share-link-modal
+    [instanceId]="instance()!.id"
+    (dismissed)="closeShareModal()"
+  />
+}
+
 <!-- ── Loading skeleton ─────────────────────────────────────────────────── -->
 @if (isLoading()) {
   <div class="wfd-page" aria-busy="true">
@@ -387,6 +395,15 @@
                     } @else {
                       <span class="pi pi-file-export"></span> Export Fields CSV
                     }
+                  </button>
+
+                  <!-- Share-with-client button (US-177) -->
+                  <button
+                    class="wfd-btn wfd-btn-ghost wfd-btn-sm"
+                    (click)="openShareModal()"
+                    title="Generate a secure link to share this job with your client"
+                  >
+                    <span class="pi pi-share-alt"></span> Share with client
                   </button>
 
                   <!-- Invoice panel (only on completed instances) -->

@@ -30,6 +30,7 @@ import { WorkflowService }       from '../../services/workflow.service';
 import { TeamsService }          from '../../../../features/teams/services/teams.service';
 import { TeamSummary }           from '../../../../features/teams/models/team.models';
 import { StepActionModalComponent }  from '../../components/step-action-modal/step-action-modal';
+import { ShareLinkModalComponent }    from '../../components/share-link-modal/share-link-modal';
 import { StepAttachmentsComponent }      from '../../components/step-attachments/step-attachments';
 import { InstanceAttachmentsComponent } from '../../components/instance-attachments/instance-attachments';
 import { CommentThreadComponent }        from '../../components/comment-thread/comment-thread';
@@ -49,7 +50,7 @@ type DetailTab = 'steps' | 'run' | 'attachments' | 'activity' | 'history';
 @Component({
   selector: 'app-workflow-detail-page',
   standalone: true,
-  imports: [NgClass, DecimalPipe, RouterLink, StepActionModalComponent, StepAttachmentsComponent, InstanceAttachmentsComponent, CommentThreadComponent, ActivityTimelineComponent],
+  imports: [NgClass, DecimalPipe, RouterLink, StepActionModalComponent, ShareLinkModalComponent, StepAttachmentsComponent, InstanceAttachmentsComponent, CommentThreadComponent, ActivityTimelineComponent],
   templateUrl: './workflow-detail-page.html',
   styleUrl: './workflow-detail-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -533,6 +534,13 @@ export class WorkflowDetailPageComponent implements OnInit {
     this.modalStep.set(null);
     this.modalAction.set(null);
   }
+
+  // ── Share-with-client modal (US-177) ───────────────────────────────────────
+
+  readonly shareModalOpen = signal(false);
+
+  openShareModal(): void  { this.shareModalOpen.set(true); }
+  closeShareModal(): void { this.shareModalOpen.set(false); }
 
   onStepActioned(): void {
     this.closeModal();

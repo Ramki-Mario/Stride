@@ -335,6 +335,26 @@ public sealed class WorkflowApiClient
             $"/api/workflows/instances/{instanceId}/activity?page={page}&pageSize={pageSize}&order={order}",
             token), cancellationToken);
 
+    // ── Shared links (EP-058 / US-177) ─────────────────────────────────────
+
+    public Task<HttpResponseMessage> ListSharedLinksAsync(
+        Guid instanceId, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get,
+            $"/api/workflows/instances/{instanceId}/share", token), cancellationToken);
+
+    public Task<HttpResponseMessage> CreateSharedLinkAsync(
+        Guid instanceId, HttpContent body, string token, CancellationToken cancellationToken = default)
+    {
+        var req = Build(HttpMethod.Post, $"/api/workflows/instances/{instanceId}/share", token);
+        req.Content = body;
+        return _client.SendAsync(req, cancellationToken);
+    }
+
+    public Task<HttpResponseMessage> RevokeSharedLinkAsync(
+        Guid instanceId, Guid linkId, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Delete,
+            $"/api/workflows/instances/{instanceId}/share/{linkId}", token), cancellationToken);
+
     // ── Helper ────────────────────────────────────────────────────────────
 
     private static HttpRequestMessage Build(HttpMethod method, string uri, string token)
