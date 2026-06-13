@@ -13,15 +13,18 @@ internal sealed class GetPublicJobViewQueryHandler
 
     private readonly ISharedWorkflowLinkRepository          _links;
     private readonly IWorkflowInstanceRepository            _instances;
+    private readonly IPublicInvoiceService                  _invoices;
     private readonly ILogger<GetPublicJobViewQueryHandler>  _logger;
 
     public GetPublicJobViewQueryHandler(
         ISharedWorkflowLinkRepository         links,
         IWorkflowInstanceRepository           instances,
+        IPublicInvoiceService                 invoices,
         ILogger<GetPublicJobViewQueryHandler> logger)
     {
         _links     = links;
         _instances = instances;
+        _invoices  = invoices;
         _logger    = logger;
     }
 
@@ -58,6 +61,9 @@ internal sealed class GetPublicJobViewQueryHandler
         var slaStatus = SlaStatusComputer.Compute(
             instance.CreatedAt, instance.DeadlineAt, instance.CompletedAt);
 
+        var invoice = await _invoices.GetByWorkflowInstanceIdAsync(
+            instance.Id, cancellationToken);
+
         var dto = new PublicJobViewDto(
             WorkflowName: instance.WorkflowName,
             Status:       instance.Status.ToString(),
@@ -75,7 +81,10 @@ internal sealed class GetPublicJobViewQueryHandler
                     CompletedAt: s.CompletedAt,
                     DueAt:       s.DueAt))
                 .ToList()
-                .AsReadOnly());
+                .AsReadOnly(),
+            SignedOffAt: link.SignedOffAt,
+            SignedOffBy: link.SignedOffBy,
+            Invoice:     invoice);
 
         return Result.Success(dto);
     }

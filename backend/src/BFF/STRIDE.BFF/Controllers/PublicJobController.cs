@@ -5,13 +5,10 @@ using STRIDE.BFF.HttpClients;
 namespace STRIDE.BFF.Controllers;
 
 /// <summary>
-/// BFF proxy for the unauthenticated public job view (EP-058 / US-178).
-/// Angular calls /bff/public/jobs/{token} — this controller forwards to
-/// STRIDE.Host without a Bearer token (the endpoint is AllowAnonymous there too).
+/// BFF proxy for the unauthenticated public job endpoints (EP-058 / US-178 &amp; US-179).
 ///
-///   GET /bff/public/jobs/{token}
-///     200 — PublicJobViewDto JSON
-///     410 — Gone (expired / revoked / not found)
+///   GET  /bff/public/jobs/{token}         — view job status, sign-off state, invoice
+///   POST /bff/public/jobs/{token}/signoff  — client sign-off
 /// </summary>
 [ApiController]
 [AllowAnonymous]
@@ -56,5 +53,28 @@ public sealed class PublicJobController : ControllerBase
             ContentType = "application/json",
             StatusCode  = StatusCodes.Status200OK,
         };
+    }
+
+    [HttpPost("{token}/signoff")]
+    public async Task<IActionResult> SignOffPublicJob(string token, CancellationToken cancellationToken)
+    {
+        using var body = new System.Net.Http.StreamContent(Request.Body);
+        body.Headers.ContentType =
+            new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+        var response = await _workflows.PostPublicSignOffAsync(token, body, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var detail = await response.Content.ReadAsStringAsync(cancellationToken);
+            return StatusCode((int)response.StatusCode, new ProblemDetails
+            {
+                Title  = "Sign-off failed",
+                Detail = detail,
+                Status = (int)response.StatusCode,
+            });
+        }
+
+        return NoContent();
     }
 }

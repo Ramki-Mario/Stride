@@ -9,11 +9,12 @@ public sealed class GetPublicJobViewQueryHandlerTests
 {
     private readonly ISharedWorkflowLinkRepository         _links     = Substitute.For<ISharedWorkflowLinkRepository>();
     private readonly IWorkflowInstanceRepository           _instances = Substitute.For<IWorkflowInstanceRepository>();
+    private readonly IPublicInvoiceService                 _invoices  = Substitute.For<IPublicInvoiceService>();
     private readonly GetPublicJobViewQueryHandler          _sut;
 
     public GetPublicJobViewQueryHandlerTests()
     {
-        _sut = new GetPublicJobViewQueryHandler(_links, _instances,
+        _sut = new GetPublicJobViewQueryHandler(_links, _instances, _invoices,
             Microsoft.Extensions.Logging.Abstractions.NullLogger<GetPublicJobViewQueryHandler>.Instance);
     }
 

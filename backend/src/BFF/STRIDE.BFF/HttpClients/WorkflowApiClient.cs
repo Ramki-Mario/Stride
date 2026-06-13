@@ -355,13 +355,21 @@ public sealed class WorkflowApiClient
         => _client.SendAsync(Build(HttpMethod.Delete,
             $"/api/workflows/instances/{instanceId}/share/{linkId}", token), cancellationToken);
 
-    // ── Public job view (EP-058 / US-178) — no auth required ─────────────────
+    // ── Public job view + sign-off (EP-058 / US-178 & US-179) — no auth ─────
 
     public Task<HttpResponseMessage> GetPublicJobViewAsync(
         string token, CancellationToken cancellationToken = default)
         => _client.SendAsync(
             new HttpRequestMessage(HttpMethod.Get, $"/api/public/jobs/{token}"),
             cancellationToken);
+
+    public Task<HttpResponseMessage> PostPublicSignOffAsync(
+        string linkToken, HttpContent body, CancellationToken cancellationToken = default)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Post, $"/api/public/jobs/{linkToken}/signoff");
+        req.Content = body;
+        return _client.SendAsync(req, cancellationToken);
+    }
 
     // ── Helper ────────────────────────────────────────────────────────────
 

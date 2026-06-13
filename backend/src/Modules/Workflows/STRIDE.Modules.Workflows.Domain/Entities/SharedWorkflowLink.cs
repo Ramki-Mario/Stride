@@ -32,6 +32,12 @@ public sealed class SharedWorkflowLink : AuditableEntity
     /// <summary>Number of times the public endpoint has resolved this token (US-178).</summary>
     public int      ViewCount          { get; private set; }
 
+    /// <summary>UTC timestamp when the client confirmed sign-off (US-179). Null until signed off.</summary>
+    public DateTime? SignedOffAt       { get; private set; }
+
+    /// <summary>Display name supplied by the client at sign-off (US-179). Null until signed off.</summary>
+    public string?  SignedOffBy        { get; private set; }
+
     private SharedWorkflowLink() { }
 
     /// <summary>
@@ -96,6 +102,19 @@ public sealed class SharedWorkflowLink : AuditableEntity
     {
         ViewCount++;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Records client sign-off. Idempotent — signing off an already-signed-off link is a no-op.
+    /// </summary>
+    public void SignOff(string clientName)
+    {
+        if (SignedOffAt.HasValue) return;
+
+        var now   = DateTime.UtcNow;
+        SignedOffAt = now;
+        SignedOffBy = clientName;
+        UpdatedAt   = now;
     }
 
     /// <summary>
