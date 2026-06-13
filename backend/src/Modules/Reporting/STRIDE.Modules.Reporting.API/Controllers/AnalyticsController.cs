@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Reporting.Application.Abstractions;
 using STRIDE.Modules.Reporting.Application.Queries.GetCompletionTimeAnalytics;
+using STRIDE.Modules.Reporting.Application.Queries.GetRevenueAnalytics;
 using STRIDE.Modules.Reporting.Application.Queries.GetTeamPerformance;
 using STRIDE.Modules.Reporting.Application.ReadModels;
 
@@ -182,6 +183,59 @@ public sealed class AnalyticsController : ControllerBase
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Returns revenue analytics: summary KPIs, monthly trend, by-workflow-type breakdown,
+    /// and per-client ranking — filtered to workflow-linked Sent/Paid invoices.
+    /// GET /api/analytics/revenue?fromDate=YYYY-MM-DD&amp;toDate=YYYY-MM-DD
+    /// </summary>
+    [HttpGet("revenue")]
+    [ProducesResponseType(typeof(RevenueAnalyticsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetRevenueAnalytics(
+        [FromQuery] DateTime fromDate,
+        [FromQuery] DateTime toDate,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(
+            new GetRevenueAnalyticsQuery(
+                _tenantContext.TenantId,
+                fromDate.ToUniversalTime(),
+                toDate.ToUniversalTime()),
+            cancellationToken);
+
+        if (result.IsFailure)
+            return BadRequest(new { error = result.Error });
+
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Returns a CSV file of individual invoices for the revenue date range.
+    /// GET /api/analytics/revenue/export?fromDate=YYYY-MM-DD&amp;toDate=YYYY-MM-DD
+    /// </summary>
+    [HttpGet("revenue/export")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ExportRevenue(
+        [FromQuery] DateTime fromDate,
+        [FromQuery] DateTime toDate,
+        CancellationToken cancellationToken = default)
+    {
+        if (toDate <= fromDate)
+            return BadRequest(new { error = "ToDate must be after FromDate." });
+
+        var rows = await _analyticsReadService.GetRevenueExportAsync(
+            _tenantContext.TenantId,
+            fromDate.ToUniversalTime(),
+            toDate.ToUniversalTime(),
+            cancellationToken);
+
+        var csv      = BuildRevenueCsv(rows);
+        var fileName = $"revenue-{fromDate:yyyy-MM-dd}-to-{toDate:yyyy-MM-dd}.csv";
+
+        return File(Encoding.UTF8.GetBytes(csv), "text/csv; charset=utf-8", fileName);
+    }
+
     private static string BuildTeamPerformanceCsv(IReadOnlyList<TeamMemberPerformanceDto> rows)
     {
         var sb = new StringBuilder();
@@ -197,6 +251,26 @@ public sealed class AnalyticsController : ControllerBase
                 r.CompletedWorkflows,
                 r.AvgStepDurationMinutes.ToString("F1", CultureInfo.InvariantCulture),
                 r.OverdueRate.ToString("F1", CultureInfo.InvariantCulture)));
+        }
+
+        return sb.ToString();
+    }
+
+    private static string BuildRevenueCsv(IReadOnlyList<RevenueExportRowDto> rows)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("InvoiceNumber,ClientName,WorkflowType,Currency,TotalAmount,Status,SentAt");
+
+        foreach (var r in rows)
+        {
+            sb.AppendLine(string.Join(',',
+                $"\"{r.InvoiceNumber.Replace("\"", "\"\"")}\"",
+                $"\"{r.ClientName.Replace("\"", "\"\"")}\"",
+                $"\"{r.WorkflowType.Replace("\"", "\"\"")}\"",
+                r.Currency,
+                r.TotalAmount.ToString("F2", CultureInfo.InvariantCulture),
+                r.Status,
+                r.SentAt.ToString("o", CultureInfo.InvariantCulture)));
         }
 
         return sb.ToString();

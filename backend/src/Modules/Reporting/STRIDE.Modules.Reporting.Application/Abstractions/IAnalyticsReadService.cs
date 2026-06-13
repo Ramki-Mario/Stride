@@ -49,4 +49,28 @@ public interface IAnalyticsReadService
         DateTime  toDate,
         Guid?     roleId = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns revenue analytics for workflow-linked invoices (Status Sent or Paid):
+    ///   1. Zero-filled monthly trend (InvoicedAmount + PaidAmount per month).
+    ///   2. Revenue by workflow type (definition name).
+    ///   3. Revenue by client (ranked by total).
+    /// </summary>
+    Task<(IReadOnlyList<RevenueMonthlyDto> Monthly,
+          IReadOnlyList<RevenueByWorkflowTypeDto> ByWorkflowType,
+          IReadOnlyList<RevenueByClientDto> ByClient)>
+        GetRevenueAsync(
+            Guid      tenantId,
+            DateTime  fromDate,
+            DateTime  toDate,
+            CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns a flat list of workflow-linked invoices in the date range for CSV export.
+    /// </summary>
+    Task<IReadOnlyList<RevenueExportRowDto>> GetRevenueExportAsync(
+        Guid      tenantId,
+        DateTime  fromDate,
+        DateTime  toDate,
+        CancellationToken cancellationToken = default);
 }

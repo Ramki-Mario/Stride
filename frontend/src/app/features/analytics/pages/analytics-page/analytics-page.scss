@@ -142,6 +142,44 @@
   &--tall { height: 340px; }
 }
 
+// ── Revenue KPI strip ─────────────────────────────────────────────────────────
+
+.an-kpi-strip {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.an-kpi-card {
+  flex: 1;
+  min-width: 160px;
+  background: var(--stride-surface, #fff);
+  border: 1px solid var(--stride-border, #e2e8f0);
+  border-radius: var(--stride-radius-lg, 16px);
+  padding: 1.1rem 1.5rem;
+  box-shadow: var(--stride-shadow-card, 0 1px 3px rgba(0, 0, 0, 0.06));
+
+  &--paid        { border-top: 3px solid #16a34a; }
+  &--outstanding { border-top: 3px solid #ea580c; }
+}
+
+.an-kpi-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--stride-text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.an-kpi-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--stride-text-primary, #0f172a);
+  margin-top: 0.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
 // ── Team section ──────────────────────────────────────────────────────────────
 
 .an-header--section {
@@ -206,6 +244,7 @@
   &--rank { text-align: center; }
   &--num  { text-align: right; font-variant-numeric: tabular-nums; }
   &--overdue { color: var(--stride-danger, #e53e3e); font-weight: 600; }
+  &--paid    { color: #16a34a; }
 }
 
 .an-medal {

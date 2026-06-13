@@ -175,6 +175,30 @@ public sealed class ReportingApiClient
         return _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
     }
 
+    /// <summary>Proxies GET /api/analytics/revenue.</summary>
+    public Task<HttpResponseMessage> GetRevenueAnalyticsAsync(
+        string   fromDate,
+        string   toDate,
+        string   accessToken,
+        CancellationToken cancellationToken = default)
+    {
+        var qs = $"?fromDate={Uri.EscapeDataString(fromDate)}&toDate={Uri.EscapeDataString(toDate)}";
+        var request = BuildRequest(HttpMethod.Get, $"/api/analytics/revenue{qs}", accessToken);
+        return _client.SendAsync(request, cancellationToken);
+    }
+
+    /// <summary>Proxies GET /api/analytics/revenue/export (CSV download).</summary>
+    public Task<HttpResponseMessage> ExportRevenueAsync(
+        string   fromDate,
+        string   toDate,
+        string   accessToken,
+        CancellationToken cancellationToken = default)
+    {
+        var qs = $"?fromDate={Uri.EscapeDataString(fromDate)}&toDate={Uri.EscapeDataString(toDate)}";
+        var request = BuildRequest(HttpMethod.Get, $"/api/analytics/revenue/export{qs}", accessToken);
+        return _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────
 
     private static HttpRequestMessage BuildRequest(

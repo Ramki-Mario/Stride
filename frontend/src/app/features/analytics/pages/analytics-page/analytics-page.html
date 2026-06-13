@@ -96,6 +96,139 @@
     </div>
   }
 
+  <!-- ── Revenue Analytics ──────────────────────────────────────────────── -->
+  <div class="an-header an-header--section">
+    <div>
+      <h2 class="an-title">Revenue Analytics</h2>
+      <p class="an-subtitle">Invoice value from completed workflows — monthly trend, by type, and by client.</p>
+    </div>
+    <button class="stride-btn" (click)="exportRevenue()"
+            [disabled]="isRevenueLoading() || !revenue()?.monthlyTrend?.length">
+      Export CSV
+    </button>
+  </div>
+
+  <!-- ── Revenue Filters ─────────────────────────────────────────────────── -->
+  <div class="an-filters">
+    <div class="an-filter-group">
+      <label class="an-label" for="rv-from">From</label>
+      <input id="rv-from" class="an-input" type="date"
+             [ngModel]="revenueFromDate()" (ngModelChange)="revenueFromDate.set($event)" />
+    </div>
+    <div class="an-filter-group">
+      <label class="an-label" for="rv-to">To</label>
+      <input id="rv-to" class="an-input" type="date"
+             [ngModel]="revenueToDate()" (ngModelChange)="revenueToDate.set($event)" />
+    </div>
+    <button class="stride-btn stride-btn-primary an-apply" (click)="loadRevenue()" [disabled]="isRevenueLoading()">
+      {{ isRevenueLoading() ? 'Loading…' : 'Apply' }}
+    </button>
+  </div>
+
+  <!-- ── Revenue Error ───────────────────────────────────────────────────── -->
+  @if (revenueError()) {
+    <div class="an-error">{{ revenueError() }}</div>
+  }
+
+  <!-- ── Revenue Loading ────────────────────────────────────────────────── -->
+  @if (isRevenueLoading()) {
+    <div class="an-loading">Loading revenue data…</div>
+  }
+
+  <!-- ── Revenue Content ────────────────────────────────────────────────── -->
+  @if (!isRevenueLoading() && revenue(); as rev) {
+
+    @if (rev.summary.totalInvoiced === 0) {
+      <div class="an-empty">
+        <p>No invoiced revenue from completed workflows in the selected date range.</p>
+        <p class="an-empty-hint">Try expanding the date range.</p>
+      </div>
+    } @else {
+
+      <!-- KPI Summary strip -->
+      <div class="an-kpi-strip">
+        <div class="an-kpi-card">
+          <div class="an-kpi-label">Total Invoiced</div>
+          <div class="an-kpi-value">{{ rev.summary.totalInvoiced | number:'1.2-2' }}</div>
+        </div>
+        <div class="an-kpi-card an-kpi-card--paid">
+          <div class="an-kpi-label">Collected</div>
+          <div class="an-kpi-value">{{ rev.summary.totalPaid | number:'1.2-2' }}</div>
+        </div>
+        <div class="an-kpi-card an-kpi-card--outstanding">
+          <div class="an-kpi-label">Outstanding</div>
+          <div class="an-kpi-value">{{ rev.summary.outstanding | number:'1.2-2' }}</div>
+        </div>
+      </div>
+
+      <div class="an-charts">
+
+        <!-- Monthly stacked bar chart -->
+        @if (revenueMonthlyChart(); as chartData) {
+          <section class="an-card">
+            <h3 class="an-card-title">Monthly Revenue</h3>
+            <p class="an-card-subtitle">Stacked by collected (green) and outstanding (orange) per month.</p>
+            <div class="an-chart-wrap an-chart-wrap--tall">
+              <p-chart type="bar" [data]="chartData" [options]="stackedBarOptions" />
+            </div>
+          </section>
+        }
+
+        <!-- Workflow-type donut chart -->
+        @if (revenueWorkflowTypeChart(); as chartData) {
+          <section class="an-card">
+            <h3 class="an-card-title">Revenue by Workflow Type</h3>
+            <p class="an-card-subtitle">Total invoiced value split by the workflow definition that generated each invoice.</p>
+            <div class="an-chart-wrap an-chart-wrap--tall">
+              <p-chart type="doughnut" [data]="chartData" [options]="doughnutOptions" />
+            </div>
+          </section>
+        }
+
+        <!-- By-client ranked table -->
+        @if (rev.byClient.length > 0) {
+          <section class="an-card an-leaderboard">
+            <h3 class="an-card-title" style="padding: 1.25rem 1.5rem 0">Revenue by Client</h3>
+            <div class="an-table-wrap">
+              <table class="an-table">
+                <thead>
+                  <tr>
+                    <th class="an-th an-th--rank">#</th>
+                    <th class="an-th">Client</th>
+                    <th class="an-th an-th--num">Invoiced</th>
+                    <th class="an-th an-th--num">Collected</th>
+                    <th class="an-th an-th--num">Outstanding</th>
+                    <th class="an-th an-th--num">Invoices</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of rev.byClient; track c.clientName; let i = $index) {
+                    <tr class="an-tr">
+                      <td class="an-td an-td--rank">
+                        @if (i === 0) { <span class="an-medal an-medal--gold">1</span> }
+                        @else if (i === 1) { <span class="an-medal an-medal--silver">2</span> }
+                        @else if (i === 2) { <span class="an-medal an-medal--bronze">3</span> }
+                        @else { <span class="an-rank-num">{{ i + 1 }}</span> }
+                      </td>
+                      <td class="an-td"><strong>{{ c.clientName }}</strong></td>
+                      <td class="an-td an-td--num">{{ c.totalAmount | number:'1.2-2' }}</td>
+                      <td class="an-td an-td--num an-td--paid">{{ c.paidAmount | number:'1.2-2' }}</td>
+                      <td class="an-td an-td--num" [class.an-td--overdue]="(c.totalAmount - c.paidAmount) > 0">
+                        {{ (c.totalAmount - c.paidAmount) | number:'1.2-2' }}
+                      </td>
+                      <td class="an-td an-td--num">{{ c.invoiceCount }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+        }
+
+      </div>
+    }
+  }
+
   <!-- ── Team Performance ────────────────────────────────────────────────── -->
   <div class="an-header an-header--section">
     <div>
