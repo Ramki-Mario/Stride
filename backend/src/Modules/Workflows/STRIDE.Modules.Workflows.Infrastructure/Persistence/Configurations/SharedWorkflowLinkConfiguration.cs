@@ -20,6 +20,9 @@ internal sealed class SharedWorkflowLinkConfiguration : IEntityTypeConfiguration
         builder.Property(l => l.RevokedAt).HasColumnType("datetime2");
         builder.Property(l => l.ViewCount).IsRequired().HasDefaultValue(0);
 
+        builder.Property(l => l.SignedOffAt).HasColumnType("datetime2");
+        builder.Property(l => l.SignedOffBy).HasMaxLength(200);
+
         builder.Property(l => l.TenantId).IsRequired();
         builder.Property(l => l.CreatedAt).IsRequired();
         builder.Property(l => l.UpdatedAt).IsRequired();

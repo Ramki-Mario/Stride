@@ -260,6 +260,260 @@
   &--skipped &__name { text-decoration: line-through; color: var(--color-text-secondary, #64748b); }
 }
 
+// ── Signed-off badge (header) ─────────────────────────────────────────────────
+
+.signoff-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #dcfce7;
+  color: #15803d;
+}
+
+// ── Invoice section ──────────────────────────────────────────────────────────
+
+.pjp-invoice {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border, #e2e8f0);
+
+  &__heading {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-secondary, #64748b);
+    margin-bottom: 0.75rem;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  &__number {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #0f172a);
+  }
+
+  &__lines {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.75rem;
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  &__line {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6rem 0.875rem;
+    font-size: 0.875rem;
+
+    &:not(:last-child) { border-bottom: 1px solid var(--color-border, #e2e8f0); }
+  }
+
+  &__line-desc  { color: var(--color-text-primary, #0f172a); }
+  &__line-amount { color: var(--color-text-secondary, #64748b); white-space: nowrap; }
+
+  &__total {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text-primary, #0f172a);
+  }
+
+  &__due {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary, #64748b);
+    margin-top: 0.25rem;
+  }
+}
+
+.invoice-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+
+  &--draft   { background: #f1f5f9; color: #475569; }
+  &--sent    { background: #dbeafe; color: #1d4ed8; }
+  &--paid    { background: #dcfce7; color: #15803d; }
+  &--void    { background: #fee2e2; color: #b91c1c; }
+}
+
+// ── Sign-off prompt ───────────────────────────────────────────────────────────
+
+.pjp-signoff-prompt {
+  margin-top: 2rem;
+  padding: 1.25rem 1.5rem;
+  background: #f8faff;
+  border: 1px solid #c7d7fe;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  &__text {
+    font-size: 0.875rem;
+    color: var(--color-text-primary, #0f172a);
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.btn-signoff {
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  background: var(--color-accent, #7c3aed);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+
+  &:hover { opacity: 0.9; }
+}
+
+// ── Signed confirmation banner ────────────────────────────────────────────────
+
+.pjp-signed {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+
+  &__icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    color: #16a34a;
+  }
+
+  &__text {
+    font-size: 0.875rem;
+    color: var(--color-text-primary, #0f172a);
+  }
+}
+
+// ── Sign-off modal ────────────────────────────────────────────────────────────
+
+.pjp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.pjp-modal {
+  background: var(--color-surface, #fff);
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+
+  &__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text-primary, #0f172a);
+    margin: 0 0 0.75rem;
+  }
+
+  &__body {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary, #64748b);
+    margin: 0 0 1.25rem;
+    line-height: 1.5;
+  }
+
+  &__label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #0f172a);
+    margin-bottom: 0.375rem;
+  }
+
+  &__input {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    outline: none;
+    box-sizing: border-box;
+
+    &:focus { border-color: var(--color-accent, #7c3aed); }
+    &:disabled { background: #f8fafc; }
+  }
+
+  &__error {
+    font-size: 0.8rem;
+    color: var(--color-danger, #e53e3e);
+    margin: 0.375rem 0 0;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+}
+
+.btn-cancel {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: transparent;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: var(--color-text-primary, #0f172a);
+
+  &:hover { background: #f8fafc; }
+  &:disabled { opacity: 0.5; cursor: default; }
+}
+
+.btn-confirm {
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  background: var(--color-accent, #7c3aed);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover { opacity: 0.9; }
+  &:disabled { opacity: 0.6; cursor: default; }
+}
+
 // ── Footer ───────────────────────────────────────────────────────────────────
 
 .pjp-footer {

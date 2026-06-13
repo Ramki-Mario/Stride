@@ -33,8 +33,9 @@ public static class WorkflowsInfrastructureExtensions
         services.AddScoped<IWorkflowActivityRepository,  WorkflowActivityRepository>();
         services.AddScoped<ISharedWorkflowLinkRepository, SharedWorkflowLinkRepository>();
 
-        // ── Read service (Dapper reads) ────────────────────────────────────────
-        services.AddScoped<IWorkflowReadService, WorkflowReadService>();
+        // ── Read services (Dapper reads) ──────────────────────────────────────
+        services.AddScoped<IWorkflowReadService,    WorkflowReadService>();
+        services.AddScoped<IPublicInvoiceService,   PublicInvoiceService>();
 
         // ── Shared-link public URL builder (EP-058) ───────────────────────────
         // Reads the public SPA origin from config; falls back to the dev origin.

@@ -11,6 +11,20 @@ export interface PublicStepDto {
   dueAt:       string | null;
 }
 
+export interface PublicInvoiceLineItemDto {
+  description: string;
+  subtotal:    number;
+}
+
+export interface PublicInvoiceDto {
+  invoiceNumber: string;
+  statusLabel:   string;
+  currency:      string;
+  totalAmount:   number;
+  dueDate:       string;
+  lineItems:     PublicInvoiceLineItemDto[];
+}
+
 export interface PublicJobViewDto {
   workflowName: string;
   status:       string;
@@ -19,6 +33,9 @@ export interface PublicJobViewDto {
   deadlineAt:   string | null;
   slaStatus:    string | null;
   steps:        PublicStepDto[];
+  signedOffAt:  string | null;
+  signedOffBy:  string | null;
+  invoice:      PublicInvoiceDto | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -27,5 +44,12 @@ export class PublicJobViewService {
 
   getJobView(token: string): Observable<PublicJobViewDto> {
     return this.http.get<PublicJobViewDto>(`/bff/public/jobs/${token}`);
+  }
+
+  signOff(token: string, clientName: string): Observable<void> {
+    return this.http.post<void>(
+      `/bff/public/jobs/${token}/signoff`,
+      { clientName },
+    );
   }
 }

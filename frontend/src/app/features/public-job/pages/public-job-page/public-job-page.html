@@ -48,6 +48,11 @@
                 {{ slaLabel(j.slaStatus) }}
               </span>
             }
+            @if (j.signedOffAt) {
+              <span class="signoff-badge">
+                ✓ Signed off
+              </span>
+            }
           </div>
         </div>
       </header>
@@ -106,9 +111,99 @@
         </ol>
       </section>
 
+      <!-- Invoice -->
+      @if (j.invoice; as inv) {
+        <section class="pjp-invoice">
+          <h2 class="pjp-invoice__heading">Invoice</h2>
+          <div class="pjp-invoice__meta">
+            <span class="pjp-invoice__number">{{ inv.invoiceNumber }}</span>
+            <span class="invoice-status-badge invoice-status-badge--{{ inv.statusLabel.toLowerCase() }}">
+              {{ inv.statusLabel }}
+            </span>
+          </div>
+          @if (inv.lineItems.length > 0) {
+            <ul class="pjp-invoice__lines">
+              @for (line of inv.lineItems; track $index) {
+                <li class="pjp-invoice__line">
+                  <span class="pjp-invoice__line-desc">{{ line.description }}</span>
+                  <span class="pjp-invoice__line-amount">
+                    {{ line.subtotal | currency:inv.currency:'symbol':'1.2-2' }}
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+          <div class="pjp-invoice__total">
+            <span class="pjp-invoice__total-label">Total</span>
+            <span class="pjp-invoice__total-amount">
+              {{ inv.totalAmount | currency:inv.currency:'symbol':'1.2-2' }}
+            </span>
+          </div>
+          <p class="pjp-invoice__due">
+            Due {{ inv.dueDate | date:'mediumDate' }}
+          </p>
+        </section>
+      }
+
+      <!-- Sign-off -->
+      @if (j.status === 'Completed' && !j.signedOffAt) {
+        <div class="pjp-signoff-prompt">
+          <p class="pjp-signoff-prompt__text">
+            Everything look good? Confirm you're satisfied with the completed work.
+          </p>
+          <button class="btn-signoff" (click)="openSignOff()">Sign Off</button>
+        </div>
+      }
+
+      @if (j.signedOffAt) {
+        <div class="pjp-signed">
+          <svg class="pjp-signed__icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <circle cx="10" cy="10" r="9" fill="#16a34a"/>
+            <path d="M6 10l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="pjp-signed__text">
+            <strong>{{ j.signedOffBy }}</strong> confirmed sign-off on
+            {{ j.signedOffAt | date:'mediumDate' }}
+          </div>
+        </div>
+      }
+
       <footer class="pjp-footer">
         <span>Powered by <strong>STRIDE</strong></span>
       </footer>
     </div>
   }
 </div>
+
+<!-- Sign-off modal -->
+@if (showSignOff()) {
+  <div class="pjp-modal-backdrop" (click)="cancelSignOff()">
+    <div class="pjp-modal" (click)="$event.stopPropagation()">
+      <h2 class="pjp-modal__title">Confirm Sign-Off</h2>
+      <p class="pjp-modal__body">
+        By signing off you confirm that the work meets the agreed requirements.
+      </p>
+      <label class="pjp-modal__label" for="clientName">Your name</label>
+      <input
+        id="clientName"
+        class="pjp-modal__input"
+        type="text"
+        placeholder="e.g. Jane Smith"
+        [value]="clientName()"
+        (input)="clientName.set($any($event.target).value)"
+        [disabled]="isSigningOff()"
+      />
+      @if (signOffError()) {
+        <p class="pjp-modal__error">{{ signOffError() }}</p>
+      }
+      <div class="pjp-modal__actions">
+        <button class="btn-cancel" (click)="cancelSignOff()" [disabled]="isSigningOff()">
+          Cancel
+        </button>
+        <button class="btn-confirm" (click)="submitSignOff()" [disabled]="isSigningOff()">
+          @if (isSigningOff()) { Signing off… } @else { Confirm Sign-Off }
+        </button>
+      </div>
+    </div>
+  </div>
+}
