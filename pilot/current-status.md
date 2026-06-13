@@ -278,9 +278,9 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - EP-053 #268 → US-162–164 (#292–294) — SLA & Deadline Tracking ✅
 - EP-054 #269 → US-165–167 (#295–297) — Comments & Activity Log ✅ (PRs #320 #321 #322)
 - EP-055 #270 → US-168–170 (#298–300) — Mobile-First Experience 🔵 In Progress (US-168 ✅ #298 closed, US-169 🔵 PR #331, US-170 ✅ #300 closed PR #332)
-- EP-056 #271 → US-171–173 (#301–303) — Approval Gates ✅ (PRs #333 #334 #335, epic closed 2026-06-09)
-- EP-057 #272 → US-174–176 (#304–306) — Actionable Dashboard ⏳
-- EP-058 #273 → US-177–179 (#307–309) — External Customer-Facing Link ⏳
+- EP-056 #271 → US-171–173 (#301–303) — Approval Gates ✅ (PRs #333 #334 #335, epic closed 2026-06-09). Test back-fill: +37 tests PR #339 🔵 In Review (2026-06-12) — US-172/US-173 had shipped with zero tests; new totals Workflows 136 dom / 167 app, Notifications 13
+- EP-057 #272 → US-174–176 (#304–306) — Actionable Dashboard ✅ (PRs #336 #337 #338 all merged)
+- EP-058 #273 → US-177–179 (#307–309) — External Customer-Facing Link 🔵 In Progress (US-177 ✅ PR #341, US-178/179 ⏳)
 - EP-059 #274 → US-180–182 (#310–312) — Webhooks and Integrations ⏳
 - EP-060 #275 → US-183–185 (#313–315) — Operational Analytics ⏳
 - EP-061 #276 → US-186 (#316) — README and Product Story ⏳
@@ -288,7 +288,34 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 **Extra work delivered outside original plan:**
 - EP-062 #327 → US-187 (#326) / US-188 (#328) / US-189 (#329) — Teams / Department Entity ✅ (PRs #323 #324 #325 — all closed, board=Done)
 
-**Next:** EP-055 US-169 🔵 PR #331 pending merge (last story of EP-055). Then EP-057 Actionable Dashboard (#272)
+**EP-057 Actionable Dashboard** (#272) — 🔵 In Progress (last story in review)
+- US-174 Dashboard Alert Panels ✅ Done (PR #336 merged, #304 closed)
+  - 4 alert panels: Overdue / Unassigned Steps / SLA At Risk / Ready to Invoice
+  - `GetDashboardAlertsQuery`; 4 parallel Dapper queries (own connection per `QueryListAsync<T>`); `AlertPanelComponent`; 4 tests
+- US-175 Team Workload View ✅ Done (PR #337 merged, #305 closed)
+  - Per-user active step counts + top-3 steps (`ROW_NUMBER() PARTITION BY AssigneeId`), overdue flags, Reassign navigation
+  - `GetTeamWorkloadQuery`; 2 parallel Dapper queries joined in C#; `WorkloadPanelComponent`; 4 tests
+- US-176 Real-time updates via SignalR — PR #338 🔵 In Review (branch `feat/EP-057/US-176-realtime-dashboard`, commit `e6f4a74`)
+  - Architecture: Host domain events → 5 MediatR handlers (Reporting.Application) → `RedisDashboardNotifier` → Redis channel `stride:dashboard:updates` → `DashboardRedisSubscriber` (BFF hosted service) → `DashboardHub` tenant group → Angular
+  - Hub in BFF (not Host): cookie auth, no JWT in browser (ADR-007/008); `DashboardUpdates` shared contract in BuildingBlocks.Application.Abstractions
+  - Frontend: `@microsoft/signalr`; `DashboardRealtimeService` (state signal, infinite reconnect); debounced silent refresh; 60s polling fallback via `effect()`; Live/Polling header badge; cleanup on destroy
+  - Tests: 5 handler tests — 13/13 pass in Reporting.Application.Tests
+
+**EP-058 External Customer-Facing Link** (#273) — 🔵 In Progress
+- US-177 Shareable secure link generation & revocation — PR #341 🔵 In Review (branch `feat/EP-058/US-177-shareable-link`, commit `9c83eda`)
+  - `SharedWorkflowLink` aggregate (Workflows): 256-bit base64url token, 30-day expiry, RevokedAt, ViewCount; Create/Revoke/IncrementViewCount/IsValid
+  - CreateSharedLink/RevokeSharedLink commands + ListSharedLinks query; `ISharedWorkflowLinkRepository`; `ISharedLinkUrlBuilder` (reads `PublicApp:BaseUrl` config); migration `AddSharedWorkflowLinks`
+  - `SharedLinksController` (GET/POST/DELETE under instances/{id}/share) + BFF proxy; Angular `ShareLinkModalComponent` + "Share with client" button on instance detail
+  - Tests: 12 domain + 8 application (Workflows now 148 domain / 175 app)
+- US-178 Public job status view — PR #342 🔵 In Review (branch `feat/EP-058/US-178-public-job-view`, commit `c9d1d72`)
+  - `GET /bff/public/jobs/{token}` [AllowAnonymous], 410 Gone on expired/revoked, increments ViewCount
+  - `GetPublicJobViewQuery` + handler: token resolved without tenant context (token IS the credential), explicit tenantId from link, `GetByTokenAsync` + `GetByIdPublicAsync` bypass tenant-scoped Query
+  - `PublicJobViewDto`: redacted — no user IDs, billable amounts, assignees, field values, failure reasons
+  - Angular `/job/:token` route — no authGuard, no app shell; `PublicJobPageComponent` with loading skeleton, 410 Gone state, step timeline (check/dot indicators), status + SLA badges
+  - Tests: +6 in Workflows.Application (total 181/181); also committed previously-untracked US-177 shared-link tests (20 tests)
+- US-179 Client sign-off + invoice view via link — ⏳ Pending
+
+**Next:** Merge PR #342 (US-178). Then US-179. EP-055 US-169 PR #331 still open.
 
 ### EP-049 — Client/Customer Entity ✅ Done (#264, closed 2026-06-07)
 
