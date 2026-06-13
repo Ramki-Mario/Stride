@@ -10,6 +10,13 @@ public interface ISharedWorkflowLinkRepository
     Task<SharedWorkflowLink?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Looks up a link by its public token without applying tenant scoping.
+    /// The token is the sole credential for the public endpoint (US-178); tenant
+    /// is unknown until after the token resolves.
+    /// </summary>
+    Task<SharedWorkflowLink?> GetByTokenAsync(string token, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Returns the non-revoked links for a workflow instance, newest first.
     /// Expired-but-not-revoked links are included so the manager can see and clean them up.
     /// </summary>

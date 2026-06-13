@@ -17,6 +17,13 @@ internal sealed class SharedWorkflowLinkRepository
         Guid id, CancellationToken cancellationToken = default)
         => await Query.FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
 
+    public async Task<SharedWorkflowLink?> GetByTokenAsync(
+        string token, CancellationToken cancellationToken = default)
+        // Intentionally bypasses the tenant-scoped Query — the token IS the credential;
+        // tenant is unknown until after this resolves.
+        => await Context.SharedWorkflowLinks
+            .FirstOrDefaultAsync(l => l.Token == token && !l.IsDeleted, cancellationToken);
+
     public async Task<IReadOnlyList<SharedWorkflowLink>> ListActiveByInstanceAsync(
         Guid instanceId, CancellationToken cancellationToken = default)
     {
