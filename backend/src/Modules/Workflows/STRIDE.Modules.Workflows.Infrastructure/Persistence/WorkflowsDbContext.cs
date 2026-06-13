@@ -27,6 +27,7 @@ public sealed class WorkflowsDbContext : DbContext
     public DbSet<Attachment>          Attachments          => Set<Attachment>();
     public DbSet<WorkflowComment>         WorkflowComments         => Set<WorkflowComment>();
     public DbSet<WorkflowActivityEvent>   WorkflowActivityEvents   => Set<WorkflowActivityEvent>();
+    public DbSet<SharedWorkflowLink>      SharedWorkflowLinks      => Set<SharedWorkflowLink>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

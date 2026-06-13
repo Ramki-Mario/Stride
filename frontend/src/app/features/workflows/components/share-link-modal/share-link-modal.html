@@ -1,0 +1,99 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     Share Link Modal   (US-177 · EP-058)
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<div class="slm-backdrop" (click)="dismiss()" aria-hidden="true" tabindex="-1"></div>
+
+<dialog class="slm-dialog" aria-label="Share with client" open (keydown.escape)="dismiss()">
+  <!-- Header -->
+  <div class="slm-header">
+    <div class="slm-header-left">
+      <span class="pi pi-share-alt"></span>
+      <div>
+        <h2 class="slm-title">Share with client</h2>
+        <p class="slm-subtitle">Generate a secure link clients can open without an account.</p>
+      </div>
+    </div>
+    <button class="slm-close" (click)="dismiss()" aria-label="Close">
+      <span class="pi pi-times"></span>
+    </button>
+  </div>
+
+  @if (error()) {
+    <div class="slm-error" role="alert">
+      <span class="pi pi-exclamation-triangle"></span>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <!-- Generate -->
+  <button class="slm-generate" (click)="generate()" [disabled]="isGenerating()">
+    @if (isGenerating()) {
+      <span class="pi pi-spin pi-spinner"></span> Generating…
+    } @else {
+      <span class="pi pi-plus"></span> Generate new link
+    }
+  </button>
+
+  <!-- Body -->
+  <div class="slm-body">
+    @if (isLoading()) {
+      <div class="slm-loading"><span class="pi pi-spin pi-spinner"></span> Loading links…</div>
+    } @else if (links().length === 0) {
+      <div class="slm-empty">
+        <span class="pi pi-link"></span>
+        <p>No active links yet. Generate one to share this job with your client.</p>
+      </div>
+    } @else {
+      <ul class="slm-list">
+        @for (link of links(); track link.id) {
+          <li class="slm-item" [class.slm-item--expired]="link.isExpired">
+            <div class="slm-item-main">
+              <code class="slm-url" [title]="link.shareUrl">{{ link.shareUrl }}</code>
+              <div class="slm-meta">
+                @if (link.isExpired) {
+                  <span class="slm-badge slm-badge--expired">Expired</span>
+                } @else {
+                  <span class="slm-badge slm-badge--active">Active</span>
+                }
+                <span class="slm-meta-item">
+                  <span class="pi pi-calendar"></span>
+                  Expires {{ link.expiresAt | date:'mediumDate' }}
+                </span>
+                <span class="slm-meta-item">
+                  <span class="pi pi-eye"></span>
+                  {{ link.viewCount }} view{{ link.viewCount === 1 ? '' : 's' }}
+                </span>
+              </div>
+            </div>
+            <div class="slm-item-actions">
+              <button
+                class="slm-icon-btn"
+                (click)="copy(link)"
+                [attr.aria-label]="'Copy link'"
+                title="Copy link">
+                @if (copiedId() === link.id) {
+                  <span class="pi pi-check slm-copied"></span>
+                } @else {
+                  <span class="pi pi-copy"></span>
+                }
+              </button>
+              <button
+                class="slm-icon-btn slm-icon-btn--danger"
+                (click)="revoke(link)"
+                [disabled]="revokingId() === link.id"
+                aria-label="Revoke link"
+                title="Revoke link">
+                @if (revokingId() === link.id) {
+                  <span class="pi pi-spin pi-spinner"></span>
+                } @else {
+                  <span class="pi pi-ban"></span>
+                }
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</dialog>

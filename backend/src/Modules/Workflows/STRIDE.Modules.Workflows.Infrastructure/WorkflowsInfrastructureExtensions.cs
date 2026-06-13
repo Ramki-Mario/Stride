@@ -31,9 +31,16 @@ public static class WorkflowsInfrastructureExtensions
         services.AddScoped<IAttachmentRepository,         AttachmentRepository>();
         services.AddScoped<IWorkflowCommentRepository,    WorkflowCommentRepository>();
         services.AddScoped<IWorkflowActivityRepository,  WorkflowActivityRepository>();
+        services.AddScoped<ISharedWorkflowLinkRepository, SharedWorkflowLinkRepository>();
 
         // ── Read service (Dapper reads) ────────────────────────────────────────
         services.AddScoped<IWorkflowReadService, WorkflowReadService>();
+
+        // ── Shared-link public URL builder (EP-058) ───────────────────────────
+        // Reads the public SPA origin from config; falls back to the dev origin.
+        services.AddSingleton<ISharedLinkUrlBuilder>(
+            new SharedLinkUrlBuilder(
+                configuration["PublicApp:BaseUrl"] ?? "http://localhost:4200"));
 
         // ── Cross-module services (Dapper, identity schema) ───────────────────
         services.AddScoped<IUserRoleService,   UserRoleService>();
