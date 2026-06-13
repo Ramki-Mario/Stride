@@ -471,7 +471,8 @@ export class SidebarComponent {
     {
       label: 'Reporting',
       items: [
-        { label: 'Reports',   route: '/reporting', icon: 'pi-chart-bar' },
+        { label: 'Reports',   route: '/reporting',  icon: 'pi-chart-bar' },
+        { label: 'Analytics', route: '/analytics',  icon: 'pi-chart-line' },
       ],
     },
     {

@@ -100,6 +100,49 @@ public sealed class ReportingApiClient
         return _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
     }
 
+    // ── Analytics ─────────────────────────────────────────────────────────
+
+    /// <summary>Proxies GET /api/analytics/workflow-definitions.</summary>
+    public Task<HttpResponseMessage> GetAnalyticsWorkflowDefinitionsAsync(
+        string accessToken,
+        CancellationToken cancellationToken = default)
+    {
+        var request = BuildRequest(HttpMethod.Get, "/api/analytics/workflow-definitions", accessToken);
+        return _client.SendAsync(request, cancellationToken);
+    }
+
+    /// <summary>Proxies GET /api/analytics/completion-times.</summary>
+    public Task<HttpResponseMessage> GetCompletionTimesAsync(
+        string   fromDate,
+        string   toDate,
+        string?  workflowDefinitionId,
+        string   accessToken,
+        CancellationToken cancellationToken = default)
+    {
+        var qs = $"?fromDate={Uri.EscapeDataString(fromDate)}&toDate={Uri.EscapeDataString(toDate)}";
+        if (!string.IsNullOrEmpty(workflowDefinitionId))
+            qs += $"&workflowDefinitionId={Uri.EscapeDataString(workflowDefinitionId)}";
+
+        var request = BuildRequest(HttpMethod.Get, $"/api/analytics/completion-times{qs}", accessToken);
+        return _client.SendAsync(request, cancellationToken);
+    }
+
+    /// <summary>Proxies GET /api/analytics/completion-times/export (CSV download).</summary>
+    public Task<HttpResponseMessage> ExportCompletionTimesAsync(
+        string   fromDate,
+        string   toDate,
+        string?  workflowDefinitionId,
+        string   accessToken,
+        CancellationToken cancellationToken = default)
+    {
+        var qs = $"?fromDate={Uri.EscapeDataString(fromDate)}&toDate={Uri.EscapeDataString(toDate)}";
+        if (!string.IsNullOrEmpty(workflowDefinitionId))
+            qs += $"&workflowDefinitionId={Uri.EscapeDataString(workflowDefinitionId)}";
+
+        var request = BuildRequest(HttpMethod.Get, $"/api/analytics/completion-times/export{qs}", accessToken);
+        return _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────
 
     private static HttpRequestMessage BuildRequest(

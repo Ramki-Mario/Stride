@@ -26,6 +26,7 @@ public static class ReportingInfrastructureExtensions
                 sql => sql.MigrationsAssembly(typeof(ReportingDbContext).Assembly.FullName)));
 
         services.AddScoped<IReportingReadService, ReportingReadService>();
+        services.AddScoped<IAnalyticsReadService, AnalyticsReadService>();
         services.AddScoped<IReportRepository, ReportRepository>();
 
         // Real-time dashboard push (US-176) — singleton: holds no state beyond the

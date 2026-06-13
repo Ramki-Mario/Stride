@@ -131,6 +131,60 @@ public sealed class ReportingController : ControllerBase
         return File(content, contentType, fileName);
     }
 
+    // ── Analytics ─────────────────────────────────────────────────────────
+
+    /// <summary>GET /bff/analytics/workflow-definitions</summary>
+    [HttpGet("/bff/analytics/workflow-definitions")]
+    public async Task<IActionResult> GetAnalyticsWorkflowDefinitions(CancellationToken cancellationToken)
+    {
+        var token = await GetAccessTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _reporting.GetAnalyticsWorkflowDefinitionsAsync(token, cancellationToken);
+        return await ProxyJsonResponseAsync(response, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>GET /bff/analytics/completion-times</summary>
+    [HttpGet("/bff/analytics/completion-times")]
+    public async Task<IActionResult> GetCompletionTimes(
+        [FromQuery] string  fromDate,
+        [FromQuery] string  toDate,
+        [FromQuery] string? workflowDefinitionId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var token = await GetAccessTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _reporting.GetCompletionTimesAsync(
+            fromDate, toDate, workflowDefinitionId, token, cancellationToken);
+        return await ProxyJsonResponseAsync(response, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>GET /bff/analytics/completion-times/export — streams CSV to browser.</summary>
+    [HttpGet("/bff/analytics/completion-times/export")]
+    public async Task<IActionResult> ExportCompletionTimes(
+        [FromQuery] string  fromDate,
+        [FromQuery] string  toDate,
+        [FromQuery] string? workflowDefinitionId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var token = await GetAccessTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _reporting.ExportCompletionTimesAsync(
+            fromDate, toDate, workflowDefinitionId, token, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+            return StatusCode((int)response.StatusCode);
+
+        var content     = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+        var contentType = response.Content.Headers.ContentType?.ToString() ?? "text/csv; charset=utf-8";
+        var fileName    = response.Content.Headers.ContentDisposition?.FileName
+                          ?? $"completion-times-{fromDate}-to-{toDate}.csv";
+
+        return File(content, contentType, fileName);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────
 
     /// <summary>
