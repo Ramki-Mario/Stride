@@ -1,0 +1,60 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using STRIDE.BFF.HttpClients;
+
+namespace STRIDE.BFF.Controllers;
+
+/// <summary>
+/// BFF proxy for the unauthenticated public job view (EP-058 / US-178).
+/// Angular calls /bff/public/jobs/{token} — this controller forwards to
+/// STRIDE.Host without a Bearer token (the endpoint is AllowAnonymous there too).
+///
+///   GET /bff/public/jobs/{token}
+///     200 — PublicJobViewDto JSON
+///     410 — Gone (expired / revoked / not found)
+/// </summary>
+[ApiController]
+[AllowAnonymous]
+[Route("bff/public/jobs")]
+public sealed class PublicJobController : ControllerBase
+{
+    private readonly WorkflowApiClient            _workflows;
+    private readonly ILogger<PublicJobController> _logger;
+
+    public PublicJobController(
+        WorkflowApiClient workflows,
+        ILogger<PublicJobController> logger)
+    {
+        _workflows = workflows;
+        _logger    = logger;
+    }
+
+    [HttpGet("{token}")]
+    public async Task<IActionResult> GetPublicJobView(string token, CancellationToken cancellationToken)
+    {
+        var response = await _workflows.GetPublicJobViewAsync(token, cancellationToken);
+
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogInformation(
+                "Public job view: Host returned {StatusCode} for token length {Len}",
+                (int)response.StatusCode, token.Length);
+
+            return StatusCode((int)response.StatusCode, new ProblemDetails
+            {
+                Title  = "Link unavailable",
+                Detail = body,
+                Status = (int)response.StatusCode,
+            });
+        }
+
+        return new ContentResult
+        {
+            Content     = body,
+            ContentType = "application/json",
+            StatusCode  = StatusCodes.Status200OK,
+        };
+    }
+}

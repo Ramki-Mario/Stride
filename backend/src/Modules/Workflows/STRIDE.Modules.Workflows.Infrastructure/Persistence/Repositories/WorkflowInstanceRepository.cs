@@ -26,6 +26,15 @@ internal sealed class WorkflowInstanceRepository
             .Include(i => i.ApprovalRequests)
             .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
 
+    public async Task<WorkflowInstance?> GetByIdPublicAsync(
+        Guid instanceId, Guid tenantId, CancellationToken cancellationToken = default)
+        // Bypasses TenantAwareRepository.Query; tenant is supplied explicitly
+        // from the resolved SharedWorkflowLink rather than from ITenantContext.
+        => await Context.WorkflowInstances
+            .Where(i => i.Id == instanceId && i.TenantId == tenantId && !i.IsDeleted)
+            .Include(i => i.Steps)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public async Task<IReadOnlyList<WorkflowInstance>> GetByDefinitionIdAsync(
         Guid definitionId,
         CancellationToken cancellationToken = default)

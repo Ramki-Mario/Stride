@@ -11,6 +11,13 @@ public interface IWorkflowInstanceRepository
     /// <summary>Returns a workflow instance by primary key, including its step instances.</summary>
     Task<WorkflowInstance?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Returns a workflow instance for the public (unauthenticated) job view.
+    /// Bypasses the current-tenant filter and uses an explicit <paramref name="tenantId"/>
+    /// derived from the resolved <see cref="STRIDE.Modules.Workflows.Domain.Entities.SharedWorkflowLink"/> (US-178).
+    /// </summary>
+    Task<WorkflowInstance?> GetByIdPublicAsync(Guid instanceId, Guid tenantId, CancellationToken cancellationToken = default);
+
     /// <summary>Returns all instances for a given workflow definition (history view).</summary>
     Task<IReadOnlyList<WorkflowInstance>> GetByDefinitionIdAsync(Guid definitionId, CancellationToken cancellationToken = default);
 

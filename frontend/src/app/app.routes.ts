@@ -10,6 +10,14 @@ export const appRoutes: Routes = [
       ),
   },
   {
+    // Public route — no authGuard. Clients view a shared workflow status page.
+    path: 'job/:token',
+    loadComponent: () =>
+      import('./features/public-job/pages/public-job-page/public-job-page').then(
+        (m) => m.PublicJobPageComponent
+      ),
+  },
+  {
     // Public route — no authGuard. New customers complete the 4-step wizard here.
     path: 'onboarding',
     loadComponent: () =>

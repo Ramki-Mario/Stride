@@ -1,0 +1,114 @@
+<div class="pjp-root">
+  <!-- Loading skeleton -->
+  @if (isLoading()) {
+    <div class="pjp-card pjp-card--skeleton">
+      <div class="skeleton skeleton--title"></div>
+      <div class="skeleton skeleton--badge"></div>
+      <div class="skeleton skeleton--line"></div>
+      <div class="skeleton skeleton--line"></div>
+      <div class="skeleton skeleton--line"></div>
+    </div>
+  }
+
+  <!-- 410 Gone -->
+  @else if (isGone()) {
+    <div class="pjp-card pjp-gone">
+      <div class="pjp-gone__icon">🔒</div>
+      <h2 class="pjp-gone__title">Link unavailable</h2>
+      <p class="pjp-gone__body">
+        This link has expired or been revoked by the team that shared it.
+        Please contact them for an updated link.
+      </p>
+    </div>
+  }
+
+  <!-- Error -->
+  @else if (errorMsg()) {
+    <div class="pjp-card pjp-error">
+      <p>{{ errorMsg() }}</p>
+    </div>
+  }
+
+  <!-- Job view -->
+  @else if (job(); as j) {
+    <div class="pjp-card">
+      <!-- Header -->
+      <header class="pjp-header">
+        <div class="pjp-header__branding">
+          <span class="pjp-header__logo">STRIDE</span>
+        </div>
+        <div class="pjp-header__meta">
+          <h1 class="pjp-header__title">{{ j.workflowName }}</h1>
+          <div class="pjp-header__badges">
+            <span class="status-badge status-badge--{{ j.status.toLowerCase() }}">
+              {{ statusLabel(j.status) }}
+            </span>
+            @if (j.slaStatus) {
+              <span class="sla-badge {{ slaClass(j.slaStatus) }}">
+                {{ slaLabel(j.slaStatus) }}
+              </span>
+            }
+          </div>
+        </div>
+      </header>
+
+      <!-- Dates -->
+      <section class="pjp-dates">
+        <div class="pjp-dates__item">
+          <span class="pjp-dates__label">Started</span>
+          <span class="pjp-dates__value">{{ j.startedAt | date:'mediumDate' }}</span>
+        </div>
+        @if (j.deadlineAt) {
+          <div class="pjp-dates__item">
+            <span class="pjp-dates__label">Deadline</span>
+            <span class="pjp-dates__value">{{ j.deadlineAt | date:'mediumDate' }}</span>
+          </div>
+        }
+        @if (j.completedAt) {
+          <div class="pjp-dates__item">
+            <span class="pjp-dates__label">Completed</span>
+            <span class="pjp-dates__value">{{ j.completedAt | date:'mediumDate' }}</span>
+          </div>
+        }
+      </section>
+
+      <!-- Step timeline -->
+      <section class="pjp-timeline">
+        <h2 class="pjp-timeline__heading">Progress</h2>
+        <ol class="pjp-timeline__list">
+          @for (step of j.steps; track step.order) {
+            <li class="step {{ stepStatusClass(step.status) }}">
+              <div class="step__indicator">
+                @if (step.status === 'Completed') {
+                  <svg class="step__icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <circle cx="10" cy="10" r="9" fill="currentColor"/>
+                    <path d="M6 10l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                } @else if (step.status === 'InProgress') {
+                  <div class="step__dot step__dot--active"></div>
+                } @else {
+                  <div class="step__dot"></div>
+                }
+              </div>
+              <div class="step__content">
+                <span class="step__name">{{ step.stepName }}</span>
+                @if (!step.isRequired) {
+                  <span class="step__optional">(optional)</span>
+                }
+                @if (step.completedAt) {
+                  <span class="step__date">{{ step.completedAt | date:'mediumDate' }}</span>
+                } @else if (step.dueAt && step.status !== 'Completed') {
+                  <span class="step__date step__date--due">Due {{ step.dueAt | date:'mediumDate' }}</span>
+                }
+              </div>
+            </li>
+          }
+        </ol>
+      </section>
+
+      <footer class="pjp-footer">
+        <span>Powered by <strong>STRIDE</strong></span>
+      </footer>
+    </div>
+  }
+</div>
