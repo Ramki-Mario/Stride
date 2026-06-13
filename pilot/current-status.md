@@ -280,8 +280,8 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 - EP-055 #270 → US-168–170 (#298–300) — Mobile-First Experience 🔵 In Progress (US-168 ✅ #298 closed, US-169 🔵 PR #331, US-170 ✅ #300 closed PR #332)
 - EP-056 #271 → US-171–173 (#301–303) — Approval Gates ✅ (PRs #333 #334 #335, epic closed 2026-06-09). Test back-fill: +37 tests PR #339 🔵 In Review (2026-06-12) — US-172/US-173 had shipped with zero tests; new totals Workflows 136 dom / 167 app, Notifications 13
 - EP-057 #272 → US-174–176 (#304–306) — Actionable Dashboard ✅ (PRs #336 #337 #338 all merged)
-- EP-058 #273 → US-177–179 (#307–309) — External Customer-Facing Link 🔵 In Progress (US-177 ✅ PR #341, US-178/179 ⏳)
-- EP-059 #274 → US-180–182 (#310–312) — Webhooks and Integrations ⏳
+- EP-058 #273 → US-177–179 (#307–309) — External Customer-Facing Link ✅ COMPLETE (PRs #341/#342/#343)
+- EP-059 #274 → US-180–182 (#310–312) — Webhooks and Integrations 🔵 In Progress (US-180 PR #345 In Review, US-181/182 ⏳)
 - EP-060 #275 → US-183–185 (#313–315) — Operational Analytics ⏳
 - EP-061 #276 → US-186 (#316) — README and Product Story ⏳
 
@@ -321,9 +321,20 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
   - Frontend: sign-off modal (name input, idempotent confirm), signed-off banner, invoice section (number/status/line items/total/due date)
   - Tests: 7 new `SignOffPublicJobCommandHandlerTests`; 188 Workflows.Application tests pass
 
-**EP-058 ✅ COMPLETE** — all 3 stories done (US-177 ✅, US-178 ✅, US-179 🔵 In Review)
+**EP-058 ✅ COMPLETE** — all 3 stories merged (US-177 PR #341, US-178 PR #342, US-179 PR #343)
 
-**Next:** Merge PR #343 (US-179). EP-055 US-169 PR #331 still open. Then EP-059 Webhooks or EP-060 Analytics.
+**EP-059 Webhooks & Integrations** (#274) — 🔵 In Progress
+- US-180 Webhook subscription management — PR #345 🔵 In Review (branch `feat/EP-059/US-180-webhook-subscriptions`)
+  - New `STRIDE.Modules.Webhooks` module (Domain/Application/Infrastructure/API + 2 test projects); schema `webhooks`, table `WebhookSubscriptions`; migration `CreateWebhooksSchema`
+  - Domain: `WebhookSubscription` (HTTPS-only URL, AES-encrypted `SigningSecret`, `EventTypesJson`, `IsActive`, idempotent soft-delete, secret rotation); `WebhookEventTypes` catalog
+  - Application: Create/Update/Delete/RegenerateSecret/Test commands + validators; GetSubscriptions/GetEventTypes queries; `IWebhookSecretProtector`/`IWebhookTester`/`IWebhookReadService`
+  - Infrastructure: `WebhooksDbContext` (AES-256 value converter), `AesWebhookSecretProtector` (key from gitignored `Webhooks:EncryptionKey`), Dapper read (secret never selected), `HttpWebhookTester` (IHttpClientFactory, HMAC-SHA256 ping)
+  - API: `WebhooksController` [Authorize(Roles=Admin)] CRUD + test + regenerate-secret; BFF `WebhooksApiClient` + proxy
+  - Frontend: `features/webhooks` page at `/administration/webhooks` (list, create/edit panel, event checkboxes, secret-shown-once dialog, inline test result, regenerate, delete) + sidebar nav
+  - Tests: 15 domain + 11 application (26) pass
+- US-181 (dispatch + HMAC signing) ⏳, US-182 (retry + delivery log UI) ⏳
+
+**Next:** Merge PR #345 (US-180), then US-181 dispatch. EP-055 US-169 PR #331 still open.
 
 ### EP-049 — Client/Customer Entity ✅ Done (#264, closed 2026-06-07)
 
