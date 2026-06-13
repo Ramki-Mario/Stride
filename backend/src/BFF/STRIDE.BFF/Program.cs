@@ -54,6 +54,9 @@ builder.Services.AddHttpClient<TenantSettingsApiClient>(client =>
 builder.Services.AddHttpClient<TenantRegistrationApiClient>(client =>
     client.BaseAddress = new Uri(hostBaseUrl));
 
+builder.Services.AddHttpClient<WebhooksApiClient>(client =>
+    client.BaseAddress = new Uri(hostBaseUrl));
+
 // ── Redis (session store) ──────────────────────────────────────────────────
 builder.Services.Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.SectionName));
 

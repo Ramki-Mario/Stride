@@ -21,4 +21,9 @@ export const administrationRoutes: Routes = [
     loadComponent: () =>
       import('./pages/audit-log-page/audit-log-page').then((m) => m.AuditLogPageComponent),
   },
+  {
+    path: 'webhooks',
+    loadComponent: () =>
+      import('../webhooks/pages/webhooks-page/webhooks-page').then((m) => m.WebhooksPageComponent),
+  },
 ];

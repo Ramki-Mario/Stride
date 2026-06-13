@@ -1,0 +1,147 @@
+<div class="wh-page">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <div class="wh-header">
+    <div>
+      <h1 class="wh-title">Webhooks</h1>
+      <p class="wh-subtitle">
+        Notify external systems when key events happen in STRIDE.
+        @if (!svc.isLoading()) {
+          · {{ svc.subscriptions().length }} endpoint{{ svc.subscriptions().length === 1 ? '' : 's' }},
+          {{ svc.activeCount() }} active
+        }
+      </p>
+    </div>
+    <button class="stride-btn stride-btn-primary" (click)="openCreate()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      New Webhook
+    </button>
+  </div>
+
+  <!-- ── States ─────────────────────────────────────────────────────────── -->
+  @if (svc.isLoading()) {
+    <div class="wh-empty">Loading…</div>
+  } @else if (svc.error()) {
+    <div class="wh-error">{{ svc.error() }}</div>
+  } @else if (svc.isEmpty()) {
+    <div class="wh-empty">
+      <p>No webhooks yet.</p>
+      <p class="wh-empty-hint">Register an endpoint to start receiving event notifications.</p>
+    </div>
+  } @else {
+
+    <!-- ── Subscription list ────────────────────────────────────────────── -->
+    <ul class="wh-list">
+      @for (sub of svc.subscriptions(); track sub.id) {
+        <li class="wh-card">
+          <div class="wh-card__main">
+            <div class="wh-card__top">
+              <span class="wh-url" [title]="sub.url">{{ sub.url }}</span>
+              <span class="wh-status" [class.wh-status--active]="sub.isActive" [class.wh-status--inactive]="!sub.isActive">
+                {{ sub.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <div class="wh-events">
+              @for (key of sub.eventTypes; track key) {
+                <span class="wh-chip">{{ labelFor(key) }}</span>
+              }
+            </div>
+            <div class="wh-meta">Created {{ sub.createdAt | date:'mediumDate' }}</div>
+
+            @if (resultFor(sub.id); as r) {
+              <div class="wh-testresult" [class.ok]="r.success" [class.fail]="!r.success">
+                @if (r.success) {
+                  ✓ Endpoint responded {{ r.statusCode }} in {{ r.elapsedMs }} ms
+                } @else {
+                  ✗ {{ r.error }}@if (r.statusCode) { (HTTP {{ r.statusCode }})}
+                }
+              </div>
+            }
+          </div>
+
+          <div class="wh-card__actions">
+            <button class="wh-action" (click)="test(sub)" [disabled]="testingId() === sub.id">
+              {{ testingId() === sub.id ? 'Testing…' : 'Test' }}
+            </button>
+            <button class="wh-action" (click)="openEdit(sub)">Edit</button>
+            <button class="wh-action" (click)="regenerate(sub)">Regenerate secret</button>
+            <button class="wh-action wh-action--danger" (click)="remove(sub)">Delete</button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>
+
+<!-- ── Create / Edit panel ────────────────────────────────────────────────── -->
+@if (editor(); as e) {
+  <div class="wh-backdrop" (click)="closeEditor()">
+    <div class="wh-panel" (click)="$event.stopPropagation()">
+      <h2 class="wh-panel__title">{{ e.mode === 'create' ? 'New Webhook' : 'Edit Webhook' }}</h2>
+
+      <label class="wh-label" for="wh-url">Endpoint URL</label>
+      <input
+        id="wh-url"
+        class="wh-input"
+        type="url"
+        placeholder="https://example.com/hooks/stride"
+        [ngModel]="e.url"
+        (ngModelChange)="setUrl($event)"
+        [disabled]="saving()"
+      />
+      <p class="wh-hint">Must be an HTTPS URL. STRIDE signs each request with HMAC-SHA256.</p>
+
+      <span class="wh-label">Events</span>
+      <div class="wh-events-grid">
+        @for (type of svc.eventTypes(); track type.key) {
+          <label class="wh-check">
+            <input type="checkbox" [checked]="isSelected(type.key)" (change)="toggleEvent(type.key)" [disabled]="saving()" />
+            <span>{{ type.label }}</span>
+            <code class="wh-check__key">{{ type.key }}</code>
+          </label>
+        }
+      </div>
+
+      @if (e.mode === 'edit') {
+        <label class="wh-check wh-check--active">
+          <input type="checkbox" [checked]="e.isActive" (change)="setActive(!e.isActive)" [disabled]="saving()" />
+          <span>Active — deactivated webhooks receive no events</span>
+        </label>
+      }
+
+      @if (formError()) {
+        <p class="wh-form-error">{{ formError() }}</p>
+      }
+
+      <div class="wh-panel__actions">
+        <button class="stride-btn" (click)="closeEditor()" [disabled]="saving()">Cancel</button>
+        <button class="stride-btn stride-btn-primary" (click)="save()" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : (e.mode === 'create' ? 'Create' : 'Save') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Secret-shown-once dialog ──────────────────────────────────────────── -->
+@if (revealedSecret(); as secret) {
+  <div class="wh-backdrop">
+    <div class="wh-panel wh-panel--secret" (click)="$event.stopPropagation()">
+      <h2 class="wh-panel__title">Signing secret</h2>
+      <p class="wh-hint">
+        Copy this secret now — it is shown only once and cannot be retrieved later.
+        Use it to verify the <code>X-STRIDE-Signature</code> header on incoming requests.
+      </p>
+      <div class="wh-secret">
+        <code class="wh-secret__value">{{ secret }}</code>
+        <button class="stride-btn" (click)="copySecret()">{{ secretCopied() ? 'Copied ✓' : 'Copy' }}</button>
+      </div>
+      <div class="wh-panel__actions">
+        <button class="stride-btn stride-btn-primary" (click)="dismissSecret()">Done</button>
+      </div>
+    </div>
+  </div>
+}
