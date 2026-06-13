@@ -6,6 +6,7 @@ import {
   signal,
   computed,
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChartModule } from 'primeng/chart';
 
@@ -13,29 +14,65 @@ import { AnalyticsService } from '../../services/analytics.service';
 import {
   AnalyticsWorkflowDefinitionDto,
   CompletionTimeAnalyticsDto,
+  RoleDto,
+  TeamMemberPerformanceDto,
+  TeamSortField,
 } from '../../models/analytics.models';
 
 @Component({
   selector: 'app-analytics-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, ChartModule],
+  imports: [DecimalPipe, FormsModule, ChartModule],
   templateUrl: './analytics-page.html',
   styleUrl: './analytics-page.scss',
 })
 export class AnalyticsPageComponent implements OnInit {
   private readonly svc = inject(AnalyticsService);
 
-  // ── Filter state ──────────────────────────────────────────────────────────
+  // ── Completion-time filter state ──────────────────────────────────────────
   readonly fromDate = signal(this.defaultFromDate());
   readonly toDate   = signal(this.defaultToDate());
   readonly selectedDefinitionId = signal<string>('');
+
+  // ── Team performance filter state ─────────────────────────────────────────
+  readonly teamFromDate = signal(this.defaultFromDate());
+  readonly teamToDate   = signal(this.defaultToDate());
+  readonly selectedRoleId = signal<string>('');
+
+  // ── Sort state ────────────────────────────────────────────────────────────
+  readonly sortField = signal<TeamSortField>('completedSteps');
+  readonly sortAsc   = signal(false);
 
   // ── Server state ──────────────────────────────────────────────────────────
   readonly definitions = signal<AnalyticsWorkflowDefinitionDto[]>([]);
   readonly analytics   = signal<CompletionTimeAnalyticsDto | null>(null);
   readonly isLoading   = signal(false);
   readonly error       = signal<string | null>(null);
+
+  readonly roles          = signal<RoleDto[]>([]);
+  readonly teamMembers    = signal<TeamMemberPerformanceDto[] | null>(null);
+  readonly isTeamLoading  = signal(false);
+  readonly teamError      = signal<string | null>(null);
+
+  // ── Sorted team leaderboard ───────────────────────────────────────────────
+  readonly sortedTeam = computed(() => {
+    const members = this.teamMembers();
+    if (!members) return [];
+    const field = this.sortField();
+    const asc   = this.sortAsc();
+
+    return [...members].sort((a, b) => {
+      const av = a[field];
+      const bv = b[field];
+      if (typeof av === 'string' && typeof bv === 'string') {
+        return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+      }
+      return asc
+        ? (av as number) - (bv as number)
+        : (bv as number) - (av as number);
+    });
+  });
 
   // ── Derived chart data ────────────────────────────────────────────────────
   readonly byDefinitionChart = computed(() => {
@@ -129,7 +166,12 @@ export class AnalyticsPageComponent implements OnInit {
       next: defs => this.definitions.set(defs),
       error: () => {},
     });
+    this.svc.getRoles().subscribe({
+      next: roles => this.roles.set(roles),
+      error: () => {},
+    });
     this.load();
+    this.loadTeam();
   }
 
   load(): void {
@@ -153,6 +195,27 @@ export class AnalyticsPageComponent implements OnInit {
     });
   }
 
+  loadTeam(): void {
+    this.isTeamLoading.set(true);
+    this.teamError.set(null);
+    this.teamMembers.set(null);
+
+    this.svc.getTeamPerformance(
+      this.teamFromDate(),
+      this.teamToDate(),
+      this.selectedRoleId() || undefined,
+    ).subscribe({
+      next: data => {
+        this.teamMembers.set(data);
+        this.isTeamLoading.set(false);
+      },
+      error: () => {
+        this.teamError.set('Failed to load team performance data.');
+        this.isTeamLoading.set(false);
+      },
+    });
+  }
+
   export(): void {
     const url = this.svc.getExportUrl(
       this.fromDate(),
@@ -160,6 +223,29 @@ export class AnalyticsPageComponent implements OnInit {
       this.selectedDefinitionId() || undefined,
     );
     window.open(url, '_self');
+  }
+
+  exportTeam(): void {
+    const url = this.svc.getTeamPerformanceExportUrl(
+      this.teamFromDate(),
+      this.teamToDate(),
+      this.selectedRoleId() || undefined,
+    );
+    window.open(url, '_self');
+  }
+
+  sortBy(field: TeamSortField): void {
+    if (this.sortField() === field) {
+      this.sortAsc.update(v => !v);
+    } else {
+      this.sortField.set(field);
+      this.sortAsc.set(false);
+    }
+  }
+
+  sortIcon(field: TeamSortField): string {
+    if (this.sortField() !== field) return 'pi-sort';
+    return this.sortAsc() ? 'pi-sort-amount-up-alt' : 'pi-sort-amount-down-alt';
   }
 
   private defaultFromDate(): string {

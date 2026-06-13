@@ -35,3 +35,14 @@ public sealed record CompletionTimeExportRowDto(
     DateTime StartedAt,
     DateTime CompletedAt,
     double   DurationMinutes);
+
+/// <summary>Per-member row in the team performance leaderboard.</summary>
+public sealed record TeamMemberPerformanceDto(
+    Guid   UserId,
+    string DisplayName,
+    string Email,
+    string Role,
+    int    CompletedSteps,
+    int    CompletedWorkflows,
+    double AvgStepDurationMinutes,
+    double OverdueRate);

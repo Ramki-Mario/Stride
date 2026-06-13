@@ -27,3 +27,28 @@ export interface CompletionTimeAnalyticsDto {
   bottlenecks:  StepBottleneckDto[];
   weeklyTrend:  CompletionTrendDto[];
 }
+
+export interface TeamMemberPerformanceDto {
+  userId:                string;
+  displayName:           string;
+  email:                 string;
+  role:                  string;
+  completedSteps:        number;
+  completedWorkflows:    number;
+  avgStepDurationMinutes: number;
+  overdueRate:           number;
+}
+
+export interface RoleDto {
+  id:          string;
+  name:        string;
+  description: string;
+}
+
+export type TeamSortField =
+  | 'displayName'
+  | 'role'
+  | 'completedSteps'
+  | 'completedWorkflows'
+  | 'avgStepDurationMinutes'
+  | 'overdueRate';

@@ -38,4 +38,15 @@ public interface IAnalyticsReadService
         DateTime  toDate,
         Guid?     workflowDefinitionId = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns per-member performance metrics for all users with at least one
+    /// completed step assigned in the given date range. Optionally filtered by role.
+    /// </summary>
+    Task<IReadOnlyList<TeamMemberPerformanceDto>> GetTeamPerformanceAsync(
+        Guid      tenantId,
+        DateTime  fromDate,
+        DateTime  toDate,
+        Guid?     roleId = null,
+        CancellationToken cancellationToken = default);
 }
