@@ -25,8 +25,9 @@ public static class WebhooksInfrastructureExtensions
         services.AddScoped<IWebhookSubscriptionRepository, WebhookSubscriptionRepository>();
         services.AddScoped<IWebhookReadService, WebhookReadService>();
         services.AddScoped<IWebhookTester, HttpWebhookTester>();
+        services.AddScoped<IWebhookDispatcher, HttpWebhookDispatcher>();
 
-        // Short, bounded timeout so a slow/unreachable endpoint never hangs the test request.
+        // Short, bounded timeout so a slow/unreachable endpoint never hangs dispatch or test requests.
         services.AddHttpClient(HttpWebhookTester.HttpClientName, client =>
             client.Timeout = TimeSpan.FromSeconds(10));
 

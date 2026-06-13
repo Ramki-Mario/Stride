@@ -3,6 +3,10 @@
   <ItemGroup>
     <ProjectReference Include="..\STRIDE.Modules.Webhooks.Domain\STRIDE.Modules.Webhooks.Domain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\STRIDE.BuildingBlocks.Application\STRIDE.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\STRIDE.BuildingBlocks.Infrastructure\STRIDE.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Workflows\STRIDE.Modules.Workflows.Domain\STRIDE.Modules.Workflows.Domain.csproj" />
+    <ProjectReference Include="..\..\Invoicing\STRIDE.Modules.Invoicing.Domain\STRIDE.Modules.Invoicing.Domain.csproj" />
+    <ProjectReference Include="..\..\Identity\STRIDE.Modules.Identity.Domain\STRIDE.Modules.Identity.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +23,9 @@
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>STRIDE.Modules.Webhooks.Application.Tests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
 
