@@ -1,0 +1,42 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import {
+  AnalyticsWorkflowDefinitionDto,
+  CompletionTimeAnalyticsDto,
+} from '../models/analytics.models';
+
+@Injectable({ providedIn: 'root' })
+export class AnalyticsService {
+  private readonly http = inject(HttpClient);
+  private readonly base = '/bff/analytics';
+
+  getWorkflowDefinitions(): Observable<AnalyticsWorkflowDefinitionDto[]> {
+    return this.http.get<AnalyticsWorkflowDefinitionDto[]>(`${this.base}/workflow-definitions`);
+  }
+
+  getCompletionTimes(
+    fromDate: string,
+    toDate: string,
+    workflowDefinitionId?: string,
+  ): Observable<CompletionTimeAnalyticsDto> {
+    let params = new HttpParams()
+      .set('fromDate', fromDate)
+      .set('toDate', toDate);
+
+    if (workflowDefinitionId) {
+      params = params.set('workflowDefinitionId', workflowDefinitionId);
+    }
+
+    return this.http.get<CompletionTimeAnalyticsDto>(
+      `${this.base}/completion-times`, { params });
+  }
+
+  getExportUrl(fromDate: string, toDate: string, workflowDefinitionId?: string): string {
+    let url = `${this.base}/completion-times/export?fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}`;
+    if (workflowDefinitionId) {
+      url += `&workflowDefinitionId=${encodeURIComponent(workflowDefinitionId)}`;
+    }
+    return url;
+  }
+}

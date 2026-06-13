@@ -61,6 +61,13 @@ export const appRoutes: Routes = [
           ),
       },
       {
+        path: 'analytics',
+        loadChildren: () =>
+          import('./features/analytics/analytics.routes').then(
+            (m) => m.analyticsRoutes
+          ),
+      },
+      {
         path: 'notifications',
         loadChildren: () =>
           import('./features/notifications/notifications.routes').then(

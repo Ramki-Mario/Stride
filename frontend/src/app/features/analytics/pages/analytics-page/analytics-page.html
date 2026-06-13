@@ -1,0 +1,99 @@
+<div class="an-page">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="an-header">
+    <div>
+      <h1 class="an-title">Completion Time Analytics</h1>
+      <p class="an-subtitle">Average workflow and step duration by type — identify bottlenecks in your processes.</p>
+    </div>
+    <button class="stride-btn" (click)="export()" [disabled]="isLoading() || !analytics()">
+      Export CSV
+    </button>
+  </div>
+
+  <!-- ── Filters ─────────────────────────────────────────────────────────── -->
+  <div class="an-filters">
+    <div class="an-filter-group">
+      <label class="an-label" for="an-from">From</label>
+      <input id="an-from" class="an-input" type="date"
+             [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" />
+    </div>
+    <div class="an-filter-group">
+      <label class="an-label" for="an-to">To</label>
+      <input id="an-to" class="an-input" type="date"
+             [ngModel]="toDate()" (ngModelChange)="toDate.set($event)" />
+    </div>
+    <div class="an-filter-group">
+      <label class="an-label" for="an-def">Workflow</label>
+      <select id="an-def" class="an-input"
+              [ngModel]="selectedDefinitionId()" (ngModelChange)="selectedDefinitionId.set($event)">
+        <option value="">All workflows</option>
+        @for (d of definitions(); track d.id) {
+          <option [value]="d.id">{{ d.name }}</option>
+        }
+      </select>
+    </div>
+    <button class="stride-btn stride-btn-primary an-apply" (click)="load()" [disabled]="isLoading()">
+      {{ isLoading() ? 'Loading…' : 'Apply' }}
+    </button>
+  </div>
+
+  <!-- ── Error ───────────────────────────────────────────────────────────── -->
+  @if (error()) {
+    <div class="an-error">{{ error() }}</div>
+  }
+
+  <!-- ── Loading skeleton ────────────────────────────────────────────────── -->
+  @if (isLoading()) {
+    <div class="an-loading">Loading analytics…</div>
+  }
+
+  <!-- ── Empty state ─────────────────────────────────────────────────────── -->
+  @if (isEmpty()) {
+    <div class="an-empty">
+      <p>No completed workflow instances found in the selected date range.</p>
+      <p class="an-empty-hint">Try expanding the date range or selecting a different workflow.</p>
+    </div>
+  }
+
+  <!-- ── Charts ──────────────────────────────────────────────────────────── -->
+  @if (!isLoading() && analytics() && !isEmpty()) {
+    <div class="an-charts">
+
+      <!-- Avg completion time by workflow definition -->
+      @if (byDefinitionChart(); as chartData) {
+        <section class="an-card">
+          <h2 class="an-card-title">Average Completion Time by Workflow</h2>
+          <p class="an-card-subtitle">Mean duration (minutes) from start to completion, per definition.</p>
+          <div class="an-chart-wrap">
+            <p-chart type="bar" [data]="chartData" [options]="barOptions" />
+          </div>
+        </section>
+      }
+
+      <!-- Step bottleneck chart -->
+      @if (bottleneckChart(); as chartData) {
+        <section class="an-card">
+          <h2 class="an-card-title">Step Bottlenecks</h2>
+          <p class="an-card-subtitle">Average time (minutes) from assignment to completion per step — longest on top.</p>
+          <div class="an-chart-wrap an-chart-wrap--tall">
+            <p-chart type="bar" [data]="chartData" [options]="horizontalBarOptions" />
+          </div>
+        </section>
+      }
+
+      <!-- Weekly trend chart -->
+      @if (trendChart(); as chartData) {
+        <section class="an-card">
+          <h2 class="an-card-title">Weekly Completion Time Trend</h2>
+          <p class="an-card-subtitle">Average completion time per week over the selected date range.</p>
+          <div class="an-chart-wrap">
+            <p-chart type="line" [data]="chartData" [options]="lineOptions" />
+          </div>
+        </section>
+      }
+
+    </div>
+  }
+
+</div>
