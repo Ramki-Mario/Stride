@@ -13,4 +13,5 @@ public enum NotificationType
     InvoiceDraftCreated,
     Mentioned,
     ApprovalRequested,
+    WebhookDeliveryExhausted,
 }

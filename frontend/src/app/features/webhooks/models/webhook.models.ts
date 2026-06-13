@@ -38,3 +38,17 @@ export interface UpdateWebhookSubscriptionRequest {
   eventTypes: string[];
   isActive:   boolean;
 }
+
+export type DeliveryStatus = 'Pending' | 'Success' | 'Failed' | 'Exhausted';
+
+export interface WebhookDeliveryDto {
+  id:            string;
+  eventType:     string;
+  status:        DeliveryStatus;
+  responseCode:  number | null;
+  responseBody:  string | null;
+  attemptCount:  number;
+  createdAt:     string;   // ISO 8601
+  lastAttemptAt: string | null;
+  nextAttemptAt: string | null;
+}

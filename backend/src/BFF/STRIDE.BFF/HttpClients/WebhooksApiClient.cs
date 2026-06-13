@@ -8,13 +8,15 @@ namespace STRIDE.BFF.HttpClients;
 /// Typed HttpClient for the Webhooks module surface of STRIDE.Host.
 ///
 /// BFF route → Host route mapping:
-///   GET    /bff/webhooks/event-types                       → GET    /api/webhooks/event-types
-///   GET    /bff/webhooks/subscriptions                     → GET    /api/webhooks/subscriptions
-///   POST   /bff/webhooks/subscriptions                     → POST   /api/webhooks/subscriptions
-///   PUT    /bff/webhooks/subscriptions/{id}                → PUT    /api/webhooks/subscriptions/{id}
-///   DELETE /bff/webhooks/subscriptions/{id}                → DELETE /api/webhooks/subscriptions/{id}
-///   POST   /bff/webhooks/subscriptions/{id}/test           → POST   /api/webhooks/subscriptions/{id}/test
-///   POST   /bff/webhooks/subscriptions/{id}/regenerate-secret → POST /api/webhooks/subscriptions/{id}/regenerate-secret
+///   GET    /bff/webhooks/event-types                                  → GET    /api/webhooks/event-types
+///   GET    /bff/webhooks/subscriptions                                 → GET    /api/webhooks/subscriptions
+///   POST   /bff/webhooks/subscriptions                                 → POST   /api/webhooks/subscriptions
+///   PUT    /bff/webhooks/subscriptions/{id}                            → PUT    /api/webhooks/subscriptions/{id}
+///   DELETE /bff/webhooks/subscriptions/{id}                            → DELETE /api/webhooks/subscriptions/{id}
+///   POST   /bff/webhooks/subscriptions/{id}/test                       → POST   /api/webhooks/subscriptions/{id}/test
+///   POST   /bff/webhooks/subscriptions/{id}/regenerate-secret          → POST   /api/webhooks/subscriptions/{id}/regenerate-secret
+///   GET    /bff/webhooks/subscriptions/{id}/deliveries                 → GET    /api/webhooks/subscriptions/{id}/deliveries
+///   POST   /bff/webhooks/subscriptions/{id}/deliveries/{dId}/retry     → POST   /api/webhooks/subscriptions/{id}/deliveries/{dId}/retry
 /// </summary>
 public sealed class WebhooksApiClient
 {
@@ -42,6 +44,12 @@ public sealed class WebhooksApiClient
 
     public Task<HttpResponseMessage> RegenerateSecretAsync(Guid id, string token, CancellationToken cancellationToken = default)
         => _client.SendAsync(BuildWithBody(HttpMethod.Post, $"/api/webhooks/subscriptions/{id}/regenerate-secret", null, token), cancellationToken);
+
+    public Task<HttpResponseMessage> GetDeliveriesAsync(Guid id, int limit, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, $"/api/webhooks/subscriptions/{id}/deliveries?limit={limit}", token), cancellationToken);
+
+    public Task<HttpResponseMessage> RetryDeliveryAsync(Guid id, Guid deliveryId, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Post, $"/api/webhooks/subscriptions/{id}/deliveries/{deliveryId}/retry", null, token), cancellationToken);
 
     // ── helpers ──────────────────────────────────────────────────────────────
 

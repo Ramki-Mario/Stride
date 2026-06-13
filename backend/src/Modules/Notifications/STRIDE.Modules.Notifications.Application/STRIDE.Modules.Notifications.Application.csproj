@@ -5,6 +5,7 @@
     <ProjectReference Include="..\..\..\BuildingBlocks\STRIDE.BuildingBlocks.Application\STRIDE.BuildingBlocks.Application.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\STRIDE.BuildingBlocks.Infrastructure\STRIDE.BuildingBlocks.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Workflows\STRIDE.Modules.Workflows.Domain\STRIDE.Modules.Workflows.Domain.csproj" />
+    <ProjectReference Include="..\..\Webhooks\STRIDE.Modules.Webhooks.Domain\STRIDE.Modules.Webhooks.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

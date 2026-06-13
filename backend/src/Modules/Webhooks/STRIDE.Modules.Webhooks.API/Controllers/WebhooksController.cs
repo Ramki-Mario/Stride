@@ -7,8 +7,10 @@ using STRIDE.Modules.Webhooks.API.DTOs;
 using STRIDE.Modules.Webhooks.Application.Commands.CreateWebhookSubscription;
 using STRIDE.Modules.Webhooks.Application.Commands.DeleteWebhookSubscription;
 using STRIDE.Modules.Webhooks.Application.Commands.RegenerateWebhookSecret;
+using STRIDE.Modules.Webhooks.Application.Commands.RetryWebhookDelivery;
 using STRIDE.Modules.Webhooks.Application.Commands.TestWebhookSubscription;
 using STRIDE.Modules.Webhooks.Application.Commands.UpdateWebhookSubscription;
+using STRIDE.Modules.Webhooks.Application.Queries.GetWebhookDeliveries;
 using STRIDE.Modules.Webhooks.Application.Queries.GetWebhookEventTypes;
 using STRIDE.Modules.Webhooks.Application.Queries.GetWebhookSubscriptions;
 
@@ -17,13 +19,15 @@ namespace STRIDE.Modules.Webhooks.API.Controllers;
 /// <summary>
 /// Tenant webhook subscription management (admin only — maps to the tenant.settings capability).
 ///
-///   GET    /api/webhooks/event-types                       — subscribable event catalog
-///   GET    /api/webhooks/subscriptions                     — list subscriptions (no secrets)
-///   POST   /api/webhooks/subscriptions                     — create (returns signing secret once)
-///   PUT    /api/webhooks/subscriptions/{id}                — update
-///   DELETE /api/webhooks/subscriptions/{id}                — soft-delete
-///   POST   /api/webhooks/subscriptions/{id}/test           — fire a sample ping
-///   POST   /api/webhooks/subscriptions/{id}/regenerate-secret — rotate the signing secret
+///   GET    /api/webhooks/event-types                                  — subscribable event catalog
+///   GET    /api/webhooks/subscriptions                                 — list subscriptions (no secrets)
+///   POST   /api/webhooks/subscriptions                                 — create (returns signing secret once)
+///   PUT    /api/webhooks/subscriptions/{id}                            — update
+///   DELETE /api/webhooks/subscriptions/{id}                            — soft-delete
+///   POST   /api/webhooks/subscriptions/{id}/test                       — fire a sample ping
+///   POST   /api/webhooks/subscriptions/{id}/regenerate-secret          — rotate the signing secret
+///   GET    /api/webhooks/subscriptions/{id}/deliveries                 — delivery log (last 50)
+///   POST   /api/webhooks/subscriptions/{id}/deliveries/{dId}/retry     — manually retry exhausted delivery
 /// </summary>
 [ApiController]
 [Authorize(Roles = "Admin")]
@@ -127,5 +131,32 @@ public sealed class WebhooksController : ControllerBase
         return result.IsSuccess
             ? Ok(result.Value)
             : NotFound(new ProblemDetails { Title = "Could not regenerate secret", Detail = result.Error });
+    }
+
+    [HttpGet("subscriptions/{id:guid}/deliveries")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDeliveries(
+        Guid id, [FromQuery] int limit = 50, CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(
+            new GetWebhookDeliveriesQuery(_tenantContext.TenantId, id, Math.Clamp(limit, 1, 200)),
+            cancellationToken);
+
+        return Ok(result.Value);
+    }
+
+    [HttpPost("subscriptions/{id:guid}/deliveries/{deliveryId:guid}/retry")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RetryDelivery(
+        Guid id, Guid deliveryId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new RetryWebhookDeliveryCommand(_tenantContext.TenantId, id, deliveryId),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? NoContent()
+            : BadRequest(new ProblemDetails { Title = "Could not retry delivery", Detail = result.Error });
     }
 }

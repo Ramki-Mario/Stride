@@ -18,7 +18,7 @@ public sealed class WebhooksDbContextFactory : IDesignTimeDbContextFactory<Webho
                 sql => sql.MigrationsAssembly(typeof(WebhooksDbContext).Assembly.FullName))
             .Options;
 
-        // Migrations never read/write real secret values, so a pass-through protector is sufficient.
+        // Migrations never read/write real secret values; no publisher needed at design time.
         return new WebhooksDbContext(options, new PassThroughProtector());
     }
 

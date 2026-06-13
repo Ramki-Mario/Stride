@@ -6,6 +6,7 @@ import {
   WebhookSecretDto,
   WebhookEventTypeDto,
   WebhookTestResult,
+  WebhookDeliveryDto,
   CreateWebhookSubscriptionRequest,
   UpdateWebhookSubscriptionRequest,
 } from '../models/webhook.models';
@@ -69,5 +70,14 @@ export class WebhookService {
 
   regenerateSecret(id: string): Observable<WebhookSecretDto> {
     return this.http.post<WebhookSecretDto>(`${this.base}/subscriptions/${id}/regenerate-secret`, {});
+  }
+
+  getDeliveries(id: string, limit = 50): Observable<WebhookDeliveryDto[]> {
+    return this.http.get<WebhookDeliveryDto[]>(`${this.base}/subscriptions/${id}/deliveries?limit=${limit}`);
+  }
+
+  retryDelivery(subscriptionId: string, deliveryId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.base}/subscriptions/${subscriptionId}/deliveries/${deliveryId}/retry`, {});
   }
 }

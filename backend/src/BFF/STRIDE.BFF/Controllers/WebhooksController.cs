@@ -15,6 +15,8 @@ namespace STRIDE.BFF.Controllers;
 ///   DELETE /bff/webhooks/subscriptions/{id}
 ///   POST   /bff/webhooks/subscriptions/{id}/test
 ///   POST   /bff/webhooks/subscriptions/{id}/regenerate-secret
+///   GET    /bff/webhooks/subscriptions/{id}/deliveries
+///   POST   /bff/webhooks/subscriptions/{id}/deliveries/{deliveryId}/retry
 /// </summary>
 [ApiController]
 [Authorize]
@@ -89,6 +91,24 @@ public sealed class WebhooksController : ControllerBase
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
         return await ProxyAsync(await _webhooks.RegenerateSecretAsync(id, token, cancellationToken), cancellationToken);
+    }
+
+    [HttpGet("subscriptions/{id:guid}/deliveries")]
+    public async Task<IActionResult> GetDeliveries(
+        Guid id, [FromQuery] int limit = 50, CancellationToken cancellationToken = default)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(await _webhooks.GetDeliveriesAsync(id, limit, token, cancellationToken), cancellationToken);
+    }
+
+    [HttpPost("subscriptions/{id:guid}/deliveries/{deliveryId:guid}/retry")]
+    public async Task<IActionResult> RetryDelivery(Guid id, Guid deliveryId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        var response = await _webhooks.RetryDeliveryAsync(id, deliveryId, token, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

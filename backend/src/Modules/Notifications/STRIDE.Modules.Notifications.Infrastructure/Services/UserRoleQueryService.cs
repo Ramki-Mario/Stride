@@ -37,4 +37,29 @@ internal sealed class UserRoleQueryService : IUserRoleQueryService
 
         return userIds.ToList().AsReadOnly();
     }
+
+    public async Task<IReadOnlyList<Guid>> GetUsersByRoleNameAsync(
+        string roleName,
+        Guid tenantId,
+        CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            SELECT ur.UserId
+            FROM   [identity].[UserRoles]  ur
+            JOIN   [identity].[Users]      u  ON u.Id       = ur.UserId
+            JOIN   [identity].[Roles]      r  ON r.Id       = ur.RoleId
+            WHERE  ur.TenantId  = @TenantId
+              AND  r.Name       = @RoleName
+              AND  ur.IsDeleted = 0
+              AND  u.IsActive   = 1
+              AND  u.IsDeleted  = 0
+            """;
+
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
+        var userIds = await conn.QueryAsync<Guid>(
+            new CommandDefinition(sql, new { TenantId = tenantId, RoleName = roleName },
+                cancellationToken: cancellationToken));
+
+        return userIds.ToList().AsReadOnly();
+    }
 }
