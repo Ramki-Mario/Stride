@@ -1107,7 +1107,7 @@ EP-036 (Invoicing)             ← parallel with EP-037 after EP-035 done
 | EP-055 Mobile-First Experience | US-168 (#298) / US-169 (#299) / US-170 (#300) | — | [ ] Next |
 | EP-056 Approval Gates | US-171 (#301) / US-172 (#302) / US-173 (#303) | #333 #334 #335 | [x] Done — 2026-06-09 |
 | EP-057 Actionable Dashboard | US-174 (#304) / US-175 (#305) / US-176 (#306) | #336 #337 #338 | [x] Done — 2026-06-12 |
-| EP-058 External Customer-Facing Link | US-177 (#307) / US-178 (#308) / US-179 (#309) | #341 #342 | [-] In Progress — US-177 ✅, US-178 PR #342 🔵 In Review |
+| EP-058 External Customer-Facing Link | US-177 (#307) / US-178 (#308) / US-179 (#309) | #341 #342 #343 | [x] Done — US-177 ✅ US-178 ✅ US-179 PR #343 🔵 In Review |
 | EP-059–EP-061 | per board | — | [ ] Backlog |
 | EP-062 Teams / Dept Entity (extra) | US-187 (#326) / US-188 (#328) / US-189 (#329) | #323 #324 #325 | [x] Done — 2026-06-09 |
 

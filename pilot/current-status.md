@@ -313,9 +313,17 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
   - `PublicJobViewDto`: redacted — no user IDs, billable amounts, assignees, field values, failure reasons
   - Angular `/job/:token` route — no authGuard, no app shell; `PublicJobPageComponent` with loading skeleton, 410 Gone state, step timeline (check/dot indicators), status + SLA badges
   - Tests: +6 in Workflows.Application (total 181/181); also committed previously-untracked US-177 shared-link tests (20 tests)
-- US-179 Client sign-off + invoice view via link — ⏳ Pending
+- US-179 Client sign-off + invoice view via link — PR #343 🔵 In Review (branch `feat/EP-058/US-179-client-signoff`, commit `b2f2c63`)
+  - Domain: `SharedWorkflowLink` + `SignedOffAt`/`SignedOffBy` + `SignOff(clientName)` (idempotent); EF migration `AddSignOffToSharedWorkflowLinks`
+  - Application: `SignOffPublicJobCommand` + handler + validator; `IPublicInvoiceService` (cross-schema Dapper); `PublicJobViewDto` extended with sign-off + invoice fields
+  - Infrastructure: `PublicInvoiceService` (Dapper cross-schema `invoicing.Invoices` by `WorkflowInstanceId`); registered in `WorkflowsInfrastructureExtensions`
+  - Host: `POST /api/public/jobs/{token}/signoff` [AllowAnonymous]; BFF proxy `PostPublicSignOffAsync` + `POST /bff/public/jobs/{token}/signoff`
+  - Frontend: sign-off modal (name input, idempotent confirm), signed-off banner, invoice section (number/status/line items/total/due date)
+  - Tests: 7 new `SignOffPublicJobCommandHandlerTests`; 188 Workflows.Application tests pass
 
-**Next:** Merge PR #342 (US-178). Then US-179. EP-055 US-169 PR #331 still open.
+**EP-058 ✅ COMPLETE** — all 3 stories done (US-177 ✅, US-178 ✅, US-179 🔵 In Review)
+
+**Next:** Merge PR #343 (US-179). EP-055 US-169 PR #331 still open. Then EP-059 Webhooks or EP-060 Analytics.
 
 ### EP-049 — Client/Customer Entity ✅ Done (#264, closed 2026-06-07)
 
