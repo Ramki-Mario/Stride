@@ -21,17 +21,16 @@ FROM (
             PARTITION BY si.AssigneeId
             ORDER BY si.IsOverdue DESC, ISNULL(si.DueAt, '9999-12-31') ASC
         )                                    AS RowNum
-    FROM workflows.StepInstances si
-    INNER JOIN workflows.WorkflowInstances wi
+    FROM [workflows].[StepInstances] si
+    INNER JOIN [workflows].[WorkflowInstances] wi
         ON  wi.Id        = si.WorkflowInstanceId
         AND wi.IsDeleted = 0
-    INNER JOIN identity.Users u
+    INNER JOIN [identity].[Users] u
         ON  u.Id        = si.AssigneeId
         AND u.TenantId  = @TenantId
         AND u.IsDeleted = 0
         AND u.IsActive  = 1
     WHERE si.TenantId  = @TenantId
-      AND si.IsDeleted = 0
       AND si.Status IN ('Assigned', 'InProgress', 'Pending')
 ) ranked
 WHERE ranked.RowNum <= 3

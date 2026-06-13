@@ -8,7 +8,7 @@ SELECT
     wi.WorkflowName,
     wi.Status          AS WorkflowStatus,
     c.Name             AS ClientName,
-    0                  AS IsApprovalTask
+    CAST(0 AS BIT)     AS IsApprovalTask
 FROM   [workflows].[StepInstances]    si
 JOIN   [workflows].[WorkflowInstances] wi ON wi.Id = si.WorkflowInstanceId
 LEFT JOIN [clients].[Clients]         c  ON c.Id  = wi.ClientId
@@ -31,7 +31,7 @@ SELECT
     wi.WorkflowName,
     wi.Status          AS WorkflowStatus,
     c.Name             AS ClientName,
-    1                  AS IsApprovalTask
+    CAST(1 AS BIT)     AS IsApprovalTask
 FROM   [workflows].[StepInstances]     si
 JOIN   [workflows].[WorkflowInstances] wi ON wi.Id  = si.WorkflowInstanceId
 JOIN   [workflows].[ApprovalRequests]  ar ON ar.StepInstanceId = si.Id

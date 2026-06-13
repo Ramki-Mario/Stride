@@ -44,7 +44,7 @@ Angular SPA (frontend/) → BFF (STRIDE.BFF) → Host API (STRIDE.Host)
                                         Notifications | Reporting | Scheduling |
                                         Administration)
                                     ↕
-                               SQL Server (local: LAPTOP-417EMKN1\SQLEXPRESS)
+                               SQL Server (local: LAPTOP-417EMKN1\SQLEXPRESS2025)
                                Redis Cloud (sessions + cache)
 ```
 
@@ -77,7 +77,7 @@ tests/
 
 | Item | Value |
 |---|---|
-| SQL Server | `LAPTOP-417EMKN1\SQLEXPRESS`, DB = `STRIDE`, Windows Auth |
+| SQL Server | `LAPTOP-417EMKN1\SQLEXPRESS2025`, DB = `STRIDE`, Windows Auth |
 | Redis | Redis Cloud: `redis-18113.crce300.ap-south-1-2.ec2.cloud.redislabs.com:18113` |
 | Backend port | `http://localhost:5001` (Host) |
 | BFF port | `http://localhost:5000` |
@@ -86,7 +86,7 @@ tests/
 
 **Connection string (Host appsettings.Development.json — NEVER commit passwords):**
 ```
-Server=LAPTOP-417EMKN1\SQLEXPRESS;Database=STRIDE;Integrated Security=true;TrustServerCertificate=true;
+Server=LAPTOP-417EMKN1\SQLEXPRESS2025;Database=STRIDE;Integrated Security=true;TrustServerCertificate=true;
 ```
 
 ### EF Migration Command
