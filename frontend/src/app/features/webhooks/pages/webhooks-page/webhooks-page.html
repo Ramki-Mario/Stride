@@ -68,8 +68,71 @@
             </button>
             <button class="wh-action" (click)="openEdit(sub)">Edit</button>
             <button class="wh-action" (click)="regenerate(sub)">Regenerate secret</button>
+            <button class="wh-action wh-action--log" (click)="toggleDeliveries(sub)">
+              {{ deliverySubId() === sub.id ? 'Hide log' : 'Delivery log' }}
+            </button>
             <button class="wh-action wh-action--danger" (click)="remove(sub)">Delete</button>
           </div>
+
+          <!-- ── Delivery log (expandable) ─────────────────────────────── -->
+          @if (deliverySubId() === sub.id) {
+            <div class="wh-deliveries">
+              @if (deliveriesLoading()) {
+                <p class="wh-deliveries__loading">Loading delivery history…</p>
+              } @else if (deliveries().length === 0) {
+                <p class="wh-deliveries__empty">No deliveries recorded yet.</p>
+              } @else {
+                <table class="wh-dl-table">
+                  <thead>
+                    <tr>
+                      <th>Event</th>
+                      <th>Status</th>
+                      <th>HTTP</th>
+                      <th>Attempts</th>
+                      <th>Created</th>
+                      <th>Last attempt</th>
+                      <th>Next retry</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (d of deliveries(); track d.id) {
+                      <tr>
+                        <td><code class="wh-event-code">{{ d.eventType }}</code></td>
+                        <td>
+                          <span class="wh-dl-status wh-dl-status--{{ d.status.toLowerCase() }}">
+                            {{ statusLabel(d.status) }}
+                          </span>
+                        </td>
+                        <td>{{ d.responseCode ?? '—' }}</td>
+                        <td>{{ d.attemptCount }}</td>
+                        <td>{{ d.createdAt | date:'short' }}</td>
+                        <td>{{ d.lastAttemptAt ? (d.lastAttemptAt | date:'short') : '—' }}</td>
+                        <td>{{ d.nextAttemptAt ? (d.nextAttemptAt | date:'shortTime') : '—' }}</td>
+                        <td>
+                          @if (d.status === 'Exhausted') {
+                            <button
+                              class="wh-action wh-action--sm"
+                              [disabled]="retryingId() === d.id"
+                              (click)="retryDelivery(sub, d)">
+                              {{ retryingId() === d.id ? '…' : 'Retry now' }}
+                            </button>
+                          }
+                        </td>
+                      </tr>
+                      @if (d.responseBody) {
+                        <tr class="wh-dl-body-row">
+                          <td colspan="8">
+                            <pre class="wh-dl-body">{{ d.responseBody }}</pre>
+                          </td>
+                        </tr>
+                      }
+                    }
+                  </tbody>
+                </table>
+              }
+            </div>
+          }
         </li>
       }
     </ul>

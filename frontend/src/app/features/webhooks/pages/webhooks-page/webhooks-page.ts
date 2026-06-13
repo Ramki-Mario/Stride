@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 
 import { WebhookService } from '../../services/webhook.service';
 import {
+  WebhookDeliveryDto,
   WebhookSubscriptionDto,
   WebhookTestResult,
 } from '../../models/webhook.models';
@@ -45,6 +46,12 @@ export class WebhooksPageComponent implements OnInit {
   // ── Per-row test feedback ─────────────────────────────────────────────────
   readonly testingId   = signal<string | null>(null);
   readonly testResults = signal<Record<string, WebhookTestResult>>({});
+
+  // ── Delivery log ──────────────────────────────────────────────────────────
+  readonly deliverySubId   = signal<string | null>(null);
+  readonly deliveries      = signal<WebhookDeliveryDto[]>([]);
+  readonly deliveriesLoading = signal(false);
+  readonly retryingId      = signal<string | null>(null);
 
   ngOnInit(): void {
     this.svc.loadEventTypes();
@@ -194,5 +201,50 @@ export class WebhooksPageComponent implements OnInit {
 
   resultFor(id: string): WebhookTestResult | undefined {
     return this.testResults()[id];
+  }
+
+  // ── Delivery log ──────────────────────────────────────────────────────────
+
+  toggleDeliveries(sub: WebhookSubscriptionDto): void {
+    if (this.deliverySubId() === sub.id) {
+      this.deliverySubId.set(null);
+      this.deliveries.set([]);
+      return;
+    }
+
+    this.deliverySubId.set(sub.id);
+    this.deliveries.set([]);
+    this.deliveriesLoading.set(true);
+
+    this.svc.getDeliveries(sub.id).subscribe({
+      next: list => {
+        this.deliveries.set(list);
+        this.deliveriesLoading.set(false);
+      },
+      error: () => this.deliveriesLoading.set(false),
+    });
+  }
+
+  retryDelivery(sub: WebhookSubscriptionDto, delivery: WebhookDeliveryDto): void {
+    this.retryingId.set(delivery.id);
+    this.svc.retryDelivery(sub.id, delivery.id).subscribe({
+      next: () => {
+        this.retryingId.set(null);
+        // Reload the delivery list to reflect the new Pending status.
+        this.svc.getDeliveries(sub.id).subscribe({
+          next: list => this.deliveries.set(list),
+        });
+      },
+      error: () => this.retryingId.set(null),
+    });
+  }
+
+  statusLabel(status: string): string {
+    switch (status) {
+      case 'Success':   return '✓ Success';
+      case 'Failed':    return '↻ Failed';
+      case 'Exhausted': return '✗ Exhausted';
+      default:          return '⋯ Pending';
+    }
   }
 }

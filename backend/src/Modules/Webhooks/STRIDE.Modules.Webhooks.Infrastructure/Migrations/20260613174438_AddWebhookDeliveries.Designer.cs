@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using STRIDE.Modules.Webhooks.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using STRIDE.Modules.Webhooks.Infrastructure.Persistence;
 namespace STRIDE.Modules.Webhooks.Infrastructure.Migrations
 {
     [DbContext(typeof(WebhooksDbContext))]
-    partial class WebhooksDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260613174438_AddWebhookDeliveries")]
+    partial class AddWebhookDeliveries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

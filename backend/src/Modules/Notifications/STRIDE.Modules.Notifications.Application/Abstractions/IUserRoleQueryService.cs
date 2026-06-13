@@ -11,4 +11,13 @@ public interface IUserRoleQueryService
         Guid roleId,
         Guid tenantId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns active users in the tenant whose role name matches <paramref name="roleName"/>
+    /// (case-insensitive). Used when a specific role Guid is not available (e.g. "Admin").
+    /// </summary>
+    Task<IReadOnlyList<Guid>> GetUsersByRoleNameAsync(
+        string roleName,
+        Guid tenantId,
+        CancellationToken cancellationToken = default);
 }
