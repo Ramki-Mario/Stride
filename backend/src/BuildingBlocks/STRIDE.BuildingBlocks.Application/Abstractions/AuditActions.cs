@@ -37,4 +37,10 @@ public static class AuditActions
     public const string TeamUpdated     = "team.updated";
     public const string TeamDeactivated = "team.deactivated";
     public const string TeamReactivated = "team.reactivated";
+
+    // ── Webhooks ──────────────────────────────────────────────────────────────
+    public const string WebhookCreated          = "webhook.created";
+    public const string WebhookUpdated          = "webhook.updated";
+    public const string WebhookDeleted          = "webhook.deleted";
+    public const string WebhookSecretRegenerated = "webhook.secret_regenerated";
 }
