@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import {
   AnalyticsWorkflowDefinitionDto,
   CompletionTimeAnalyticsDto,
+  RevenueAnalyticsDto,
   RoleDto,
   TeamMemberPerformanceDto,
 } from '../models/analytics.models';
@@ -69,5 +70,16 @@ export class AnalyticsService {
       url += `&roleId=${encodeURIComponent(roleId)}`;
     }
     return url;
+  }
+
+  getRevenueAnalytics(fromDate: string, toDate: string): Observable<RevenueAnalyticsDto> {
+    const params = new HttpParams()
+      .set('fromDate', fromDate)
+      .set('toDate', toDate);
+    return this.http.get<RevenueAnalyticsDto>(`${this.base}/revenue`, { params });
+  }
+
+  getRevenueExportUrl(fromDate: string, toDate: string): string {
+    return `${this.base}/revenue/export?fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}`;
   }
 }

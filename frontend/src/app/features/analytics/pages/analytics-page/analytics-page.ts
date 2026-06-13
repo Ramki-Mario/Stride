@@ -14,6 +14,7 @@ import { AnalyticsService } from '../../services/analytics.service';
 import {
   AnalyticsWorkflowDefinitionDto,
   CompletionTimeAnalyticsDto,
+  RevenueAnalyticsDto,
   RoleDto,
   TeamMemberPerformanceDto,
   TeamSortField,
@@ -55,6 +56,13 @@ export class AnalyticsPageComponent implements OnInit {
   readonly isTeamLoading  = signal(false);
   readonly teamError      = signal<string | null>(null);
 
+  // ── Revenue state ─────────────────────────────────────────────────────────
+  readonly revenueFromDate   = signal(this.defaultFromDate());
+  readonly revenueToDate     = signal(this.defaultToDate());
+  readonly revenue           = signal<RevenueAnalyticsDto | null>(null);
+  readonly isRevenueLoading  = signal(false);
+  readonly revenueError      = signal<string | null>(null);
+
   // ── Sorted team leaderboard ───────────────────────────────────────────────
   readonly sortedTeam = computed(() => {
     const members = this.teamMembers();
@@ -72,6 +80,53 @@ export class AnalyticsPageComponent implements OnInit {
         ? (av as number) - (bv as number)
         : (bv as number) - (av as number);
     });
+  });
+
+  // ── Revenue computed ──────────────────────────────────────────────────────
+  readonly revenueMonthlyChart = computed(() => {
+    const d = this.revenue();
+    if (!d?.monthlyTrend.length) return null;
+    return {
+      labels: d.monthlyTrend.map(m => m.monthStart.slice(0, 7)), // YYYY-MM
+      datasets: [
+        {
+          label:           'Paid',
+          data:            d.monthlyTrend.map(m => Number(m.paidAmount.toFixed(2))),
+          backgroundColor: 'rgba(22, 163, 74, 0.8)',
+          borderColor:     '#16a34a',
+          borderWidth:     1,
+        },
+        {
+          label:           'Outstanding',
+          data:            d.monthlyTrend.map(m => Number((m.invoicedAmount - m.paidAmount).toFixed(2))),
+          backgroundColor: 'rgba(234, 88, 12, 0.7)',
+          borderColor:     '#ea580c',
+          borderWidth:     1,
+        },
+      ],
+    };
+  });
+
+  readonly revenueWorkflowTypeChart = computed(() => {
+    const d = this.revenue();
+    if (!d?.byWorkflowType.length) return null;
+    const palette = [
+      'rgba(124, 58, 237, 0.8)',
+      'rgba(22, 163, 74, 0.8)',
+      'rgba(234, 88, 12, 0.8)',
+      'rgba(59, 130, 246, 0.8)',
+      'rgba(245, 158, 11, 0.8)',
+      'rgba(239, 68, 68, 0.8)',
+    ];
+    return {
+      labels: d.byWorkflowType.map(w => w.workflowType),
+      datasets: [{
+        data:            d.byWorkflowType.map(w => Number(w.totalAmount.toFixed(2))),
+        backgroundColor: d.byWorkflowType.map((_, i) => palette[i % palette.length]),
+        borderWidth:     2,
+        borderColor:     '#fff',
+      }],
+    };
   });
 
   // ── Derived chart data ────────────────────────────────────────────────────
@@ -161,6 +216,23 @@ export class AnalyticsPageComponent implements OnInit {
     },
   };
 
+  readonly stackedBarOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' as const } },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Amount' } },
+    },
+  };
+
+  readonly doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'right' as const } },
+    cutout: '60%',
+  };
+
   ngOnInit(): void {
     this.svc.getWorkflowDefinitions().subscribe({
       next: defs => this.definitions.set(defs),
@@ -172,6 +244,7 @@ export class AnalyticsPageComponent implements OnInit {
     });
     this.load();
     this.loadTeam();
+    this.loadRevenue();
   }
 
   load(): void {
@@ -223,6 +296,29 @@ export class AnalyticsPageComponent implements OnInit {
       this.selectedDefinitionId() || undefined,
     );
     window.open(url, '_self');
+  }
+
+  loadRevenue(): void {
+    this.isRevenueLoading.set(true);
+    this.revenueError.set(null);
+    this.revenue.set(null);
+
+    this.svc.getRevenueAnalytics(this.revenueFromDate(), this.revenueToDate()).subscribe({
+      next: data => {
+        this.revenue.set(data);
+        this.isRevenueLoading.set(false);
+      },
+      error: () => {
+        this.revenueError.set('Failed to load revenue data.');
+        this.isRevenueLoading.set(false);
+      },
+    });
+  }
+
+  exportRevenue(): void {
+    window.open(
+      this.svc.getRevenueExportUrl(this.revenueFromDate(), this.revenueToDate()),
+      '_self');
   }
 
   exportTeam(): void {

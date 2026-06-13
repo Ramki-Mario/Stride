@@ -35,6 +35,22 @@ internal sealed class AnalyticsReadService : IAnalyticsReadService
         SqlLoader.Load(typeof(AnalyticsReadService).Assembly,
             "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetTeamPerformance.sql");
 
+    private static readonly string SqlGetRevenueMonthlyTrend =
+        SqlLoader.Load(typeof(AnalyticsReadService).Assembly,
+            "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetRevenueMonthlyTrend.sql");
+
+    private static readonly string SqlGetRevenueByWorkflowType =
+        SqlLoader.Load(typeof(AnalyticsReadService).Assembly,
+            "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetRevenueByWorkflowType.sql");
+
+    private static readonly string SqlGetRevenueByClient =
+        SqlLoader.Load(typeof(AnalyticsReadService).Assembly,
+            "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetRevenueByClient.sql");
+
+    private static readonly string SqlGetRevenueExport =
+        SqlLoader.Load(typeof(AnalyticsReadService).Assembly,
+            "STRIDE.Modules.Reporting.Infrastructure.ReadModels.Queries.GetRevenueExport.sql");
+
     private readonly IDbConnectionFactory _db;
 
     public AnalyticsReadService(IDbConnectionFactory db) => _db = db;
@@ -116,6 +132,38 @@ internal sealed class AnalyticsReadService : IAnalyticsReadService
                 ToDate   = toDate,
                 RoleId   = roleId,
             },
+            cancellationToken);
+    }
+
+    public async Task<(IReadOnlyList<RevenueMonthlyDto> Monthly,
+                       IReadOnlyList<RevenueByWorkflowTypeDto> ByWorkflowType,
+                       IReadOnlyList<RevenueByClientDto> ByClient)>
+        GetRevenueAsync(
+            Guid      tenantId,
+            DateTime  fromDate,
+            DateTime  toDate,
+            CancellationToken cancellationToken = default)
+    {
+        var param = new { TenantId = tenantId, FromDate = fromDate, ToDate = toDate };
+
+        var monthlyTask      = QueryListAsync<RevenueMonthlyDto>(SqlGetRevenueMonthlyTrend,  param, cancellationToken);
+        var byWorkflowTask   = QueryListAsync<RevenueByWorkflowTypeDto>(SqlGetRevenueByWorkflowType, param, cancellationToken);
+        var byClientTask     = QueryListAsync<RevenueByClientDto>(SqlGetRevenueByClient,     param, cancellationToken);
+
+        await Task.WhenAll(monthlyTask, byWorkflowTask, byClientTask);
+
+        return (await monthlyTask, await byWorkflowTask, await byClientTask);
+    }
+
+    public async Task<IReadOnlyList<RevenueExportRowDto>> GetRevenueExportAsync(
+        Guid      tenantId,
+        DateTime  fromDate,
+        DateTime  toDate,
+        CancellationToken cancellationToken = default)
+    {
+        return await QueryListAsync<RevenueExportRowDto>(
+            SqlGetRevenueExport,
+            new { TenantId = tenantId, FromDate = fromDate, ToDate = toDate },
             cancellationToken);
     }
 

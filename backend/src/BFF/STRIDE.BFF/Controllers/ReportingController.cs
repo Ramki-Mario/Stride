@@ -160,6 +160,45 @@ public sealed class ReportingController : ControllerBase
         return await ProxyJsonResponseAsync(response, cancellationToken: cancellationToken);
     }
 
+    /// <summary>GET /bff/analytics/revenue</summary>
+    [HttpGet("/bff/analytics/revenue")]
+    public async Task<IActionResult> GetRevenueAnalytics(
+        [FromQuery] string fromDate,
+        [FromQuery] string toDate,
+        CancellationToken cancellationToken = default)
+    {
+        var token = await GetAccessTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _reporting.GetRevenueAnalyticsAsync(
+            fromDate, toDate, token, cancellationToken);
+        return await ProxyJsonResponseAsync(response, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>GET /bff/analytics/revenue/export — streams CSV to browser.</summary>
+    [HttpGet("/bff/analytics/revenue/export")]
+    public async Task<IActionResult> ExportRevenue(
+        [FromQuery] string fromDate,
+        [FromQuery] string toDate,
+        CancellationToken cancellationToken = default)
+    {
+        var token = await GetAccessTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _reporting.ExportRevenueAsync(
+            fromDate, toDate, token, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+            return StatusCode((int)response.StatusCode);
+
+        var content     = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+        var contentType = response.Content.Headers.ContentType?.ToString() ?? "text/csv; charset=utf-8";
+        var fileName    = response.Content.Headers.ContentDisposition?.FileName
+                          ?? $"revenue-{fromDate}-to-{toDate}.csv";
+
+        return File(content, contentType, fileName);
+    }
+
     /// <summary>GET /bff/analytics/team/performance</summary>
     [HttpGet("/bff/analytics/team/performance")]
     public async Task<IActionResult> GetTeamPerformance(
