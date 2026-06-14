@@ -34,10 +34,13 @@ internal sealed class SendGridEmailSender : IEmailSender
 
         if (!response.IsSuccessStatusCode)
         {
-            var body = await response.Body.ReadAsStringAsync(cancellationToken);
-            _logger.LogError("SendGrid returned {StatusCode}: {Body}", (int)response.StatusCode, body);
+            if (_logger.IsEnabled(LogLevel.Error))
+            {
+                var body = await response.Body.ReadAsStringAsync(cancellationToken);
+                _logger.LogError("SendGrid returned {StatusCode}: {Body}", (int)response.StatusCode, body);
+            }
         }
-        else
+        else if (_logger.IsEnabled(LogLevel.Information))
         {
             _logger.LogInformation("Email sent to {To} via SendGrid.", to);
         }

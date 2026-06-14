@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Identity.Application.Abstractions;
+using STRIDE.Modules.Identity.Application.Services;
 using STRIDE.Modules.Identity.Infrastructure.Auth;
 using STRIDE.Modules.Identity.Infrastructure.Email;
 using STRIDE.Modules.Identity.Infrastructure.Persistence;
@@ -36,6 +37,7 @@ public static class IdentityInfrastructureExtensions
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
+        services.AddScoped<ILoginResultBuilder, LoginResultBuilder>();
 
         // Email sender: SendGrid in production, console stub in development
         if (environment.IsDevelopment())

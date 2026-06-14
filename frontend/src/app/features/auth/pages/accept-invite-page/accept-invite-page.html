@@ -99,8 +99,9 @@
               class="auth-input auth-input--pass"
               [class.auth-input--error]="pwCtrl.invalid && pwCtrl.touched"
               placeholder="Min. 8 characters"
+              name="password"
               autocomplete="new-password"
-              aria-describedby="password-error"
+              aria-describedby="password-required-error password-minlength-error"
             />
             <button type="button" class="auth-pass-toggle" (click)="togglePassword()"
               [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
@@ -132,9 +133,9 @@
           }
 
           @if (pwCtrl.touched && pwCtrl.hasError('required')) {
-            <span id="password-error" class="auth-field-error" role="alert">Password is required</span>
+            <span id="password-required-error" class="auth-field-error" role="alert">Password is required</span>
           } @else if (pwCtrl.touched && pwCtrl.hasError('minlength')) {
-            <span id="password-error" class="auth-field-error" role="alert">Password must be at least 8 characters</span>
+            <span id="password-minlength-error" class="auth-field-error" role="alert">Password must be at least 8 characters</span>
           }
         </div>
 
@@ -149,8 +150,9 @@
               class="auth-input auth-input--pass"
               [class.auth-input--error]="cfmCtrl.touched && (cfmCtrl.hasError('required') || form.hasError('mismatch'))"
               placeholder="Repeat your password"
+              name="confirm"
               autocomplete="new-password"
-              aria-describedby="confirm-error"
+              aria-describedby="confirm-required-error confirm-mismatch-error"
             />
             <button type="button" class="auth-pass-toggle" (click)="toggleConfirm()"
               [attr.aria-label]="showConfirm() ? 'Hide confirm password' : 'Show confirm password'">
@@ -169,9 +171,9 @@
             </button>
           </div>
           @if (cfmCtrl.touched && cfmCtrl.hasError('required')) {
-            <span id="confirm-error" class="auth-field-error" role="alert">Please confirm your password</span>
+            <span id="confirm-required-error" class="auth-field-error" role="alert">Please confirm your password</span>
           } @else if (cfmCtrl.touched && form.hasError('mismatch')) {
-            <span id="confirm-error" class="auth-field-error" role="alert">Passwords do not match</span>
+            <span id="confirm-mismatch-error" class="auth-field-error" role="alert">Passwords do not match</span>
           }
         </div>
 
