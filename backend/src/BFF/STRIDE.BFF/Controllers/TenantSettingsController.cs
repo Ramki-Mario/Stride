@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using STRIDE.BFF.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BFF.HttpClients;
@@ -8,9 +8,10 @@ namespace STRIDE.BFF.Controllers;
 /// <summary>
 /// BFF proxy for tenant settings endpoints.
 ///
-///   GET  /bff/administration/settings              â€” get current tenant settings
-///   PUT  /bff/administration/settings              â€” update settings (+ CSS sanitisation report)
-///   GET  /bff/administration/settings/css-template â€” download --stride-* token template file
+///   GET  /bff/administration/settings                   -- get current tenant settings
+///   PUT  /bff/administration/settings                   -- update settings (+ CSS sanitisation report)
+///   POST /bff/administration/settings/complete-onboarding -- mark onboarding wizard done
+///   GET  /bff/administration/settings/css-template      -- download --stride-* token template file
 /// </summary>
 [ApiController]
 [Authorize]
@@ -44,14 +45,27 @@ public sealed class TenantSettingsController : ControllerBase
 
         if (!response.IsSuccessStatusCode) return await ProxyAsync(response, cancellationToken);
 
-        // 200 means CSS was included and a sanitisation report was returned; proxy it.
-        // 204 means settings-only update with no CSS.
+        // 200 = CSS included, sanitisation report returned; proxy it.
+        // 204 = settings-only update with no CSS.
         return response.StatusCode == System.Net.HttpStatusCode.NoContent
             ? NoContent()
             : await ProxyAsync(response, cancellationToken);
     }
 
-    /// <summary>GET /bff/administration/settings/css-template â€” proxies the CSS file download.</summary>
+    /// <summary>POST /bff/administration/settings/complete-onboarding -- marks onboarding wizard complete.</summary>
+    [HttpPost("complete-onboarding")]
+    public async Task<IActionResult> CompleteOnboarding(CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+
+        var response = await _settings.CompleteOnboardingAsync(token, cancellationToken);
+        return response.IsSuccessStatusCode
+            ? NoContent()
+            : await ProxyAsync(response, cancellationToken);
+    }
+
+    /// <summary>GET /bff/administration/settings/css-template -- proxies the CSS file download.</summary>
     [HttpGet("css-template")]
     public async Task<IActionResult> GetCssTemplate(CancellationToken cancellationToken)
     {
@@ -65,7 +79,7 @@ public sealed class TenantSettingsController : ControllerBase
         return File(css, "text/css", "stride-theme-template.css");
     }
 
-    // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Helpers --
 
     private Task<string?> GetTokenAsync() => HttpContext.GetCurrentAccessTokenAsync();
 
@@ -96,4 +110,3 @@ public sealed class TenantSettingsController : ControllerBase
         };
     }
 }
-

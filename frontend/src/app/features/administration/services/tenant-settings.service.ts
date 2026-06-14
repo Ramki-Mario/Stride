@@ -30,6 +30,11 @@ export class TenantSettingsService {
 
   // ── Update ─────────────────────────────────────────────────────────────────
 
+  /** Marks the onboarding wizard as completed for this tenant. */
+  completeOnboarding(): Observable<void> {
+    return this.http.post<void>(`${this.base}/complete-onboarding`, {});
+  }
+
   /** Settings-only update (no CSS). Returns void Observable. */
   updateSettings(req: UpdateTenantSettingsRequest): Observable<void> {
     return this.http.put<void>(this.base, req);

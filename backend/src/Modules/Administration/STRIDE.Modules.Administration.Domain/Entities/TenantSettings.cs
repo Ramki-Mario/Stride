@@ -8,10 +8,11 @@ namespace STRIDE.Modules.Administration.Domain.Entities;
 /// </summary>
 public sealed class TenantSettings : AuditableEntity
 {
-    public string  DisplayName         { get; private set; } = string.Empty;
-    public string  DefaultPalette      { get; private set; } = "purple";
-    public string  Timezone            { get; private set; } = "UTC";
-    public string? CustomCssTokensJson { get; private set; }
+    public string  DisplayName          { get; private set; } = string.Empty;
+    public string  DefaultPalette       { get; private set; } = "purple";
+    public string  Timezone             { get; private set; } = "UTC";
+    public string? CustomCssTokensJson  { get; private set; }
+    public bool    OnboardingCompleted  { get; private set; }
 
     private TenantSettings() { }   // EF
 
@@ -26,10 +27,17 @@ public sealed class TenantSettings : AuditableEntity
             DefaultPalette      = "purple",
             Timezone            = "UTC",
             CustomCssTokensJson = null,
+            OnboardingCompleted = false,
             CreatedAt           = now,
             UpdatedAt           = now,
             CreatedBy           = createdBy,
         };
+    }
+
+    public void CompleteOnboarding()
+    {
+        OnboardingCompleted = true;
+        UpdatedAt           = DateTime.UtcNow;
     }
 
     /// <summary>

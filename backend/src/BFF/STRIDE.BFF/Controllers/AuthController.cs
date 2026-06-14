@@ -93,9 +93,9 @@ public sealed class AuthController : ControllerBase
         var settingsTask    = GetTenantSettingsAsync(hostResponse.AccessToken, cancellationToken);
         var permissionsTask = GetPermissionsAsync(hostResponse.AccessToken, cancellationToken);
         await Task.WhenAll(settingsTask, permissionsTask);
-        var (defaultPalette, tenantName) = settingsTask.Result;
+        var (defaultPalette, tenantName, onboardingCompleted) = settingsTask.Result;
 
-        return Ok(ToMeResponse(hostResponse, permissionsTask.Result, defaultPalette, tenantName));
+        return Ok(ToMeResponse(hostResponse, permissionsTask.Result, defaultPalette, tenantName, onboardingCompleted));
     }
 
     /// <summary>
@@ -283,8 +283,9 @@ public sealed class AuthController : ControllerBase
 
         var token = await HttpContext.GetCurrentAccessTokenAsync();
 
-        var defaultPalette = DefaultPalette;
-        var tenantName     = "";
+        var defaultPalette      = DefaultPalette;
+        var tenantName          = "";
+        var onboardingCompleted = false;
         IReadOnlyList<string> permissions = Array.Empty<string>();
 
         if (token is not null)
@@ -292,26 +293,26 @@ public sealed class AuthController : ControllerBase
             var settingsTask    = GetTenantSettingsAsync(token, cancellationToken);
             var permissionsTask = GetPermissionsAsync(token, cancellationToken);
             await Task.WhenAll(settingsTask, permissionsTask);
-            (defaultPalette, tenantName) = settingsTask.Result;
+            (defaultPalette, tenantName, onboardingCompleted) = settingsTask.Result;
             permissions = permissionsTask.Result;
         }
 
-        return Ok(new MeResponse(userId, tenantId, email, displayName, roles, permissions, defaultPalette, tenantName));
+        return Ok(new MeResponse(userId, tenantId, email, displayName, roles, permissions, defaultPalette, tenantName, onboardingCompleted));
     }
 
     // ── helpers ────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Fetches TenantSettings and extracts defaultPalette + displayName in a single call.
+    /// Fetches TenantSettings and extracts defaultPalette, displayName, and onboardingCompleted.
     /// Returns safe defaults on any failure so auth never breaks due to a settings fault.
     /// </summary>
-    private async Task<(string Palette, string TenantName)> GetTenantSettingsAsync(
+    private async Task<(string Palette, string TenantName, bool OnboardingCompleted)> GetTenantSettingsAsync(
         string token, CancellationToken cancellationToken)
     {
         try
         {
             var response = await _tenantSettings.GetSettingsAsync(token, cancellationToken);
-            if (!response.IsSuccessStatusCode) return (DefaultPalette, "");
+            if (!response.IsSuccessStatusCode) return (DefaultPalette, "", false);
 
             var json = await response.Content.ReadAsStringAsync(cancellationToken);
             using var doc = JsonDocument.Parse(json);
@@ -325,12 +326,15 @@ public sealed class AuthController : ControllerBase
                 ? nameProp.GetString() ?? ""
                 : "";
 
-            return (palette, name);
+            var onboardingCompleted = root.TryGetProperty("onboardingCompleted", out var onboardingProp)
+                && onboardingProp.GetBoolean();
+
+            return (palette, name, onboardingCompleted);
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to fetch tenant settings for /auth/me — using defaults.");
-            return (DefaultPalette, "");
+            return (DefaultPalette, "", false);
         }
     }
 
@@ -375,8 +379,10 @@ public sealed class AuthController : ControllerBase
     }
 
     private static MeResponse ToMeResponse(
-        HostLoginResponse r, IReadOnlyList<string> permissions, string defaultPalette, string tenantName) =>
-        new(r.UserId, r.TenantId, r.Email, r.DisplayName, r.Roles, permissions, defaultPalette, tenantName);
+        HostLoginResponse r, IReadOnlyList<string> permissions,
+        string defaultPalette, string tenantName, bool onboardingCompleted) =>
+        new(r.UserId, r.TenantId, r.Email, r.DisplayName, r.Roles, permissions,
+            defaultPalette, tenantName, onboardingCompleted);
 
     private static bool TryParseGuidClaim(ClaimsPrincipal user, string claimType, out Guid value)
     {
