@@ -259,9 +259,10 @@ Phase 4 (Dashboard & Reporting) — **Complete** ✅ (all stories done, all epic
 |---|---|---|---|
 | EP-040 Unit & Integration Tests | #195 | US-112–114 (#200–202) | ⏳ Pending |
 | EP-041 Refresh Token Flow | #196 | US-115–118 (#203–206) | ✅ Done — PRs #352 #353 #354 #355 merged |
-| EP-042 Invite Email Flow | #197 | US-119–122 (#207–210) | 🔵 In Review — PR #356 open |
-| EP-043 Scheduling Module | #198 | US-123–127 (#211–215) | 🔵 In Review — PR #357 open |
+| EP-042 Invite Email Flow | #197 | US-119–122 (#207–210) | ✅ Done — PR #356 merged |
+| EP-043 Scheduling Module | #198 | US-123–127 (#211–215) | ✅ Done — PR #357 merged |
 | EP-044 Live Deployment | #199 | US-128–131 (#216–219) | ⏳ Pending |
+| EP-045 Tenant Custom RBAC | #245 | US-132 #248, US-133 #249, US-134–140 | 🔵 In Progress — US-132 + US-133 branch feat/EP-045/US-132-133 |
 
 ### Milestone #11 — Product Layer Gaps (EP-048–061)
 

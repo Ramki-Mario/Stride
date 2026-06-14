@@ -13,6 +13,7 @@ internal sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
         builder.Property(r => r.Name).IsRequired().HasMaxLength(100);
         builder.Property(r => r.NormalizedName).IsRequired().HasMaxLength(100);
         builder.Property(r => r.Description).HasMaxLength(500);
+        builder.Property(r => r.IsSystemRole).IsRequired().HasDefaultValue(false);
         builder.Property(r => r.TenantId).IsRequired();
         builder.Property(r => r.CreatedAt).IsRequired();
         builder.Property(r => r.UpdatedAt).IsRequired();

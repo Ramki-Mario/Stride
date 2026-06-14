@@ -6,9 +6,11 @@ public sealed class Role : AuditableEntity
 {
     private readonly List<RolePermission> _permissions = new();
 
-    public string Name { get; private set; } = string.Empty;
+    public string Name           { get; private set; } = string.Empty;
     public string NormalizedName { get; private set; } = string.Empty;
-    public string Description { get; private set; } = string.Empty;
+    public string Description    { get; private set; } = string.Empty;
+    /// <summary>System roles cannot be deleted or have their permissions removed.</summary>
+    public bool   IsSystemRole   { get; private set; }
 
     public IReadOnlyList<RolePermission> Permissions => _permissions.AsReadOnly();
 
@@ -18,14 +20,31 @@ public sealed class Role : AuditableEntity
     {
         return new Role
         {
-            Id = Guid.NewGuid(),
-            TenantId = tenantId,
-            Name = name.Trim(),
+            Id             = Guid.NewGuid(),
+            TenantId       = tenantId,
+            Name           = name.Trim(),
             NormalizedName = name.Trim().ToUpperInvariant(),
-            Description = description.Trim(),
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            CreatedBy = createdBy
+            Description    = description.Trim(),
+            IsSystemRole   = false,
+            CreatedAt      = DateTime.UtcNow,
+            UpdatedAt      = DateTime.UtcNow,
+            CreatedBy      = createdBy
+        };
+    }
+
+    public static Role CreateSystemRole(Guid tenantId, string name, string description, Guid createdBy)
+    {
+        return new Role
+        {
+            Id             = Guid.NewGuid(),
+            TenantId       = tenantId,
+            Name           = name.Trim(),
+            NormalizedName = name.Trim().ToUpperInvariant(),
+            Description    = description.Trim(),
+            IsSystemRole   = true,
+            CreatedAt      = DateTime.UtcNow,
+            UpdatedAt      = DateTime.UtcNow,
+            CreatedBy      = createdBy
         };
     }
 

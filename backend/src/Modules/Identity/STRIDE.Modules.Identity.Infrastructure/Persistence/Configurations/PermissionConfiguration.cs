@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using STRIDE.Modules.Identity.Domain;
 using STRIDE.Modules.Identity.Domain.Entities;
 
 namespace STRIDE.Modules.Identity.Infrastructure.Persistence.Configurations;
@@ -10,17 +11,18 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
     {
         builder.HasKey(p => p.Id);
 
-        builder.Property(p => p.Name).IsRequired().HasMaxLength(100);
-        builder.Property(p => p.Resource).IsRequired().HasMaxLength(50);
-        builder.Property(p => p.Action).IsRequired().HasMaxLength(50);
-        builder.Property(p => p.TenantId).IsRequired();
-        builder.Property(p => p.CreatedAt).IsRequired();
-        builder.Property(p => p.UpdatedAt).IsRequired();
-        builder.Property(p => p.CreatedBy).IsRequired();
-        builder.Property(p => p.IsDeleted).IsRequired().HasDefaultValue(false);
+        builder.Property(p => p.Key)
+            .IsRequired()
+            .HasMaxLength(100);
 
-        builder.HasIndex(p => new { p.TenantId, p.Name }).IsUnique();
-        builder.HasIndex(p => new { p.TenantId, p.IsDeleted });
+        builder.Property(p => p.Description)
+            .IsRequired()
+            .HasMaxLength(255);
+
+        builder.HasIndex(p => p.Key).IsUnique();
+
+        builder.HasData(DefaultPermissions.All.Select(p =>
+            new { p.Id, p.Key, p.Description }).ToArray());
 
         builder.ToTable("Permissions");
     }

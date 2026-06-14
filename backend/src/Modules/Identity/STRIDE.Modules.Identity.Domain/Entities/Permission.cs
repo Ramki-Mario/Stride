@@ -2,26 +2,24 @@ using STRIDE.BuildingBlocks.Domain.Entities;
 
 namespace STRIDE.Modules.Identity.Domain.Entities;
 
-public sealed class Permission : AuditableEntity
+/// <summary>
+/// System-wide permission key. Not tenant-scoped — shared across all tenants.
+/// Seeded once via data migration; roles reference these by FK.
+/// </summary>
+public sealed class Permission : BaseEntity<Guid>
 {
-    public string Name { get; private set; } = string.Empty;
-    public string Resource { get; private set; } = string.Empty;
-    public string Action { get; private set; } = string.Empty;
+    public string Key         { get; private set; } = string.Empty;
+    public string Description { get; private set; } = string.Empty;
 
     private Permission() { }
 
-    public static Permission Create(Guid tenantId, string resource, string action, Guid createdBy)
+    public static Permission Create(string key, string description)
     {
         return new Permission
         {
-            Id = Guid.NewGuid(),
-            TenantId = tenantId,
-            Resource = resource.Trim().ToLowerInvariant(),
-            Action = action.Trim().ToLowerInvariant(),
-            Name = $"{resource.Trim().ToLowerInvariant()}.{action.Trim().ToLowerInvariant()}",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            CreatedBy = createdBy
+            Id          = Guid.NewGuid(),
+            Key         = key.Trim().ToLowerInvariant(),
+            Description = description.Trim()
         };
     }
 }

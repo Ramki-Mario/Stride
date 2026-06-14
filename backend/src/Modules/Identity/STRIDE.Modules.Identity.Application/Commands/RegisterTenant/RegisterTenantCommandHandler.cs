@@ -13,9 +13,9 @@ namespace STRIDE.Modules.Identity.Application.Commands.RegisterTenant;
 /// <summary>
 /// Atomically provisions a new tenant workspace:
 ///   1. Create Tenant record
-///   2. Create Admin role for the new tenant
+///   2. Create TenantAdmin system role (IsSystemRole=true) with all permissions
 ///   3. Create the first admin user (active, not pending)
-///   4. Assign Admin role via the User aggregate
+///   4. Assign TenantAdmin role via the User aggregate
 ///   5. Create UserTenantMapping (required for TenantResolver on login)
 ///   6. Flush all changes in a single SaveChangesAsync call
 ///   7. Mint a JWT + refresh token and return LoginResult — the BFF will auto-issue a session cookie
@@ -23,12 +23,13 @@ namespace STRIDE.Modules.Identity.Application.Commands.RegisterTenant;
 internal sealed class RegisterTenantCommandHandler
     : IRequestHandler<RegisterTenantCommand, Result<LoginResult>>
 {
-    private const  string AdminRoleName  = "Admin";
+    private const  string TenantAdminRoleName = "TenantAdmin";
     private static readonly Guid SystemActorId = Guid.Empty;
 
     private readonly ITenantContextSetter    _tenantSetter;
     private readonly ITenantRepository       _tenants;
     private readonly IRoleRepository         _roles;
+    private readonly IPermissionRepository   _permissions;
     private readonly IUserRepository         _users;
     private readonly IPasswordHasher         _hasher;
     private readonly IJwtTokenService        _jwt;
@@ -40,6 +41,7 @@ internal sealed class RegisterTenantCommandHandler
         ITenantContextSetter    tenantSetter,
         ITenantRepository       tenants,
         IRoleRepository         roles,
+        IPermissionRepository   permissions,
         IUserRepository         users,
         IPasswordHasher         hasher,
         IJwtTokenService        jwt,
@@ -50,6 +52,7 @@ internal sealed class RegisterTenantCommandHandler
         _tenantSetter   = tenantSetter;
         _tenants        = tenants;
         _roles          = roles;
+        _permissions    = permissions;
         _users          = users;
         _hasher         = hasher;
         _jwt            = jwt;
@@ -74,14 +77,18 @@ internal sealed class RegisterTenantCommandHandler
         // ── 2. Establish tenant scope for all downstream repositories ─────────
         _tenantSetter.SetTenantId(tenant.Id);
 
-        // ── 3. Create Admin role ──────────────────────────────────────────────
-        var adminRole = Role.Create(
+        // ── 3. Create TenantAdmin system role with all permissions ────────────
+        var allPermissions  = await _permissions.GetAllAsync(cancellationToken);
+        var tenantAdminRole = Role.CreateSystemRole(
             tenantId:    tenant.Id,
-            name:        AdminRoleName,
-            description: "Full administrative access",
+            name:        TenantAdminRoleName,
+            description: "Full system administrator — all permissions (system role, cannot be deleted)",
             createdBy:   SystemActorId);
 
-        await _roles.AddAsync(adminRole, cancellationToken);
+        foreach (var permission in allPermissions)
+            tenantAdminRole.GrantPermission(permission, SystemActorId);
+
+        await _roles.AddAsync(tenantAdminRole, cancellationToken);
 
         // ── 4. Create first admin user ────────────────────────────────────────
         var passwordHash = _hasher.Hash(request.AdminPassword);
@@ -94,8 +101,8 @@ internal sealed class RegisterTenantCommandHandler
 
         user.ClearDomainEvents(); // No dispatcher active — suppress events
 
-        // ── 5. Assign Admin role via domain aggregate ─────────────────────────
-        user.AssignRole(adminRole, SystemActorId);
+        // ── 5. Assign TenantAdmin role via domain aggregate ───────────────────
+        user.AssignRole(tenantAdminRole, SystemActorId);
 
         await _users.AddAsync(user, cancellationToken);
 
@@ -103,7 +110,7 @@ internal sealed class RegisterTenantCommandHandler
         var mapping = UserTenantMapping.Create(
             tenantId:  tenant.Id,
             userId:    user.Id,
-            roleName:  AdminRoleName,
+            roleName:  TenantAdminRoleName,
             createdBy: SystemActorId);
 
         await _users.AddTenantMappingAsync(mapping, cancellationToken);
@@ -114,7 +121,7 @@ internal sealed class RegisterTenantCommandHandler
         _logger.TenantRegistered(tenant.Id, tenant.Slug, user.Id);
 
         // ── 8. Mint JWT + refresh token ───────────────────────────────────────
-        var roleNames   = new[] { AdminRoleName }.AsReadOnly();
+        var roleNames   = new[] { TenantAdminRoleName }.AsReadOnly();
         var jwtResult   = _jwt.Generate(new JwtTokenRequest(
             UserId:      user.Id,
             TenantId:    tenant.Id,
