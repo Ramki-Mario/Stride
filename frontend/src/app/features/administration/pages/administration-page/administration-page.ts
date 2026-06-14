@@ -1199,7 +1199,7 @@ export class AdministrationPageComponent implements OnInit {
       ['color-mix(in srgb, #8B5CF6 15%, transparent)', '#7C3AED'],
     ];
     let hash = 0;
-    for (let i = 0; i < role.length; i++) hash = (hash * 31 + role.charCodeAt(i)) & 0xffff;
+    for (let i = 0; i < role.length; i++) hash = (hash * 31 + role.codePointAt(i)!) & 0xffff;
     const [bg, fg] = colors[hash % colors.length];
     return `background:${bg};color:${fg}`;
   }
@@ -1214,7 +1214,7 @@ export class AdministrationPageComponent implements OnInit {
       ['color-mix(in srgb, #8B5CF6 12%, transparent)', '#7C3AED'],
     ];
     let hash = 0;
-    for (let i = 0; i < role.length; i++) hash = (hash * 31 + role.charCodeAt(i)) & 0xffff;
+    for (let i = 0; i < role.length; i++) hash = (hash * 31 + role.codePointAt(i)!) & 0xffff;
     const [bg, fg] = colors[hash % colors.length];
     return `background:${bg};color:${fg}`;
   }
