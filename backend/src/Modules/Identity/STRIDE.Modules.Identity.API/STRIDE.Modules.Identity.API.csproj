@@ -9,6 +9,13 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.10" />
   </ItemGroup>
 
+  <!-- Expose internal authorization handlers to the test project -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>STRIDE.Modules.Identity.API.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

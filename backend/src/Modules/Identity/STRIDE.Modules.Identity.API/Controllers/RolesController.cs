@@ -2,8 +2,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using STRIDE.Modules.Identity.API.Authorization;
 using STRIDE.Modules.Identity.Application.Queries.ListRoles;
+using STRIDE.Modules.Identity.Domain;
 
 namespace STRIDE.Modules.Identity.API.Controllers;
 
@@ -25,7 +25,7 @@ public sealed class RolesController : ControllerBase
     /// Used by the workflow builder to populate the "Required Role" dropdown per step.
     /// </summary>
     [HttpGet]
-    [Authorize(Policy = Policies.RequireManager)]
+    [Authorize(Policy = DefaultPermissions.RoleView)]
     [ProducesResponseType(typeof(IReadOnlyList<RoleDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ListRoles(CancellationToken cancellationToken)
     {

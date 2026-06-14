@@ -6,6 +6,7 @@ using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Identity.Application.Abstractions;
 using STRIDE.Modules.Identity.Application.Services;
 using STRIDE.Modules.Identity.Infrastructure.Auth;
+using STRIDE.Modules.Identity.Infrastructure.Authorization;
 using STRIDE.Modules.Identity.Infrastructure.Email;
 using STRIDE.Modules.Identity.Infrastructure.Persistence;
 using STRIDE.Modules.Identity.Infrastructure.Persistence.Repositories;
@@ -31,6 +32,7 @@ public static class IdentityInfrastructureExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
+        services.AddScoped<IUserPermissionService, UserPermissionService>();
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IInviteTokenRepository, InviteTokenRepository>();

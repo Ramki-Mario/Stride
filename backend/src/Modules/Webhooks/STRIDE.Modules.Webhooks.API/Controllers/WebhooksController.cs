@@ -30,7 +30,9 @@ namespace STRIDE.Modules.Webhooks.API.Controllers;
 ///   POST   /api/webhooks/subscriptions/{id}/deliveries/{dId}/retry     — manually retry exhausted delivery
 /// </summary>
 [ApiController]
-[Authorize(Roles = "Admin")]
+// Dynamic permission policy (US-134). "tenant.settings" is a key in the Identity
+// permission catalog (DefaultPermissions); the TenantAdmin system role holds it.
+[Authorize(Policy = "tenant.settings")]
 [Route("api/webhooks")]
 public sealed class WebhooksController : ControllerBase
 {

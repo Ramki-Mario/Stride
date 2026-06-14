@@ -8,11 +8,13 @@ using STRIDE.Modules.Administration.Application.Queries.GetAuditLog;
 namespace STRIDE.Modules.Administration.API.Controllers;
 
 /// <summary>
-/// Tenant audit log — Admin role only.
+/// Tenant audit log — requires the tenant.settings permission.
 /// GET /api/administration/audit-log
 /// </summary>
 [ApiController]
-[Authorize(Roles = "Admin")]
+// Dynamic permission policy (US-134). "tenant.settings" is a key in the Identity
+// permission catalog (DefaultPermissions); the TenantAdmin system role holds it.
+[Authorize(Policy = "tenant.settings")]
 [Route("api/administration/audit-log")]
 public sealed class AuditLogController : ControllerBase
 {

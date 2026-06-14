@@ -11,16 +11,19 @@ internal sealed class AssignRoleCommandHandler
 {
     private readonly IUserRepository _users;
     private readonly IRoleRepository _roles;
+    private readonly IUserPermissionService _permissions;
     private readonly ILogger<AssignRoleCommandHandler> _logger;
 
     public AssignRoleCommandHandler(
         IUserRepository users,
         IRoleRepository roles,
+        IUserPermissionService permissions,
         ILogger<AssignRoleCommandHandler> logger)
     {
-        _users  = users;
-        _roles  = roles;
-        _logger = logger;
+        _users       = users;
+        _roles       = roles;
+        _permissions = permissions;
+        _logger      = logger;
     }
 
     public async Task<Result> Handle(AssignRoleCommand request, CancellationToken cancellationToken)
@@ -44,6 +47,9 @@ internal sealed class AssignRoleCommandHandler
         user.AssignRole(role, request.AssignedBy);
         _users.Update(user);
         await _users.SaveChangesAsync(cancellationToken);
+
+        // Bust the cached permission set so the new role takes effect immediately.
+        _permissions.InvalidateUser(user.TenantId, user.Id);
 
         _logger.RoleAssigned(role.Name, user.Id, request.AssignedBy);
 
