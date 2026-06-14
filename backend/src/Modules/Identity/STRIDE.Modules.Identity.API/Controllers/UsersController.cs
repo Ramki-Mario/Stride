@@ -5,8 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Identity.API.Authorization;
 using STRIDE.Modules.Identity.API.Dtos;
+using STRIDE.Modules.Identity.Application.Commands.AcceptInvite;
 using STRIDE.Modules.Identity.Application.Commands.AssignRole;
 using STRIDE.Modules.Identity.Application.Queries.GetUser;
+using STRIDE.Modules.Identity.Application.Queries.ValidateInviteToken;
 
 namespace STRIDE.Modules.Identity.API.Controllers;
 
@@ -41,6 +43,51 @@ public sealed class UsersController : ControllerBase
 
         if (result.IsFailure)
             return NotFound(new { error = result.Error });
+
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Validates an invite token without consuming it — returns the invitee's email+name.
+    /// GET /api/identity/users/accept-invite/validate?token=xxx
+    /// </summary>
+    [HttpGet("accept-invite/validate")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(InviteTokenInfoDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ValidateInviteToken(
+        [FromQuery] string token,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new ValidateInviteTokenQuery(token), cancellationToken);
+
+        if (result.IsFailure)
+            return BadRequest(new { error = result.Error });
+
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Validates the invite token, sets the user's password, activates their account,
+    /// and returns a full token pair (auto-login).
+    /// POST /api/identity/users/accept-invite
+    /// </summary>
+    [HttpPost("accept-invite")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> AcceptInvite(
+        [FromBody] AcceptInviteRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
+        var result = await _mediator.Send(
+            new AcceptInviteCommand(request.Token, request.Password, request.ConfirmPassword),
+            cancellationToken);
+
+        if (result.IsFailure)
+            return BadRequest(new { error = result.Error });
 
         return Ok(result.Value);
     }

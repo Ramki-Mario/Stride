@@ -11,6 +11,15 @@ public interface IAdminWriteService
         Guid invitedBy,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Persists a SHA-256 invite token hash for the given user.</summary>
+    Task CreateInviteTokenAsync(
+        Guid     tenantId,
+        Guid     userId,
+        string   tokenHash,
+        DateTime expiresAt,
+        Guid     createdBy,
+        CancellationToken cancellationToken = default);
+
     /// <summary>Changes the primary role for a user within a tenant.</summary>
     Task UpdateUserRoleAsync(Guid tenantId, Guid userId, string newRoleName, Guid updatedBy, CancellationToken cancellationToken = default);
 

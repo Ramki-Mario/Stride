@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using STRIDE.Modules.Identity.API.Authorization;
 using STRIDE.Modules.Identity.Application;
 using STRIDE.Modules.Identity.Infrastructure;
@@ -10,10 +11,11 @@ public static class IdentityModuleExtensions
 {
     public static IServiceCollection AddIdentityModule(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         services.AddIdentityApplication();
-        services.AddIdentityInfrastructure(configuration);
+        services.AddIdentityInfrastructure(configuration, environment);
 
         // Register named RBAC policies declared by this module.
         // AddAuthorization is idempotent and additive — safe to call from multiple modules.
