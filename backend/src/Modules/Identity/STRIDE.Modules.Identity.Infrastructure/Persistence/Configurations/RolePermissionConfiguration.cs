@@ -21,6 +21,11 @@ internal sealed class RolePermissionConfiguration : IEntityTypeConfiguration<Rol
         builder.HasIndex(rp => new { rp.TenantId, rp.RoleId, rp.PermissionId }).IsUnique();
         builder.HasIndex(rp => new { rp.TenantId, rp.IsDeleted });
 
+        builder.HasOne<Permission>()
+            .WithMany()
+            .HasForeignKey(rp => rp.PermissionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.ToTable("RolePermissions");
     }
 }
