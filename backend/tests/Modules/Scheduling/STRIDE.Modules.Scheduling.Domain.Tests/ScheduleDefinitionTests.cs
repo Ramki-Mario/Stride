@@ -44,7 +44,7 @@ public sealed class ScheduleDefinitionTests
     [Fact]
     public void Create_WithValidData_ReturnsSchedule()
     {
-        var schedule = ScheduleDefinition.Create(TenantId, "Daily", null, WfDefId, Cron, true, null, ActorId);
+        var schedule = Build();
 
         schedule.Id.Should().NotBeEmpty();
         schedule.TenantId.Should().Be(TenantId);
@@ -60,14 +60,14 @@ public sealed class ScheduleDefinitionTests
     [InlineData("   ")]
     public void Create_WithEmptyName_Throws(string name)
     {
-        var act = () => ScheduleDefinition.Create(TenantId, name, null, WfDefId, Cron, true, null, ActorId);
+        var act = () => Build(name: name);
         act.Should().Throw<SchedulingDomainException>().WithMessage("*name cannot be empty*");
     }
 
     [Fact]
     public void Create_RaisesScheduleDefinitionCreatedEvent()
     {
-        var schedule = ScheduleDefinition.Create(TenantId, "Daily", null, WfDefId, Cron, true, null, ActorId);
+        var schedule = Build();
 
         schedule.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<ScheduleDefinitionCreatedEvent>();
@@ -76,7 +76,7 @@ public sealed class ScheduleDefinitionTests
     [Fact]
     public void Create_TrimsName()
     {
-        var schedule = ScheduleDefinition.Create(TenantId, "  Daily  ", null, WfDefId, Cron, true, null, ActorId);
+        var schedule = Build(name: "  Daily  ");
         schedule.Name.Should().Be("Daily");
     }
 
@@ -85,7 +85,7 @@ public sealed class ScheduleDefinitionTests
     [Fact]
     public void Activate_WhenInactive_SetsIsActiveTrue()
     {
-        var schedule = ScheduleDefinition.Create(TenantId, "Daily", null, WfDefId, Cron, false, null, ActorId);
+        var schedule = Build(isActive: false);
         schedule.ClearDomainEvents();
 
         schedule.Activate(DateTime.UtcNow.AddHours(1), ActorId);
@@ -97,7 +97,7 @@ public sealed class ScheduleDefinitionTests
     [Fact]
     public void Activate_WhenInactive_RaisesScheduleActivatedEvent()
     {
-        var schedule = ScheduleDefinition.Create(TenantId, "Daily", null, WfDefId, Cron, false, null, ActorId);
+        var schedule = Build(isActive: false);
         schedule.ClearDomainEvents();
 
         schedule.Activate(null, ActorId);
@@ -109,7 +109,7 @@ public sealed class ScheduleDefinitionTests
     [Fact]
     public void Activate_WhenAlreadyActive_Throws()
     {
-        var schedule = ScheduleDefinition.Create(TenantId, "Daily", null, WfDefId, Cron, true, null, ActorId);
+        var schedule = Build(isActive: true);
 
         var act = () => schedule.Activate(null, ActorId);
         act.Should().Throw<SchedulingDomainException>().WithMessage("*already active*");
@@ -118,7 +118,7 @@ public sealed class ScheduleDefinitionTests
     [Fact]
     public void Activate_WhenDeleted_Throws()
     {
-        var schedule = ScheduleDefinition.Create(TenantId, "Daily", null, WfDefId, Cron, false, null, ActorId);
+        var schedule = Build(isActive: false);
         schedule.SoftDelete();
 
         var act = () => schedule.Activate(null, ActorId);
@@ -130,7 +130,7 @@ public sealed class ScheduleDefinitionTests
     [Fact]
     public void Deactivate_WhenActive_SetsIsActiveFalseAndClearsNextRunAt()
     {
-        var schedule = ScheduleDefinition.Create(TenantId, "Daily", null, WfDefId, Cron, true, DateTime.UtcNow, ActorId);
+        var schedule = Build(isActive: true, nextRunAt: DateTime.UtcNow);
         schedule.ClearDomainEvents();
 
         schedule.Deactivate(ActorId);
@@ -142,7 +142,7 @@ public sealed class ScheduleDefinitionTests
     [Fact]
     public void Deactivate_WhenActive_RaisesScheduleDeactivatedEvent()
     {
-        var schedule = ScheduleDefinition.Create(TenantId, "Daily", null, WfDefId, Cron, true, null, ActorId);
+        var schedule = Build(isActive: true);
         schedule.ClearDomainEvents();
 
         schedule.Deactivate(ActorId);
@@ -154,7 +154,7 @@ public sealed class ScheduleDefinitionTests
     [Fact]
     public void Deactivate_WhenAlreadyInactive_Throws()
     {
-        var schedule = ScheduleDefinition.Create(TenantId, "Daily", null, WfDefId, Cron, false, null, ActorId);
+        var schedule = Build(isActive: false);
 
         var act = () => schedule.Deactivate(ActorId);
         act.Should().Throw<SchedulingDomainException>().WithMessage("*already inactive*");
@@ -163,7 +163,7 @@ public sealed class ScheduleDefinitionTests
     [Fact]
     public void Deactivate_WhenDeleted_Throws()
     {
-        var schedule = ScheduleDefinition.Create(TenantId, "Daily", null, WfDefId, Cron, true, null, ActorId);
+        var schedule = Build(isActive: true);
         schedule.SoftDelete();
 
         var act = () => schedule.Deactivate(ActorId);
@@ -175,11 +175,27 @@ public sealed class ScheduleDefinitionTests
     [Fact]
     public void SoftDelete_SetsIsDeletedTrueAndIsActiveFalse()
     {
-        var schedule = ScheduleDefinition.Create(TenantId, "Daily", null, WfDefId, Cron, true, null, ActorId);
+        var schedule = Build(isActive: true);
 
         schedule.SoftDelete();
 
         schedule.IsDeleted.Should().BeTrue();
         schedule.IsActive.Should().BeFalse();
     }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private static ScheduleDefinition Build(
+        string    name      = "Daily",
+        bool      isActive  = true,
+        DateTime? nextRunAt = null)
+        => ScheduleDefinition.Create(new NewSchedule(
+            TenantId:             TenantId,
+            Name:                 name,
+            Description:          null,
+            WorkflowDefinitionId: WfDefId,
+            CronExpression:       Cron,
+            IsActive:             isActive,
+            NextRunAt:            nextRunAt,
+            CreatedBy:            ActorId));
 }

@@ -5,6 +5,16 @@ using STRIDE.Modules.Scheduling.Domain.ValueObjects;
 
 namespace STRIDE.Modules.Scheduling.Domain.Entities;
 
+public sealed record NewSchedule(
+    Guid           TenantId,
+    string         Name,
+    string?        Description,
+    Guid           WorkflowDefinitionId,
+    CronExpression CronExpression,
+    bool           IsActive,
+    DateTime?      NextRunAt,
+    Guid           CreatedBy);
+
 public sealed class ScheduleDefinition : AuditableEntity
 {
     public const int NameMaxLength        = 100;
@@ -19,36 +29,28 @@ public sealed class ScheduleDefinition : AuditableEntity
 
     private ScheduleDefinition() { }
 
-    public static ScheduleDefinition Create(
-        Guid            tenantId,
-        string          name,
-        string?         description,
-        Guid            workflowDefinitionId,
-        CronExpression  cronExpression,
-        bool            isActive,
-        DateTime?       nextRunAt,
-        Guid            createdBy)
+    public static ScheduleDefinition Create(NewSchedule data)
     {
-        ValidateName(name);
+        ValidateName(data.Name);
 
         var now = DateTime.UtcNow;
         var schedule = new ScheduleDefinition
         {
             Id                   = Guid.NewGuid(),
-            TenantId             = tenantId,
-            Name                 = name.Trim(),
-            Description          = description?.Trim(),
-            WorkflowDefinitionId = workflowDefinitionId,
-            CronExpression       = cronExpression,
-            IsActive             = isActive,
-            NextRunAt            = nextRunAt,
+            TenantId             = data.TenantId,
+            Name                 = data.Name.Trim(),
+            Description          = data.Description?.Trim(),
+            WorkflowDefinitionId = data.WorkflowDefinitionId,
+            CronExpression       = data.CronExpression,
+            IsActive             = data.IsActive,
+            NextRunAt            = data.NextRunAt,
             CreatedAt            = now,
             UpdatedAt            = now,
-            CreatedBy            = createdBy,
+            CreatedBy            = data.CreatedBy,
         };
 
         schedule.RaiseDomainEvent(new ScheduleDefinitionCreatedEvent(
-            schedule.Id, tenantId, schedule.Name, workflowDefinitionId, createdBy));
+            schedule.Id, data.TenantId, schedule.Name, data.WorkflowDefinitionId, data.CreatedBy));
 
         return schedule;
     }

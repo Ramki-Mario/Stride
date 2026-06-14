@@ -36,15 +36,15 @@ internal sealed class CreateScheduleCommandHandler
         if (request.IsActive)
             nextRunAt = ComputeNextRun(request.CronExpression);
 
-        var schedule = ScheduleDefinition.Create(
-            tenantId:             _tenant.TenantId,
-            name:                 request.Name,
-            description:          request.Description,
-            workflowDefinitionId: request.WorkflowDefinitionId,
-            cronExpression:       cronVo,
-            isActive:             request.IsActive,
-            nextRunAt:            nextRunAt,
-            createdBy:            _currentUser.UserId);
+        var schedule = ScheduleDefinition.Create(new NewSchedule(
+            TenantId:             _tenant.TenantId,
+            Name:                 request.Name,
+            Description:          request.Description,
+            WorkflowDefinitionId: request.WorkflowDefinitionId,
+            CronExpression:       cronVo,
+            IsActive:             request.IsActive,
+            NextRunAt:            nextRunAt,
+            CreatedBy:            _currentUser.UserId));
 
         await _repository.AddAsync(schedule, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);
