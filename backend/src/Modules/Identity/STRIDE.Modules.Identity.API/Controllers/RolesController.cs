@@ -8,6 +8,7 @@ using STRIDE.Modules.Identity.Application.Commands.CreateRole;
 using STRIDE.Modules.Identity.Application.Commands.DeleteRole;
 using STRIDE.Modules.Identity.Application.Commands.UpdateRole;
 using STRIDE.Modules.Identity.Application.Queries.GetRole;
+using STRIDE.Modules.Identity.Application.Queries.ListPermissions;
 using STRIDE.Modules.Identity.Application.Queries.ListRoles;
 using STRIDE.Modules.Identity.Domain;
 
@@ -25,6 +26,19 @@ public sealed class RolesController : ControllerBase
     {
         _mediator    = mediator;
         _currentUser = currentUser;
+    }
+
+    /// <summary>
+    /// Returns the system-wide permission catalog.
+    /// Used by the role create/edit UI to populate the permission checkboxes.
+    /// GET /api/identity/permissions
+    /// </summary>
+    [HttpGet("/api/identity/permissions")]
+    [ProducesResponseType(typeof(IReadOnlyList<PermissionDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ListPermissions(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new ListPermissionsQuery(), cancellationToken);
+        return Ok(result.Value);
     }
 
     /// <summary>
