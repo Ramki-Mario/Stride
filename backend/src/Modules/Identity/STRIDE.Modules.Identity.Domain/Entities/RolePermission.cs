@@ -4,8 +4,9 @@ namespace STRIDE.Modules.Identity.Domain.Entities;
 
 public sealed class RolePermission : AuditableEntity
 {
-    public Guid RoleId { get; private set; }
-    public Guid PermissionId { get; private set; }
+    public Guid        RoleId       { get; private set; }
+    public Guid        PermissionId { get; private set; }
+    public Permission? Permission   { get; private set; }
 
     private RolePermission() { }
 
@@ -26,6 +27,12 @@ public sealed class RolePermission : AuditableEntity
     public void Revoke()
     {
         IsDeleted = true;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Restore()
+    {
+        IsDeleted = false;
         UpdatedAt = DateTime.UtcNow;
     }
 }

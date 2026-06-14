@@ -56,12 +56,15 @@ internal sealed class UserPermissionService : IUserPermissionService
         Guid userId,
         CancellationToken cancellationToken)
     {
-        // UserRoles → RolePermissions → Permissions, tenant-scoped, ignoring soft-deleted links.
+        // UserRoles → Roles (active) → RolePermissions → Permissions, all tenant-scoped.
         var keys = await (
             from ur in _db.UserRoles.AsNoTracking()
             where ur.UserId == userId && ur.TenantId == tenantId && !ur.IsDeleted
+            join r in _db.Roles.AsNoTracking()
+                on ur.RoleId equals r.Id
+            where !r.IsDeleted
             join rp in _db.RolePermissions.AsNoTracking()
-                on ur.RoleId equals rp.RoleId
+                on r.Id equals rp.RoleId
             where !rp.IsDeleted && rp.TenantId == tenantId
             join p in _db.Permissions.AsNoTracking()
                 on rp.PermissionId equals p.Id

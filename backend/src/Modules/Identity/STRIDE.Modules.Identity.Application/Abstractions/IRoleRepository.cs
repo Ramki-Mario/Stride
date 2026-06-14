@@ -22,5 +22,8 @@ public interface IRoleRepository
     /// <summary>Marks an existing role as modified. Caller must call SaveChangesAsync.</summary>
     void Update(Role role);
 
+    /// <summary>Returns the IDs of active users currently assigned this role within the current tenant.</summary>
+    Task<IReadOnlyList<Guid>> GetAssignedUserIdsAsync(Guid roleId, CancellationToken cancellationToken = default);
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

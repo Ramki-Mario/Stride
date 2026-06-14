@@ -80,4 +80,56 @@ public sealed class RoleTests
 
         role.Permissions.Should().HaveCount(10);
     }
+
+    [Fact]
+    public void GrantPermission_WhenPreviouslyRevoked_RestoresExistingRow()
+    {
+        var role       = Role.Create(TenantId, "TestRole", "desc", ActorId);
+        var permission = Permission.Create("workflow.view", "View workflows");
+        role.GrantPermission(permission, ActorId);
+        role.RevokePermission(permission.Id);
+
+        // Re-granting should restore, not add a new row.
+        role.GrantPermission(permission, ActorId);
+
+        role.Permissions.Should().HaveCount(1);
+        role.Permissions[0].IsDeleted.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Update_ChangesNameAndDescription()
+    {
+        var role = Role.Create(TenantId, "OldName", "old desc", ActorId);
+
+        role.Update("NewName", "new desc");
+
+        role.Name.Should().Be("NewName");
+        role.NormalizedName.Should().Be("NEWNAME");
+        role.Description.Should().Be("new desc");
+    }
+
+    [Fact]
+    public void SoftDelete_SetsIsDeletedTrue()
+    {
+        var role = Role.Create(TenantId, "Temp", "desc", ActorId);
+
+        role.SoftDelete();
+
+        role.IsDeleted.Should().BeTrue();
+    }
+
+    [Fact]
+    public void SyncPermissions_RevokesRemovedAndGrantsNew()
+    {
+        var role  = Role.Create(TenantId, "TestRole", "desc", ActorId);
+        var view  = Permission.Create("workflow.view",   "View");
+        var create= Permission.Create("workflow.create", "Create");
+        role.GrantPermission(view, ActorId);
+
+        // Sync: drop view, add create.
+        role.SyncPermissions([create], ActorId);
+
+        role.Permissions.Single(p => p.PermissionId == view.Id).IsDeleted.Should().BeTrue();
+        role.Permissions.Single(p => p.PermissionId == create.Id).IsDeleted.Should().BeFalse();
+    }
 }
