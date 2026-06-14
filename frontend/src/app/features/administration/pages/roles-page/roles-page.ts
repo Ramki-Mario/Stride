@@ -6,7 +6,6 @@ import {
   signal,
   computed,
 } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 
 import { RoleService } from '../../services/role.service';
@@ -38,7 +37,7 @@ const PERMISSION_GROUPS = [
   selector: 'app-roles-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, FormsModule, ReactiveFormsModule],
+  imports: [FormsModule, ReactiveFormsModule],
   template: `
     <div class="rl-page">
 

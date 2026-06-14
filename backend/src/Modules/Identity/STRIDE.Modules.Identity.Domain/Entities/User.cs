@@ -89,6 +89,15 @@ public sealed class User : AuditableEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
+    /// <summary>Soft-deletes the active UserRole mapping for the given role.</summary>
+    public void RevokeRole(Guid roleId)
+    {
+        var existing = _roles.FirstOrDefault(r => r.RoleId == roleId && !r.IsDeleted);
+        if (existing is null) return;
+        existing.Revoke();
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     public void Deactivate()
     {
         IsActive = false;

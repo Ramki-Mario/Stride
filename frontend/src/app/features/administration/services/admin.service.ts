@@ -5,8 +5,7 @@ import {
   AdminUserDto,
   PagedResult,
   InviteUserRequest,
-  UpdateUserRoleRequest,
-  UserRole,
+  AssignUserRoleRequest,
   UserStatus,
 } from '../models/admin-user.models';
 
@@ -14,6 +13,7 @@ import {
 export class AdminService {
   private readonly http = inject(HttpClient);
   private readonly base = '/bff/administration';
+  private readonly identityBase = '/bff/identity/users';
 
   // ── Server state ──────────────────────────────────────────────────────────
   readonly users     = signal<AdminUserDto[]>([]);
@@ -37,7 +37,7 @@ export class AdminService {
     page     = 1,
     pageSize = 20,
     search?: string,
-    role?:   UserRole | undefined,
+    role?:   string | undefined,
     status?: UserStatus | undefined,
   ): void {
     this.isLoading.set(true);
@@ -69,13 +69,21 @@ export class AdminService {
     });
   }
 
-  inviteUser(request: InviteUserRequest): Observable<unknown> {
-    return this.http.post(`${this.base}/users/invite`, request);
+  inviteUser(request: InviteUserRequest): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>(`${this.base}/users/invite`, request);
   }
 
-  updateUserRole(id: string, request: UpdateUserRoleRequest): Observable<void> {
-    return this.http.put<void>(`${this.base}/users/${id}/role`, request);
+  // ── Custom RBAC role assignment ───────────────────────────────────────────
+
+  assignUserRole(userId: string, request: AssignUserRoleRequest): Observable<void> {
+    return this.http.post<void>(`${this.identityBase}/${userId}/roles`, request);
   }
+
+  revokeUserRole(userId: string, roleId: string): Observable<void> {
+    return this.http.delete<void>(`${this.identityBase}/${userId}/roles/${roleId}`);
+  }
+
+  // ── Deactivate / Reactivate ───────────────────────────────────────────────
 
   deactivateUser(id: string): Observable<void> {
     return this.http.put<void>(`${this.base}/users/${id}/deactivate`, {});

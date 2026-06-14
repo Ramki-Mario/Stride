@@ -59,6 +59,31 @@ public sealed class IdentityApiClient
         CancellationToken cancellationToken = default)
         => Send(HttpMethod.Delete, $"/api/identity/roles/{roleId}", accessToken, cancellationToken);
 
+    // ── User-role assignment ─────────────────────────────────────────────────
+
+    /// <summary>Returns the active custom roles currently assigned to a user.</summary>
+    public Task<HttpResponseMessage> GetUserRolesAsync(
+        Guid   userId,
+        string accessToken,
+        CancellationToken cancellationToken = default)
+        => Send(HttpMethod.Get, $"/api/identity/users/{userId}/roles", accessToken, cancellationToken);
+
+    /// <summary>Assigns a custom role to a user.</summary>
+    public Task<HttpResponseMessage> AssignUserRoleAsync(
+        Guid   userId,
+        object body,
+        string accessToken,
+        CancellationToken cancellationToken = default)
+        => SendJson(HttpMethod.Post, $"/api/identity/users/{userId}/roles", body, accessToken, cancellationToken);
+
+    /// <summary>Revokes a specific custom role from a user.</summary>
+    public Task<HttpResponseMessage> RevokeUserRoleAsync(
+        Guid   userId,
+        Guid   roleId,
+        string accessToken,
+        CancellationToken cancellationToken = default)
+        => Send(HttpMethod.Delete, $"/api/identity/users/{userId}/roles/{roleId}", accessToken, cancellationToken);
+
     private Task<HttpResponseMessage> Send(
         HttpMethod method, string path, string accessToken,
         CancellationToken cancellationToken)
