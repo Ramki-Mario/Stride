@@ -18,17 +18,68 @@ public sealed class IdentityApiClient
 
     public IdentityApiClient(HttpClient client) => _client = client;
 
-    /// <summary>
-    /// Returns all active roles for the current tenant.
-    /// Forwards the Bearer token from the BFF session cookie.
-    /// </summary>
+    /// <summary>Returns the system-wide permission catalog (for role create/edit UI).</summary>
+    public Task<HttpResponseMessage> ListPermissionsAsync(
+        string accessToken,
+        CancellationToken cancellationToken = default)
+        => Send(HttpMethod.Get, "/api/identity/permissions", accessToken, cancellationToken);
+
+    /// <summary>Returns all active roles for the current tenant.</summary>
     public Task<HttpResponseMessage> ListRolesAsync(
         string accessToken,
         CancellationToken cancellationToken = default)
+        => Send(HttpMethod.Get, "/api/identity/roles", accessToken, cancellationToken);
+
+    /// <summary>Returns a single role with its active permissions.</summary>
+    public Task<HttpResponseMessage> GetRoleAsync(
+        Guid   roleId,
+        string accessToken,
+        CancellationToken cancellationToken = default)
+        => Send(HttpMethod.Get, $"/api/identity/roles/{roleId}", accessToken, cancellationToken);
+
+    /// <summary>Creates a new custom role.</summary>
+    public Task<HttpResponseMessage> CreateRoleAsync(
+        object body,
+        string accessToken,
+        CancellationToken cancellationToken = default)
+        => SendJson(HttpMethod.Post, "/api/identity/roles", body, accessToken, cancellationToken);
+
+    /// <summary>Updates an existing role's name, description, and permissions.</summary>
+    public Task<HttpResponseMessage> UpdateRoleAsync(
+        Guid   roleId,
+        object body,
+        string accessToken,
+        CancellationToken cancellationToken = default)
+        => SendJson(HttpMethod.Put, $"/api/identity/roles/{roleId}", body, accessToken, cancellationToken);
+
+    /// <summary>Soft-deletes a custom role.</summary>
+    public Task<HttpResponseMessage> DeleteRoleAsync(
+        Guid   roleId,
+        string accessToken,
+        CancellationToken cancellationToken = default)
+        => Send(HttpMethod.Delete, $"/api/identity/roles/{roleId}", accessToken, cancellationToken);
+
+    private Task<HttpResponseMessage> Send(
+        HttpMethod method, string path, string accessToken,
+        CancellationToken cancellationToken)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "/api/identity/roles");
-        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-        return _client.SendAsync(request, cancellationToken);
+        var req = new HttpRequestMessage(method, path);
+        req.Headers.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+        return _client.SendAsync(req, cancellationToken);
+    }
+
+    private Task<HttpResponseMessage> SendJson(
+        HttpMethod method, string path, object body, string accessToken,
+        CancellationToken cancellationToken)
+    {
+        var req = new HttpRequestMessage(method, path)
+        {
+            Content = System.Net.Http.Json.JsonContent.Create(body),
+        };
+        req.Headers.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+        return _client.SendAsync(req, cancellationToken);
     }
 
     /// <summary>

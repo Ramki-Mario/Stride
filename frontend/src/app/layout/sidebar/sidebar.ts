@@ -492,6 +492,7 @@ export class SidebarComponent {
       label: 'Administration',
       items: [
         { label: 'Users',            route: '/administration',              icon: 'pi-users',      exact: true },
+        { label: 'Roles',           route: '/administration/roles',      icon: 'pi-id-card' },
         { label: 'Tenant Settings', route: '/administration/settings',   icon: 'pi-palette' },
         { label: 'Webhooks',        route: '/administration/webhooks',   icon: 'pi-send' },
         { label: 'Audit Log',       route: '/administration/audit-log',  icon: 'pi-shield' },

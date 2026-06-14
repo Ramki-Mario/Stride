@@ -17,6 +17,11 @@ export const administrationRoutes: Routes = [
       import('./pages/settings-page/settings-page').then((m) => m.SettingsPageComponent),
   },
   {
+    path: 'roles',
+    loadComponent: () =>
+      import('./pages/roles-page/roles-page').then((m) => m.RolesPageComponent),
+  },
+  {
     path: 'audit-log',
     loadComponent: () =>
       import('./pages/audit-log-page/audit-log-page').then((m) => m.AuditLogPageComponent),
