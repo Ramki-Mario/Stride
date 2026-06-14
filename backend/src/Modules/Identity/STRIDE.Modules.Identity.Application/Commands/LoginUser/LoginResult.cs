@@ -2,8 +2,8 @@ namespace STRIDE.Modules.Identity.Application.Commands.LoginUser;
 
 /// <summary>
 /// Returned by <see cref="LoginCommand"/> on successful authentication.
-/// The <see cref="AccessToken"/> is forwarded to the BFF which exchanges it
-/// for an HttpOnly session cookie backed by Redis (ADR-007).
+/// Contains both an access token (short-lived JWT) and a refresh token (long-lived opaque token).
+/// The BFF stores the refresh token in an HttpOnly cookie and uses it to silently renew sessions.
 /// </summary>
 public sealed record LoginResult(
     Guid   UserId,
@@ -11,5 +11,7 @@ public sealed record LoginResult(
     string Email,
     string DisplayName,
     IReadOnlyList<string> Roles,
-    string AccessToken,
-    DateTime ExpiresAtUtc);
+    string   AccessToken,
+    DateTime AccessTokenExpiresAtUtc,
+    string   RefreshToken,
+    DateTime RefreshTokenExpiresAtUtc);

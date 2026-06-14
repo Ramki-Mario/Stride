@@ -6,6 +6,7 @@ using STRIDE.Modules.Identity.Application;
 using STRIDE.Modules.Identity.Application.Abstractions;
 using STRIDE.Modules.Identity.Application.Commands.LoginUser;
 using STRIDE.Modules.Identity.Domain.Entities;
+using RefreshTokenEntity = STRIDE.Modules.Identity.Domain.Entities.RefreshToken;
 
 namespace STRIDE.Modules.Identity.Application.Commands.RegisterTenant;
 
@@ -17,7 +18,7 @@ namespace STRIDE.Modules.Identity.Application.Commands.RegisterTenant;
 ///   4. Assign Admin role via the User aggregate
 ///   5. Create UserTenantMapping (required for TenantResolver on login)
 ///   6. Flush all changes in a single SaveChangesAsync call
-///   7. Mint a JWT and return LoginResult — the BFF will auto-issue a session cookie
+///   7. Mint a JWT + refresh token and return LoginResult — the BFF will auto-issue a session cookie
 /// </summary>
 internal sealed class RegisterTenantCommandHandler
     : IRequestHandler<RegisterTenantCommand, Result<LoginResult>>
@@ -25,30 +26,36 @@ internal sealed class RegisterTenantCommandHandler
     private const  string AdminRoleName  = "Admin";
     private static readonly Guid SystemActorId = Guid.Empty;
 
-    private readonly ITenantContextSetter  _tenantSetter;
-    private readonly ITenantRepository     _tenants;
-    private readonly IRoleRepository       _roles;
-    private readonly IUserRepository       _users;
-    private readonly IPasswordHasher       _hasher;
-    private readonly IJwtTokenService      _jwt;
+    private readonly ITenantContextSetter    _tenantSetter;
+    private readonly ITenantRepository       _tenants;
+    private readonly IRoleRepository         _roles;
+    private readonly IUserRepository         _users;
+    private readonly IPasswordHasher         _hasher;
+    private readonly IJwtTokenService        _jwt;
+    private readonly IRefreshTokenRepository _refreshTokens;
+    private readonly IRefreshTokenGenerator  _tokenGenerator;
     private readonly ILogger<RegisterTenantCommandHandler> _logger;
 
     public RegisterTenantCommandHandler(
-        ITenantContextSetter  tenantSetter,
-        ITenantRepository     tenants,
-        IRoleRepository       roles,
-        IUserRepository       users,
-        IPasswordHasher       hasher,
-        IJwtTokenService      jwt,
+        ITenantContextSetter    tenantSetter,
+        ITenantRepository       tenants,
+        IRoleRepository         roles,
+        IUserRepository         users,
+        IPasswordHasher         hasher,
+        IJwtTokenService        jwt,
+        IRefreshTokenRepository refreshTokens,
+        IRefreshTokenGenerator  tokenGenerator,
         ILogger<RegisterTenantCommandHandler> logger)
     {
-        _tenantSetter = tenantSetter;
-        _tenants      = tenants;
-        _roles        = roles;
-        _users        = users;
-        _hasher       = hasher;
-        _jwt          = jwt;
-        _logger       = logger;
+        _tenantSetter   = tenantSetter;
+        _tenants        = tenants;
+        _roles          = roles;
+        _users          = users;
+        _hasher         = hasher;
+        _jwt            = jwt;
+        _refreshTokens  = refreshTokens;
+        _tokenGenerator = tokenGenerator;
+        _logger         = logger;
     }
 
     public async Task<Result<LoginResult>> Handle(
@@ -106,22 +113,35 @@ internal sealed class RegisterTenantCommandHandler
 
         _logger.TenantRegistered(tenant.Id, tenant.Slug, user.Id);
 
-        // ── 8. Mint JWT — same shape as LoginResult ───────────────────────────
-        var roleNames  = new[] { AdminRoleName }.AsReadOnly();
-        var tokenResult = _jwt.Generate(new JwtTokenRequest(
+        // ── 8. Mint JWT + refresh token ───────────────────────────────────────
+        var roleNames   = new[] { AdminRoleName }.AsReadOnly();
+        var jwtResult   = _jwt.Generate(new JwtTokenRequest(
             UserId:      user.Id,
             TenantId:    tenant.Id,
             Email:       user.Email,
             DisplayName: user.DisplayName,
             Roles:       roleNames));
 
+        var (rawToken, refreshExpiry) = _tokenGenerator.Generate();
+        var refreshToken = RefreshTokenEntity.Create(
+            tenantId:  tenant.Id,
+            userId:    user.Id,
+            token:     rawToken,
+            expiresAt: refreshExpiry,
+            createdBy: user.Id);
+
+        await _refreshTokens.AddAsync(refreshToken, cancellationToken);
+        await _refreshTokens.SaveChangesAsync(cancellationToken);
+
         return Result.Success(new LoginResult(
-            UserId:       user.Id,
-            TenantId:     tenant.Id,
-            Email:        user.Email,
-            DisplayName:  user.DisplayName,
-            Roles:        roleNames,
-            AccessToken:  tokenResult.AccessToken,
-            ExpiresAtUtc: tokenResult.ExpiresAtUtc));
+            UserId:                   user.Id,
+            TenantId:                 tenant.Id,
+            Email:                    user.Email,
+            DisplayName:              user.DisplayName,
+            Roles:                    roleNames,
+            AccessToken:              jwtResult.AccessToken,
+            AccessTokenExpiresAtUtc:  jwtResult.ExpiresAtUtc,
+            RefreshToken:             rawToken,
+            RefreshTokenExpiresAtUtc: refreshExpiry));
     }
 }

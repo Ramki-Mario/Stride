@@ -72,12 +72,15 @@ public sealed class AuthController : ControllerBase
         {
             IsPersistent = true,
             IssuedUtc    = DateTimeOffset.UtcNow,
-            ExpiresUtc   = new DateTimeOffset(hostResponse.ExpiresAtUtc, TimeSpan.Zero),
+            ExpiresUtc   = new DateTimeOffset(hostResponse.RefreshTokenExpiresAtUtc, TimeSpan.Zero),
             AllowRefresh = false
         };
         properties.StoreTokens(new[]
         {
-            new AuthenticationToken { Name = "access_token", Value = hostResponse.AccessToken }
+            new AuthenticationToken { Name = "access_token",               Value = hostResponse.AccessToken },
+            new AuthenticationToken { Name = "refresh_token",              Value = hostResponse.RefreshToken },
+            new AuthenticationToken { Name = "access_token_expires_at",    Value = hostResponse.AccessTokenExpiresAtUtc.ToString("O") },
+            new AuthenticationToken { Name = "refresh_token_expires_at",   Value = hostResponse.RefreshTokenExpiresAtUtc.ToString("O") },
         });
 
         await HttpContext.SignInAsync(
