@@ -44,6 +44,7 @@ public sealed record MeResponse(
     string Email,
     string DisplayName,
     IReadOnlyList<string> Roles,
+    IReadOnlyList<string> Permissions,
     string DefaultPalette = "purple",
     string TenantName     = "");
 

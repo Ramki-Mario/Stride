@@ -24,13 +24,16 @@ namespace STRIDE.BFF.Controllers;
 public sealed class TenantsController : ControllerBase
 {
     private readonly TenantRegistrationApiClient _registration;
+    private readonly IdentityApiClient           _identity;
     private readonly ILogger<TenantsController>  _logger;
 
     public TenantsController(
         TenantRegistrationApiClient registration,
+        IdentityApiClient           identity,
         ILogger<TenantsController>  logger)
     {
         _registration = registration;
+        _identity     = identity;
         _logger       = logger;
     }
 
@@ -121,6 +124,19 @@ public sealed class TenantsController : ControllerBase
 
         _logger.TenantRegistrationComplete(hostResponse.UserId, hostResponse.TenantId);
 
+        // The new TenantAdmin holds all permissions (US-132). Fetch them so the SPA
+        // renders the full permission-aware UI immediately after onboarding.
+        IReadOnlyList<string> permissions;
+        try
+        {
+            permissions = await _identity.GetMyPermissionsAsync(hostResponse.AccessToken, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to fetch permissions after tenant registration — using empty set.");
+            permissions = Array.Empty<string>();
+        }
+
         // TenantSettings are auto-created on first GET; use OrgName directly so the
         // sidebar shows the correct name immediately without a second round-trip.
         return Ok(new MeResponse(
@@ -129,6 +145,7 @@ public sealed class TenantsController : ControllerBase
             hostResponse.Email,
             hostResponse.DisplayName,
             hostResponse.Roles,
+            permissions,
             DefaultPalette: "purple",
             TenantName:     request.OrgName.Trim()));
     }

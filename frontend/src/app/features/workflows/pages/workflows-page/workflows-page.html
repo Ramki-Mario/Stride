@@ -12,7 +12,7 @@
     </p>
   </div>
   <div class="wfl-header-actions">
-    <button class="wfl-btn wfl-btn-primary" (click)="navigateToCreate()">
+    <button *hasPermission="'workflow.create'" class="wfl-btn wfl-btn-primary" (click)="navigateToCreate()">
       <span class="pi pi-plus"></span> New Workflow
     </button>
   </div>
@@ -219,7 +219,7 @@
         <span class="pi pi-filter-slash"></span> Clear filters
       </button>
     } @else {
-      <button class="wfl-btn wfl-btn-primary" (click)="navigateToCreate()">
+      <button *hasPermission="'workflow.create'" class="wfl-btn wfl-btn-primary" (click)="navigateToCreate()">
         <span class="pi pi-plus"></span> New Workflow
       </button>
     }

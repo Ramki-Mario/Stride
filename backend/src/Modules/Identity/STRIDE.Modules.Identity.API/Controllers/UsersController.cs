@@ -8,6 +8,7 @@ using STRIDE.Modules.Identity.Domain;
 using STRIDE.Modules.Identity.Application.Commands.AcceptInvite;
 using STRIDE.Modules.Identity.Application.Commands.AssignRole;
 using STRIDE.Modules.Identity.Application.Commands.RevokeUserRole;
+using STRIDE.Modules.Identity.Application.Queries.GetMyPermissions;
 using STRIDE.Modules.Identity.Application.Queries.GetUser;
 using STRIDE.Modules.Identity.Application.Queries.GetUserRoles;
 using STRIDE.Modules.Identity.Application.Queries.ValidateInviteToken;
@@ -91,6 +92,19 @@ public sealed class UsersController : ControllerBase
         if (result.IsFailure)
             return BadRequest(new { error = result.Error });
 
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Returns the effective permission keys held by the current user within their tenant.
+    /// Drives permission-aware UI in the SPA (hide/disable actions the user cannot perform).
+    /// GET /api/identity/users/me/permissions
+    /// </summary>
+    [HttpGet("me/permissions")]
+    [ProducesResponseType(typeof(IReadOnlyList<string>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyPermissions(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetMyPermissionsQuery(), cancellationToken);
         return Ok(result.Value);
     }
 

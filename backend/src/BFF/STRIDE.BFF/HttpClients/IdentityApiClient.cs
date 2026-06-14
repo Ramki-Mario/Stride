@@ -24,6 +24,24 @@ public sealed class IdentityApiClient
         CancellationToken cancellationToken = default)
         => Send(HttpMethod.Get, "/api/identity/permissions", accessToken, cancellationToken);
 
+    /// <summary>
+    /// Returns the effective permission keys held by the current user.
+    /// Returns an empty array on any non-success response so /auth/me never breaks.
+    /// </summary>
+    public async Task<IReadOnlyList<string>> GetMyPermissionsAsync(
+        string accessToken,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await Send(
+            HttpMethod.Get, "/api/identity/users/me/permissions", accessToken, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+            return Array.Empty<string>();
+
+        return await response.Content.ReadFromJsonAsync<IReadOnlyList<string>>(
+            cancellationToken: cancellationToken) ?? Array.Empty<string>();
+    }
+
     /// <summary>Returns all active roles for the current tenant.</summary>
     public Task<HttpResponseMessage> ListRolesAsync(
         string accessToken,

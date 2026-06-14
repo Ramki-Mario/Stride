@@ -12,6 +12,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { map, catchError, of } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
+import { PermissionService, Permissions } from '../../core/auth/permission.service';
 import { WorkflowService } from '../../features/workflows/services/workflow.service';
 
 interface NavItem {
@@ -20,6 +21,7 @@ interface NavItem {
   icon: string;   // PrimeIcons class name (e.g. 'pi-objects-column')
   exact?: boolean;
   badgeCount?: () => number;  // optional dynamic badge count
+  permission?: string;        // hides the item unless the user holds this permission
 }
 
 interface NavGroup {
@@ -81,6 +83,7 @@ interface NavGroup {
         <div class="sb-group-label" aria-hidden="true">{{ group.label }}</div>
 
         @for (item of group.items; track item.route) {
+          @if (canShow(item)) {
           <a class="sb-nav-item"
              [routerLink]="item.route"
              routerLinkActive="active"
@@ -94,6 +97,7 @@ interface NavGroup {
               <span class="sb-nav-badge">{{ item.badgeCount() }}</span>
             }
           </a>
+          }
         }
       }
     </nav>
@@ -405,8 +409,9 @@ interface NavGroup {
   `],
 })
 export class SidebarComponent {
-  protected readonly auth = inject(AuthService);
-  private   readonly wf   = inject(WorkflowService);
+  protected readonly auth  = inject(AuthService);
+  private   readonly perms = inject(PermissionService);
+  private   readonly wf    = inject(WorkflowService);
 
   /** Set by ShellComponent when the mobile hamburger is tapped. */
   @Input() mobileOpen = false;
@@ -492,14 +497,19 @@ export class SidebarComponent {
       label: 'Administration',
       items: [
         { label: 'Users',            route: '/administration',              icon: 'pi-users',      exact: true },
-        { label: 'Roles',           route: '/administration/roles',      icon: 'pi-id-card' },
-        { label: 'Tenant Settings', route: '/administration/settings',   icon: 'pi-palette' },
+        { label: 'Roles',           route: '/administration/roles',      icon: 'pi-id-card', permission: Permissions.RoleView },
+        { label: 'Tenant Settings', route: '/administration/settings',   icon: 'pi-palette', permission: Permissions.TenantSettings },
         { label: 'Webhooks',        route: '/administration/webhooks',   icon: 'pi-send' },
         { label: 'Audit Log',       route: '/administration/audit-log',  icon: 'pi-shield' },
         { label: 'System Health',   route: '/administration/health',     icon: 'pi-heart-fill' },
       ],
     },
   ];
+
+  /** A nav item is shown when it has no permission gate, or the user holds that permission. */
+  protected canShow(item: NavItem): boolean {
+    return !item.permission || this.perms.has(item.permission);
+  }
 
   protected toggleCollapse(): void {
     this.collapsed.update(c => !c);
