@@ -7,6 +7,8 @@ public sealed class UserRole : AuditableEntity
     public Guid UserId { get; private set; }
     public Guid RoleId { get; private set; }
 
+    public Role? Role { get; }
+
     private UserRole() { }
 
     public static UserRole Create(Guid tenantId, Guid userId, Guid roleId, Guid createdBy)

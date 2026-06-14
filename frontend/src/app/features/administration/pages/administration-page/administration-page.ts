@@ -15,7 +15,8 @@ import { Subject } from 'rxjs';
 import { SelectModule } from 'primeng/select';
 
 import { AdminService } from '../../services/admin.service';
-import { AdminUserDto, UserRole, UserStatus } from '../../models/admin-user.models';
+import { RoleService } from '../../services/role.service';
+import { AdminUserDto, UserStatus } from '../../models/admin-user.models';
 
 @Component({
   selector: 'app-administration-page',
@@ -77,7 +78,7 @@ import { AdminUserDto, UserRole, UserStatus } from '../../models/admin-user.mode
         </div>
 
         <p-select
-          [options]="roleOptions"
+          [options]="roleFilterOptions()"
           [(ngModel)]="selectedRole"
           (onChange)="onFilterChange()"
           optionLabel="label"
@@ -183,7 +184,7 @@ import { AdminUserDto, UserRole, UserStatus } from '../../models/admin-user.mode
                   <!-- User cell: avatar initial + name + email -->
                   <td>
                     <div class="admin-user-cell">
-                      <div class="admin-avatar" [ngClass]="avatarClass(user)">
+                      <div class="admin-avatar" [style]="avatarColor(user.role)">
                         {{ initials(user.displayName) }}
                       </div>
                       <div>
@@ -195,7 +196,7 @@ import { AdminUserDto, UserRole, UserStatus } from '../../models/admin-user.mode
 
                   <!-- Role badge -->
                   <td>
-                    <span class="admin-badge" [ngClass]="roleBadgeClass(user.role)">
+                    <span class="admin-badge" [style]="roleBadgeStyle(user.role)">
                       {{ user.role }}
                     </span>
                   </td>
@@ -333,15 +334,15 @@ import { AdminUserDto, UserRole, UserStatus } from '../../models/admin-user.mode
             </div>
 
             <div class="form-field">
-              <label class="form-label" for="invite-role">Role <span class="form-required">*</span></label>
+              <label class="form-label" for="invite-role">Role</label>
               <p-select
                 inputId="invite-role"
-                [options]="roleInviteOptions"
-                formControlName="role"
+                [options]="rolePickerOptions()"
+                formControlName="roleId"
                 optionLabel="label"
                 optionValue="value"
                 styleClass="form-select"
-                placeholder="Select a role"
+                placeholder="Select a role (optional)"
               />
             </div>
 
@@ -387,14 +388,15 @@ import { AdminUserDto, UserRole, UserStatus } from '../../models/admin-user.mode
             </p>
 
             <div class="form-field">
-              <label class="form-label" for="new-role">New Role</label>
+              <label class="form-label" for="new-role">New Role <span class="form-required">*</span></label>
               <p-select
                 inputId="new-role"
-                [options]="roleInviteOptions"
-                [(ngModel)]="selectedNewRole"
+                [options]="rolePickerOptions()"
+                [(ngModel)]="selectedNewRoleId"
                 optionLabel="label"
                 optionValue="value"
                 styleClass="form-select"
+                placeholder="Select a role"
               />
             </div>
 
@@ -408,7 +410,7 @@ import { AdminUserDto, UserRole, UserStatus } from '../../models/admin-user.mode
                 Cancel
               </button>
               <button class="stride-btn stride-btn-primary"
-                      (click)="submitRoleChange()" [disabled]="changingRole()">
+                      (click)="submitRoleChange()" [disabled]="changingRole() || !selectedNewRoleId">
                 @if (changingRole()) { Saving… } @else { Save }
               </button>
             </div>
@@ -951,13 +953,15 @@ import { AdminUserDto, UserRole, UserStatus } from '../../models/admin-user.mode
   `],
 })
 export class AdministrationPageComponent implements OnInit {
-  readonly svc        = inject(AdminService);
-  private readonly fb = inject(FormBuilder);
+  readonly svc     = inject(AdminService);
+  readonly roleSvc = inject(RoleService);
+
+  private readonly fb         = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
 
   // ── Filter state ─────────────────────────────────────────────────────────
   readonly searchTerm = signal('');
-  selectedRole:   UserRole | '' = '';
+  selectedRole:   string = '';
   selectedStatus: UserStatus | '' = '';
 
   private readonly search$ = new Subject<string>();
@@ -966,23 +970,15 @@ export class AdministrationPageComponent implements OnInit {
     () => !!this.searchTerm() || !!this.selectedRole || !!this.selectedStatus
   );
 
-  // ── Dropdown options ──────────────────────────────────────────────────────
-  readonly roleOptions = [
-    { label: 'All Roles',          value: '' as UserRole | '' },
-    { label: 'Admin',              value: 'Admin'              as UserRole },
-    { label: 'Operations Manager', value: 'OperationsManager'  as UserRole },
-    { label: 'Finance User',       value: 'FinanceUser'        as UserRole },
-    { label: 'Field Worker',       value: 'FieldWorker'        as UserRole },
-    { label: 'Supervisor',         value: 'Supervisor'         as UserRole },
-  ];
+  // ── Role filter options (dynamically derived from catalog) ─────────────────
+  readonly roleFilterOptions = computed(() => [
+    { label: 'All Roles', value: '' },
+    ...this.roleSvc.roles().map(r => ({ label: r.name, value: r.name })),
+  ]);
 
-  readonly roleInviteOptions = [
-    { label: 'Admin',              value: 'Admin'              as UserRole },
-    { label: 'Operations Manager', value: 'OperationsManager'  as UserRole },
-    { label: 'Finance User',       value: 'FinanceUser'        as UserRole },
-    { label: 'Field Worker',       value: 'FieldWorker'        as UserRole },
-    { label: 'Supervisor',         value: 'Supervisor'         as UserRole },
-  ];
+  readonly rolePickerOptions = computed(() =>
+    this.roleSvc.roles().map(r => ({ label: r.name, value: r.id }))
+  );
 
   readonly statusOptions = [
     { label: 'All Statuses', value: '' as UserStatus | '' },
@@ -1004,7 +1000,7 @@ export class AdministrationPageComponent implements OnInit {
   readonly inviteForm = this.fb.group({
     email:       ['', [Validators.required, Validators.email]],
     displayName: ['', Validators.required],
-    role:        ['FieldWorker' as UserRole, Validators.required],
+    roleId:      ['' as string],
   });
 
   // ── Change Role modal ─────────────────────────────────────────────────────
@@ -1012,7 +1008,7 @@ export class AdministrationPageComponent implements OnInit {
   readonly changingRole    = signal(false);
   readonly roleError       = signal<string | null>(null);
   readonly roleTargetUser  = signal<AdminUserDto | null>(null);
-  selectedNewRole: UserRole = 'FieldWorker';
+  selectedNewRoleId = '';
 
   // ── Derived ───────────────────────────────────────────────────────────────
   readonly pageRange = computed(() => {
@@ -1037,6 +1033,7 @@ export class AdministrationPageComponent implements OnInit {
       });
 
     this.reload();
+    this.roleSvc.loadRoles();
   }
 
   // ── Search / filter ────────────────────────────────────────────────────────
@@ -1067,7 +1064,7 @@ export class AdministrationPageComponent implements OnInit {
   // ── Invite modal ───────────────────────────────────────────────────────────
 
   openInviteModal(): void {
-    this.inviteForm.reset({ email: '', displayName: '', role: 'FieldWorker' });
+    this.inviteForm.reset({ email: '', displayName: '', roleId: '' });
     this.inviteError.set(null);
     this.showInviteModal.set(true);
   }
@@ -1080,11 +1077,15 @@ export class AdministrationPageComponent implements OnInit {
   submitInvite(): void {
     if (this.inviteForm.invalid) { this.inviteForm.markAllAsTouched(); return; }
 
-    const { email, displayName, role } = this.inviteForm.getRawValue();
+    const { email, displayName, roleId } = this.inviteForm.getRawValue();
     this.inviting.set(true);
     this.inviteError.set(null);
 
-    this.svc.inviteUser({ email: email!, displayName: displayName!, role: role as UserRole }).subscribe({
+    const request = roleId
+      ? { email: email!, displayName: displayName!, roleId }
+      : { email: email!, displayName: displayName! };
+
+    this.svc.inviteUser(request).subscribe({
       next: () => {
         this.inviting.set(false);
         this.showInviteModal.set(false);
@@ -1093,8 +1094,7 @@ export class AdministrationPageComponent implements OnInit {
       },
       error: (err) => {
         this.inviting.set(false);
-        const msg = err?.error?.error ?? 'Failed to send invite. Please try again.';
-        this.inviteError.set(msg);
+        this.inviteError.set(err?.error?.error ?? 'Failed to send invite. Please try again.');
       },
     });
   }
@@ -1104,7 +1104,7 @@ export class AdministrationPageComponent implements OnInit {
   openRoleModal(user: AdminUserDto): void {
     this.openMenuId.set(null);
     this.roleTargetUser.set(user);
-    this.selectedNewRole = user.role;
+    this.selectedNewRoleId = user.roleId ?? '';
     this.roleError.set(null);
     this.showRoleModal.set(true);
   }
@@ -1116,23 +1116,35 @@ export class AdministrationPageComponent implements OnInit {
 
   submitRoleChange(): void {
     const user = this.roleTargetUser();
-    if (!user) return;
+    if (!user || !this.selectedNewRoleId) return;
 
     this.changingRole.set(true);
     this.roleError.set(null);
 
-    this.svc.updateUserRole(user.id, { role: this.selectedNewRole }).subscribe({
-      next: () => {
-        this.changingRole.set(false);
-        this.showRoleModal.set(false);
-        this.notification.set({ type: 'success', message: `${user.displayName}'s role updated to ${this.selectedNewRole}.` });
-        this.reload();
-      },
-      error: (err) => {
-        this.changingRole.set(false);
-        this.roleError.set(err?.error?.error ?? 'Failed to update role.');
-      },
-    });
+    const assign = () =>
+      this.svc.assignUserRole(user.id, { roleId: this.selectedNewRoleId }).subscribe({
+        next: () => {
+          this.changingRole.set(false);
+          this.showRoleModal.set(false);
+          const roleName = this.roleSvc.roles().find(r => r.id === this.selectedNewRoleId)?.name
+            ?? this.selectedNewRoleId;
+          this.notification.set({ type: 'success', message: `${user.displayName}'s role updated to ${roleName}.` });
+          this.reload();
+        },
+        error: (err) => {
+          this.changingRole.set(false);
+          this.roleError.set(err?.error?.error ?? 'Failed to update role.');
+        },
+      });
+
+    if (user.roleId && user.roleId !== this.selectedNewRoleId) {
+      this.svc.revokeUserRole(user.id, user.roleId).subscribe({
+        next:  () => assign(),
+        error: () => assign(), // proceed with assign even if revoke fails (role may already be gone)
+      });
+    } else {
+      assign();
+    }
   }
 
   // ── Deactivate / Reactivate ─────────────────────────────────────────────────
@@ -1177,12 +1189,34 @@ export class AdministrationPageComponent implements OnInit {
     return name.substring(0, 2).toUpperCase();
   }
 
-  avatarClass(user: AdminUserDto): string {
-    return `admin-avatar--${user.role.toLowerCase()}`;
+  avatarColor(role: string): string {
+    const colors = [
+      ['color-mix(in srgb, var(--stride-primary) 15%, transparent)', 'var(--stride-primary)'],
+      ['color-mix(in srgb, #3B82F6 15%, transparent)', '#2563EB'],
+      ['color-mix(in srgb, #10B981 15%, transparent)', '#059669'],
+      ['color-mix(in srgb, #0891B2 15%, transparent)', '#0E7490'],
+      ['color-mix(in srgb, #F59E0B 15%, transparent)', '#D97706'],
+      ['color-mix(in srgb, #8B5CF6 15%, transparent)', '#7C3AED'],
+    ];
+    let hash = 0;
+    for (let i = 0; i < role.length; i++) hash = (hash * 31 + role.codePointAt(i)!) & 0xffff;
+    const [bg, fg] = colors[hash % colors.length];
+    return `background:${bg};color:${fg}`;
   }
 
-  roleBadgeClass(role: UserRole): string {
-    return `badge-role--${role.toLowerCase()}`;
+  roleBadgeStyle(role: string): string {
+    const colors = [
+      ['color-mix(in srgb, var(--stride-primary) 12%, transparent)', 'var(--stride-primary)'],
+      ['color-mix(in srgb, #3B82F6 12%, transparent)', '#2563EB'],
+      ['color-mix(in srgb, #10B981 12%, transparent)', '#059669'],
+      ['color-mix(in srgb, #0891B2 12%, transparent)', '#0E7490'],
+      ['color-mix(in srgb, #F59E0B 12%, transparent)', '#D97706'],
+      ['color-mix(in srgb, #8B5CF6 12%, transparent)', '#7C3AED'],
+    ];
+    let hash = 0;
+    for (let i = 0; i < role.length; i++) hash = (hash * 31 + role.codePointAt(i)!) & 0xffff;
+    const [bg, fg] = colors[hash % colors.length];
+    return `background:${bg};color:${fg}`;
   }
 
   statusBadgeClass(user: AdminUserDto): string {

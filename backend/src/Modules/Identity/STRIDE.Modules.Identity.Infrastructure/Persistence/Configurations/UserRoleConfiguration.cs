@@ -18,6 +18,11 @@ internal sealed class UserRoleConfiguration : IEntityTypeConfiguration<UserRole>
         builder.Property(ur => ur.CreatedBy).IsRequired();
         builder.Property(ur => ur.IsDeleted).IsRequired().HasDefaultValue(false);
 
+        builder.HasOne(ur => ur.Role)
+               .WithMany()
+               .HasForeignKey(ur => ur.RoleId)
+               .OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+
         builder.HasIndex(ur => new { ur.TenantId, ur.UserId, ur.RoleId }).IsUnique();
         builder.HasIndex(ur => new { ur.TenantId, ur.IsDeleted });
 

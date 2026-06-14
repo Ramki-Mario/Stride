@@ -13,12 +13,12 @@ internal sealed class UserRepository : TenantAwareRepository<User, IdentityDbCon
 
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => await Query
-            .Include(u => u.Roles)
+            .Include(u => u.Roles).ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
     public async Task<User?> GetByNormalizedEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default)
         => await Query
-            .Include(u => u.Roles)
+            .Include(u => u.Roles).ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail, cancellationToken);
 
     public async Task<bool> ExistsByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default)
@@ -26,7 +26,7 @@ internal sealed class UserRepository : TenantAwareRepository<User, IdentityDbCon
 
     public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
         => await Query
-            .Include(u => u.Roles)
+            .Include(u => u.Roles).ThenInclude(ur => ur.Role)
             .OrderBy(u => u.DisplayName)
             .ToListAsync(cancellationToken);
 

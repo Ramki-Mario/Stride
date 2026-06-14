@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using STRIDE.BFF.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BFF.HttpClients;
@@ -21,12 +22,17 @@ namespace STRIDE.BFF.Controllers;
 public sealed class AdminController : ControllerBase
 {
     private readonly AdminApiClient            _admin;
+    private readonly IdentityApiClient         _identity;
     private readonly ILogger<AdminController>  _logger;
 
-    public AdminController(AdminApiClient admin, ILogger<AdminController> logger)
+    public AdminController(
+        AdminApiClient           admin,
+        IdentityApiClient        identity,
+        ILogger<AdminController> logger)
     {
-        _admin  = admin;
-        _logger = logger;
+        _admin    = admin;
+        _identity = identity;
+        _logger   = logger;
     }
 
     [HttpGet("users")]
@@ -45,14 +51,49 @@ public sealed class AdminController : ControllerBase
     }
 
     [HttpPost("users/invite")]
-    public async Task<IActionResult> InviteUser([FromBody] object body, CancellationToken cancellationToken)
+    public async Task<IActionResult> InviteUser(
+        [FromBody] JsonElement body, CancellationToken cancellationToken)
     {
         var token = await GetTokenAsync();
         if (token is null) return Unauthorized();
+
+        // Extract optional roleId before forwarding to the admin endpoint.
+        Guid? roleId = null;
+        if (body.TryGetProperty("roleId", out var roleIdEl) &&
+            roleIdEl.ValueKind == JsonValueKind.String &&
+            Guid.TryParse(roleIdEl.GetString(), out var rid))
+        {
+            roleId = rid;
+        }
+
         var response = await _admin.InviteUserAsync(body, token, cancellationToken);
-        return response.IsSuccessStatusCode
-            ? StatusCode(StatusCodes.Status201Created, await response.Content.ReadAsStringAsync(cancellationToken))
-            : await ProxyAsync(response, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+            return await ProxyAsync(response, cancellationToken);
+
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        // If a custom roleId was supplied, assign it now that the user exists.
+        if (roleId.HasValue)
+        {
+            using var doc    = JsonDocument.Parse(json);
+            var       newDoc = doc.RootElement;
+            if (newDoc.TryGetProperty("id", out var idEl) &&
+                idEl.ValueKind == JsonValueKind.String &&
+                Guid.TryParse(idEl.GetString(), out var newUserId))
+            {
+                var assignResponse = await _identity.AssignUserRoleAsync(
+                    newUserId, new { roleId = roleId.Value }, token, cancellationToken);
+
+                if (!assignResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning(
+                        "Post-invite role assignment failed for user {UserId}: {Status}",
+                        newUserId, (int)assignResponse.StatusCode);
+                }
+            }
+        }
+
+        return StatusCode(StatusCodes.Status201Created, json);
     }
 
     [HttpPut("users/{id:guid}/role")]

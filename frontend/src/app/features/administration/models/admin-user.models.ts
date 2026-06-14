@@ -1,11 +1,11 @@
-export type UserRole   = 'Admin' | 'OperationsManager' | 'FinanceUser' | 'FieldWorker' | 'Supervisor';
 export type UserStatus = 'Active' | 'Pending' | 'Inactive';
 
 export interface AdminUserDto {
   id:          string;
   displayName: string;
   email:       string;
-  role:        UserRole;
+  roleId:      string | null;
+  role:        string;
   isActive:    boolean;
   isPending:   boolean;
   createdAt:   string;
@@ -24,9 +24,9 @@ export interface PagedResult<T> {
 export interface InviteUserRequest {
   email:       string;
   displayName: string;
-  role:        UserRole;
+  roleId?:     string;
 }
 
-export interface UpdateUserRoleRequest {
-  role: UserRole;
+export interface AssignUserRoleRequest {
+  roleId: string;
 }

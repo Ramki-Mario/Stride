@@ -5,6 +5,7 @@ public sealed record AdminUserDto(
     Guid Id,
     string DisplayName,
     string Email,
+    Guid? RoleId,
     string Role,
     bool IsActive,
     bool IsPending,
