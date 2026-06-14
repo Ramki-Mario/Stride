@@ -20,11 +20,15 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="FluentAssertions" Version="7.2.0" />
+    <PackageReference Include="NSubstitute" Version="5.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\Modules\Scheduling\STRIDE.Modules.Scheduling.Domain\STRIDE.Modules.Scheduling.Domain.csproj" />
     <ProjectReference Include="..\..\..\..\src\Modules\Scheduling\STRIDE.Modules.Scheduling.Application\STRIDE.Modules.Scheduling.Application.csproj" />
+    <ProjectReference Include="..\..\..\..\src\BuildingBlocks\STRIDE.BuildingBlocks.Application\STRIDE.BuildingBlocks.Application.csproj" />
   </ItemGroup>
 
 </Project>

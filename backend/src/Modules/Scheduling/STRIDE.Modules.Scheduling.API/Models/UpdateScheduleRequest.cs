@@ -1,0 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace STRIDE.Modules.Scheduling.API.Models;
+
+public sealed class UpdateScheduleRequest
+{
+    [Required] public string  Name                 { get; set; } = string.Empty;
+    public             string? Description          { get; set; }
+    [Required] public Guid    WorkflowDefinitionId  { get; set; }
+    [Required] public string  CronExpression        { get; set; } = string.Empty;
+}
