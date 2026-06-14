@@ -23,7 +23,7 @@ export class RoleService {
   // ── Derived ───────────────────────────────────────────────────────────────
   readonly isEmpty      = computed(() => !this.isLoading() && this.roles().length === 0);
   readonly totalCount   = computed(() => this.roles().length);
-  readonly customCount  = computed(() => this.roles().filter(r => !(r as any).isSystemRole).length);
+  readonly customCount  = computed(() => this.roles().filter(r => !r.isSystemRole).length);
 
   // ── Load list ─────────────────────────────────────────────────────────────
   loadRoles(): void {

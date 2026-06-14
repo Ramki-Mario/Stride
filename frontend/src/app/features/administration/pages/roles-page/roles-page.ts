@@ -10,7 +10,7 @@ import { NgClass } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 
 import { RoleService } from '../../services/role.service';
-import { PermissionDto, RoleDetailDto } from '../../models/role.models';
+import { PermissionDto } from '../../models/role.models';
 
 // Friendly labels for each permission key
 const PERMISSION_LABELS: Record<string, string> = {
@@ -654,9 +654,9 @@ export class RolesPageComponent implements OnInit {
 
   // ── Derived KPIs ─────────────────────────────────────────────────────────
   readonly systemCount = computed(() =>
-    (this.svc.roles() as any[]).filter(r => r.isSystemRole).length);
+    this.svc.roles().filter(r => r.isSystemRole).length);
   readonly customCount = computed(() =>
-    (this.svc.roles() as any[]).filter(r => !r.isSystemRole).length);
+    this.svc.roles().filter(r => !r.isSystemRole).length);
 
   // ── UI state ───────────────────────────────────────────────────────────────
   readonly notification = signal<{ type: 'success' | 'error'; message: string } | null>(null);

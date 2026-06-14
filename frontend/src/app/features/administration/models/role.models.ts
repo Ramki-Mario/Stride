@@ -5,9 +5,10 @@ export interface PermissionDto {
 }
 
 export interface RoleDto {
-  id:          string;
-  name:        string;
-  description: string;
+  id:           string;
+  name:         string;
+  description:  string;
+  isSystemRole: boolean;
 }
 
 export interface RoleDetailDto {
