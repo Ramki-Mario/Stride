@@ -15,6 +15,9 @@ internal sealed class RefreshTokenRepository
     public async Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken ct = default)
         => await Query.FirstOrDefaultAsync(r => r.Token == token, ct);
 
+    public async Task<RefreshToken?> GetByTokenCrossTenantAsync(string token, CancellationToken ct = default)
+        => await Context.RefreshTokens.FirstOrDefaultAsync(r => r.Token == token && !r.IsDeleted, ct);
+
     public async Task AddAsync(RefreshToken refreshToken, CancellationToken ct = default)
         => await Context.RefreshTokens.AddAsync(refreshToken, ct);
 

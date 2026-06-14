@@ -1,4 +1,3 @@
-using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
@@ -95,12 +94,82 @@ public sealed class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// POST /bff/auth/logout. Removes the Redis session and clears the cookie.
+    /// POST /bff/auth/logout. Revokes the server-side refresh token, removes the Redis
+    /// session, and clears the cookie. Revocation is best-effort — the session is cleared
+    /// regardless of whether the Host call succeeds.
     /// </summary>
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
+        var refreshToken = await HttpContext.GetTokenAsync("refresh_token");
+        if (refreshToken is not null)
+        {
+            try { await _identity.RevokeTokenAsync(refreshToken, cancellationToken); }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to revoke refresh token on logout — session will still be cleared.");
+            }
+        }
+
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// POST /bff/auth/refresh. Rotates the refresh token and updates the session with
+    /// the new token pair. Called by Angular (or the US-118 middleware) when the access
+    /// token has expired. Uses the refresh token stored in the HttpOnly session cookie
+    /// as the credential — no Bearer header required.
+    /// </summary>
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
+    {
+        var refreshToken = await HttpContext.GetTokenAsync("refresh_token");
+        if (string.IsNullOrEmpty(refreshToken))
+            return Unauthorized();
+
+        HostTokenPairResponse? tokenPair;
+        try
+        {
+            tokenPair = await _identity.RefreshTokenAsync(refreshToken, cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Host identity API unreachable during token refresh.");
+            return StatusCode(StatusCodes.Status502BadGateway, new ProblemDetails
+            {
+                Title  = "Identity service unavailable",
+                Detail = "Unable to reach the identity service. Please try again shortly.",
+                Status = StatusCodes.Status502BadGateway
+            });
+        }
+
+        if (tokenPair is null)
+            return Unauthorized();
+
+        // Re-authenticate: persist the rotated token pair into the session cookie.
+        var authResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        var properties = authResult?.Properties ?? new AuthenticationProperties
+        {
+            IsPersistent = true,
+            AllowRefresh = false
+        };
+
+        properties.ExpiresUtc = new DateTimeOffset(tokenPair.RefreshTokenExpiresAtUtc, TimeSpan.Zero);
+        properties.StoreTokens(new[]
+        {
+            new AuthenticationToken { Name = "access_token",             Value = tokenPair.AccessToken },
+            new AuthenticationToken { Name = "refresh_token",            Value = tokenPair.RefreshToken },
+            new AuthenticationToken { Name = "access_token_expires_at",  Value = tokenPair.AccessTokenExpiresAtUtc.ToString("O") },
+            new AuthenticationToken { Name = "refresh_token_expires_at", Value = tokenPair.RefreshTokenExpiresAtUtc.ToString("O") },
+        });
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            HttpContext.User,
+            properties);
+
         return NoContent();
     }
 

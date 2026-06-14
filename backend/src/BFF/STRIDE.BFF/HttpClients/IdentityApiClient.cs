@@ -50,4 +50,41 @@ public sealed class IdentityApiClient
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<HostLoginResponse>(cancellationToken: cancellationToken);
     }
+
+    /// <summary>
+    /// Rotates a refresh token. Returns null when the Host rejects the token (401),
+    /// the new token pair on success, and throws on transport / 5xx errors.
+    /// </summary>
+    public async Task<HostTokenPairResponse?> RefreshTokenAsync(
+        string refreshToken,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await _client.PostAsJsonAsync(
+            "/api/identity/auth/refresh",
+            new { Token = refreshToken },
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+            return null;
+
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<HostTokenPairResponse>(cancellationToken: cancellationToken);
+    }
+
+    /// <summary>
+    /// Revokes a refresh token on the Host (fire-and-forget safe — idempotent).
+    /// Throws on transport / 5xx errors; 404 is swallowed (token already gone).
+    /// </summary>
+    public async Task RevokeTokenAsync(
+        string refreshToken,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await _client.PostAsJsonAsync(
+            "/api/identity/auth/revoke",
+            new { Token = refreshToken },
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.NotFound) return; // already revoked/gone — OK
+        response.EnsureSuccessStatusCode();
+    }
 }

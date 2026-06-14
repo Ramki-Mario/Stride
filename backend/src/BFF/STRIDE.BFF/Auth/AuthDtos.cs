@@ -27,6 +27,16 @@ public sealed record HostLoginResponse(
     string   RefreshToken,
     DateTime RefreshTokenExpiresAtUtc);
 
+/// <summary>
+/// Response from the Host Identity API's token-refresh endpoint.
+/// Mirrors <c>TokenPairResult</c> in STRIDE.Modules.Identity.Application.
+/// </summary>
+public sealed record HostTokenPairResponse(
+    string   AccessToken,
+    DateTime AccessTokenExpiresAtUtc,
+    string   RefreshToken,
+    DateTime RefreshTokenExpiresAtUtc);
+
 /// <summary>Response body for <c>GET /bff/auth/me</c>.</summary>
 public sealed record MeResponse(
     Guid UserId,

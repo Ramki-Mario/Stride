@@ -4,8 +4,15 @@ namespace STRIDE.Modules.Identity.Application.Abstractions;
 
 public interface IRefreshTokenRepository
 {
-    /// <summary>Looks up an active refresh token by its raw token string (tenant-scoped).</summary>
+    /// <summary>Looks up a refresh token by its raw token string within the current tenant scope.</summary>
     Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken ct = default);
+
+    /// <summary>
+    /// Cross-tenant token lookup — bypasses the tenant filter.
+    /// Used by refresh/revoke endpoints where no JWT is present and tenant context
+    /// has not yet been established; callers must set tenant context after this call.
+    /// </summary>
+    Task<RefreshToken?> GetByTokenCrossTenantAsync(string token, CancellationToken ct = default);
 
     /// <summary>Stages a new refresh token for insertion. Caller must call SaveChangesAsync.</summary>
     Task AddAsync(RefreshToken refreshToken, CancellationToken ct = default);

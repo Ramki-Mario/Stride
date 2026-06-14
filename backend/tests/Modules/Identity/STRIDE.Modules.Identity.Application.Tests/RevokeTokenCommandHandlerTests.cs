@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
+using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Identity.Application.Abstractions;
 using STRIDE.Modules.Identity.Application.Commands.RevokeToken;
 
@@ -9,6 +10,7 @@ namespace STRIDE.Modules.Identity.Application.Tests;
 public sealed class RevokeTokenCommandHandlerTests
 {
     private readonly IRefreshTokenRepository _refreshTokens = Substitute.For<IRefreshTokenRepository>();
+    private readonly ITenantContextSetter    _tenantSetter  = Substitute.For<ITenantContextSetter>();
     private readonly RevokeTokenCommandHandler _sut;
 
     private static readonly Guid   TenantId = Guid.NewGuid();
@@ -19,6 +21,7 @@ public sealed class RevokeTokenCommandHandlerTests
     {
         _sut = new RevokeTokenCommandHandler(
             _refreshTokens,
+            _tenantSetter,
             NullLogger<RevokeTokenCommandHandler>.Instance);
     }
 
@@ -26,7 +29,7 @@ public sealed class RevokeTokenCommandHandlerTests
     public async Task Handle_WithActiveToken_RevokesAndReturnsSuccess()
     {
         var token = BuildActiveToken();
-        _refreshTokens.GetByTokenAsync(RawToken, Arg.Any<CancellationToken>()).Returns(token);
+        _refreshTokens.GetByTokenCrossTenantAsync(RawToken, Arg.Any<CancellationToken>()).Returns(token);
 
         var result = await _sut.Handle(new RevokeTokenCommand(RawToken), CancellationToken.None);
 
@@ -36,11 +39,22 @@ public sealed class RevokeTokenCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_WithActiveToken_SetsTenantContext()
+    {
+        var token = BuildActiveToken();
+        _refreshTokens.GetByTokenCrossTenantAsync(RawToken, Arg.Any<CancellationToken>()).Returns(token);
+
+        await _sut.Handle(new RevokeTokenCommand(RawToken), CancellationToken.None);
+
+        _tenantSetter.Received(1).SetTenantId(TenantId);
+    }
+
+    [Fact]
     public async Task Handle_WithAlreadyRevokedToken_ReturnsSuccessWithoutSaving()
     {
         var token = BuildActiveToken();
         token.Revoke(DateTime.UtcNow.AddMinutes(-5));
-        _refreshTokens.GetByTokenAsync(RawToken, Arg.Any<CancellationToken>()).Returns(token);
+        _refreshTokens.GetByTokenCrossTenantAsync(RawToken, Arg.Any<CancellationToken>()).Returns(token);
 
         var result = await _sut.Handle(new RevokeTokenCommand(RawToken), CancellationToken.None);
 
@@ -51,7 +65,7 @@ public sealed class RevokeTokenCommandHandlerTests
     [Fact]
     public async Task Handle_WhenTokenNotFound_ReturnsFailure()
     {
-        _refreshTokens.GetByTokenAsync(RawToken, Arg.Any<CancellationToken>())
+        _refreshTokens.GetByTokenCrossTenantAsync(RawToken, Arg.Any<CancellationToken>())
             .Returns((Domain.Entities.RefreshToken?)null);
 
         var result = await _sut.Handle(new RevokeTokenCommand(RawToken), CancellationToken.None);

@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
+using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Identity.Application.Abstractions;
 using STRIDE.Modules.Identity.Application.Commands.RefreshToken;
 using STRIDE.Modules.Identity.Domain.Entities;
@@ -15,6 +16,7 @@ public sealed class RefreshTokenCommandHandlerTests
     private readonly IUserRepository         _users          = Substitute.For<IUserRepository>();
     private readonly IRoleRepository         _roles          = Substitute.For<IRoleRepository>();
     private readonly IJwtTokenService        _jwt            = Substitute.For<IJwtTokenService>();
+    private readonly ITenantContextSetter    _tenantSetter   = Substitute.For<ITenantContextSetter>();
 
     private readonly RefreshTokenCommandHandler _sut;
 
@@ -30,6 +32,7 @@ public sealed class RefreshTokenCommandHandlerTests
     {
         _sut = new RefreshTokenCommandHandler(
             _refreshTokens, _tokenGenerator, _users, _roles, _jwt,
+            _tenantSetter,
             NullLogger<RefreshTokenCommandHandler>.Instance);
     }
 
@@ -48,10 +51,20 @@ public sealed class RefreshTokenCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_WithValidToken_SetsTenantContextFromToken()
+    {
+        SetupHappyPath();
+
+        await _sut.Handle(new RefreshTokenCommand(OldToken), CancellationToken.None);
+
+        _tenantSetter.Received(1).SetTenantId(TenantId);
+    }
+
+    [Fact]
     public async Task Handle_WithValidToken_RevokesOldTokenWithRotationPointer()
     {
         var existing = BuildActiveRefreshToken();
-        _refreshTokens.GetByTokenAsync(OldToken, Arg.Any<CancellationToken>()).Returns(existing);
+        _refreshTokens.GetByTokenCrossTenantAsync(OldToken, Arg.Any<CancellationToken>()).Returns(existing);
         SetupUserAndRoles();
         _tokenGenerator.Generate().Returns((NewToken, NewExpiry));
         _jwt.Generate(Arg.Any<JwtTokenRequest>())
@@ -80,7 +93,7 @@ public sealed class RefreshTokenCommandHandlerTests
     [Fact]
     public async Task Handle_WhenTokenNotFound_ReturnsFailure()
     {
-        _refreshTokens.GetByTokenAsync(OldToken, Arg.Any<CancellationToken>())
+        _refreshTokens.GetByTokenCrossTenantAsync(OldToken, Arg.Any<CancellationToken>())
             .Returns((Domain.Entities.RefreshToken?)null);
 
         var result = await _sut.Handle(new RefreshTokenCommand(OldToken), CancellationToken.None);
@@ -96,7 +109,7 @@ public sealed class RefreshTokenCommandHandlerTests
             TenantId, UserId, OldToken,
             expiresAt: DateTime.UtcNow.AddDays(-1),
             createdBy: UserId);
-        _refreshTokens.GetByTokenAsync(OldToken, Arg.Any<CancellationToken>()).Returns(expired);
+        _refreshTokens.GetByTokenCrossTenantAsync(OldToken, Arg.Any<CancellationToken>()).Returns(expired);
 
         var result = await _sut.Handle(new RefreshTokenCommand(OldToken), CancellationToken.None);
 
@@ -108,7 +121,7 @@ public sealed class RefreshTokenCommandHandlerTests
     {
         var revoked = BuildActiveRefreshToken();
         revoked.Revoke(DateTime.UtcNow.AddMinutes(-1));
-        _refreshTokens.GetByTokenAsync(OldToken, Arg.Any<CancellationToken>()).Returns(revoked);
+        _refreshTokens.GetByTokenCrossTenantAsync(OldToken, Arg.Any<CancellationToken>()).Returns(revoked);
 
         var result = await _sut.Handle(new RefreshTokenCommand(OldToken), CancellationToken.None);
 
@@ -119,7 +132,7 @@ public sealed class RefreshTokenCommandHandlerTests
     public async Task Handle_WhenUserInactive_ReturnsFailure()
     {
         var existing = BuildActiveRefreshToken();
-        _refreshTokens.GetByTokenAsync(OldToken, Arg.Any<CancellationToken>()).Returns(existing);
+        _refreshTokens.GetByTokenCrossTenantAsync(OldToken, Arg.Any<CancellationToken>()).Returns(existing);
 
         var inactive = User.Create(TenantId, "alice@a.com", "Alice",
             Password.FromHash("h"), Guid.NewGuid());
@@ -150,7 +163,7 @@ public sealed class RefreshTokenCommandHandlerTests
     private void SetupHappyPath()
     {
         var existing = BuildActiveRefreshToken();
-        _refreshTokens.GetByTokenAsync(OldToken, Arg.Any<CancellationToken>()).Returns(existing);
+        _refreshTokens.GetByTokenCrossTenantAsync(OldToken, Arg.Any<CancellationToken>()).Returns(existing);
         SetupUserAndRoles();
         _tokenGenerator.Generate().Returns((NewToken, NewExpiry));
         _jwt.Generate(Arg.Any<JwtTokenRequest>())
