@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using STRIDE.BFF.Extensions;
 using STRIDE.BFF.HttpClients;
 
 namespace STRIDE.BFF.Controllers;
@@ -93,7 +93,7 @@ public sealed class TeamsController : ControllerBase
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");
+    private Task<string?> GetTokenAsync() => HttpContext.GetCurrentAccessTokenAsync();
 
     private async Task<IActionResult> ProxyAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
     {

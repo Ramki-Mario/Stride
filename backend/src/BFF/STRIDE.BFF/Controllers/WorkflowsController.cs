@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using STRIDE.BFF.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BFF.HttpClients;
 
@@ -8,7 +8,7 @@ namespace STRIDE.BFF.Controllers;
 /// <summary>
 /// BFF proxy for Workflows module endpoints.
 ///
-/// Angular calls /bff/workflows/* — this controller forwards with the session
+/// Angular calls /bff/workflows/* â€” this controller forwards with the session
 /// JWT so STRIDE.Host can authenticate and apply tenant isolation.
 ///
 /// Definitions:
@@ -55,7 +55,7 @@ public sealed class WorkflowsController : ControllerBase
         _logger    = logger;
     }
 
-    // ── Definitions ───────────────────────────────────────────────────────
+    // â”€â”€ Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     [HttpGet("definitions")]
     public async Task<IActionResult> GetDefinitions(CancellationToken cancellationToken)
@@ -125,7 +125,7 @@ public sealed class WorkflowsController : ControllerBase
         return await ProxyAsync(await _workflows.GetInstancesByDefinitionAsync(id, token, cancellationToken), cancellationToken: cancellationToken);
     }
 
-    // ── Instances ─────────────────────────────────────────────────────────
+    // â”€â”€ Instances â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     [HttpGet("my-tasks")]
     public async Task<IActionResult> GetMyTasks(CancellationToken cancellationToken)
@@ -199,7 +199,7 @@ public sealed class WorkflowsController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 
-    // ── Steps ─────────────────────────────────────────────────────────────
+    // â”€â”€ Steps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     [HttpPost("instances/{instanceId:guid}/steps/{stepId:guid}/assign")]
     public async Task<IActionResult> AssignStep(Guid instanceId, Guid stepId, CancellationToken cancellationToken)
@@ -277,7 +277,7 @@ public sealed class WorkflowsController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 
-    // ── Step Attachments ──────────────────────────────────────────────────
+    // â”€â”€ Step Attachments â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     [HttpPost("instances/{instanceId:guid}/steps/{stepId:guid}/attachments")]
     [Consumes("multipart/form-data")]
@@ -323,7 +323,7 @@ public sealed class WorkflowsController : ControllerBase
         if (!response.IsSuccessStatusCode)
             return await ProxyAsync(response, cancellationToken: cancellationToken);
 
-        // Stream binary content directly — do NOT read as JSON.
+        // Stream binary content directly â€” do NOT read as JSON.
         var stream      = await response.Content.ReadAsStreamAsync(cancellationToken);
         var contentType = response.Content.Headers.ContentType?.ToString()
                           ?? "application/octet-stream";
@@ -350,7 +350,7 @@ public sealed class WorkflowsController : ControllerBase
             : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 
-    // ── Instance Attachments ──────────────────────────────────────────────
+    // â”€â”€ Instance Attachments â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     [HttpPost("instances/{instanceId:guid}/attachments")]
     [Consumes("multipart/form-data")]
@@ -420,7 +420,7 @@ public sealed class WorkflowsController : ControllerBase
             : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 
-    // ── Comments ─────────────────────────────────────────────────────────
+    // â”€â”€ Comments â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     [HttpGet("instances/{instanceId:guid}/comments")]
     public async Task<IActionResult> ListComments(
@@ -467,7 +467,7 @@ public sealed class WorkflowsController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 
-    // ── Shared links (EP-058 / US-177) ─────────────────────────────────────
+    // â”€â”€ Shared links (EP-058 / US-177) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     [HttpGet("instances/{instanceId:guid}/share")]
     public async Task<IActionResult> ListSharedLinks(Guid instanceId, CancellationToken cancellationToken)
@@ -500,7 +500,7 @@ public sealed class WorkflowsController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken: cancellationToken);
     }
 
-    // ── Activity ──────────────────────────────────────────────────────────
+    // â”€â”€ Activity â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     [HttpGet("instances/{instanceId:guid}/activity")]
     public async Task<IActionResult> GetActivityTimeline(
@@ -517,9 +517,9 @@ public sealed class WorkflowsController : ControllerBase
             cancellationToken: cancellationToken);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────
+    // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");
+    private Task<string?> GetTokenAsync() => HttpContext.GetCurrentAccessTokenAsync();
 
     /// <summary>Forwards the request body as application/json to the Host.</summary>
     private StreamContent JsonBody()
@@ -560,3 +560,4 @@ public sealed class WorkflowsController : ControllerBase
         };
     }
 }
+

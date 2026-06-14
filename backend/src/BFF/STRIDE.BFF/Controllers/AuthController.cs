@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BFF.Auth;
+using STRIDE.BFF.Extensions;
 using STRIDE.BFF.HttpClients;
 
 namespace STRIDE.BFF.Controllers;
@@ -193,7 +194,7 @@ public sealed class AuthController : ControllerBase
         var roles       = user.FindAll(ClaimTypes.Role).Select(c => c.Value).ToArray();
         var tenantId    = GetTenantIdFromClaims(user);
 
-        var token = await HttpContext.GetTokenAsync("access_token");
+        var token = await HttpContext.GetCurrentAccessTokenAsync();
         var (defaultPalette, tenantName) = token is not null
             ? await GetTenantSettingsAsync(token, cancellationToken)
             : (DefaultPalette, "");

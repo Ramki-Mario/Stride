@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using STRIDE.BFF.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BFF.HttpClients;
 
@@ -8,12 +8,12 @@ namespace STRIDE.BFF.Controllers;
 /// <summary>
 /// BFF proxy for Administration module user-management endpoints.
 ///
-///   GET    /bff/administration/users              — paged user list
-///   POST   /bff/administration/users/invite       — invite new user
-///   PUT    /bff/administration/users/{id}/role    — change user role
-///   PUT    /bff/administration/users/{id}/deactivate  — deactivate user
-///   PUT    /bff/administration/users/{id}/reactivate  — reactivate user
-///   GET    /bff/administration/audit-log          — paged audit log (Admin only)
+///   GET    /bff/administration/users              â€” paged user list
+///   POST   /bff/administration/users/invite       â€” invite new user
+///   PUT    /bff/administration/users/{id}/role    â€” change user role
+///   PUT    /bff/administration/users/{id}/deactivate  â€” deactivate user
+///   PUT    /bff/administration/users/{id}/reactivate  â€” reactivate user
+///   GET    /bff/administration/audit-log          â€” paged audit log (Admin only)
 /// </summary>
 [ApiController]
 [Authorize]
@@ -97,9 +97,9 @@ public sealed class AdminController : ControllerBase
             await _admin.GetAuditLogAsync(token, page, pageSize, from, to, action, cancellationToken), cancellationToken);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");
+    private Task<string?> GetTokenAsync() => HttpContext.GetCurrentAccessTokenAsync();
 
     private async Task<IActionResult> ProxyAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
     {
@@ -128,3 +128,4 @@ public sealed class AdminController : ControllerBase
         };
     }
 }
+

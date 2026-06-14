@@ -4,6 +4,7 @@ using StackExchange.Redis;
 using STRIDE.BFF.Auth;
 using STRIDE.BFF.Hubs;
 using STRIDE.BFF.HttpClients;
+using STRIDE.BFF.Middleware;
 using STRIDE.BFF.Realtime;
 using STRIDE.BuildingBlocks.Infrastructure.Correlation;
 using STRIDE.BuildingBlocks.Infrastructure.Extensions;
@@ -76,6 +77,9 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
 });
 
 builder.Services.AddSingleton<ITicketStore, RedisTicketStore>();
+builder.Services.AddSingleton<TokenRenewalLockProvider>();
+builder.Services.Configure<SilentTokenRenewalOptions>(
+    builder.Configuration.GetSection(SilentTokenRenewalOptions.SectionName));
 
 // ── Cookie Auth backed by Redis ticket store ──────────────────────────────
 // Browser only ever sees an opaque cookie; the JWT lives in Redis.
@@ -137,6 +141,7 @@ app.UseSerilogRequestLogging();
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseCors("SPA");
 app.UseAuthentication();
+app.UseMiddleware<SilentTokenRenewalMiddleware>(); // runs after auth, before controllers
 app.UseAuthorization();
 
 app.MapControllers();

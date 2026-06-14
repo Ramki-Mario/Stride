@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using STRIDE.BFF.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BFF.HttpClients;
 
@@ -8,13 +8,13 @@ namespace STRIDE.BFF.Controllers;
 /// <summary>
 /// BFF proxy for Clients module endpoints.
 ///
-///   GET  /bff/clients                  — paged client list
-///   POST /bff/clients                  — create client
-///   GET  /bff/clients/{id}             — client detail
-///   GET  /bff/clients/{id}/history     — workflow + invoice history
-///   PUT  /bff/clients/{id}             — update client
-///   PUT  /bff/clients/{id}/deactivate  — deactivate client
-///   PUT  /bff/clients/{id}/reactivate  — reactivate client
+///   GET  /bff/clients                  â€” paged client list
+///   POST /bff/clients                  â€” create client
+///   GET  /bff/clients/{id}             â€” client detail
+///   GET  /bff/clients/{id}/history     â€” workflow + invoice history
+///   PUT  /bff/clients/{id}             â€” update client
+///   PUT  /bff/clients/{id}/deactivate  â€” deactivate client
+///   PUT  /bff/clients/{id}/reactivate  â€” reactivate client
 /// </summary>
 [ApiController]
 [Authorize]
@@ -99,9 +99,9 @@ public sealed class ClientsController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");
+    private Task<string?> GetTokenAsync() => HttpContext.GetCurrentAccessTokenAsync();
 
     private async Task<IActionResult> ProxyAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
     {
@@ -130,3 +130,4 @@ public sealed class ClientsController : ControllerBase
         };
     }
 }
+

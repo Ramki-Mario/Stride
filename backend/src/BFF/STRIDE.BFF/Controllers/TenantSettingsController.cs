@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using STRIDE.BFF.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BFF.HttpClients;
 
@@ -8,9 +8,9 @@ namespace STRIDE.BFF.Controllers;
 /// <summary>
 /// BFF proxy for tenant settings endpoints.
 ///
-///   GET  /bff/administration/settings              — get current tenant settings
-///   PUT  /bff/administration/settings              — update settings (+ CSS sanitisation report)
-///   GET  /bff/administration/settings/css-template — download --stride-* token template file
+///   GET  /bff/administration/settings              â€” get current tenant settings
+///   PUT  /bff/administration/settings              â€” update settings (+ CSS sanitisation report)
+///   GET  /bff/administration/settings/css-template â€” download --stride-* token template file
 /// </summary>
 [ApiController]
 [Authorize]
@@ -51,7 +51,7 @@ public sealed class TenantSettingsController : ControllerBase
             : await ProxyAsync(response, cancellationToken);
     }
 
-    /// <summary>GET /bff/administration/settings/css-template — proxies the CSS file download.</summary>
+    /// <summary>GET /bff/administration/settings/css-template â€” proxies the CSS file download.</summary>
     [HttpGet("css-template")]
     public async Task<IActionResult> GetCssTemplate(CancellationToken cancellationToken)
     {
@@ -65,9 +65,9 @@ public sealed class TenantSettingsController : ControllerBase
         return File(css, "text/css", "stride-theme-template.css");
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");
+    private Task<string?> GetTokenAsync() => HttpContext.GetCurrentAccessTokenAsync();
 
     private async Task<IActionResult> ProxyAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
     {
@@ -96,3 +96,4 @@ public sealed class TenantSettingsController : ControllerBase
         };
     }
 }
+

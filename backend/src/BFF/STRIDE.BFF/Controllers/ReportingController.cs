@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using STRIDE.BFF.Extensions;
 using STRIDE.BFF.HttpClients;
 
 namespace STRIDE.BFF.Controllers;
@@ -272,7 +272,7 @@ public sealed class ReportingController : ControllerBase
     /// Returns null if the session has no access_token (should not happen for [Authorize] routes).
     /// </summary>
     private Task<string?> GetAccessTokenAsync() =>
-        HttpContext.GetTokenAsync("access_token");
+        HttpContext.GetCurrentAccessTokenAsync();
 
     /// <summary>
     /// Reads the Host response and returns it verbatim as JSON.

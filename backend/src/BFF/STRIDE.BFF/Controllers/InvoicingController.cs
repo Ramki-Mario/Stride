@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using STRIDE.BFF.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BFF.HttpClients;
 
@@ -8,14 +8,14 @@ namespace STRIDE.BFF.Controllers;
 /// <summary>
 /// BFF proxy for Invoicing module endpoints.
 ///
-///   GET    /bff/invoicing/invoices                                    — paged invoice list
-///   POST   /bff/invoicing/invoices                                    — generate invoice
-///   GET    /bff/invoicing/invoices/{id}                               — invoice detail
-///   GET    /bff/invoicing/invoices/by-workflow/{workflowInstanceId}   — invoice for workflow instance
-///   POST   /bff/invoicing/invoices/from-workflow/{workflowInstanceId} — create draft from workflow
-///   PUT    /bff/invoicing/invoices/{id}/send                          — send invoice
-///   PUT    /bff/invoicing/invoices/{id}/paid                          — mark paid
-///   PUT    /bff/invoicing/invoices/{id}/void                          — void invoice
+///   GET    /bff/invoicing/invoices                                    â€” paged invoice list
+///   POST   /bff/invoicing/invoices                                    â€” generate invoice
+///   GET    /bff/invoicing/invoices/{id}                               â€” invoice detail
+///   GET    /bff/invoicing/invoices/by-workflow/{workflowInstanceId}   â€” invoice for workflow instance
+///   POST   /bff/invoicing/invoices/from-workflow/{workflowInstanceId} â€” create draft from workflow
+///   PUT    /bff/invoicing/invoices/{id}/send                          â€” send invoice
+///   PUT    /bff/invoicing/invoices/{id}/paid                          â€” mark paid
+///   PUT    /bff/invoicing/invoices/{id}/void                          â€” void invoice
 /// </summary>
 [ApiController]
 [Authorize]
@@ -115,9 +115,9 @@ public sealed class InvoicingController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");
+    private Task<string?> GetTokenAsync() => HttpContext.GetCurrentAccessTokenAsync();
 
     private async Task<IActionResult> ProxyAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
     {
@@ -146,3 +146,4 @@ public sealed class InvoicingController : ControllerBase
         };
     }
 }
+

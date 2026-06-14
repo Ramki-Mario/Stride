@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using STRIDE.BFF.Extensions;
 using STRIDE.BFF.HttpClients;
 
 namespace STRIDE.BFF.Controllers;
@@ -28,7 +28,7 @@ public sealed class RolesController : ControllerBase
     [HttpGet("roles")]
     public async Task<IActionResult> ListRoles(CancellationToken cancellationToken)
     {
-        var token = await HttpContext.GetTokenAsync("access_token");
+        var token = await HttpContext.GetCurrentAccessTokenAsync();
         if (token is null) return Unauthorized();
 
         var response = await _identity.ListRolesAsync(token, cancellationToken);
