@@ -18,6 +18,9 @@ namespace STRIDE.BFF.Tests;
 /// </summary>
 public sealed class BffAuthControllerTests
 {
+    private static readonly System.Text.Json.JsonSerializerOptions CamelCase =
+        new() { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase };
+
     private static readonly string FakeRefreshToken = new('r', 64);
     private const string FakeAccessToken  = "new_access_token_value";
 
@@ -203,11 +206,7 @@ public sealed class BffAuthControllerTests
 
     private static HttpResponseMessage BuildJsonResponse<T>(T value)
     {
-        var json = System.Text.Json.JsonSerializer.Serialize(value,
-            new System.Text.Json.JsonSerializerOptions
-            {
-                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
-            });
+        var json = System.Text.Json.JsonSerializer.Serialize(value, CamelCase);
         return new HttpResponseMessage(HttpStatusCode.OK)
         {
             Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")

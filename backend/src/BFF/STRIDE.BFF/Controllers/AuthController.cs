@@ -18,7 +18,8 @@ namespace STRIDE.BFF.Controllers;
 [Route("bff/auth")]
 public sealed class AuthController : ControllerBase
 {
-    private const string DefaultPalette = "purple";
+    private const string DefaultPalette    = "purple";
+    private const string RefreshTokenName  = "refresh_token";
 
     private readonly IdentityApiClient       _identity;
     private readonly TenantSettingsApiClient _tenantSettings;
@@ -78,7 +79,7 @@ public sealed class AuthController : ControllerBase
         properties.StoreTokens(new[]
         {
             new AuthenticationToken { Name = "access_token",               Value = hostResponse.AccessToken },
-            new AuthenticationToken { Name = "refresh_token",              Value = hostResponse.RefreshToken },
+            new AuthenticationToken { Name = RefreshTokenName,              Value = hostResponse.RefreshToken },
             new AuthenticationToken { Name = "access_token_expires_at",    Value = hostResponse.AccessTokenExpiresAtUtc.ToString("O") },
             new AuthenticationToken { Name = "refresh_token_expires_at",   Value = hostResponse.RefreshTokenExpiresAtUtc.ToString("O") },
         });
@@ -102,7 +103,7 @@ public sealed class AuthController : ControllerBase
     [HttpPost("logout")]
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
-        var refreshToken = await HttpContext.GetTokenAsync("refresh_token");
+        var refreshToken = await HttpContext.GetTokenAsync(RefreshTokenName);
         if (refreshToken is not null)
         {
             try { await _identity.RevokeTokenAsync(refreshToken, cancellationToken); }
@@ -126,7 +127,7 @@ public sealed class AuthController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
     {
-        var refreshToken = await HttpContext.GetTokenAsync("refresh_token");
+        var refreshToken = await HttpContext.GetTokenAsync(RefreshTokenName);
         if (string.IsNullOrEmpty(refreshToken))
             return Unauthorized();
 
@@ -161,7 +162,7 @@ public sealed class AuthController : ControllerBase
         properties.StoreTokens(new[]
         {
             new AuthenticationToken { Name = "access_token",             Value = tokenPair.AccessToken },
-            new AuthenticationToken { Name = "refresh_token",            Value = tokenPair.RefreshToken },
+            new AuthenticationToken { Name = RefreshTokenName,            Value = tokenPair.RefreshToken },
             new AuthenticationToken { Name = "access_token_expires_at",  Value = tokenPair.AccessTokenExpiresAtUtc.ToString("O") },
             new AuthenticationToken { Name = "refresh_token_expires_at", Value = tokenPair.RefreshTokenExpiresAtUtc.ToString("O") },
         });

@@ -19,6 +19,9 @@ namespace STRIDE.BFF.Tests;
 /// </summary>
 public sealed class SilentTokenRenewalMiddlewareTests
 {
+    private static readonly System.Text.Json.JsonSerializerOptions CamelCase =
+        new() { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase };
+
     private const string FakeAccessToken  = "access_token_value";
     private const string FakeRefreshToken = "refresh_token_value";
     private static readonly DateTime FarFuture = DateTime.UtcNow.AddHours(8);
@@ -268,11 +271,7 @@ public sealed class SilentTokenRenewalMiddlewareTests
 
     private static HttpResponseMessage BuildJsonResponse<T>(T value)
     {
-        var json = System.Text.Json.JsonSerializer.Serialize(value,
-            new System.Text.Json.JsonSerializerOptions
-            {
-                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
-            });
+        var json = System.Text.Json.JsonSerializer.Serialize(value, CamelCase);
         return new HttpResponseMessage(HttpStatusCode.OK)
         {
             Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
