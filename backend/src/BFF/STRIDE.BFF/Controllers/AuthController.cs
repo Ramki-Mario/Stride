@@ -89,10 +89,13 @@ public sealed class AuthController : ControllerBase
             principal,
             properties);
 
-        // Fetch tenant settings immediately after login so the login response is complete.
-        var (defaultPalette, tenantName) = await GetTenantSettingsAsync(hostResponse.AccessToken, cancellationToken);
+        // Fetch tenant settings + permissions immediately after login so the response is complete.
+        var settingsTask    = GetTenantSettingsAsync(hostResponse.AccessToken, cancellationToken);
+        var permissionsTask = GetPermissionsAsync(hostResponse.AccessToken, cancellationToken);
+        await Task.WhenAll(settingsTask, permissionsTask);
+        var (defaultPalette, tenantName) = settingsTask.Result;
 
-        return Ok(ToMeResponse(hostResponse, defaultPalette, tenantName));
+        return Ok(ToMeResponse(hostResponse, permissionsTask.Result, defaultPalette, tenantName));
     }
 
     /// <summary>
@@ -279,11 +282,21 @@ public sealed class AuthController : ControllerBase
         var tenantId    = GetTenantIdFromClaims(user);
 
         var token = await HttpContext.GetCurrentAccessTokenAsync();
-        var (defaultPalette, tenantName) = token is not null
-            ? await GetTenantSettingsAsync(token, cancellationToken)
-            : (DefaultPalette, "");
 
-        return Ok(new MeResponse(userId, tenantId, email, displayName, roles, defaultPalette, tenantName));
+        var defaultPalette = DefaultPalette;
+        var tenantName     = "";
+        IReadOnlyList<string> permissions = Array.Empty<string>();
+
+        if (token is not null)
+        {
+            var settingsTask    = GetTenantSettingsAsync(token, cancellationToken);
+            var permissionsTask = GetPermissionsAsync(token, cancellationToken);
+            await Task.WhenAll(settingsTask, permissionsTask);
+            (defaultPalette, tenantName) = settingsTask.Result;
+            permissions = permissionsTask.Result;
+        }
+
+        return Ok(new MeResponse(userId, tenantId, email, displayName, roles, permissions, defaultPalette, tenantName));
     }
 
     // ── helpers ────────────────────────────────────────────────────────────────
@@ -321,6 +334,24 @@ public sealed class AuthController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Fetches the current user's effective permission keys. Returns an empty set on any
+    /// failure so auth never breaks due to a permission-service fault.
+    /// </summary>
+    private async Task<IReadOnlyList<string>> GetPermissionsAsync(
+        string token, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _identity.GetMyPermissionsAsync(token, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to fetch permissions for /auth/me — using empty set.");
+            return Array.Empty<string>();
+        }
+    }
+
     private static Guid GetTenantIdFromClaims(ClaimsPrincipal user)
     {
         TryParseGuidClaim(user, "tid", out var tenantId);
@@ -343,8 +374,9 @@ public sealed class AuthController : ControllerBase
         return new ClaimsPrincipal(identity);
     }
 
-    private static MeResponse ToMeResponse(HostLoginResponse r, string defaultPalette, string tenantName) =>
-        new(r.UserId, r.TenantId, r.Email, r.DisplayName, r.Roles, defaultPalette, tenantName);
+    private static MeResponse ToMeResponse(
+        HostLoginResponse r, IReadOnlyList<string> permissions, string defaultPalette, string tenantName) =>
+        new(r.UserId, r.TenantId, r.Email, r.DisplayName, r.Roles, permissions, defaultPalette, tenantName);
 
     private static bool TryParseGuidClaim(ClaimsPrincipal user, string claimType, out Guid value)
     {

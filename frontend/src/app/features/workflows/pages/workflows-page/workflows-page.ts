@@ -23,11 +23,12 @@ import {
   SortKey,
 } from '../../models/workflow.models';
 import { WorkflowService } from '../../services/workflow.service';
+import { HasPermissionDirective } from '../../../../core/auth/has-permission.directive';
 
 @Component({
   selector: 'app-workflows-page',
   standalone: true,
-  imports: [NgClass, FormsModule, Select],
+  imports: [NgClass, FormsModule, Select, HasPermissionDirective],
   templateUrl: './workflows-page.html',
   styleUrl: './workflows-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

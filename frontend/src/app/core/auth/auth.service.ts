@@ -8,6 +8,7 @@ export interface AuthUser {
   email: string;
   tenantId: string;
   roles: string[];
+  permissions: string[];
   defaultPalette: string;
   tenantName: string;
 }

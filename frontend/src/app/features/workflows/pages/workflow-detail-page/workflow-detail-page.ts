@@ -37,6 +37,7 @@ import { CommentThreadComponent }        from '../../components/comment-thread/c
 import { ActivityTimelineComponent }     from '../../components/activity-timeline/activity-timeline';
 import { InvoiceService }            from '../../../invoicing/services/invoice.service';
 import { AuthService }               from '../../../../core/auth/auth.service';
+import { PermissionService, Permissions } from '../../../../core/auth/permission.service';
 import {
   InvoiceReferenceDto,
   INVOICE_STATUS_CSS,
@@ -62,6 +63,7 @@ export class WorkflowDetailPageComponent implements OnInit {
   private readonly teamsSvc     = inject(TeamsService);
   private readonly invoiceSvc   = inject(InvoiceService);
   private readonly authService  = inject(AuthService);
+  private readonly permissions  = inject(PermissionService);
   private readonly destroyRef   = inject(DestroyRef);
 
   // ── Config exposed to template ────────────────────────────────────────────
@@ -110,8 +112,14 @@ export class WorkflowDetailPageComponent implements OnInit {
     [...(this.workflow()?.steps ?? [])].sort((a, b) => a.order - b.order),
   );
 
-  readonly canActivate = computed(() => this.workflow()?.status === 'Draft');
-  readonly canStart    = computed(() => this.workflow()?.status === 'Active');
+  // Activate/Start are gated on both workflow status AND the caller's permissions, so a
+  // user without workflow.activate / workflow.run never sees an action that would 403.
+  readonly canActivate = computed(() =>
+    this.workflow()?.status === 'Draft' && this.permissions.has(Permissions.WorkflowActivate),
+  );
+  readonly canStart    = computed(() =>
+    this.workflow()?.status === 'Active' && this.permissions.has(Permissions.WorkflowRun),
+  );
   readonly canDelete   = computed(() =>
     this.workflow()?.status === 'Draft' || this.workflow()?.status === 'Archived',
   );
