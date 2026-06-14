@@ -4,19 +4,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.Modules.Identity.API.Dtos;
 using STRIDE.Modules.Identity.Application.Commands.LoginUser;
+using STRIDE.Modules.Identity.Application.Commands.RefreshToken;
 using STRIDE.Modules.Identity.Application.Commands.RegisterUser;
+using STRIDE.Modules.Identity.Application.Commands.RevokeToken;
 
 namespace STRIDE.Modules.Identity.API.Controllers;
 
 /// <summary>
-/// Handles anonymous authentication flows — login and self-registration.
+/// Handles anonymous authentication flows — login, registration, token refresh, and revoke.
 ///
-/// POST /api/identity/auth/login
-///   Called by STRIDE.BFF (IdentityApiClient) — returns a JWT that the BFF
-///   exchanges for a Redis-backed HttpOnly session cookie (ADR-007).
-///
-/// POST /api/identity/auth/register
-///   Self-registration endpoint. Tenant is resolved from the email domain.
+/// All endpoints are [AllowAnonymous] and called server-to-server from STRIDE.BFF.
+/// Tokens are never exposed to the Angular SPA (ADR-007 / ADR-011).
 /// </summary>
 [ApiController]
 [Route("api/identity/auth")]
@@ -74,5 +72,46 @@ public sealed class AuthController : ControllerBase
         }
 
         return StatusCode(StatusCodes.Status201Created, result.Value);
+    }
+
+    /// <summary>
+    /// Rotate a refresh token. Returns a new access + refresh token pair on success.
+    /// Called by STRIDE.BFF when the current access token has expired or is about to expire.
+    /// No JWT required — the refresh token is the credential.
+    /// </summary>
+    [HttpPost("refresh")]
+    [ProducesResponseType(typeof(TokenPairResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> RefreshToken(
+        [FromBody] TokenRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new RefreshTokenCommand(request.Token), cancellationToken);
+
+        if (result.IsFailure)
+            return Unauthorized(new { error = result.Error });
+
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Revoke a refresh token. Idempotent — already-revoked tokens return 204.
+    /// Called by STRIDE.BFF on logout.
+    /// </summary>
+    [HttpPost("revoke")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RevokeToken(
+        [FromBody] TokenRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new RevokeTokenCommand(request.Token), cancellationToken);
+
+        if (result.IsFailure)
+            return NotFound(new { error = result.Error });
+
+        return NoContent();
     }
 }

@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
+using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Identity.Application.Abstractions;
 using RefreshTokenEntity = STRIDE.Modules.Identity.Domain.Entities.RefreshToken;
@@ -14,6 +15,7 @@ internal sealed class RefreshTokenCommandHandler
     private readonly IUserRepository         _users;
     private readonly IRoleRepository         _roles;
     private readonly IJwtTokenService        _jwt;
+    private readonly ITenantContextSetter    _tenantSetter;
     private readonly ILogger<RefreshTokenCommandHandler> _logger;
 
     public RefreshTokenCommandHandler(
@@ -22,6 +24,7 @@ internal sealed class RefreshTokenCommandHandler
         IUserRepository         users,
         IRoleRepository         roles,
         IJwtTokenService        jwt,
+        ITenantContextSetter    tenantSetter,
         ILogger<RefreshTokenCommandHandler> logger)
     {
         _refreshTokens  = refreshTokens;
@@ -29,6 +32,7 @@ internal sealed class RefreshTokenCommandHandler
         _users          = users;
         _roles          = roles;
         _jwt            = jwt;
+        _tenantSetter   = tenantSetter;
         _logger         = logger;
     }
 
@@ -38,13 +42,16 @@ internal sealed class RefreshTokenCommandHandler
     {
         var utcNow = DateTime.UtcNow;
 
-        // ── 1. Load and validate the incoming token ───────────────────────
-        var existing = await _refreshTokens.GetByTokenAsync(request.Token, cancellationToken);
+        // ── 1. Load and validate the incoming token (cross-tenant — no JWT present) ─
+        var existing = await _refreshTokens.GetByTokenCrossTenantAsync(request.Token, cancellationToken);
         if (existing is null || !existing.IsActive(utcNow))
         {
             _logger.RefreshTokenInvalid();
             return Result.Failure<TokenPairResult>("Refresh token is invalid or has expired.");
         }
+
+        // Establish tenant context so tenant-filtered repositories work correctly.
+        _tenantSetter.SetTenantId(existing.TenantId);
 
         // ── 2. Load user ──────────────────────────────────────────────────
         var user = await _users.GetByIdAsync(existing.UserId, cancellationToken);
