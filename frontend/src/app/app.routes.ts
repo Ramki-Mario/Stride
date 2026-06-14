@@ -18,6 +18,14 @@ export const appRoutes: Routes = [
       ),
   },
   {
+    // Public route — no authGuard. Invited users land here to set their password.
+    path: 'accept-invite',
+    loadComponent: () =>
+      import('./features/auth/pages/accept-invite-page/accept-invite-page').then(
+        (m) => m.AcceptInvitePageComponent
+      ),
+  },
+  {
     // Public route — no authGuard. New customers complete the 4-step wizard here.
     path: 'onboarding',
     loadComponent: () =>

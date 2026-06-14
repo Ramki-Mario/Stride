@@ -1,8 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Identity.Application.Abstractions;
 using STRIDE.Modules.Identity.Infrastructure.Auth;
+using STRIDE.Modules.Identity.Infrastructure.Email;
 using STRIDE.Modules.Identity.Infrastructure.Persistence;
 using STRIDE.Modules.Identity.Infrastructure.Persistence.Repositories;
 using STRIDE.Modules.Identity.Infrastructure.TenantResolution;
@@ -13,7 +16,8 @@ public static class IdentityInfrastructureExtensions
 {
     public static IServiceCollection AddIdentityInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         services.AddDbContext<IdentityDbContext>(options =>
             options.UseSqlServer(
@@ -27,10 +31,22 @@ public static class IdentityInfrastructureExtensions
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IInviteTokenRepository, InviteTokenRepository>();
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
+
+        // Email sender: SendGrid in production, console stub in development
+        if (environment.IsDevelopment())
+        {
+            services.AddScoped<IEmailSender, SmtpEmailSender>();
+        }
+        else
+        {
+            services.Configure<SendGridOptions>(configuration.GetSection(SendGridOptions.SectionName));
+            services.AddScoped<IEmailSender, SendGridEmailSender>();
+        }
 
         return services;
     }

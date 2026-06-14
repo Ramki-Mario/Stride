@@ -118,6 +118,40 @@ internal sealed class AdminWriteService : IAdminWriteService
         return userId;
     }
 
+    // ── Invite Token ──────────────────────────────────────────────────────────
+
+    public async Task CreateInviteTokenAsync(
+        Guid     tenantId,
+        Guid     userId,
+        string   tokenHash,
+        DateTime expiresAt,
+        Guid     createdBy,
+        CancellationToken cancellationToken = default)
+    {
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
+        await conn.ExecuteAsync(
+            new CommandDefinition(
+                """
+                INSERT INTO [identity].InviteTokens
+                    (Id, TenantId, UserId, TokenHash, ExpiresAt, IsUsed,
+                     CreatedAt, UpdatedAt, CreatedBy, IsDeleted)
+                VALUES
+                    (@Id, @TenantId, @UserId, @TokenHash, @ExpiresAt, 0,
+                     @Now, @Now, @CreatedBy, 0)
+                """,
+                new
+                {
+                    Id        = Guid.NewGuid(),
+                    TenantId  = tenantId,
+                    UserId    = userId,
+                    TokenHash = tokenHash,
+                    ExpiresAt = expiresAt,
+                    Now       = DateTime.UtcNow,
+                    CreatedBy = createdBy
+                },
+                cancellationToken: cancellationToken));
+    }
+
     // ── Update Role ───────────────────────────────────────────────────────────
 
     public async Task UpdateUserRoleAsync(

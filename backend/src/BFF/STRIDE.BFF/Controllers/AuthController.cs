@@ -176,6 +176,89 @@ public sealed class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// GET /bff/auth/accept-invite/validate?token=xxx. Proxies to the Host to verify the
+    /// token is valid/unexpired without consuming it. Angular calls this on page load.
+    /// </summary>
+    [HttpGet("accept-invite/validate")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ValidateInviteToken(
+        [FromQuery] string token,
+        CancellationToken cancellationToken)
+    {
+        var result = await _identity.ValidateInviteTokenAsync(token, cancellationToken);
+        if (result is null)
+            return BadRequest(new ProblemDetails
+            {
+                Title  = "Invalid invite link",
+                Detail = "The invite link is invalid or has expired.",
+                Status = StatusCodes.Status400BadRequest
+            });
+
+        return Ok(new { result.Email, result.DisplayName });
+    }
+
+    /// <summary>
+    /// POST /bff/auth/accept-invite. Validates the token, sets the user's password, activates
+    /// the account, and establishes a full session (HttpOnly cookie) — auto-login on success.
+    /// </summary>
+    [HttpPost("accept-invite")]
+    [AllowAnonymous]
+    public async Task<IActionResult> AcceptInvite(
+        [FromBody] AcceptInviteRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
+        HostLoginResponse? hostResponse;
+        try
+        {
+            hostResponse = await _identity.AcceptInviteAsync(
+                request.Token, request.Password, request.Password, cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Host identity API unreachable during accept-invite.");
+            return StatusCode(StatusCodes.Status502BadGateway, new ProblemDetails
+            {
+                Title  = "Identity service unavailable",
+                Detail = "Unable to reach the identity service. Please try again shortly.",
+                Status = StatusCodes.Status502BadGateway
+            });
+        }
+
+        if (hostResponse is null)
+            return BadRequest(new ProblemDetails
+            {
+                Title  = "Invalid invite link",
+                Detail = "The invite link is invalid or has expired.",
+                Status = StatusCodes.Status400BadRequest
+            });
+
+        var principal  = BuildPrincipal(hostResponse);
+        var properties = new AuthenticationProperties
+        {
+            IsPersistent = true,
+            IssuedUtc    = DateTimeOffset.UtcNow,
+            ExpiresUtc   = new DateTimeOffset(hostResponse.RefreshTokenExpiresAtUtc, TimeSpan.Zero),
+            AllowRefresh = false
+        };
+        properties.StoreTokens(new[]
+        {
+            new AuthenticationToken { Name = "access_token",             Value = hostResponse.AccessToken },
+            new AuthenticationToken { Name = RefreshTokenName,            Value = hostResponse.RefreshToken },
+            new AuthenticationToken { Name = "access_token_expires_at",  Value = hostResponse.AccessTokenExpiresAtUtc.ToString("O") },
+            new AuthenticationToken { Name = "refresh_token_expires_at", Value = hostResponse.RefreshTokenExpiresAtUtc.ToString("O") },
+        });
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal,
+            properties);
+
+        return NoContent();
+    }
+
+    /// <summary>
     /// GET /bff/auth/me. Returns the current user's session info including defaultPalette.
     /// Called by Angular on app boot (APP_INITIALIZER) and after any 401.
     /// </summary>

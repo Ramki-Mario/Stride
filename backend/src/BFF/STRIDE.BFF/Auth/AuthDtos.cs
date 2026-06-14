@@ -46,3 +46,16 @@ public sealed record MeResponse(
     IReadOnlyList<string> Roles,
     string DefaultPalette = "purple",
     string TenantName     = "");
+
+/// <summary>Response from the Host's invite-token validation endpoint.</summary>
+public sealed record HostInviteTokenInfoResponse(string Email, string DisplayName);
+
+/// <summary>Request body for <c>POST /bff/auth/accept-invite</c>.</summary>
+public sealed class AcceptInviteRequest
+{
+    [Required]
+    public string Token { get; set; } = string.Empty;
+
+    [Required, MinLength(8)]
+    public string Password { get; set; } = string.Empty;
+}

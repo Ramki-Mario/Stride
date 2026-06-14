@@ -87,4 +87,43 @@ public sealed class IdentityApiClient
         if (response.StatusCode == HttpStatusCode.NotFound) return; // already revoked/gone — OK
         response.EnsureSuccessStatusCode();
     }
+
+    /// <summary>
+    /// Validates an invite token without consuming it.
+    /// Returns null on 400 (invalid/expired), the token info on success.
+    /// </summary>
+    public async Task<HostInviteTokenInfoResponse?> ValidateInviteTokenAsync(
+        string token,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await _client.GetAsync(
+            $"/api/identity/users/accept-invite/validate?token={Uri.EscapeDataString(token)}",
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.BadRequest) return null;
+
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<HostInviteTokenInfoResponse>(cancellationToken: cancellationToken);
+    }
+
+    /// <summary>
+    /// Validates the token, sets password, activates account, and returns a full token pair.
+    /// Returns null on 400 (invalid/expired). Throws on 5xx.
+    /// </summary>
+    public async Task<HostLoginResponse?> AcceptInviteAsync(
+        string token,
+        string password,
+        string confirmPassword,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await _client.PostAsJsonAsync(
+            "/api/identity/users/accept-invite",
+            new { Token = token, Password = password, ConfirmPassword = confirmPassword },
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.BadRequest) return null;
+
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<HostLoginResponse>(cancellationToken: cancellationToken);
+    }
 }

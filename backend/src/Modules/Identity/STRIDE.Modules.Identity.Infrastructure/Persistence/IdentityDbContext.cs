@@ -16,6 +16,7 @@ public sealed class IdentityDbContext : DbContext
     public DbSet<TenantDomainMapping> TenantDomainMappings => Set<TenantDomainMapping>();
     public DbSet<UserTenantMapping> UserTenantMappings => Set<UserTenantMapping>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<InviteToken>  InviteTokens  => Set<InviteToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

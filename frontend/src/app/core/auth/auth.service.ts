@@ -47,4 +47,16 @@ export class AuthService {
       })
     );
   }
+
+  validateInviteToken(token: string) {
+    return this.http.get<{ email: string; displayName: string }>(
+      `/bff/auth/accept-invite/validate?token=${encodeURIComponent(token)}`
+    );
+  }
+
+  acceptInvite(token: string, password: string) {
+    return this.http
+      .post<void>('/bff/auth/accept-invite', { token, password })
+      .pipe(switchMap(() => this.checkSession()));
+  }
 }
