@@ -1,21 +1,34 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using STRIDE.Modules.Identity.Infrastructure.Persistence.SeedData;
 
 namespace STRIDE.Modules.Identity.API.Authorization;
 
 /// <summary>
-/// Registers named RBAC authorization policies for the Identity module.
-/// Called from <c>IdentityModuleExtensions.AddIdentityModule</c> so that
-/// each module declares its own policy surface at composition time.
+/// Registers RBAC authorization for the Identity module:
+///   1. The dynamic permission pipeline (US-134) — <see cref="PermissionPolicyProvider"/>
+///      synthesises a policy per permission key, satisfied by
+///      <see cref="PermissionAuthorizationHandler"/> against the tenant's role config.
+///   2. The legacy named role policies, kept as a fallback for any callers still using them.
 ///
-/// <c>AddAuthorization(options => ...)</c> is additive — calling it multiple
-/// times merges policies; it does not replace previously registered ones.
+/// Called from <c>IdentityModuleExtensions.AddIdentityModule</c> so that the module declares
+/// its own policy surface at composition time. <c>AddAuthorizationBuilder()</c> is additive.
 /// </summary>
 public static class AuthorizationPoliciesExtensions
 {
     public static IServiceCollection AddIdentityAuthorizationPolicies(
         this IServiceCollection services)
     {
+        // ── Dynamic permission authorization (US-134) ─────────────────────────
+        // Permission sets are resolved + cached in-process, so a memory cache is required.
+        services.AddMemoryCache();
+
+        // The policy provider must be a singleton (ASP.NET resolves it once). The handler
+        // is scoped because it depends on the scoped IUserPermissionService (DbContext).
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+        // ── Legacy named role policies (fallback / backward compatibility) ────
         services.AddAuthorizationBuilder()
             // ── Tier 0: any authenticated user ────────────────────────────
             .AddPolicy(Policies.RequireAuthenticated,
