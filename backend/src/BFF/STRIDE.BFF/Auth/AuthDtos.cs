@@ -13,17 +13,19 @@ public sealed class LoginRequest
 }
 
 /// <summary>
-/// Response from the Host Identity API's login endpoint.
-/// (Host endpoint comes in US-028 / US-026 — for now this is the contract.)
+/// Response from the Host Identity API's login and token-refresh endpoints.
+/// Carries both the short-lived access token (JWT) and the long-lived refresh token (opaque).
 /// </summary>
 public sealed record HostLoginResponse(
-    Guid UserId,
-    Guid TenantId,
+    Guid   UserId,
+    Guid   TenantId,
     string Email,
     string DisplayName,
     IReadOnlyList<string> Roles,
-    string AccessToken,
-    DateTime ExpiresAtUtc);
+    string   AccessToken,
+    DateTime AccessTokenExpiresAtUtc,
+    string   RefreshToken,
+    DateTime RefreshTokenExpiresAtUtc);
 
 /// <summary>Response body for <c>GET /bff/auth/me</c>.</summary>
 public sealed record MeResponse(

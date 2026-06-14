@@ -4,27 +4,32 @@ using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Application.Results;
 using STRIDE.Modules.Identity.Application;
 using STRIDE.Modules.Identity.Application.Abstractions;
+using RefreshTokenEntity = STRIDE.Modules.Identity.Domain.Entities.RefreshToken;
 
 namespace STRIDE.Modules.Identity.Application.Commands.LoginUser;
 
 internal sealed class LoginCommandHandler
     : IRequestHandler<LoginCommand, Result<LoginResult>>
 {
-    private readonly ITenantResolver       _tenantResolver;
-    private readonly ITenantContextSetter  _tenantSetter;
-    private readonly IUserRepository       _users;
-    private readonly IRoleRepository       _roles;
-    private readonly IPasswordHasher       _hasher;
-    private readonly IJwtTokenService      _jwt;
+    private readonly ITenantResolver          _tenantResolver;
+    private readonly ITenantContextSetter     _tenantSetter;
+    private readonly IUserRepository          _users;
+    private readonly IRoleRepository          _roles;
+    private readonly IPasswordHasher          _hasher;
+    private readonly IJwtTokenService         _jwt;
+    private readonly IRefreshTokenRepository  _refreshTokens;
+    private readonly IRefreshTokenGenerator   _tokenGenerator;
     private readonly ILogger<LoginCommandHandler> _logger;
 
     public LoginCommandHandler(
-        ITenantResolver      tenantResolver,
-        ITenantContextSetter tenantSetter,
-        IUserRepository      users,
-        IRoleRepository      roles,
-        IPasswordHasher      hasher,
-        IJwtTokenService     jwt,
+        ITenantResolver          tenantResolver,
+        ITenantContextSetter     tenantSetter,
+        IUserRepository          users,
+        IRoleRepository          roles,
+        IPasswordHasher          hasher,
+        IJwtTokenService         jwt,
+        IRefreshTokenRepository  refreshTokens,
+        IRefreshTokenGenerator   tokenGenerator,
         ILogger<LoginCommandHandler> logger)
     {
         _tenantResolver = tenantResolver;
@@ -33,6 +38,8 @@ internal sealed class LoginCommandHandler
         _roles          = roles;
         _hasher         = hasher;
         _jwt            = jwt;
+        _refreshTokens  = refreshTokens;
+        _tokenGenerator = tokenGenerator;
         _logger         = logger;
     }
 
@@ -48,7 +55,6 @@ internal sealed class LoginCommandHandler
             return Result.Failure<LoginResult>("Invalid email or password.");
         }
 
-        // Establish tenant scope so downstream repositories apply the correct filter.
         _tenantSetter.SetTenantId(tenantId.Value);
 
         // ── 2. Load user ──────────────────────────────────────────────────
@@ -69,31 +75,45 @@ internal sealed class LoginCommandHandler
         }
 
         // ── 4. Resolve role names ─────────────────────────────────────────
-        var allRoles    = await _roles.GetAllAsync(cancellationToken);
-        var roleIndex   = allRoles.ToDictionary(r => r.Id, r => r.Name);
-        var roleNames   = user.Roles
+        var allRoles  = await _roles.GetAllAsync(cancellationToken);
+        var roleIndex = allRoles.ToDictionary(r => r.Id, r => r.Name);
+        var roleNames = user.Roles
             .Where(ur => !ur.IsDeleted && roleIndex.ContainsKey(ur.RoleId))
             .Select(ur => roleIndex[ur.RoleId])
             .ToList()
             .AsReadOnly();
 
-        // ── 5. Mint token ─────────────────────────────────────────────────
-        var tokenResult = _jwt.Generate(new JwtTokenRequest(
+        // ── 5. Mint access token ──────────────────────────────────────────
+        var jwtResult = _jwt.Generate(new JwtTokenRequest(
             UserId:      user.Id,
             TenantId:    tenantId.Value,
             Email:       user.Email,
             DisplayName: user.DisplayName,
             Roles:       roleNames));
 
+        // ── 6. Issue refresh token ────────────────────────────────────────
+        var (rawToken, expiresAt) = _tokenGenerator.Generate();
+        var refreshToken = RefreshTokenEntity.Create(
+            tenantId:  tenantId.Value,
+            userId:    user.Id,
+            token:     rawToken,
+            expiresAt: expiresAt,
+            createdBy: user.Id);
+
+        await _refreshTokens.AddAsync(refreshToken, cancellationToken);
+        await _refreshTokens.SaveChangesAsync(cancellationToken);
+
         _logger.LoginSucceeded(user.Id, tenantId.Value);
 
         return Result.Success(new LoginResult(
-            UserId:      user.Id,
-            TenantId:    tenantId.Value,
-            Email:       user.Email,
-            DisplayName: user.DisplayName,
-            Roles:       roleNames,
-            AccessToken: tokenResult.AccessToken,
-            ExpiresAtUtc: tokenResult.ExpiresAtUtc));
+            UserId:                   user.Id,
+            TenantId:                 tenantId.Value,
+            Email:                    user.Email,
+            DisplayName:              user.DisplayName,
+            Roles:                    roleNames,
+            AccessToken:              jwtResult.AccessToken,
+            AccessTokenExpiresAtUtc:  jwtResult.ExpiresAtUtc,
+            RefreshToken:             rawToken,
+            RefreshTokenExpiresAtUtc: expiresAt));
     }
 }

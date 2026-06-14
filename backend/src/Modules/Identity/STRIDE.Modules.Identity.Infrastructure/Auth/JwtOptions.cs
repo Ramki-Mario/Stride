@@ -18,4 +18,7 @@ public sealed class JwtOptions
 
     /// <summary>Access token lifetime in minutes. Default: 8 hours.</summary>
     public int ExpiryMinutes { get; set; } = 480;
+
+    /// <summary>Refresh token lifetime in days. Default: 7 days.</summary>
+    public int RefreshTokenLifetimeDays { get; set; } = 7;
 }

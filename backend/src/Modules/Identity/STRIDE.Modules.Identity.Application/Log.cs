@@ -29,6 +29,25 @@ internal static partial class Log
         Message = "User {UserId} in tenant {TenantId} logged in successfully")]
     internal static partial void LoginSucceeded(this ILogger logger, Guid userId, Guid tenantId);
 
+    // ── RefreshToken ───────────────────────────────────────────────────────────
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Token refresh failed: token is invalid, expired, or revoked")]
+    internal static partial void RefreshTokenInvalid(this ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Token refresh failed: user {UserId} not found or inactive")]
+    internal static partial void RefreshTokenUserNotFound(this ILogger logger, Guid userId);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "Refresh token rotated for user {UserId} in tenant {TenantId}")]
+    internal static partial void RefreshTokenRotated(this ILogger logger, Guid userId, Guid tenantId);
+
+    // ── RevokeToken ────────────────────────────────────────────────────────────
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Token revocation failed: token not found")]
+    internal static partial void RevokeTokenNotFound(this ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "Refresh token revoked for user {UserId} in tenant {TenantId}")]
+    internal static partial void RevokeTokenSucceeded(this ILogger logger, Guid userId, Guid tenantId);
+
     // ── RegisterTenant ─────────────────────────────────────────────────────────
     [LoggerMessage(Level = LogLevel.Information,
         Message = "[RegisterTenant] Tenant {TenantId} ('{Slug}') created with admin user {UserId}")]
