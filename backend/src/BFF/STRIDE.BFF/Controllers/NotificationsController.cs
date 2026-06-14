@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using STRIDE.BFF.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BFF.HttpClients;
 
@@ -8,13 +8,13 @@ namespace STRIDE.BFF.Controllers;
 /// <summary>
 /// BFF proxy for Notifications module endpoints.
 ///
-/// Angular calls /bff/notifications/* — this controller forwards with the session
+/// Angular calls /bff/notifications/* â€” this controller forwards with the session
 /// JWT so STRIDE.Host can authenticate and apply tenant isolation.
 ///
-///   GET    /bff/notifications              — list notifications for current user
-///   GET    /bff/notifications/unread-count — unread badge count
-///   POST   /bff/notifications/{id}/read   — mark notification as read
-///   DELETE /bff/notifications/{id}        — soft-delete notification
+///   GET    /bff/notifications              â€” list notifications for current user
+///   GET    /bff/notifications/unread-count â€” unread badge count
+///   POST   /bff/notifications/{id}/read   â€” mark notification as read
+///   DELETE /bff/notifications/{id}        â€” soft-delete notification
 /// </summary>
 [ApiController]
 [Authorize]
@@ -66,10 +66,10 @@ public sealed class NotificationsController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
-    // ── Web Push ──────────────────────────────────────────────────────────
+    // â”€â”€ Web Push â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /// <summary>
-    /// Proxies the VAPID public key — no auth required so the Angular app can
+    /// Proxies the VAPID public key â€” no auth required so the Angular app can
     /// call this before the user is fully authenticated.
     /// GET /bff/notifications/push/vapid-key
     /// </summary>
@@ -106,9 +106,9 @@ public sealed class NotificationsController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────
+    // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");
+    private Task<string?> GetTokenAsync() => HttpContext.GetCurrentAccessTokenAsync();
 
     private async Task<IActionResult> ProxyAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
     {
@@ -137,3 +137,4 @@ public sealed class NotificationsController : ControllerBase
         };
     }
 }
+

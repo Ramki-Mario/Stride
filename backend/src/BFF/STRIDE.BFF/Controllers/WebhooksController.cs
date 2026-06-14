@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using STRIDE.BFF.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BFF.HttpClients;
 
@@ -111,9 +111,9 @@ public sealed class WebhooksController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    private Task<string?> GetTokenAsync() => HttpContext.GetTokenAsync("access_token");
+    private Task<string?> GetTokenAsync() => HttpContext.GetCurrentAccessTokenAsync();
 
     private async Task<IActionResult> ProxyAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
     {
@@ -138,3 +138,4 @@ public sealed class WebhooksController : ControllerBase
         };
     }
 }
+
