@@ -14,6 +14,8 @@ import {
   MyKitReservationDto,
   CheckoutKitItemRequest,
   CreateKitReservationRequest,
+  KitCheckoutReportRowDto,
+  KitUsageSummaryRowDto,
 } from '../models/kit-ops.models';
 
 @Injectable({ providedIn: 'root' })
@@ -125,5 +127,36 @@ export class KitOpsService {
 
   cancelReservation(reservationId: string): Observable<void> {
     return this.http.put<void>(`${this.base}/reservations/${reservationId}/cancel`, {});
+  }
+
+  // ── Reports ───────────────────────────────────────────────────────────────
+  getCheckoutHistory(from?: string, to?: string, kitItemId?: string): Observable<KitCheckoutReportRowDto[]> {
+    let params = this.buildReportParams(from, to);
+    if (kitItemId) params = params.set('kitItemId', kitItemId);
+    return this.http.get<KitCheckoutReportRowDto[]>(`${this.base}/reports/checkout-history`, { params });
+  }
+
+  exportCheckoutHistory(from?: string, to?: string): Observable<Blob> {
+    let params = this.buildReportParams(from, to);
+    return this.http.get(`${this.base}/reports/checkout-history/export`,
+      { params, responseType: 'blob' });
+  }
+
+  getUsageSummary(from?: string, to?: string): Observable<KitUsageSummaryRowDto[]> {
+    const params = this.buildReportParams(from, to);
+    return this.http.get<KitUsageSummaryRowDto[]>(`${this.base}/reports/usage-summary`, { params });
+  }
+
+  exportUsageSummary(from?: string, to?: string): Observable<Blob> {
+    const params = this.buildReportParams(from, to);
+    return this.http.get(`${this.base}/reports/usage-summary/export`,
+      { params, responseType: 'blob' });
+  }
+
+  private buildReportParams(from?: string, to?: string) {
+    let params = new HttpParams();
+    if (from) params = params.set('from', from);
+    if (to)   params = params.set('to', to);
+    return params;
   }
 }

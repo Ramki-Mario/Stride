@@ -179,6 +179,66 @@ public sealed class KitOpsController : ControllerBase
         return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
     }
 
+    // ── Report endpoints (Admin only) ─────────────────────────────────────────
+
+    [HttpGet("reports/checkout-history")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetCheckoutHistory(
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        [FromQuery] Guid?     kitItemId,
+        CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(
+            await _kitOps.GetCheckoutHistoryAsync(token, from, to, kitItemId, cancellationToken),
+            cancellationToken);
+    }
+
+    [HttpGet("reports/checkout-history/export")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ExportCheckoutHistory(
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        [FromQuery] Guid?     kitItemId,
+        CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyFileAsync(
+            await _kitOps.ExportCheckoutHistoryAsync(token, from, to, kitItemId, cancellationToken),
+            cancellationToken);
+    }
+
+    [HttpGet("reports/usage-summary")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetUsageSummary(
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(
+            await _kitOps.GetUsageSummaryAsync(token, from, to, cancellationToken),
+            cancellationToken);
+    }
+
+    [HttpGet("reports/usage-summary/export")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ExportUsageSummary(
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyFileAsync(
+            await _kitOps.ExportUsageSummaryAsync(token, from, to, cancellationToken),
+            cancellationToken);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private Task<string?> GetTokenAsync() => HttpContext.GetCurrentAccessTokenAsync();
@@ -208,5 +268,27 @@ public sealed class KitOpsController : ControllerBase
             ContentType = "application/json",
             StatusCode  = StatusCodes.Status200OK,
         };
+    }
+
+    private async Task<IActionResult> ProxyFileAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
+    {
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            _logger.LogWarning("Host kit-ops report export returned {StatusCode}: {Body}",
+                (int)response.StatusCode, body);
+            return StatusCode((int)response.StatusCode,
+                new ProblemDetails { Title = "Upstream error", Detail = body, Status = (int)response.StatusCode });
+        }
+
+        var bytes       = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+        var contentType = response.Content.Headers.ContentType?.ToString()
+                          ?? "application/octet-stream";
+        var disposition = response.Content.Headers.ContentDisposition?.ToString();
+
+        if (!string.IsNullOrEmpty(disposition))
+            Response.Headers["Content-Disposition"] = disposition;
+
+        return File(bytes, contentType);
     }
 }

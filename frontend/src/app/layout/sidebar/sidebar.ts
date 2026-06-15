@@ -496,9 +496,10 @@ export class SidebarComponent {
     {
       label: 'Field Ops',
       items: [
-        { label: 'Kit Catalog',   route: '/kit-ops',             icon: 'pi-box'          },
-        { label: 'My Kit',        route: '/kit-ops/field',       icon: 'pi-shopping-bag' },
+        { label: 'Kit Catalog',   route: '/kit-ops',              icon: 'pi-box'          },
+        { label: 'My Kit',        route: '/kit-ops/field',        icon: 'pi-shopping-bag' },
         { label: 'Availability',  route: '/kit-ops/availability', icon: 'pi-chart-bar'    },
+        { label: 'Usage Reports', route: '/kit-ops/reports',      icon: 'pi-file-edit' },
       ],
     },
     {

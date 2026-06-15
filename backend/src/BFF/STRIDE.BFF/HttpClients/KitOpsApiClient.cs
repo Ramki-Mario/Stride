@@ -97,6 +97,49 @@ public sealed class KitOpsApiClient
         Guid id, string token, CancellationToken cancellationToken = default)
         => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/kit-reservations/{id}/cancel", null, token), cancellationToken);
 
+    // ── Reports ───────────────────────────────────────────────────────────────
+
+    public Task<HttpResponseMessage> GetCheckoutHistoryAsync(
+        string token, DateTime? from, DateTime? to, Guid? kitItemId,
+        CancellationToken cancellationToken = default)
+    {
+        var qs = BuildReportQs(from, to, kitItemId);
+        return _client.SendAsync(Build(HttpMethod.Get, $"/api/kit-reports/checkout-history{qs}", token), cancellationToken);
+    }
+
+    public Task<HttpResponseMessage> ExportCheckoutHistoryAsync(
+        string token, DateTime? from, DateTime? to, Guid? kitItemId,
+        CancellationToken cancellationToken = default)
+    {
+        var qs = BuildReportQs(from, to, kitItemId);
+        return _client.SendAsync(Build(HttpMethod.Get, $"/api/kit-reports/checkout-history/export{qs}", token), cancellationToken);
+    }
+
+    public Task<HttpResponseMessage> GetUsageSummaryAsync(
+        string token, DateTime? from, DateTime? to,
+        CancellationToken cancellationToken = default)
+    {
+        var qs = BuildReportQs(from, to, null);
+        return _client.SendAsync(Build(HttpMethod.Get, $"/api/kit-reports/usage-summary{qs}", token), cancellationToken);
+    }
+
+    public Task<HttpResponseMessage> ExportUsageSummaryAsync(
+        string token, DateTime? from, DateTime? to,
+        CancellationToken cancellationToken = default)
+    {
+        var qs = BuildReportQs(from, to, null);
+        return _client.SendAsync(Build(HttpMethod.Get, $"/api/kit-reports/usage-summary/export{qs}", token), cancellationToken);
+    }
+
+    private static string BuildReportQs(DateTime? from, DateTime? to, Guid? kitItemId)
+    {
+        var parts = new List<string>();
+        if (from.HasValue)       parts.Add($"from={from.Value:O}");
+        if (to.HasValue)         parts.Add($"to={to.Value:O}");
+        if (kitItemId.HasValue)  parts.Add($"kitItemId={kitItemId.Value}");
+        return parts.Count > 0 ? "?" + string.Join("&", parts) : string.Empty;
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private static HttpRequestMessage Build(HttpMethod method, string uri, string token)
