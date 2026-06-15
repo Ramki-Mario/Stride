@@ -13,6 +13,12 @@ public interface IUserRepository
     /// <summary>Returns true if a non-deleted user with this normalised email already exists in the tenant.</summary>
     Task<bool> ExistsByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Returns the user by primary key, eagerly loading roles and each role's permission catalog.
+    /// Used for the "My Access" profile view where permissions must be displayed per role.
+    /// </summary>
+    Task<User?> GetByIdWithRolePermissionsAsync(Guid id, CancellationToken cancellationToken = default);
+
     /// <summary>Returns all active (non-deleted) users in the current tenant.</summary>
     Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default);
 

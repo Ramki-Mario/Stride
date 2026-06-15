@@ -1092,7 +1092,7 @@ EP-036 (Invoicing)             ← parallel with EP-037 after EP-035 done
 | EP-042 Invite Email Flow | #197 | US-119 #207, US-120 #208, US-121 #209, US-122 #210 | [ ] Backlog |
 | EP-043 Scheduling Module | #198 | US-123 #211, US-124 #212, US-125 #213, US-126 #214, US-127 #215 | [ ] Backlog |
 | EP-044 Live Deployment — Dev Environment | #199 | US-128 #216, US-129 #217, US-130 #218, US-131 #219 | [ ] Backlog |
-| EP-045 Tenant Custom RBAC | #245 | US-132 #248, US-133 #249, US-134 #250, US-135–140 | 🔵 In Progress — US-132+US-133 ✅ PR #358; US-134 ✅ PR #359; US-135 ✅ PR #360; US-136 ✅ PR #361; US-137 ✅ PR #362; US-138–140 ⏳ |
+| EP-045 Tenant Custom RBAC | #245 | US-132 #248, US-133 #249, US-134 #250, US-135–140 | 🔵 In Progress — US-132+US-133 ✅ PR #358; US-134 ✅ PR #359; US-135 ✅ PR #360; US-136 ✅ PR #361; US-137 ✅ PR #362; US-138 ✅ PR #363; US-139 🔵 PR #364; US-140 ⏳ |
 
 ### Milestone #11 — Product Layer Gaps (EP-048–061, implemented as part of Phase 7)
 

@@ -24,6 +24,7 @@ const ROUTE_LABELS: Record<string, string> = {
   notifications:  'Notifications',
   reporting:      'Reports',
   administration: 'Administration',
+  profile:        'My Profile',
 };
 
 @Component({
@@ -122,7 +123,7 @@ const ROUTE_LABELS: Record<string, string> = {
           </div>
 
           <!-- Items -->
-          <button class="tb-dd-item" role="menuitem">
+          <button class="tb-dd-item" role="menuitem" (click)="goToProfile()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"
                     stroke="currentColor" stroke-width="1.8"
@@ -449,6 +450,11 @@ export class TopbarComponent {
 
   protected toggleDropdown(): void {
     this.dropdownOpen.update(o => !o);
+  }
+
+  protected goToProfile(): void {
+    this.dropdownOpen.set(false);
+    this.router.navigate(['/profile']);
   }
 
   protected signOut(): void {

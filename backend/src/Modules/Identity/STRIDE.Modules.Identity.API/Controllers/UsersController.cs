@@ -9,6 +9,8 @@ using STRIDE.Modules.Identity.Application.Commands.AcceptInvite;
 using STRIDE.Modules.Identity.Application.Commands.AssignRole;
 using STRIDE.Modules.Identity.Application.Commands.RevokeUserRole;
 using STRIDE.Modules.Identity.Application.Queries.GetMyPermissions;
+using STRIDE.Modules.Identity.Application.Queries.GetMyRoles;
+using STRIDE.Modules.Identity.Application.Queries.GetRole;
 using STRIDE.Modules.Identity.Application.Queries.GetUser;
 using STRIDE.Modules.Identity.Application.Queries.GetUserRoles;
 using STRIDE.Modules.Identity.Application.Queries.ValidateInviteToken;
@@ -105,6 +107,19 @@ public sealed class UsersController : ControllerBase
     public async Task<IActionResult> GetMyPermissions(CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetMyPermissionsQuery(), cancellationToken);
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Returns the roles assigned to the current user, including each role's full
+    /// permission set grouped for display on the "My Access" profile section.
+    /// GET /api/identity/users/me/roles
+    /// </summary>
+    [HttpGet("me/roles")]
+    [ProducesResponseType(typeof(IReadOnlyList<RoleDetailDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyRoles(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetMyRolesQuery(), cancellationToken);
         return Ok(result.Value);
     }
 
