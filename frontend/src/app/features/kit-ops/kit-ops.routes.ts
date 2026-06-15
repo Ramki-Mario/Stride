@@ -15,4 +15,11 @@ export const kitOpsRoutes: Routes = [
         (m) => m.KitFieldPageComponent
       ),
   },
+  {
+    path: 'availability',
+    loadComponent: () =>
+      import('./pages/kit-availability-page/kit-availability-page').then(
+        (m) => m.KitAvailabilityPageComponent
+      ),
+  },
 ];
