@@ -110,6 +110,13 @@ export const appRoutes: Routes = [
             (m) => m.teamRoutes
           ),
       },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/identity/pages/profile-page/profile-page').then(
+            (m) => m.ProfilePageComponent
+          ),
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },

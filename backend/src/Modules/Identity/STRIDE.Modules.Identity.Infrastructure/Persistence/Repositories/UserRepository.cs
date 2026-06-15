@@ -16,6 +16,14 @@ internal sealed class UserRepository : TenantAwareRepository<User, IdentityDbCon
             .Include(u => u.Roles).ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
+    public async Task<User?> GetByIdWithRolePermissionsAsync(Guid id, CancellationToken cancellationToken = default)
+        => await Query
+            .Include(u => u.Roles.Where(ur => !ur.IsDeleted))
+                .ThenInclude(ur => ur.Role)
+                    .ThenInclude(r => r!.Permissions.Where(rp => !rp.IsDeleted))
+                        .ThenInclude(rp => rp.Permission)
+            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+
     public async Task<User?> GetByNormalizedEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default)
         => await Query
             .Include(u => u.Roles).ThenInclude(ur => ur.Role)
