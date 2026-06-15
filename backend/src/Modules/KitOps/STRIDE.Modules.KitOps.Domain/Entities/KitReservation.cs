@@ -63,6 +63,9 @@ public sealed class KitReservation : AuditableEntity
 
         Status    = KitReservationStatus.Fulfilled;
         UpdatedAt = DateTime.UtcNow;
+
+        RaiseDomainEvent(new KitReservationFulfilledEvent(
+            Id, KitItemId, TenantId, RequestedByUserId));
     }
 
     public void Cancel(Guid cancelledByUserId)

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using STRIDE.Modules.KitOps.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using STRIDE.Modules.KitOps.Infrastructure.Persistence;
 namespace STRIDE.Modules.KitOps.Infrastructure.Migrations
 {
     [DbContext(typeof(KitOpsDbContext))]
-    partial class KitOpsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260615123121_AddKitReservationUniquePendingIndex")]
+    partial class AddKitReservationUniquePendingIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

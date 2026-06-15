@@ -35,6 +35,13 @@ internal sealed class KitReservationConfiguration : IEntityTypeConfiguration<Kit
         builder.HasIndex(r => new { r.TenantId, r.IsDeleted });
         builder.HasIndex(r => new { r.TenantId, r.CreatedAt });
 
+        // A user may hold only one pending request per kit item — DB-level backstop for the
+        // application duplicate guard (Status 0 = Pending). Fulfilled/Cancelled rows are exempt,
+        // so the same user can re-request after their previous request is resolved.
+        builder.HasIndex(r => new { r.TenantId, r.KitItemId, r.RequestedByUserId })
+            .IsUnique()
+            .HasFilter("[Status] = 0 AND [IsDeleted] = 0");
+
         builder.Ignore(r => r.DomainEvents);
     }
 }

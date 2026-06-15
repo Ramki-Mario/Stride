@@ -28,6 +28,13 @@ internal sealed class KitReservationRepository : IKitReservationRepository
             .OrderBy(r => r.CreatedAt)
             .FirstOrDefaultAsync(ct);
 
+    public Task<bool> ExistsPendingForUserAsync(Guid kitItemId, Guid userId, CancellationToken ct = default)
+        => _db.KitReservations.AnyAsync(
+            r => r.KitItemId == kitItemId
+              && r.RequestedByUserId == userId
+              && r.Status == KitReservationStatus.Pending,
+            ct);
+
     public async Task AddAsync(KitReservation reservation, CancellationToken ct = default)
         => await _db.KitReservations.AddAsync(reservation, ct);
 
