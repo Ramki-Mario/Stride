@@ -24,7 +24,9 @@ public static class KitOpsInfrastructureExtensions
         services.AddScoped<IKitCheckoutRepository,    KitCheckoutRepository>();
         services.AddScoped<IKitReservationRepository, KitReservationRepository>();
 
-        services.AddScoped<IKitItemReadService, KitItemReadService>();
+        services.AddScoped<IKitItemReadService,    KitItemReadService>();
+        services.AddScoped<IKitUsageReportService, KitUsageReportService>();
+        services.AddSingleton<IKitExcelExportService, KitExcelExportService>();
 
         return services;
     }
