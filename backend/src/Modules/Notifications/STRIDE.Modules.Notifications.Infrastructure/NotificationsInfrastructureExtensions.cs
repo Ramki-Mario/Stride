@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Notifications.Application;
-using STRIDE.Modules.Notifications.Application.Abstractions;
 using STRIDE.Modules.Notifications.Application.Repositories;
 using STRIDE.Modules.Notifications.Infrastructure.Persistence;
 using STRIDE.Modules.Notifications.Infrastructure.Persistence.Repositories;

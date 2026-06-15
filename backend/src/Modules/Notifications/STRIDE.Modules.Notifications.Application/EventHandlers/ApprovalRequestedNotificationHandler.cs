@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
+using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Infrastructure.Events;
-using STRIDE.Modules.Notifications.Application.Abstractions;
 using STRIDE.Modules.Notifications.Application.Commands.CreateNotification;
 using STRIDE.Modules.Notifications.Application.Repositories;
 using STRIDE.Modules.Notifications.Domain.Enums;
