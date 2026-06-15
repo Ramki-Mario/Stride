@@ -21,6 +21,8 @@
     <ProjectReference Include="..\..\Modules\Teams\STRIDE.Modules.Teams.Infrastructure\STRIDE.Modules.Teams.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Webhooks\STRIDE.Modules.Webhooks.API\STRIDE.Modules.Webhooks.API.csproj" />
     <ProjectReference Include="..\..\Modules\Webhooks\STRIDE.Modules.Webhooks.Infrastructure\STRIDE.Modules.Webhooks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\KitOps\STRIDE.Modules.KitOps.API\STRIDE.Modules.KitOps.API.csproj" />
+    <ProjectReference Include="..\..\Modules\KitOps\STRIDE.Modules.KitOps.Infrastructure\STRIDE.Modules.KitOps.Infrastructure.csproj" />
     <ProjectReference Include="..\..\BuildingBlocks\STRIDE.BuildingBlocks.Infrastructure\STRIDE.BuildingBlocks.Infrastructure.csproj" />
   </ItemGroup>
 
