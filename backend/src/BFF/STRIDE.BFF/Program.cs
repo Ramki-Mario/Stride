@@ -58,6 +58,9 @@ builder.Services.AddHttpClient<TenantRegistrationApiClient>(client =>
 builder.Services.AddHttpClient<WebhooksApiClient>(client =>
     client.BaseAddress = new Uri(hostBaseUrl));
 
+builder.Services.AddHttpClient<KitOpsApiClient>(client =>
+    client.BaseAddress = new Uri(hostBaseUrl));
+
 builder.Services.AddHttpClient<SchedulingApiClient>(client =>
     client.BaseAddress = new Uri(hostBaseUrl));
 

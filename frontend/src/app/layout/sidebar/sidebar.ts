@@ -494,6 +494,12 @@ export class SidebarComponent {
       ],
     },
     {
+      label: 'Field Ops',
+      items: [
+        { label: 'Kit Catalog', route: '/kit-ops', icon: 'pi-box' },
+      ],
+    },
+    {
       label: 'Administration',
       items: [
         { label: 'Users',            route: '/administration',              icon: 'pi-users',      exact: true },

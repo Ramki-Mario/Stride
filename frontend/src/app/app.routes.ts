@@ -111,6 +111,13 @@ export const appRoutes: Routes = [
           ),
       },
       {
+        path: 'kit-ops',
+        loadChildren: () =>
+          import('./features/kit-ops/kit-ops.routes').then(
+            (m) => m.kitOpsRoutes
+          ),
+      },
+      {
         path: 'profile',
         loadComponent: () =>
           import('./features/identity/pages/profile-page/profile-page').then(
