@@ -17,6 +17,7 @@ export const Permissions = {
   RoleView:                'role.view',
   RoleManage:              'role.manage',
   TenantSettings:          'tenant.settings',
+  KitOpsReportView:        'kitops.report.view',
 } as const;
 
 export type PermissionKey = (typeof Permissions)[keyof typeof Permissions];

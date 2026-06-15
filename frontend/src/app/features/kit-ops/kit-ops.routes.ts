@@ -22,4 +22,11 @@ export const kitOpsRoutes: Routes = [
         (m) => m.KitAvailabilityPageComponent
       ),
   },
+  {
+    path: 'reports',
+    loadComponent: () =>
+      import('./pages/kit-reports-page/kit-reports-page').then(
+        (m) => m.KitReportsPageComponent
+      ),
+  },
 ];

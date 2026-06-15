@@ -97,3 +97,30 @@ export interface CreateKitReservationRequest {
   kitItemId: string;
   notes:     string | null;
 }
+
+// ── Report DTOs ───────────────────────────────────────────────────────────────
+
+export interface KitCheckoutReportRowDto {
+  checkoutId:         string;
+  kitItemName:        string;
+  category:           string;
+  checkedOutByUserId: string;
+  checkedOutByEmail:  string | null;
+  checkedOutAt:       string;
+  expectedReturnAt:   string;
+  returnedAt:         string | null;
+  status:             string;
+  daysCheckedOut:     number;
+}
+
+export interface KitUsageSummaryRowDto {
+  kitItemId:           string;
+  name:                string;
+  category:            string;
+  totalQuantity:       number;
+  totalCheckouts:      number;
+  activeCheckouts:     number;
+  overdueCheckouts:    number;
+  pendingReservations: number;
+  avgDaysCheckedOut:   number | null;
+}
