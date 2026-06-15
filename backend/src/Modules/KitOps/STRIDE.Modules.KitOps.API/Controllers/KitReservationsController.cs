@@ -6,6 +6,7 @@ using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.KitOps.API.Models;
 using STRIDE.Modules.KitOps.Application.Commands.CancelKitReservation;
 using STRIDE.Modules.KitOps.Application.Commands.CreateKitReservation;
+using STRIDE.Modules.KitOps.Application.Queries.GetMyKitReservations;
 
 namespace STRIDE.Modules.KitOps.API.Controllers;
 
@@ -55,6 +56,16 @@ public sealed class KitReservationsController : ControllerBase
                 : BadRequest(new { error = result.Error });
 
         return Created($"/api/kit-reservations/{result.Value}", new { id = result.Value });
+    }
+
+    [HttpGet("my")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyReservations(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetMyKitReservationsQuery(_tenantContext.TenantId, _currentUser.UserId),
+            cancellationToken);
+        return Ok(result);
     }
 
     [HttpPut("{id:guid}/cancel")]

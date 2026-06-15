@@ -6,6 +6,7 @@ using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.KitOps.API.Models;
 using STRIDE.Modules.KitOps.Application.Commands.CheckoutKitItem;
 using STRIDE.Modules.KitOps.Application.Commands.ReturnKitCheckout;
+using STRIDE.Modules.KitOps.Application.Queries.GetMyKitCheckouts;
 
 namespace STRIDE.Modules.KitOps.API.Controllers;
 
@@ -56,6 +57,16 @@ public sealed class KitCheckoutsController : ControllerBase
                 : BadRequest(new { error = result.Error });
 
         return Created($"/api/kit-checkouts/{result.Value}", new { id = result.Value });
+    }
+
+    [HttpGet("my")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyCheckouts(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetMyKitCheckoutsQuery(_tenantContext.TenantId, _currentUser.UserId),
+            cancellationToken);
+        return Ok(result);
     }
 
     [HttpPut("{id:guid}/return")]

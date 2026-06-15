@@ -8,6 +8,7 @@ namespace STRIDE.BFF.HttpClients;
 /// Typed HttpClient for the KitOps module surface of STRIDE.Host.
 ///
 /// BFF route → Host route mapping:
+///   GET  /bff/kit-ops/catalog                       → GET  /api/kit-items/catalog
 ///   GET  /bff/kit-ops/kit-items                     → GET  /api/kit-items
 ///   POST /bff/kit-ops/kit-items                     → POST /api/kit-items
 ///   GET  /bff/kit-ops/kit-items/{id}                → GET  /api/kit-items/{id}
@@ -15,12 +16,22 @@ namespace STRIDE.BFF.HttpClients;
 ///   PUT  /bff/kit-ops/kit-items/{id}                → PUT  /api/kit-items/{id}
 ///   PUT  /bff/kit-ops/kit-items/{id}/deactivate     → PUT  /api/kit-items/{id}/deactivate
 ///   PUT  /bff/kit-ops/kit-items/{id}/reactivate     → PUT  /api/kit-items/{id}/reactivate
+///   GET  /bff/kit-ops/checkouts/my                  → GET  /api/kit-checkouts/my
+///   POST /bff/kit-ops/checkouts                     → POST /api/kit-checkouts
+///   PUT  /bff/kit-ops/checkouts/{id}/return         → PUT  /api/kit-checkouts/{id}/return
+///   GET  /bff/kit-ops/reservations/my               → GET  /api/kit-reservations/my
+///   POST /bff/kit-ops/reservations                  → POST /api/kit-reservations
+///   PUT  /bff/kit-ops/reservations/{id}/cancel      → PUT  /api/kit-reservations/{id}/cancel
 /// </summary>
 public sealed class KitOpsApiClient
 {
     private readonly HttpClient _client;
 
     public KitOpsApiClient(HttpClient client) => _client = client;
+
+    public Task<HttpResponseMessage> GetCatalogAsync(
+        string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, "/api/kit-items/catalog", token), cancellationToken);
 
     public Task<HttpResponseMessage> GetKitItemsAsync(
         string token, int page, int pageSize, string? search, string? category, bool? isActive,
@@ -57,6 +68,34 @@ public sealed class KitOpsApiClient
     public Task<HttpResponseMessage> ReactivateKitItemAsync(
         Guid id, string token, CancellationToken cancellationToken = default)
         => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/kit-items/{id}/reactivate", null, token), cancellationToken);
+
+    // ── Checkout / return ────────────────────────────────────────────────────
+
+    public Task<HttpResponseMessage> GetMyCheckoutsAsync(
+        string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, "/api/kit-checkouts/my", token), cancellationToken);
+
+    public Task<HttpResponseMessage> CheckoutAsync(
+        object body, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Post, "/api/kit-checkouts", body, token), cancellationToken);
+
+    public Task<HttpResponseMessage> ReturnAsync(
+        Guid id, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/kit-checkouts/{id}/return", null, token), cancellationToken);
+
+    // ── Reservations ─────────────────────────────────────────────────────────
+
+    public Task<HttpResponseMessage> GetMyReservationsAsync(
+        string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Get, "/api/kit-reservations/my", token), cancellationToken);
+
+    public Task<HttpResponseMessage> CreateReservationAsync(
+        object body, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Post, "/api/kit-reservations", body, token), cancellationToken);
+
+    public Task<HttpResponseMessage> CancelReservationAsync(
+        Guid id, string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(BuildWithBody(HttpMethod.Put, $"/api/kit-reservations/{id}/cancel", null, token), cancellationToken);
 
     // ── helpers ───────────────────────────────────────────────────────────────
 

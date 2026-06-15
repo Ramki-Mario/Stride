@@ -6,15 +6,25 @@ using STRIDE.BFF.HttpClients;
 namespace STRIDE.BFF.Controllers;
 
 /// <summary>
-/// BFF proxy for KitOps kit-items endpoints (Admin catalog management).
+/// BFF proxy for all KitOps endpoints.
 ///
+/// Field user (any authenticated):
+///   GET  /bff/kit-ops/catalog                     — all active items with live availability
+///   GET  /bff/kit-ops/checkouts/my                — caller's checkout history
+///   POST /bff/kit-ops/checkouts                   — check out a kit item
+///   PUT  /bff/kit-ops/checkouts/{id}/return       — return a kit item
+///   GET  /bff/kit-ops/reservations/my             — caller's reservation history
+///   POST /bff/kit-ops/reservations                — request a kit item (reservation)
+///   PUT  /bff/kit-ops/reservations/{id}/cancel    — cancel your pending reservation
+///
+/// Admin only:
 ///   GET  /bff/kit-ops/kit-items                   — paged kit item list
-///   POST /bff/kit-ops/kit-items                   — create kit item (Admin)
+///   POST /bff/kit-ops/kit-items                   — create kit item
 ///   GET  /bff/kit-ops/kit-items/{id}              — kit item detail
-///   GET  /bff/kit-ops/kit-items/{id}/availability — live availability
-///   PUT  /bff/kit-ops/kit-items/{id}              — update kit item (Admin)
-///   PUT  /bff/kit-ops/kit-items/{id}/deactivate   — deactivate (Admin)
-///   PUT  /bff/kit-ops/kit-items/{id}/reactivate   — reactivate (Admin)
+///   GET  /bff/kit-ops/kit-items/{id}/availability — live availability snapshot
+///   PUT  /bff/kit-ops/kit-items/{id}              — update kit item
+///   PUT  /bff/kit-ops/kit-items/{id}/deactivate   — deactivate
+///   PUT  /bff/kit-ops/kit-items/{id}/reactivate   — reactivate
 /// </summary>
 [ApiController]
 [Authorize]
@@ -29,6 +39,74 @@ public sealed class KitOpsController : ControllerBase
         _kitOps = kitOps;
         _logger = logger;
     }
+
+    // ── Field user endpoints ─────────────────────────────────────────────────
+
+    [HttpGet("catalog")]
+    public async Task<IActionResult> GetCatalog(CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(await _kitOps.GetCatalogAsync(token, cancellationToken), cancellationToken);
+    }
+
+    [HttpGet("checkouts/my")]
+    public async Task<IActionResult> GetMyCheckouts(CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(await _kitOps.GetMyCheckoutsAsync(token, cancellationToken), cancellationToken);
+    }
+
+    [HttpPost("checkouts")]
+    public async Task<IActionResult> Checkout([FromBody] object body, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        var response = await _kitOps.CheckoutAsync(body, token, cancellationToken);
+        return response.IsSuccessStatusCode
+            ? StatusCode(StatusCodes.Status201Created, await response.Content.ReadAsStringAsync(cancellationToken))
+            : await ProxyAsync(response, cancellationToken);
+    }
+
+    [HttpPut("checkouts/{id:guid}/return")]
+    public async Task<IActionResult> Return(Guid id, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        var response = await _kitOps.ReturnAsync(id, token, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
+    }
+
+    [HttpGet("reservations/my")]
+    public async Task<IActionResult> GetMyReservations(CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        return await ProxyAsync(await _kitOps.GetMyReservationsAsync(token, cancellationToken), cancellationToken);
+    }
+
+    [HttpPost("reservations")]
+    public async Task<IActionResult> CreateReservation([FromBody] object body, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        var response = await _kitOps.CreateReservationAsync(body, token, cancellationToken);
+        return response.IsSuccessStatusCode
+            ? StatusCode(StatusCodes.Status201Created, await response.Content.ReadAsStringAsync(cancellationToken))
+            : await ProxyAsync(response, cancellationToken);
+    }
+
+    [HttpPut("reservations/{id:guid}/cancel")]
+    public async Task<IActionResult> CancelReservation(Guid id, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenAsync();
+        if (token is null) return Unauthorized();
+        var response = await _kitOps.CancelReservationAsync(id, token, cancellationToken);
+        return response.IsSuccessStatusCode ? NoContent() : await ProxyAsync(response, cancellationToken);
+    }
+
+    // ── Admin kit-items endpoints ────────────────────────────────────────────
 
     [HttpGet("kit-items")]
     public async Task<IActionResult> GetKitItems(
