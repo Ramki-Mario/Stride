@@ -26,7 +26,7 @@ public sealed class CheckoutKitItemCommandHandlerTests
     private static KitItem ActiveItem() =>
         KitItem.Create(new NewKitItem(TenantId, "Radio HT1000", "Communications", null, 5, UserId));
 
-    private CheckoutKitItemCommand Command(int days = 3) =>
+    private static CheckoutKitItemCommand Command(int days = 3) =>
         new(TenantId, KitItemId, UserId, days, "Site survey");
 
     [Fact]
