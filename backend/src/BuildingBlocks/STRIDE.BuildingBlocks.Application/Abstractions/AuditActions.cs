@@ -49,4 +49,6 @@ public static class AuditActions
     public const string KitItemUpdated     = "kititem.updated";
     public const string KitItemDeactivated = "kititem.deactivated";
     public const string KitItemReactivated = "kititem.reactivated";
+    public const string KitCheckedOut      = "kit.checked_out";
+    public const string KitReturned        = "kit.returned";
 }

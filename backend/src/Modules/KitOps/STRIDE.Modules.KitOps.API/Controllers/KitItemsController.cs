@@ -8,6 +8,7 @@ using STRIDE.Modules.KitOps.Application.Commands.CreateKitItem;
 using STRIDE.Modules.KitOps.Application.Commands.DeactivateKitItem;
 using STRIDE.Modules.KitOps.Application.Commands.ReactivateKitItem;
 using STRIDE.Modules.KitOps.Application.Commands.UpdateKitItem;
+using STRIDE.Modules.KitOps.Application.Queries.GetKitItemAvailability;
 using STRIDE.Modules.KitOps.Application.Queries.GetKitItemById;
 using STRIDE.Modules.KitOps.Application.Queries.GetKitItems;
 
@@ -19,6 +20,7 @@ namespace STRIDE.Modules.KitOps.API.Controllers;
 ///   GET    /api/kit-items              — paged list with optional search/category/isActive filters
 ///   POST   /api/kit-items              — create new kit item (Admin only)
 ///   GET    /api/kit-items/{id}         — get kit item detail
+///   GET    /api/kit-items/{id}/availability — live availability snapshot
 ///   PUT    /api/kit-items/{id}         — update kit item (Admin only)
 ///   PUT    /api/kit-items/{id}/deactivate — deactivate (Admin only)
 ///   PUT    /api/kit-items/{id}/reactivate — reactivate (Admin only)
@@ -86,6 +88,20 @@ public sealed class KitItemsController : ControllerBase
     {
         var result = await _mediator.Send(
             new GetKitItemByIdQuery(_tenantContext.TenantId, id), cancellationToken);
+
+        if (result.IsFailure)
+            return NotFound(new { error = result.Error });
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet("{id:guid}/availability")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAvailability(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetKitItemAvailabilityQuery(_tenantContext.TenantId, id), cancellationToken);
 
         if (result.IsFailure)
             return NotFound(new { error = result.Error });
