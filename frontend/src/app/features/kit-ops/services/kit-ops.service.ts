@@ -9,6 +9,11 @@ import {
   PagedResult,
   CreateKitItemRequest,
   UpdateKitItemRequest,
+  KitCatalogItemDto,
+  MyKitCheckoutDto,
+  MyKitReservationDto,
+  CheckoutKitItemRequest,
+  CreateKitReservationRequest,
 } from '../models/kit-ops.models';
 
 @Injectable({ providedIn: 'root' })
@@ -91,5 +96,34 @@ export class KitOpsService {
 
   reactivateKitItem(id: string): Observable<void> {
     return this.http.put<void>(`${this.base}/kit-items/${id}/reactivate`, {});
+  }
+
+  // ── Field user ────────────────────────────────────────────────────────────
+  getCatalog(): Observable<KitCatalogItemDto[]> {
+    return this.http.get<KitCatalogItemDto[]>(`${this.base}/catalog`);
+  }
+
+  getMyCheckouts(): Observable<MyKitCheckoutDto[]> {
+    return this.http.get<MyKitCheckoutDto[]>(`${this.base}/checkouts/my`);
+  }
+
+  checkout(body: CheckoutKitItemRequest): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>(`${this.base}/checkouts`, body);
+  }
+
+  returnCheckout(checkoutId: string): Observable<void> {
+    return this.http.put<void>(`${this.base}/checkouts/${checkoutId}/return`, {});
+  }
+
+  getMyReservations(): Observable<MyKitReservationDto[]> {
+    return this.http.get<MyKitReservationDto[]>(`${this.base}/reservations/my`);
+  }
+
+  createReservation(body: CreateKitReservationRequest): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>(`${this.base}/reservations`, body);
+  }
+
+  cancelReservation(reservationId: string): Observable<void> {
+    return this.http.put<void>(`${this.base}/reservations/${reservationId}/cancel`, {});
   }
 }

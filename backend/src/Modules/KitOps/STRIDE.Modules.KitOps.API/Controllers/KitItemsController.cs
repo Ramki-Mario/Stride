@@ -8,6 +8,7 @@ using STRIDE.Modules.KitOps.Application.Commands.CreateKitItem;
 using STRIDE.Modules.KitOps.Application.Commands.DeactivateKitItem;
 using STRIDE.Modules.KitOps.Application.Commands.ReactivateKitItem;
 using STRIDE.Modules.KitOps.Application.Commands.UpdateKitItem;
+using STRIDE.Modules.KitOps.Application.Queries.GetKitCatalog;
 using STRIDE.Modules.KitOps.Application.Queries.GetKitItemAvailability;
 using STRIDE.Modules.KitOps.Application.Queries.GetKitItemById;
 using STRIDE.Modules.KitOps.Application.Queries.GetKitItems;
@@ -56,6 +57,18 @@ public sealed class KitItemsController : ControllerBase
             cancellationToken);
 
         return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Returns all active kit items with live availability counts — used by the field user browse screen.
+    /// </summary>
+    [HttpGet("catalog")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCatalog(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetKitCatalogQuery(_tenantContext.TenantId), cancellationToken);
+        return Ok(result);
     }
 
     [HttpPost]

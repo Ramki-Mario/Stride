@@ -49,3 +49,51 @@ export interface UpdateKitItemRequest {
   description:   string | null;
   totalQuantity: number;
 }
+
+// ── Field user DTOs ───────────────────────────────────────────────────────────
+
+export interface KitCatalogItemDto {
+  kitItemId:            string;
+  name:                 string;
+  category:             string;
+  description:          string | null;
+  totalQuantity:        number;
+  outstandingCheckouts: number;
+  availableQuantity:    number;
+  overdueCheckouts:     number;
+}
+
+export interface MyKitCheckoutDto {
+  checkoutId:       string;
+  kitItemId:        string;
+  kitItemName:      string;
+  category:         string;
+  checkedOutAt:     string;
+  expectedReturnAt: string;
+  returnedAt:       string | null;
+  notes:            string | null;
+  statusLabel:      string;
+  statusValue:      number;
+}
+
+export interface MyKitReservationDto {
+  reservationId: string;
+  kitItemId:     string;
+  kitItemName:   string;
+  category:      string;
+  requestedAt:   string;
+  notes:         string | null;
+  statusLabel:   string;
+  statusValue:   number;
+}
+
+export interface CheckoutKitItemRequest {
+  kitItemId: string;
+  days:      number;
+  notes:     string | null;
+}
+
+export interface CreateKitReservationRequest {
+  kitItemId: string;
+  notes:     string | null;
+}

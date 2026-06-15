@@ -8,4 +8,11 @@ export const kitOpsRoutes: Routes = [
         (m) => m.KitCatalogPageComponent
       ),
   },
+  {
+    path: 'field',
+    loadComponent: () =>
+      import('./pages/kit-field-page/kit-field-page').then(
+        (m) => m.KitFieldPageComponent
+      ),
+  },
 ];
