@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using STRIDE.Modules.KitOps.Application.Abstractions;
 using STRIDE.Modules.KitOps.Domain.Repositories;
 using STRIDE.Modules.KitOps.Infrastructure.Persistence;
+using STRIDE.Modules.KitOps.Infrastructure.ReadModels;
 
 namespace STRIDE.Modules.KitOps.Infrastructure;
 
@@ -21,6 +23,8 @@ public static class KitOpsInfrastructureExtensions
         services.AddScoped<IKitItemRepository,        KitItemRepository>();
         services.AddScoped<IKitCheckoutRepository,    KitCheckoutRepository>();
         services.AddScoped<IKitReservationRepository, KitReservationRepository>();
+
+        services.AddScoped<IKitItemReadService, KitItemReadService>();
 
         return services;
     }

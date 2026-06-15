@@ -43,4 +43,10 @@ public static class AuditActions
     public const string WebhookUpdated          = "webhook.updated";
     public const string WebhookDeleted          = "webhook.deleted";
     public const string WebhookSecretRegenerated = "webhook.secret_regenerated";
+
+    // ── KitOps ────────────────────────────────────────────────────────────────
+    public const string KitItemCreated     = "kititem.created";
+    public const string KitItemUpdated     = "kititem.updated";
+    public const string KitItemDeactivated = "kititem.deactivated";
+    public const string KitItemReactivated = "kititem.reactivated";
 }
