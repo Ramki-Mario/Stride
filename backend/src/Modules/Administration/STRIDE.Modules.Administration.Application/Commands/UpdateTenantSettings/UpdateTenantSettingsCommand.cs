@@ -16,4 +16,8 @@ public sealed record UpdateTenantSettingsCommand(
     string  Timezone,
     /// <summary>Raw CSS text from the user. Null = keep existing tokens unchanged.</summary>
     string? CustomCss,
-    Guid    UpdatedBy) : IRequest<Result<SanitisedCssResult?>>;
+    Guid    UpdatedBy,
+    /// <summary>
+    /// Module entitlements. Null = leave unchanged. Empty list = grant all modules.
+    /// </summary>
+    IReadOnlyList<string>? EnabledModules = null) : IRequest<Result<SanitisedCssResult?>>;

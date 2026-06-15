@@ -7,4 +7,5 @@ public sealed record TenantSettingsDto(
     string  DefaultPalette,
     string  Timezone,
     string? CustomCssTokensJson,
-    bool    OnboardingCompleted);
+    bool    OnboardingCompleted,
+    IReadOnlyList<string> EnabledModules);

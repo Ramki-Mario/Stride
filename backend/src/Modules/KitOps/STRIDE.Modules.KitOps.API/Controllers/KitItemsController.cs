@@ -29,6 +29,7 @@ namespace STRIDE.Modules.KitOps.API.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/kit-items")]
+[RequiresModule(ModuleNames.KitOps)]
 public sealed class KitItemsController : ControllerBase
 {
     private readonly IMediator      _mediator;

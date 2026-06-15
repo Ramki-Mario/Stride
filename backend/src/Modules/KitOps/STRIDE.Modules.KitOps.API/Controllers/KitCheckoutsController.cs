@@ -22,6 +22,7 @@ namespace STRIDE.Modules.KitOps.API.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/kit-checkouts")]
+[RequiresModule(ModuleNames.KitOps)]
 public sealed class KitCheckoutsController : ControllerBase
 {
     private readonly IMediator      _mediator;

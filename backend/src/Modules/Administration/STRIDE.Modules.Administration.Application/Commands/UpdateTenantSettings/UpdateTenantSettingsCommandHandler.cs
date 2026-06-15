@@ -57,6 +57,9 @@ internal sealed class UpdateTenantSettingsCommandHandler
             request.CustomCss is not null ? cssTokensJson : settings.CustomCssTokensJson,
             request.UpdatedBy);
 
+        if (request.EnabledModules is not null)
+            settings.SetEnabledModules(request.EnabledModules);
+
         await _repo.SaveChangesAsync(cancellationToken);
 
         await _audit.LogAsync(new AuditLogEntry(

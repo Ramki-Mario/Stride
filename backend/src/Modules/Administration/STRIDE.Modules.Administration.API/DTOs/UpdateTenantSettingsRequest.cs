@@ -20,4 +20,10 @@ public sealed class UpdateTenantSettingsRequest
     /// </summary>
     [MaxLength(100_000)]
     public string? CustomCss { get; set; }
+
+    /// <summary>
+    /// Module entitlement list. Null = leave unchanged. Empty list = enable all modules.
+    /// Provide module names from <c>ModuleNames</c> constants (e.g. "KitOps", "Workflows").
+    /// </summary>
+    public List<string>? EnabledModules { get; set; }
 }

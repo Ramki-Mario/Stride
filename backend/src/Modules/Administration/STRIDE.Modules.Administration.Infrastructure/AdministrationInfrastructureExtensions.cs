@@ -37,6 +37,9 @@ public static class AdministrationInfrastructureExtensions
         // CSS sanitiser — stateless, safe as singleton.
         services.AddSingleton<ICssSanitiser, CssSanitiser>();
 
+        // Module entitlement service — cross-cutting, used by the API gate filter.
+        services.AddScoped<IModuleEntitlementService, ModuleEntitlementService>();
+
         return services;
     }
 }

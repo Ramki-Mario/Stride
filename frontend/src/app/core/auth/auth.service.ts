@@ -12,6 +12,7 @@ export interface AuthUser {
   defaultPalette: string;
   tenantName: string;
   onboardingCompleted: boolean;
+  enabledModules: string[];
 }
 
 @Injectable({ providedIn: 'root' })

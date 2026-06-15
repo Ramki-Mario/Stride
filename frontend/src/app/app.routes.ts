@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { moduleGuard } from './core/guards/module.guard';
 
 export const appRoutes: Routes = [
   {
@@ -112,6 +113,8 @@ export const appRoutes: Routes = [
       },
       {
         path: 'kit-ops',
+        canActivate: [moduleGuard],
+        data: { module: 'KitOps' },
         loadChildren: () =>
           import('./features/kit-ops/kit-ops.routes').then(
             (m) => m.kitOpsRoutes

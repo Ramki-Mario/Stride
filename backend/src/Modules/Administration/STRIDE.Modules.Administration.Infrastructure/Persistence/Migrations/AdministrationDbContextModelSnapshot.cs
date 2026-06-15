@@ -97,6 +97,11 @@ namespace STRIDE.Modules.Administration.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasDefaultValue("");
 
+                    b.Property<string>("EnabledModules")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
