@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 
 import { TenantSettingsService } from '../../services/tenant-settings.service';
 import { SanitisedCssResult } from '../../models/tenant-settings.models';
+import { AuthService } from '../../../../core/auth/auth.service';
 
 /** DOM id of the injected preview style element. */
 const PREVIEW_STYLE_ID = 'byot-preview';
@@ -217,6 +218,19 @@ const PREVIEW_STYLE_ID = 'byot-preview';
           }
 
         </div>
+
+        <!-- ── Section 3: Setup Wizard ───────────────────────────────────── -->
+        <div class="settings-card" style="margin-top:1.5rem">
+          <h2 class="settings-section-title">Setup Wizard</h2>
+          <p class="settings-hint" style="margin-bottom:1rem">
+            Re-run the guided setup wizard to create roles and invite team members.
+          </p>
+          <button class="stride-btn stride-btn-secondary" (click)="launchWizard()">
+            <span class="pi pi-play-circle" style="margin-right:.4rem"></span>
+            Launch Setup Wizard
+          </button>
+        </div>
+
       }
     </div>
   `,
@@ -288,7 +302,8 @@ const PREVIEW_STYLE_ID = 'byot-preview';
   `],
 })
 export class SettingsPageComponent implements OnInit, OnDestroy {
-  protected readonly svc = inject(TenantSettingsService);
+  protected readonly svc  = inject(TenantSettingsService);
+  private   readonly auth = inject(AuthService);
 
   // ── Branding form ──────────────────────────────────────────────────────────
   protected displayName    = '';
@@ -471,5 +486,9 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
   private removePreviewStyle(): void {
     document.getElementById(PREVIEW_STYLE_ID)?.remove();
+  }
+
+  protected launchWizard(): void {
+    this.auth.showWizard.set(true);
   }
 }

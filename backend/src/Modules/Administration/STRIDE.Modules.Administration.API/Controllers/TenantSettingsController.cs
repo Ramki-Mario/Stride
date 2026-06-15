@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.Modules.Administration.API.DTOs;
+using STRIDE.Modules.Administration.Application.Commands.CompleteOnboarding;
 using STRIDE.Modules.Administration.Application.Commands.UpdateTenantSettings;
 using STRIDE.Modules.Administration.Application.Queries.GetTenantSettings;
 using STRIDE.Modules.Administration.Infrastructure.Services;
@@ -72,6 +73,17 @@ public sealed class TenantSettingsController : ControllerBase
         return result.Value is not null
             ? Ok(result.Value)
             : NoContent();
+    }
+
+    /// <summary>POST /api/administration/settings/complete-onboarding — marks wizard complete.</summary>
+    [HttpPost("complete-onboarding")]
+    public async Task<IActionResult> CompleteOnboarding(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new CompleteOnboardingCommand(_tenantContext.TenantId, _currentUser.UserId),
+            cancellationToken);
+
+        return result.IsSuccess ? NoContent() : Problem(result.Error);
     }
 
     /// <summary>

@@ -11,6 +11,7 @@ export interface AuthUser {
   permissions: string[];
   defaultPalette: string;
   tenantName: string;
+  onboardingCompleted: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -19,6 +20,16 @@ export class AuthService {
 
   readonly user = this._user.asReadonly();
   readonly isAuthenticated = computed(() => this._user() !== null);
+
+  /** Set to true from the Settings page to re-show the wizard for a completed tenant. */
+  readonly showWizard = signal(false);
+
+  /** Updates the cached session to reflect onboarding completion without an extra HTTP call. */
+  markOnboardingComplete(): void {
+    const u = this._user();
+    if (u) this._user.set({ ...u, onboardingCompleted: true });
+    this.showWizard.set(false);
+  }
 
   constructor(private readonly http: HttpClient, private readonly router: Router) {}
 

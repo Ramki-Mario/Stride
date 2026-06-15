@@ -146,8 +146,9 @@ public sealed class TenantsController : ControllerBase
             hostResponse.DisplayName,
             hostResponse.Roles,
             permissions,
-            DefaultPalette: "purple",
-            TenantName:     request.OrgName.Trim()));
+            DefaultPalette:      "purple",
+            TenantName:          request.OrgName.Trim(),
+            OnboardingCompleted: false));
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

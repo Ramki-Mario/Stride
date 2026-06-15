@@ -4,11 +4,14 @@ import {
   OnInit,
   inject,
   signal,
+  computed,
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar';
 import { TopbarComponent } from '../topbar/topbar';
+import { OnboardingWizardComponent } from '../onboarding-wizard/onboarding-wizard';
+import { AuthService } from '../../core/auth/auth.service';
 import { ConnectivityService } from '../../core/pwa/connectivity.service';
 import { InstallPromptService } from '../../core/pwa/install-prompt.service';
 import { SyncService } from '../../core/pwa/sync.service';
@@ -17,8 +20,13 @@ import { SyncService } from '../../core/pwa/sync.service';
   selector: 'app-shell',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, RouterOutlet, SidebarComponent, TopbarComponent],
+  imports: [NgClass, RouterOutlet, SidebarComponent, TopbarComponent, OnboardingWizardComponent],
   template: `
+    <!-- ── Onboarding wizard (shown on first login for TenantAdmin) ──────────── -->
+    @if (shouldShowWizard()) {
+      <app-onboarding-wizard />
+    }
+
     <div class="stride-shell">
       <!-- Sidebar -->
       <app-sidebar
@@ -101,10 +109,18 @@ import { SyncService } from '../../core/pwa/sync.service';
   `,
 })
 export class ShellComponent implements OnInit {
+  private  readonly auth          = inject(AuthService);
   protected readonly mobileNavOpen = signal(false);
   protected readonly connectivity  = inject(ConnectivityService);
   protected readonly install       = inject(InstallPromptService);
   protected readonly sync          = inject(SyncService);
+
+  protected readonly shouldShowWizard = computed(() => {
+    const user = this.auth.user();
+    if (!user) return false;
+    if (this.auth.showWizard()) return true;
+    return user.roles.includes('TenantAdmin') && !user.onboardingCompleted;
+  });
 
   ngOnInit(): void {
     // Drain any queued completions if we're online at startup

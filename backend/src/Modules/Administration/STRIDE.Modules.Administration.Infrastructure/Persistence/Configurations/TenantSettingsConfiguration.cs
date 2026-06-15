@@ -32,6 +32,10 @@ public sealed class TenantSettingsConfiguration : IEntityTypeConfiguration<Tenan
         builder.Property(s => s.CustomCssTokensJson)
                .HasColumnType("nvarchar(max)");
 
+        builder.Property(s => s.OnboardingCompleted)
+               .IsRequired()
+               .HasDefaultValue(false);
+
         builder.Property(s => s.CreatedAt).IsRequired();
         builder.Property(s => s.UpdatedAt).IsRequired();
         builder.Property(s => s.CreatedBy).IsRequired();

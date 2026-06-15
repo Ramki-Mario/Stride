@@ -26,6 +26,9 @@ public sealed class TenantSettingsApiClient
     public Task<HttpResponseMessage> GetCssTemplateAsync(string token, CancellationToken cancellationToken = default)
         => _client.SendAsync(Build(HttpMethod.Get, "/api/administration/settings/css-template", token), cancellationToken);
 
+    public Task<HttpResponseMessage> CompleteOnboardingAsync(string token, CancellationToken cancellationToken = default)
+        => _client.SendAsync(Build(HttpMethod.Post, "/api/administration/settings/complete-onboarding", token), cancellationToken);
+
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private static HttpRequestMessage Build(HttpMethod method, string uri, string token)

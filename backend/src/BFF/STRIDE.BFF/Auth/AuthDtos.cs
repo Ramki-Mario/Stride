@@ -45,8 +45,9 @@ public sealed record MeResponse(
     string DisplayName,
     IReadOnlyList<string> Roles,
     IReadOnlyList<string> Permissions,
-    string DefaultPalette = "purple",
-    string TenantName     = "");
+    string DefaultPalette       = "purple",
+    string TenantName           = "",
+    bool   OnboardingCompleted  = false);
 
 /// <summary>Response from the Host's invite-token validation endpoint.</summary>
 public sealed record HostInviteTokenInfoResponse(string Email, string DisplayName);

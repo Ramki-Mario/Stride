@@ -6,4 +6,5 @@ public sealed record TenantSettingsDto(
     string  DisplayName,
     string  DefaultPalette,
     string  Timezone,
-    string? CustomCssTokensJson);
+    string? CustomCssTokensJson,
+    bool    OnboardingCompleted);
