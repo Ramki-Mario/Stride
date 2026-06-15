@@ -7,6 +7,7 @@ using Serilog;
 using StackExchange.Redis;
 using System.Security.Authentication;
 using STRIDE.Host.ErrorHandling;
+using STRIDE.Host.Filters;
 using STRIDE.BuildingBlocks.Infrastructure.Correlation;
 using STRIDE.BuildingBlocks.Infrastructure.Extensions;
 using STRIDE.BuildingBlocks.Infrastructure.Logging;
@@ -55,8 +56,14 @@ builder.Services
     .AddBuildingBlocksEventBus();
 
 // ── Controllers (all module API assemblies registered as application parts) ─
+builder.Services.AddScoped<ModuleGateFilter>();
+
 builder.Services
-    .AddControllers()
+    .AddControllers(opts =>
+    {
+        // Enforce per-tenant module entitlements on every controller decorated with [RequiresModule].
+        opts.Filters.Add<ModuleGateFilter>();
+    })
     // Serialize C# enums as their string names (e.g. "DashboardKpi", "Draft")
     // rather than integer values. Ensures the Angular client can send/receive
     // enum fields by name without needing a custom mapping layer.

@@ -64,7 +64,8 @@ public sealed class TenantSettingsController : ControllerBase
             body.DefaultPalette,
             body.Timezone,
             body.CustomCss,
-            _currentUser.UserId), cancellationToken);
+            _currentUser.UserId,
+            body.EnabledModules), cancellationToken);
 
         if (result.IsFailure)
             return Problem(result.Error);

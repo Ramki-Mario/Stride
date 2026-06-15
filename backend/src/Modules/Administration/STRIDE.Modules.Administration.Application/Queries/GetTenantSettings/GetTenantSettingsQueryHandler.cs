@@ -53,5 +53,6 @@ internal sealed class GetTenantSettingsQueryHandler
     }
 
     private static TenantSettingsDto ToDto(TenantSettings s) =>
-        new(s.Id, s.TenantId, s.DisplayName, s.DefaultPalette, s.Timezone, s.CustomCssTokensJson, s.OnboardingCompleted);
+        new(s.Id, s.TenantId, s.DisplayName, s.DefaultPalette, s.Timezone, s.CustomCssTokensJson,
+            s.OnboardingCompleted, s.GetEnabledModulesList());
 }

@@ -22,6 +22,7 @@ namespace STRIDE.Modules.KitOps.API.Controllers;
 [ApiController]
 [Authorize(Roles = "Admin")]
 [Route("api/kit-reports")]
+[RequiresModule(ModuleNames.KitOps)]
 public sealed class KitReportsController : ControllerBase
 {
     private readonly IMediator            _mediator;

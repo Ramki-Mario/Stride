@@ -13,6 +13,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { map, catchError, of } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { PermissionService, Permissions } from '../../core/auth/permission.service';
+import { ModuleService } from '../../core/services/module.service';
 import { WorkflowService } from '../../features/workflows/services/workflow.service';
 
 interface NavItem {
@@ -27,6 +28,7 @@ interface NavItem {
 interface NavGroup {
   label: string;
   items: NavItem[];
+  module?: string;  // when set, the whole group is hidden if that module is disabled
 }
 
 @Component({
@@ -80,6 +82,7 @@ interface NavGroup {
     <!-- ── Navigation ───────────────────────────────────── -->
     <nav class="sb-nav" aria-label="Main navigation">
       @for (group of navGroups; track group.label) {
+        @if (canShowGroup(group)) {
         <div class="sb-group-label" aria-hidden="true">{{ group.label }}</div>
 
         @for (item of group.items; track item.route) {
@@ -98,6 +101,7 @@ interface NavGroup {
             }
           </a>
           }
+        }
         }
       }
     </nav>
@@ -409,9 +413,10 @@ interface NavGroup {
   `],
 })
 export class SidebarComponent {
-  protected readonly auth  = inject(AuthService);
-  private   readonly perms = inject(PermissionService);
-  private   readonly wf    = inject(WorkflowService);
+  protected readonly auth    = inject(AuthService);
+  private   readonly perms   = inject(PermissionService);
+  private   readonly modules = inject(ModuleService);
+  private   readonly wf      = inject(WorkflowService);
 
   /** Set by ShellComponent when the mobile hamburger is tapped. */
   @Input() mobileOpen = false;
@@ -495,6 +500,7 @@ export class SidebarComponent {
     },
     {
       label: 'Field Ops',
+      module: 'KitOps',
       items: [
         { label: 'Kit Catalog',   route: '/kit-ops',              icon: 'pi-box'          },
         { label: 'My Kit',        route: '/kit-ops/field',        icon: 'pi-shopping-bag' },
@@ -514,6 +520,11 @@ export class SidebarComponent {
       ],
     },
   ];
+
+  /** A nav group is shown when it has no module gate, or that module is enabled for the tenant. */
+  protected canShowGroup(group: NavGroup): boolean {
+    return !group.module || this.modules.isEnabled(group.module);
+  }
 
   /** A nav item is shown when it has no permission gate, or the user holds that permission. */
   protected canShow(item: NavItem): boolean {

@@ -13,6 +13,11 @@ public sealed class TenantSettings : AuditableEntity
     public string  Timezone             { get; private set; } = "UTC";
     public string? CustomCssTokensJson  { get; private set; }
     public bool    OnboardingCompleted  { get; private set; }
+    /// <summary>
+    /// Comma-separated list of enabled module identifiers (e.g. "KitOps,Reporting").
+    /// Null or empty means ALL modules are enabled — default for existing and new tenants.
+    /// </summary>
+    public string? EnabledModules       { get; private set; }
 
     private TenantSettings() { }   // EF
 
@@ -64,4 +69,28 @@ public sealed class TenantSettings : AuditableEntity
         CustomCssTokensJson = customCssTokensJson;
         UpdatedAt           = DateTime.UtcNow;
     }
+
+    /// <summary>
+    /// Replaces the enabled-module list. Pass an empty/null collection to grant all modules.
+    /// </summary>
+    public void SetEnabledModules(IEnumerable<string>? modules)
+    {
+        var list = modules?.Select(m => m.Trim()).Where(m => m.Length > 0).ToList();
+        EnabledModules = list is { Count: > 0 } ? string.Join(",", list) : null;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Returns true when the module is enabled for this tenant.
+    /// Null/empty EnabledModules means all modules are enabled (backward-compatible default).
+    /// </summary>
+    public bool IsModuleEnabled(string moduleName) =>
+        string.IsNullOrEmpty(EnabledModules) ||
+        EnabledModules.Split(',').Any(m => m.Equals(moduleName, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>Parses EnabledModules into a list. Empty list means all modules are enabled.</summary>
+    public IReadOnlyList<string> GetEnabledModulesList() =>
+        string.IsNullOrEmpty(EnabledModules)
+            ? Array.Empty<string>()
+            : EnabledModules.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 }

@@ -93,9 +93,9 @@ public sealed class AuthController : ControllerBase
         var settingsTask    = GetTenantSettingsAsync(hostResponse.AccessToken, cancellationToken);
         var permissionsTask = GetPermissionsAsync(hostResponse.AccessToken, cancellationToken);
         await Task.WhenAll(settingsTask, permissionsTask);
-        var (defaultPalette, tenantName, onboardingCompleted) = settingsTask.Result;
+        var (defaultPalette, tenantName, onboardingCompleted, enabledModules) = settingsTask.Result;
 
-        return Ok(ToMeResponse(hostResponse, permissionsTask.Result, defaultPalette, tenantName, onboardingCompleted));
+        return Ok(ToMeResponse(hostResponse, permissionsTask.Result, defaultPalette, tenantName, onboardingCompleted, enabledModules));
     }
 
     /// <summary>
@@ -288,16 +288,18 @@ public sealed class AuthController : ControllerBase
         var onboardingCompleted = false;
         IReadOnlyList<string> permissions = Array.Empty<string>();
 
+        IReadOnlyList<string> enabledModules = Array.Empty<string>();
+
         if (token is not null)
         {
             var settingsTask    = GetTenantSettingsAsync(token, cancellationToken);
             var permissionsTask = GetPermissionsAsync(token, cancellationToken);
             await Task.WhenAll(settingsTask, permissionsTask);
-            (defaultPalette, tenantName, onboardingCompleted) = settingsTask.Result;
+            (defaultPalette, tenantName, onboardingCompleted, enabledModules) = settingsTask.Result;
             permissions = permissionsTask.Result;
         }
 
-        return Ok(new MeResponse(userId, tenantId, email, displayName, roles, permissions, defaultPalette, tenantName, onboardingCompleted));
+        return Ok(new MeResponse(userId, tenantId, email, displayName, roles, permissions, defaultPalette, tenantName, onboardingCompleted, enabledModules));
     }
 
     // ── helpers ────────────────────────────────────────────────────────────────
@@ -306,13 +308,13 @@ public sealed class AuthController : ControllerBase
     /// Fetches TenantSettings and extracts defaultPalette, displayName, and onboardingCompleted.
     /// Returns safe defaults on any failure so auth never breaks due to a settings fault.
     /// </summary>
-    private async Task<(string Palette, string TenantName, bool OnboardingCompleted)> GetTenantSettingsAsync(
+    private async Task<(string Palette, string TenantName, bool OnboardingCompleted, IReadOnlyList<string> EnabledModules)> GetTenantSettingsAsync(
         string token, CancellationToken cancellationToken)
     {
         try
         {
             var response = await _tenantSettings.GetSettingsAsync(token, cancellationToken);
-            if (!response.IsSuccessStatusCode) return (DefaultPalette, "", false);
+            if (!response.IsSuccessStatusCode) return (DefaultPalette, "", false, Array.Empty<string>());
 
             var json = await response.Content.ReadAsStringAsync(cancellationToken);
             using var doc = JsonDocument.Parse(json);
@@ -329,12 +331,22 @@ public sealed class AuthController : ControllerBase
             var onboardingCompleted = root.TryGetProperty("onboardingCompleted", out var onboardingProp)
                 && onboardingProp.GetBoolean();
 
-            return (palette, name, onboardingCompleted);
+            IReadOnlyList<string> enabledModules = Array.Empty<string>();
+            if (root.TryGetProperty("enabledModules", out var modulesProp)
+                && modulesProp.ValueKind == JsonValueKind.Array)
+            {
+                enabledModules = modulesProp.EnumerateArray()
+                    .Select(e => e.GetString() ?? string.Empty)
+                    .Where(s => s.Length > 0)
+                    .ToArray();
+            }
+
+            return (palette, name, onboardingCompleted, enabledModules);
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to fetch tenant settings for /auth/me — using defaults.");
-            return (DefaultPalette, "", false);
+            return (DefaultPalette, "", false, Array.Empty<string>());
         }
     }
 
@@ -380,9 +392,10 @@ public sealed class AuthController : ControllerBase
 
     private static MeResponse ToMeResponse(
         HostLoginResponse r, IReadOnlyList<string> permissions,
-        string defaultPalette, string tenantName, bool onboardingCompleted) =>
+        string defaultPalette, string tenantName, bool onboardingCompleted,
+        IReadOnlyList<string> enabledModules) =>
         new(r.UserId, r.TenantId, r.Email, r.DisplayName, r.Roles, permissions,
-            defaultPalette, tenantName, onboardingCompleted);
+            defaultPalette, tenantName, onboardingCompleted, enabledModules);
 
     private static bool TryParseGuidClaim(ClaimsPrincipal user, string claimType, out Guid value)
     {

@@ -22,6 +22,7 @@ namespace STRIDE.Modules.KitOps.API.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/kit-reservations")]
+[RequiresModule(ModuleNames.KitOps)]
 public sealed class KitReservationsController : ControllerBase
 {
     private readonly IMediator      _mediator;

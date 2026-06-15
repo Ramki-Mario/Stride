@@ -39,6 +39,11 @@ public sealed class TenantSettingsConfiguration : IEntityTypeConfiguration<Tenan
         builder.Property(s => s.CreatedAt).IsRequired();
         builder.Property(s => s.UpdatedAt).IsRequired();
         builder.Property(s => s.CreatedBy).IsRequired();
+        builder.Property(s => s.EnabledModules)
+               .HasMaxLength(1000)
+               .HasColumnType("nvarchar(1000)")
+               .HasDefaultValue(null);
+
         builder.Property(s => s.IsDeleted).IsRequired().HasDefaultValue(false);
 
         builder.HasQueryFilter(s => !s.IsDeleted);
