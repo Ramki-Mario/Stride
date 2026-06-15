@@ -1,6 +1,6 @@
 using Dapper;
+using STRIDE.BuildingBlocks.Application.Abstractions;
 using STRIDE.BuildingBlocks.Infrastructure.Persistence;
-using STRIDE.Modules.Notifications.Application.Abstractions;
 
 namespace STRIDE.Modules.Notifications.Infrastructure.Services;
 
@@ -61,5 +61,30 @@ internal sealed class UserRoleQueryService : IUserRoleQueryService
                 cancellationToken: cancellationToken));
 
         return userIds.ToList().AsReadOnly();
+    }
+
+    public async Task<IReadOnlyList<string>> GetEmailsByRoleNameAsync(
+        string roleName,
+        Guid tenantId,
+        CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            SELECT u.Email
+            FROM   [identity].[UserRoles]  ur
+            JOIN   [identity].[Users]      u  ON u.Id       = ur.UserId
+            JOIN   [identity].[Roles]      r  ON r.Id       = ur.RoleId
+            WHERE  ur.TenantId  = @TenantId
+              AND  r.Name       = @RoleName
+              AND  ur.IsDeleted = 0
+              AND  u.IsActive   = 1
+              AND  u.IsDeleted  = 0
+            """;
+
+        await using var conn = await _db.OpenConnectionAsync(cancellationToken);
+        var emails = await conn.QueryAsync<string>(
+            new CommandDefinition(sql, new { TenantId = tenantId, RoleName = roleName },
+                cancellationToken: cancellationToken));
+
+        return emails.ToList().AsReadOnly();
     }
 }
