@@ -6,7 +6,7 @@ import {
   signal,
   computed,
 } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -41,7 +41,7 @@ const PERMISSION_GROUPS = [
   { label: 'Tenant',    keys: ['tenant.settings'] },
 ];
 
-const DEFAULT_PERMISSIONS = ['workflow.view','workflow.create','workflow.run'];
+const DEFAULT_PERMISSIONS = new Set(['workflow.view','workflow.create','workflow.run']);
 
 interface RoleRow { name: string; description: string; permissionIds: string[]; saved: boolean; }
 interface InviteRow { email: string; roleId: string; }
@@ -439,7 +439,7 @@ export class OnboardingWizardComponent implements OnInit {
   roleName = '';
   roleDesc = '';
 
-  private permissions = signal<PermissionDto[]>([]);
+  private readonly permissions = signal<PermissionDto[]>([]);
   readonly selectedPermIds = signal<Set<string>>(new Set([]));
   readonly savedRoles      = signal<RoleRow[]>([]);
   readonly isSavingRole    = signal(false);
@@ -456,7 +456,7 @@ export class OnboardingWizardComponent implements OnInit {
   ngOnInit(): void {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      const n = parseInt(saved, 10);
+      const n = Number.parseInt(saved, 10);
       if (n >= 1 && n <= 4) this.currentStep.set(n);
     }
 
@@ -465,7 +465,7 @@ export class OnboardingWizardComponent implements OnInit {
       this.permissions.set(perms);
       // Pre-select sensible defaults
       const defaults = new Set(
-        perms.filter(p => DEFAULT_PERMISSIONS.includes(p.key)).map(p => p.id),
+        perms.filter(p => DEFAULT_PERMISSIONS.has(p.key)).map(p => p.id),
       );
       this.selectedPermIds.set(defaults);
     });
