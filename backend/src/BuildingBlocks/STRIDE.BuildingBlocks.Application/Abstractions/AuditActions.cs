@@ -51,4 +51,7 @@ public static class AuditActions
     public const string KitItemReactivated = "kititem.reactivated";
     public const string KitCheckedOut      = "kit.checked_out";
     public const string KitReturned        = "kit.returned";
+    public const string KitReservationCreated   = "kit.reservation_created";
+    public const string KitReservationCancelled = "kit.reservation_cancelled";
+    public const string KitReservationFulfilled = "kit.reservation_fulfilled";
 }

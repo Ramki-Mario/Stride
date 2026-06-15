@@ -83,6 +83,18 @@ public sealed class KitReservationTests
     }
 
     [Fact]
+    public void Fulfill_PendingReservation_RaisesKitReservationFulfilledEvent()
+    {
+        var reservation = new KitReservationBuilder().Build();
+        reservation.ClearDomainEvents();
+
+        reservation.Fulfill(Guid.NewGuid());
+
+        reservation.DomainEvents.Should().ContainSingle()
+            .Which.Should().BeOfType<KitReservationFulfilledEvent>();
+    }
+
+    [Fact]
     public void Fulfill_AlreadyFulfilled_ThrowsKitOpsDomainException()
     {
         var reservation = new KitReservationBuilder().Build();
