@@ -5,6 +5,7 @@ import {
   signal,
   computed,
   OnInit,
+  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,8 +15,14 @@ import {
   MyKitCheckoutDto,
   MyKitReservationDto,
 } from '../../models/kit-ops.models';
+import { ConnectivityService } from '../../../../core/pwa/connectivity.service';
+import { KitSyncService }      from '../../../../core/pwa/kit-sync.service';
+import { KitOfflineQueueService } from '../../../../core/pwa/kit-offline-queue.service';
 
 type ModalMode = 'checkout' | 'request' | null;
+
+/** Checkout row augmented with local optimistic state — never sent to the server. */
+type CheckoutRow = MyKitCheckoutDto & { pendingReturn?: boolean };
 
 @Component({
   selector: 'app-kit-field-page',
@@ -24,6 +31,36 @@ type ModalMode = 'checkout' | 'request' | null;
   imports: [CommonModule, FormsModule],
   template: `
     <div class="kfp-page">
+
+      <!-- ── Offline banner ─────────────────────────────────────────────────── -->
+      @if (isOffline()) {
+        <div class="kfp-offline-banner" role="status" aria-live="polite">
+          <i class="pi pi-wifi" style="opacity:.6"></i>
+          <span><strong>You are offline.</strong>
+            Checkout and return actions will be saved and synced when connectivity is restored.
+          </span>
+        </div>
+      }
+
+      <!-- ── Sync status bar ───────────────────────────────────────────────── -->
+      @if (kitSync.pendingCount() > 0 || kitSync.isSyncing()) {
+        <div class="kfp-sync-bar" [class.kfp-sync-bar--active]="kitSync.isSyncing()" role="status" aria-live="polite">
+          @if (kitSync.isSyncing()) {
+            <i class="pi pi-spin pi-spinner"></i>
+            <span>Syncing {{ kitSync.pendingCount() }} queued action(s)…</span>
+          } @else {
+            <i class="pi pi-clock"></i>
+            <span>{{ kitSync.pendingCount() }} action(s) queued — will sync on reconnect.</span>
+          }
+        </div>
+      }
+
+      @if (kitSync.lastSyncError()) {
+        <div class="kfp-error-banner" role="alert">
+          <i class="pi pi-exclamation-circle"></i>
+          <span>{{ kitSync.lastSyncError() }}</span>
+        </div>
+      }
 
       <!-- ── Header ─────────────────────────────────────────────────────── -->
       <div class="kfp-header">
@@ -35,7 +72,7 @@ type ModalMode = 'checkout' | 'request' | null;
 
       <!-- ── Global error ───────────────────────────────────────────────── -->
       @if (error()) {
-        <div class="kfp-error-banner">
+        <div class="kfp-error-banner" role="alert">
           <i class="pi pi-exclamation-circle"></i>
           <span>{{ error() }}</span>
           <button class="kfp-error-close" (click)="error.set(null)" aria-label="Dismiss">
@@ -46,7 +83,7 @@ type ModalMode = 'checkout' | 'request' | null;
 
       <!-- ── Action feedback ────────────────────────────────────────────── -->
       @if (successMsg()) {
-        <div class="kfp-success-banner">
+        <div class="kfp-success-banner" role="status" aria-live="polite">
           <i class="pi pi-check-circle"></i>
           <span>{{ successMsg() }}</span>
         </div>
@@ -136,12 +173,15 @@ type ModalMode = 'checkout' | 'request' | null;
         } @else {
           <div class="kfp-list">
             @for (co of activeCheckouts(); track co.checkoutId) {
-              <div class="kfp-list-row">
+              <div class="kfp-list-row" [class.kfp-row--pending]="co.pendingReturn">
                 <div class="kfp-list-info">
                   <div class="kfp-list-name">
                     {{ co.kitItemName }}
                     @if (isOverdue(co)) {
                       <span class="kfp-overdue-tag">Overdue</span>
+                    }
+                    @if (co.pendingReturn) {
+                      <span class="kfp-queued-tag">Return queued</span>
                     }
                   </div>
                   <div class="kfp-list-meta">
@@ -154,8 +194,8 @@ type ModalMode = 'checkout' | 'request' | null;
                   }
                 </div>
                 <button class="btn btn-outline btn-sm"
-                        (click)="returnCheckout(co.checkoutId)"
-                        [disabled]="actionInProgress()">
+                        (click)="returnCheckout(co.checkoutId, co.kitItemName)"
+                        [disabled]="actionInProgress() || !!co.pendingReturn">
                   <i class="pi pi-reply"></i> Return
                 </button>
               </div>
@@ -225,6 +265,12 @@ type ModalMode = 'checkout' | 'request' | null;
             </button>
           </div>
           <div class="modal-body">
+            @if (isOffline() && modalMode() === 'checkout') {
+              <div class="kfp-modal-offline-note">
+                <i class="pi pi-wifi" style="opacity:.6"></i>
+                You are offline. This checkout will be queued and submitted when connectivity is restored.
+              </div>
+            }
             @if (modalMode() === 'checkout') {
               <div class="form-field">
                 <label class="form-label" for="kf-days">Number of days <span class="required">*</span></label>
@@ -261,7 +307,7 @@ type ModalMode = 'checkout' | 'request' | null;
               @if (actionInProgress()) {
                 <i class="pi pi-spin pi-spinner"></i>
               }
-              {{ modalMode() === 'checkout' ? 'Check Out' : 'Submit Request' }}
+              {{ modalMode() === 'checkout' ? (isOffline() ? 'Queue Checkout' : 'Check Out') : 'Submit Request' }}
             </button>
           </div>
         </div>
@@ -274,7 +320,68 @@ type ModalMode = 'checkout' | 'request' | null;
       max-width: 1100px;
       display: flex;
       flex-direction: column;
-      gap: 2rem;
+      gap: 1.5rem;
+    }
+
+    /* ── Offline banner ─── */
+    .kfp-offline-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--stride-radius-md);
+      font-size: 0.875rem;
+      background: #fef9c3;
+      color: #854d0e;
+      border: 1px solid #fde68a;
+    }
+
+    /* ── Sync status bar ─── */
+    .kfp-sync-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.625rem 1rem;
+      border-radius: var(--stride-radius-md);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      background: var(--stride-primary-surface, #eff6ff);
+      color: var(--stride-primary);
+      border: 1px solid var(--stride-primary-border, #bfdbfe);
+    }
+    .kfp-sync-bar--active {
+      animation: kfp-sync-pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes kfp-sync-pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .7; }
+    }
+
+    /* ── Queued / pending-return row decorators ─── */
+    .kfp-row--pending {
+      opacity: .75;
+      border-style: dashed;
+    }
+    .kfp-queued-tag {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      background: #fef3c7;
+      color: #92400e;
+      padding: 0.1rem 0.4rem;
+      border-radius: 999px;
+    }
+
+    /* ── Offline note inside modal ─── */
+    .kfp-modal-offline-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.8125rem;
+      padding: 0.625rem 0.875rem;
+      border-radius: var(--stride-radius-md);
+      background: #fef9c3;
+      color: #854d0e;
+      border: 1px solid #fde68a;
     }
 
     /* ── Header ─── */
@@ -446,6 +553,7 @@ type ModalMode = 'checkout' | 'request' | null;
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      flex-wrap: wrap;
     }
     .kfp-overdue-tag {
       font-size: 0.6875rem;
@@ -563,14 +671,25 @@ type ModalMode = 'checkout' | 'request' | null;
     .form-textarea { resize: vertical; }
     .form-error { font-size: .8125rem; color: var(--stride-danger, #dc2626); }
     .required { color: var(--stride-danger, #dc2626); }
+
+    /* ── Mobile ─── */
+    @media (max-width: 600px) {
+      .kfp-page { padding: 1rem; gap: 1.25rem; }
+      .kfp-card-grid { grid-template-columns: 1fr; }
+    }
   `],
 })
 export class KitFieldPageComponent implements OnInit {
-  private readonly svc = inject(KitOpsService);
+  private readonly svc          = inject(KitOpsService);
+  private readonly connectivity = inject(ConnectivityService);
+  protected readonly kitSync    = inject(KitSyncService);
+  private readonly kitQueue     = inject(KitOfflineQueueService);
+
+  readonly isOffline = computed(() => !this.connectivity.isOnline());
 
   // ── Page state ────────────────────────────────────────────────────────────
   readonly catalog          = signal<KitCatalogItemDto[]>([]);
-  readonly checkouts        = signal<MyKitCheckoutDto[]>([]);
+  readonly checkouts        = signal<CheckoutRow[]>([]);
   readonly reservations     = signal<MyKitReservationDto[]>([]);
 
   readonly catalogLoading      = signal(false);
@@ -581,7 +700,7 @@ export class KitFieldPageComponent implements OnInit {
   readonly successMsg = signal<string | null>(null);
   readonly actionInProgress = signal(false);
 
-  readonly activeCheckouts   = computed(() => this.checkouts().filter(c => c.statusValue === 0 || c.statusValue === 2));
+  readonly activeCheckouts    = computed(() => this.checkouts().filter(c => c.statusValue === 0 || c.statusValue === 2));
   readonly pendingReservations = computed(() => this.reservations().filter(r => r.statusValue === 0));
 
   // ── Modal state ────────────────────────────────────────────────────────────
@@ -596,6 +715,20 @@ export class KitFieldPageComponent implements OnInit {
     return null;
   });
   readonly modalError = signal<string | null>(null);
+
+  constructor() {
+    // When we come back online after queuing actions, reload data once sync finishes.
+    effect(() => {
+      const syncing = this.kitSync.isSyncing();
+      if (!syncing && !this.isOffline()) {
+        // isSyncing just flipped to false while online — refresh to reflect server state.
+        // Guard against the initial false→false at startup with pendingCount check.
+        if (this.kitSync.pendingCount() === 0 && this.checkouts().length > 0) {
+          this.loadAll();
+        }
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.loadAll();
@@ -679,14 +812,21 @@ export class KitFieldPageComponent implements OnInit {
     const item = this.selectedItem();
     if (!item) return;
 
-    this.actionInProgress.set(true);
-    this.modalError.set(null);
-
-    this.svc.checkout({
+    const body = {
       kitItemId: item.kitItemId,
       days:      this.modalDays,
       notes:     this.modalNotes.trim() || null,
-    }).subscribe({
+    };
+
+    if (this.isOffline()) {
+      this.queueCheckout(item, body);
+      return;
+    }
+
+    this.actionInProgress.set(true);
+    this.modalError.set(null);
+
+    this.svc.checkout(body).subscribe({
       next: () => {
         this.actionInProgress.set(false);
         this.closeModal();
@@ -698,6 +838,29 @@ export class KitFieldPageComponent implements OnInit {
         this.modalError.set(err?.error?.error ?? 'Checkout failed. Please try again.');
       },
     });
+  }
+
+  private async queueCheckout(item: KitCatalogItemDto, body: object): Promise<void> {
+    await this.kitQueue.enqueue({
+      id:          crypto.randomUUID(),
+      type:        'checkout',
+      kitItemId:   item.kitItemId,
+      kitItemName: item.name,
+      payload:     JSON.stringify(body),
+      queuedAt:    Date.now(),
+    });
+    await this.kitSync.refreshCount();
+
+    // Optimistic: decrement available count in catalog
+    this.catalog.update(list =>
+      list.map(i => i.kitItemId === item.kitItemId
+        ? { ...i, availableQuantity: Math.max(0, i.availableQuantity - 1) }
+        : i
+      )
+    );
+
+    this.closeModal();
+    this.flash(`Checkout for "${item.name}" queued — will sync when back online.`);
   }
 
   private submitRequest(): void {
@@ -724,7 +887,12 @@ export class KitFieldPageComponent implements OnInit {
     });
   }
 
-  returnCheckout(checkoutId: string): void {
+  returnCheckout(checkoutId: string, kitItemName: string): void {
+    if (this.isOffline()) {
+      void this.queueReturn(checkoutId, kitItemName);
+      return;
+    }
+
     this.actionInProgress.set(true);
     this.svc.returnCheckout(checkoutId).subscribe({
       next: () => {
@@ -737,6 +905,25 @@ export class KitFieldPageComponent implements OnInit {
         this.error.set(err?.error?.error ?? 'Return failed. Please try again.');
       },
     });
+  }
+
+  private async queueReturn(checkoutId: string, kitItemName: string): Promise<void> {
+    await this.kitQueue.enqueue({
+      id:          crypto.randomUUID(),
+      type:        'return',
+      checkoutId,
+      kitItemName,
+      payload:     '{}',
+      queuedAt:    Date.now(),
+    });
+    await this.kitSync.refreshCount();
+
+    // Optimistic: mark the checkout row as pending-return in local state
+    this.checkouts.update(list =>
+      list.map(c => c.checkoutId === checkoutId ? { ...c, pendingReturn: true } : c)
+    );
+
+    this.flash(`Return for "${kitItemName}" queued — will sync when back online.`);
   }
 
   cancelReservation(reservationId: string): void {
