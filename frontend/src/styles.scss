@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    STRIDE — Global Design System
-   Stack : Angular 21 · Tailwind CSS 4 · PrimeNG 21 · Inter font
+   Stack : Angular 21 · Tailwind CSS 4 · PrimeNG 21 · DM Sans font
    Theme : Premium Purple SaaS (light + dark)  ·  v2 2026-05-16
    Palette: Default = Purple (#B97AF9)  |  Alt = Indigo (#6366F1)
    Docs  : pilot/docs/ui-mockups/ for visual reference
@@ -8,7 +8,7 @@
 
 /* tailwindcss @import moved to src/tailwind.css (plain CSS) to avoid the   */
 /* Dart Sass "@import is deprecated" warning. Angular processes both files.  */
-@import "@fontsource-variable/inter";
+@import "@fontsource-variable/dm-sans";
 @import "primeicons/primeicons.css";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -21,7 +21,7 @@
 [data-theme="light"] {
   /* Font stack — declared here so var(--font-sans) works in plain CSS.
      The @theme inline block below exposes the same value to Tailwind utilities. */
-  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-sans: 'DM Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
   /* ── Primary — Premium Purple ──────────────────────────────────────────── */
   --stride-primary:         #B97AF9;
@@ -507,7 +507,7 @@
   --shadow-card: var(--stride-shadow-card);
 
   /* Typography */
-  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-sans: 'DM Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 
