@@ -3,6 +3,13 @@ name: Deploy
 # Runs on every push to develop after CI passes.
 # Builds Docker images for Host + BFF and deploys to Fly.io.
 # Vercel auto-deploys the Angular SPA on every push (no step needed here).
+#
+# Topology:
+#   app.strydesuite.com  (Vercel, SPA)
+#       → /bff/* rewrite
+#   api.strydesuite.com  (Fly.io, BFF — public)
+#       → Fly private network
+#   stride-host.internal (Fly.io, Host — no public ingress)
 
 on:
   push:
@@ -13,7 +20,7 @@ concurrency:
   cancel-in-progress: false   # never cancel a deploy mid-flight
 
 jobs:
-  # ── Deploy STRIDE.Host ────────────────────────────────────────────────────────
+  # ── Deploy STRIDE.Host (private) ─────────────────────────────────────────────
   deploy-host:
     name: Deploy Host
     runs-on: ubuntu-latest
@@ -29,7 +36,7 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
-  # ── Deploy STRIDE.BFF ─────────────────────────────────────────────────────────
+  # ── Deploy STRIDE.BFF (public) ────────────────────────────────────────────────
   deploy-bff:
     name: Deploy BFF
     needs: deploy-host   # Host must be healthy before BFF is updated
@@ -53,22 +60,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Health check — Host
+      # BFF is the only public endpoint — Host is private, unreachable from here.
+      # BFF /health calls through to the Host health check, so one test covers both.
+      - name: Health check — BFF (covers Host internally)
         run: |
-          for i in $(seq 1 5); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://stride-host.fly.dev/health/live)
+          for i in $(seq 1 6); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://api.strydesuite.com/health)
             echo "Attempt $i: HTTP $STATUS"
             [ "$STATUS" = "200" ] && exit 0
             sleep 10
           done
-          echo "Health check failed" && exit 1
-
-      - name: Health check — BFF
-        run: |
-          for i in $(seq 1 5); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://stride-bff.fly.dev/health)
-            echo "Attempt $i: HTTP $STATUS"
-            [ "$STATUS" = "200" ] && exit 0
-            sleep 10
-          done
-          echo "Health check failed" && exit 1
+          echo "Health check failed after 6 attempts" && exit 1

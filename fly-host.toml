@@ -1,23 +1,16 @@
 # Fly.io configuration for STRIDE.Host
 # Deploy: flyctl deploy --config fly-host.toml
+#
+# NO public ingress — Host is private-only.
+# Reachable from within the Fly.io organisation via private networking:
+#   http://stride-host.internal:8080
+# The BFF calls this URL. Zero public surface area on the Host.
 app            = "stride-host"
 primary_region = "iad"
 
 [build]
   dockerfile    = "docker/stride-host/Dockerfile"
   build-context = "."
-
-[http_service]
-  internal_port        = 8080
-  force_https          = true
-  auto_stop_machines   = "stop"
-  auto_start_machines  = true
-  min_machines_running = 1   # keep 1 alive — within the 3-VM free allowance
-
-[http_service.concurrency]
-  type       = "requests"
-  soft_limit = 200
-  hard_limit = 250
 
 [[vm]]
   memory   = "256mb"
@@ -29,7 +22,7 @@ primary_region = "iad"
   ASPNETCORE_URLS        = "http://+:8080"
   # Secrets (set via: flyctl secrets set --app stride-host KEY=value)
   # CONNECTIONSTRINGS__DEFAULTCONNECTION  — Azure SQL connection string
-  # REDIS__CONNECTIONSTRING               — Upstash Redis connection string
+  # REDIS__CONNECTIONSTRING               — Upstash Redis TLS connection string
   # JWT__SECRET                           — signing key (32+ chars)
-  # JWT__ISSUER                           — e.g. https://stride-host.fly.dev
-  # JWT__AUDIENCE                         — e.g. https://stride-host.fly.dev
+  # JWT__ISSUER                           — https://api.strydesuite.com
+  # JWT__AUDIENCE                         — https://api.strydesuite.com

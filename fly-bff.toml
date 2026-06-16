@@ -1,5 +1,9 @@
 # Fly.io configuration for STRIDE.BFF
 # Deploy: flyctl deploy --config fly-bff.toml
+#
+# Public ingress on api.strydesuite.com.
+# Calls the Host via Fly private networking (stride-host.internal) — no
+# Host traffic leaves the Fly.io network.
 app            = "stride-bff"
 primary_region = "iad"
 
@@ -12,7 +16,7 @@ primary_region = "iad"
   force_https          = true
   auto_stop_machines   = "stop"
   auto_start_machines  = true
-  min_machines_running = 1   # keep 1 alive — within the 3-VM free allowance
+  min_machines_running = 1
 
 [http_service.concurrency]
   type       = "requests"
@@ -25,10 +29,10 @@ primary_region = "iad"
   cpus     = 1
 
 [env]
-  ASPNETCORE_ENVIRONMENT = "Production"
-  ASPNETCORE_URLS        = "http://+:8080"
+  ASPNETCORE_ENVIRONMENT   = "Production"
+  ASPNETCORE_URLS          = "http://+:8080"
+  # Host is private — BFF connects via Fly internal DNS, never public internet
+  SERVICES__STRIDEHOST     = "http://stride-host.internal:8080"
   # Secrets (set via: flyctl secrets set --app stride-bff KEY=value)
-  # SERVICES__STRIDEHOST       — e.g. https://stride-host.fly.dev
-  # REDIS__CONNECTIONSTRING    — Upstash Redis connection string
-  # SESSION__SECRET            — random 32+ char string for cookie signing
-  # CORS__SPAORIGIN            — Vercel URL, e.g. https://stride.vercel.app
+  # REDIS__CONNECTIONSTRING  — Upstash Redis TLS connection string
+  # CORS__SPAORIGIN          — https://app.strydesuite.com

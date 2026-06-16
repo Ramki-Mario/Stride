@@ -1,0 +1,21 @@
+name: Keep-alive
+
+# Pings the BFF health endpoint every 6 hours to prevent Azure SQL free tier
+# from auto-pausing. The /health endpoint performs a lightweight SQL check.
+# Costs zero — well within GitHub Actions 2000 min/month free limit.
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # every 6 hours, all week
+  workflow_dispatch:          # allow manual trigger before a demo
+
+jobs:
+  ping:
+    name: Wake Azure SQL
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping BFF health (triggers SQL connectivity check)
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://api.strydesuite.com/health)
+          echo "Health status: HTTP $STATUS"
+          [ "$STATUS" = "200" ] || echo "Warning: unexpected status $STATUS (Azure SQL may be waking up)"

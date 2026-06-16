@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/bff/:path*",
-      "destination": "https://stride-bff.fly.dev/bff/:path*"
+      "destination": "https://api.strydesuite.com/bff/:path*"
     }
   ]
 }
