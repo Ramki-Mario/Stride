@@ -6,6 +6,7 @@ import {
   computed,
   OnInit,
   effect,
+  untracked,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -723,7 +724,9 @@ export class KitFieldPageComponent implements OnInit {
       if (!syncing && !this.isOffline()) {
         // isSyncing just flipped to false while online — refresh to reflect server state.
         // Guard against the initial false→false at startup with pendingCount check.
-        if (this.kitSync.pendingCount() === 0 && this.checkouts().length > 0) {
+        // untracked: checkouts must not be a reactive dep here — updating it
+        // after loadAll() would otherwise re-trigger this effect indefinitely.
+        if (this.kitSync.pendingCount() === 0 && untracked(() => this.checkouts()).length > 0) {
           this.loadAll();
         }
       }
