@@ -1,0 +1,35 @@
+# Fly.io configuration for STRIDE.Host
+# Deploy: flyctl deploy --config fly-host.toml
+app            = "stride-host"
+primary_region = "iad"
+
+[build]
+  dockerfile    = "docker/stride-host/Dockerfile"
+  build-context = "."
+
+[http_service]
+  internal_port        = 8080
+  force_https          = true
+  auto_stop_machines   = "stop"
+  auto_start_machines  = true
+  min_machines_running = 1   # keep 1 alive — within the 3-VM free allowance
+
+[http_service.concurrency]
+  type       = "requests"
+  soft_limit = 200
+  hard_limit = 250
+
+[[vm]]
+  memory   = "256mb"
+  cpu_kind = "shared"
+  cpus     = 1
+
+[env]
+  ASPNETCORE_ENVIRONMENT = "Production"
+  ASPNETCORE_URLS        = "http://+:8080"
+  # Secrets (set via: flyctl secrets set --app stride-host KEY=value)
+  # CONNECTIONSTRINGS__DEFAULTCONNECTION  — Azure SQL connection string
+  # REDIS__CONNECTIONSTRING               — Upstash Redis connection string
+  # JWT__SECRET                           — signing key (32+ chars)
+  # JWT__ISSUER                           — e.g. https://stride-host.fly.dev
+  # JWT__AUDIENCE                         — e.g. https://stride-host.fly.dev

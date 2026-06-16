@@ -1,0 +1,10 @@
+{
+  "buildCommand": "cd frontend && npm ci --ignore-scripts && ./node_modules/.bin/ng build --configuration=production",
+  "outputDirectory": "frontend/dist/stride-frontend/browser",
+  "rewrites": [
+    {
+      "source": "/bff/:path*",
+      "destination": "https://stride-bff.fly.dev/bff/:path*"
+    }
+  ]
+}
