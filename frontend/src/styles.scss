@@ -9,6 +9,7 @@
 /* tailwindcss @import moved to src/tailwind.css (plain CSS) to avoid the   */
 /* Dart Sass "@import is deprecated" warning. Angular processes both files.  */
 @import "@fontsource-variable/dm-sans";
+@import "@fontsource-variable/lexend";
 @import "primeicons/primeicons.css";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -21,7 +22,7 @@
 [data-theme="light"] {
   /* Font stack — declared here so var(--font-sans) works in plain CSS.
      The @theme inline block below exposes the same value to Tailwind utilities. */
-  --font-sans: 'DM Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-sans: 'DM Sans Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
   /* ── Primary — Premium Purple ──────────────────────────────────────────── */
   --stride-primary:         #B97AF9;
@@ -507,7 +508,7 @@
   --shadow-card: var(--stride-shadow-card);
 
   /* Typography */
-  --font-sans: 'DM Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-sans: 'DM Sans Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 
