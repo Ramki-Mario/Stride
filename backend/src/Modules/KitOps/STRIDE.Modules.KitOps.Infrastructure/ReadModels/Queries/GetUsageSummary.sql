@@ -28,5 +28,5 @@ LEFT JOIN [kitops].[KitCheckouts] c
     AND (@To   IS NULL OR c.CreatedAt <= @To)
 WHERE  ki.TenantId  = @TenantId
   AND  ki.IsDeleted = 0
-GROUP  BY ki.Id, ki.Name, ki.Category, ki.TotalQuantity
+GROUP  BY ki.Id, ki.TenantId, ki.Name, ki.Category, ki.TotalQuantity
 ORDER  BY ki.Name;
