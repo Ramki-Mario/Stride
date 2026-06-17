@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { NgClass, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { NgClass, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
@@ -18,7 +18,7 @@ import { InvoiceDetailDto, INVOICE_STATUS_CSS, INVOICE_STATUS_LABELS, InvoiceSta
 @Component({
   selector: 'app-invoice-detail-page',
   standalone: true,
-  imports: [NgClass, CurrencyPipe, DatePipe, DecimalPipe, RouterLink],
+  imports: [NgClass, DecimalPipe, RouterLink],
   templateUrl: './invoice-detail-page.html',
   styleUrl:    './invoice-detail-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

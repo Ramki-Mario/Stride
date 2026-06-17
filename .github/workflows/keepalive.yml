@@ -1,0 +1,39 @@
+name: Keepalive — warm BFF + Host
+
+# Two schedules:
+#   • Every 6 hours: prevents Azure SQL serverless from auto-pausing (it pauses
+#     after 1 hour of inactivity). This hits /bff/health which in turn calls
+#     Host's /health/ready, which queries SQL + Redis — enough to keep both warm.
+#
+#   • Every 10 min, Mon–Fri, 08:30–20:30 IST (03:00–15:00 UTC):
+#     Keeps the Container Apps warm during business hours so demos and real
+#     user sessions never hit a cold-start delay.
+#     Outside these windows the apps scale to zero and cost nothing.
+#
+# The "before a demo" rule: if the app has been idle for more than 10 min
+# outside business hours, load https://api.strydesuite.com/bff/health in your
+# browser ~20 seconds before you show the client.
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'         # every 6 hours — SQL anti-pause
+    - cron: '*/10 3-15 * * 1-5'   # every 10 min, Mon–Fri, ~08:30–21:30 IST
+  workflow_dispatch:               # allow manual trigger (e.g. just before a demo)
+
+jobs:
+  ping:
+    name: Ping BFF health (warms Host too)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /bff/health
+        run: |
+          STATUS=$(curl -o /dev/null -s -w "%{http_code}" \
+            --max-time 30 \
+            https://api.strydesuite.com/bff/health)
+          echo "Response: HTTP $STATUS"
+          # 200 = healthy, 503 = Host dependency issue but BFF is up.
+          # Both mean the container is warm. Anything else is a real problem.
+          if [ "$STATUS" != "200" ] && [ "$STATUS" != "503" ]; then
+            echo "Unexpected response from BFF — $STATUS"
+            exit 1
+          fi

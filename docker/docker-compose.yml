@@ -1,15 +1,15 @@
 services:
   # ── Angular SPA served by nginx ──────────────────────────────────────────────
-  # nginx serves the compiled Angular build and proxies /bff/* to stride-bff.
+  # nginx serves the compiled Angular build and proxies /bff/* to strydesuite-bff.
   # This is the production equivalent of proxy.conf.json (used only by ng serve).
-  stride-frontend:
+  strydesuite-frontend:
     build:
       context: ..
-      dockerfile: docker/stride-frontend/Dockerfile
+      dockerfile: docker/strydesuite-frontend/Dockerfile
     ports:
       - "4200:8080"
     depends_on:
-      stride-bff:
+      strydesuite-bff:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080"]
@@ -17,19 +17,19 @@ services:
       timeout: 10s
       retries: 3
 
-  stride-bff:
+  strydesuite-bff:
     build:
       context: ..
-      dockerfile: docker/stride-bff/Dockerfile
+      dockerfile: docker/strydesuite-bff/Dockerfile
     ports:
       - "5000:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - Services__StrideHost=http://stride-host:8080
+      - Services__StrideHost=http://strydesuite-host:8080
       - Redis__ConnectionString=redis:6379
       - Seq__ServerUrl=http://seq:5341
     depends_on:
-      stride-host:
+      strydesuite-host:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -39,15 +39,15 @@ services:
       timeout: 10s
       retries: 3
 
-  stride-host:
+  strydesuite-host:
     build:
       context: ..
-      dockerfile: docker/stride-host/Dockerfile
+      dockerfile: docker/strydesuite-host/Dockerfile
     ports:
       - "5001:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=STRIDE;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=true;
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=StrydeSuite;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=true;
       - Redis__ConnectionString=redis:6379
       - Seq__ServerUrl=http://seq:5341
     depends_on:
