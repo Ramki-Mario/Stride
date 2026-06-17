@@ -21,7 +21,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
-RG="strydesuite-prod"
+RG="strydesuite-free-prod-resource-group"
 LOCATION="centralindia"
 ENV="strydesuite-env"
 HOST_APP="strydesuite-host"

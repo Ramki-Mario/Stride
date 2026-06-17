@@ -74,14 +74,14 @@ jobs:
         run: |
           az containerapp update \
             --name strydesuite-host \
-            --resource-group strydesuite-prod \
+            --resource-group strydesuite-free-prod-resource-group \
             --image "${{ needs.build.outputs.host_image }}"
 
       - name: Deploy strydesuite-bff
         run: |
           az containerapp update \
             --name strydesuite-bff \
-            --resource-group strydesuite-prod \
+            --resource-group strydesuite-free-prod-resource-group \
             --image "${{ needs.build.outputs.bff_image }}"
 
       # Give the new revision 30 s to become active before smoke-testing.
