@@ -44,8 +44,6 @@ jobs:
           file: docker/strydesuite-host/Dockerfile
           push: true
           tags: ${{ steps.names.outputs.host }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Build & push strydesuite-bff
         uses: docker/build-push-action@v5
@@ -54,8 +52,6 @@ jobs:
           file: docker/strydesuite-bff/Dockerfile
           push: true
           tags: ${{ steps.names.outputs.bff }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   # ── Deploy updated images to Azure Container Apps ────────────────────────
   deploy:
