@@ -1,6 +1,6 @@
 {
   "buildCommand": "cd frontend && npm ci --ignore-scripts && npx ng build --configuration=production",
-  "outputDirectory": "frontend/dist/stride/browser",
+  "outputDirectory": "frontend/dist/strydesuite-frontend/browser",
   "rewrites": [
     { "source": "/bff/:path*", "destination": "https://api.strydesuite.com/bff/:path*" },
     { "source": "/(.*)",       "destination": "/index.html" }
