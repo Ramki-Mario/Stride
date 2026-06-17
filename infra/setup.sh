@@ -125,7 +125,8 @@ BFF_FQDN=$(az containerapp show \
 # ── GitHub Actions service principal ────────────────────────────────────────
 echo "==> Creating service principal for GitHub Actions"
 SUBSCRIPTION_ID=$(az account show --query id -o tsv)
-SP_JSON=$(az ad sp create-for-rbac \
+# MSYS_NO_PATHCONV=1 prevents Git Bash from mangling the /subscriptions/... scope path
+SP_JSON=$(MSYS_NO_PATHCONV=1 az ad sp create-for-rbac \
   --name "strydesuite-github-actions" \
   --role Contributor \
   --scopes "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG}" \
