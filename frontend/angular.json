@@ -94,10 +94,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "stride-frontend:build:production"
+              "buildTarget": "strydesuite-frontend:build:production"
             },
             "development": {
-              "buildTarget": "stride-frontend:build:development"
+              "buildTarget": "strydesuite-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
