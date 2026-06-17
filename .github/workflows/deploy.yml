@@ -1,0 +1,96 @@
+name: CD — Deploy to Azure Container Apps
+
+# Triggers on every push to develop (i.e. every merged PR).
+# Requires infra/setup.sh to have been run once to create the container apps.
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  # ── Build Docker images and push to GitHub Container Registry ────────────
+  build:
+    name: Build & push images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      host_image: ${{ steps.names.outputs.host }}
+      bff_image:  ${{ steps.names.outputs.bff }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set lowercase image names
+        id: names
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "host=ghcr.io/${OWNER}/strydesuite-host:${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "bff=ghcr.io/${OWNER}/strydesuite-bff:${{ github.sha }}"   >> $GITHUB_OUTPUT
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build both images in parallel via separate matrix steps is awkward;
+      # we build sequentially here since the SDK base layer is shared (cached).
+      - name: Build & push strydesuite-host
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/strydesuite-host/Dockerfile
+          push: true
+          tags: ${{ steps.names.outputs.host }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build & push strydesuite-bff
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/strydesuite-bff/Dockerfile
+          push: true
+          tags: ${{ steps.names.outputs.bff }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── Deploy updated images to Azure Container Apps ────────────────────────
+  deploy:
+    name: Deploy to Azure
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Deploy Host first — BFF calls Host, so Host must be ready.
+      - name: Deploy strydesuite-host
+        run: |
+          az containerapp update \
+            --name strydesuite-host \
+            --resource-group strydesuite-prod \
+            --image "${{ needs.build.outputs.host_image }}"
+
+      - name: Deploy strydesuite-bff
+        run: |
+          az containerapp update \
+            --name strydesuite-bff \
+            --resource-group strydesuite-prod \
+            --image "${{ needs.build.outputs.bff_image }}"
+
+      # Give the new revision 30 s to become active before smoke-testing.
+      - name: Smoke test
+        run: |
+          sleep 30
+          STATUS=$(curl -o /dev/null -s -w "%{http_code}" https://api.strydesuite.com/bff/health)
+          if [ "$STATUS" != "200" ]; then
+            echo "Smoke test failed — /bff/health returned HTTP $STATUS"
+            exit 1
+          fi
+          echo "Smoke test passed (HTTP $STATUS)"

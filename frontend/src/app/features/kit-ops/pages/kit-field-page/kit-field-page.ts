@@ -724,8 +724,8 @@ export class KitFieldPageComponent implements OnInit {
       if (!syncing && !this.isOffline()) {
         // isSyncing just flipped to false while online — refresh to reflect server state.
         // Guard against the initial false→false at startup with pendingCount check.
-        // untracked: checkouts must not be a reactive dep here — updating it
-        // after loadAll() would otherwise re-trigger this effect indefinitely.
+        // untracked: reading checkouts here must not create a reactive dependency,
+        // otherwise every loadAll() completion re-triggers this effect (request flood).
         if (this.kitSync.pendingCount() === 0 && untracked(() => this.checkouts()).length > 0) {
           this.loadAll();
         }
