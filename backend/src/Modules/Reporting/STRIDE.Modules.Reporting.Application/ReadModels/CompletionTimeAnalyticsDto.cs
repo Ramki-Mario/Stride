@@ -44,5 +44,5 @@ public sealed record TeamMemberPerformanceDto(
     string Role,
     int    CompletedSteps,
     int    CompletedWorkflows,
-    double AvgStepDurationMinutes,
-    double OverdueRate);
+    double  AvgStepDurationMinutes,
+    decimal OverdueRate);
