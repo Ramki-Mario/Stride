@@ -95,7 +95,10 @@ builder.Services
     {
         options.Cookie.Name = "stride.session";
         options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.Strict;
+        // Lax (not Strict) so the cookie is sent when the user navigates here
+        // from an external link (email, bookmark, SSO redirect). Strict would
+        // silently drop the cookie on first-party top-level navigation.
+        options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
             ? CookieSecurePolicy.SameAsRequest
             : CookieSecurePolicy.Always;
