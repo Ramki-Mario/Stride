@@ -93,7 +93,7 @@ builder.Services
     .AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
     .Configure<IServiceProvider>((options, sp) =>
     {
-        options.Cookie.Name = "stride.session";
+        options.Cookie.Name = "__strydesuite_session";
         options.Cookie.HttpOnly = true;
         // Lax (not Strict) so the cookie is sent when the user navigates here
         // from an external link (email, bookmark, SSO redirect). Strict would

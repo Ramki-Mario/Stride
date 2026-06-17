@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# STRIDE — One-time Azure Container Apps infrastructure setup
+# StrydeSuite — One-time Azure Container Apps infrastructure setup
 #
 # Run this ONCE from your local machine after authenticating:
 #   az login
@@ -13,19 +13,19 @@
 #
 # After running:
 #   1. Copy the BFF FQDN printed at the end.
-#   2. In your DNS provider (GoDaddy / Namecheap), add:
+#   2. In your DNS provider, add:
 #        CNAME  api  →  <bff-fqdn>
-#   3. In Azure Portal → stride-bff → Custom Domains, bind api.strydesuite.com.
+#   3. In Azure Portal → strydesuite-bff → Custom Domains, bind api.strydesuite.com.
 #      Azure provisions the managed TLS cert automatically.
 #   4. Add GitHub Actions secrets (see list at bottom of this script).
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
-RG="stride-prod"
+RG="strydesuite-prod"
 LOCATION="centralindia"
-ENV="stride-env"
-HOST_APP="stride-host"
-BFF_APP="stride-bff"
+ENV="strydesuite-env"
+HOST_APP="strydesuite-host"
+BFF_APP="strydesuite-bff"
 
 # ── Validate required env vars ───────────────────────────────────────────────
 for var in DB_CONNECTION REDIS_CONNECTION JWT_SECRET GHCR_USERNAME GHCR_TOKEN; do
@@ -51,7 +51,7 @@ ENV_DOMAIN=$(az containerapp env show \
 HOST_INTERNAL_URL="http://${HOST_APP}.internal.${ENV_DOMAIN}"
 echo "    Host internal URL will be: $HOST_INTERNAL_URL"
 
-# ── stride-host (internal ingress — never publicly reachable) ────────────────
+# ── strydesuite-host (internal ingress — never publicly reachable) ────────────
 echo "==> Creating $HOST_APP (internal ingress)"
 az containerapp create \
   --name "$HOST_APP" \
@@ -78,11 +78,11 @@ az containerapp create \
     "ConnectionStrings__DefaultConnection=secretref:db-connection" \
     "Redis__ConnectionString=secretref:redis-connection" \
     "Jwt__Secret=secretref:jwt-secret" \
-    Jwt__Issuer=STRIDE \
-    Jwt__Audience=STRIDE.Clients \
+    Jwt__Issuer=StrydeSuite \
+    Jwt__Audience=StrydeSuite.Clients \
   --output none
 
-# ── stride-bff (external ingress — public at api.strydesuite.com) ────────────
+# ── strydesuite-bff (external ingress — public at api.strydesuite.com) ────────
 echo "==> Creating $BFF_APP (external ingress)"
 az containerapp create \
   --name "$BFF_APP" \
@@ -118,7 +118,7 @@ BFF_FQDN=$(az containerapp show \
 echo "==> Creating service principal for GitHub Actions"
 SUBSCRIPTION_ID=$(az account show --query id -o tsv)
 SP_JSON=$(az ad sp create-for-rbac \
-  --name "stride-github-actions" \
+  --name "strydesuite-github-actions" \
   --role Contributor \
   --scopes "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG}" \
   --sdk-auth \
@@ -132,7 +132,7 @@ echo "║  BFF public FQDN: $BFF_FQDN"
 echo "╠══════════════════════════════════════════════════════════════════════╣"
 echo "║  NEXT STEPS                                                          ║"
 echo "║  1. DNS: CNAME  api  →  $BFF_FQDN"
-echo "║  2. Azure Portal → stride-bff → Custom Domains                       ║"
+echo "║  2. Azure Portal → strydesuite-bff → Custom Domains                  ║"
 echo "║     → bind api.strydesuite.com (managed cert auto-provisioned)       ║"
 echo "╠══════════════════════════════════════════════════════════════════════╣"
 echo "║  GitHub Actions secrets to add (Settings → Secrets → Actions):       ║"

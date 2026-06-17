@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "stride-frontend": {
+    "strydesuite-frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {

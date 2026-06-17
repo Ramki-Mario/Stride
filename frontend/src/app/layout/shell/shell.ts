@@ -20,7 +20,7 @@ import { SyncService } from '../../core/pwa/sync.service';
   selector: 'app-shell',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, RouterOutlet, SidebarComponent, TopbarComponent, OnboardingWizardComponent],
+  imports: [RouterOutlet, SidebarComponent, TopbarComponent, OnboardingWizardComponent],
   template: `
     <!-- ── Onboarding wizard (shown on first login for TenantAdmin) ──────────── -->
     @if (shouldShowWizard()) {

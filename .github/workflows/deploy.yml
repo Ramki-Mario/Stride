@@ -25,8 +25,8 @@ jobs:
         id: names
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          echo "host=ghcr.io/${OWNER}/stride-host:${{ github.sha }}" >> $GITHUB_OUTPUT
-          echo "bff=ghcr.io/${OWNER}/stride-bff:${{ github.sha }}"   >> $GITHUB_OUTPUT
+          echo "host=ghcr.io/${OWNER}/strydesuite-host:${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "bff=ghcr.io/${OWNER}/strydesuite-bff:${{ github.sha }}"   >> $GITHUB_OUTPUT
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -37,21 +37,21 @@ jobs:
 
       # Build both images in parallel via separate matrix steps is awkward;
       # we build sequentially here since the SDK base layer is shared (cached).
-      - name: Build & push stride-host
+      - name: Build & push strydesuite-host
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: docker/stride-host/Dockerfile
+          file: docker/strydesuite-host/Dockerfile
           push: true
           tags: ${{ steps.names.outputs.host }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build & push stride-bff
+      - name: Build & push strydesuite-bff
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: docker/stride-bff/Dockerfile
+          file: docker/strydesuite-bff/Dockerfile
           push: true
           tags: ${{ steps.names.outputs.bff }}
           cache-from: type=gha
@@ -70,18 +70,18 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Deploy Host first — BFF calls Host, so Host must be ready.
-      - name: Deploy stride-host
+      - name: Deploy strydesuite-host
         run: |
           az containerapp update \
-            --name stride-host \
-            --resource-group stride-prod \
+            --name strydesuite-host \
+            --resource-group strydesuite-prod \
             --image "${{ needs.build.outputs.host_image }}"
 
-      - name: Deploy stride-bff
+      - name: Deploy strydesuite-bff
         run: |
           az containerapp update \
-            --name stride-bff \
-            --resource-group stride-prod \
+            --name strydesuite-bff \
+            --resource-group strydesuite-prod \
             --image "${{ needs.build.outputs.bff_image }}"
 
       # Give the new revision 30 s to become active before smoke-testing.

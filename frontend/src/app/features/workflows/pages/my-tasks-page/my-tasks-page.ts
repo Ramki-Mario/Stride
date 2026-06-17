@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
@@ -17,7 +17,7 @@ import { WorkflowService } from '../../services/workflow.service';
 @Component({
   selector: 'app-my-tasks-page',
   standalone: true,
-  imports: [NgClass, RouterLink],
+  imports: [NgClass],
   templateUrl: './my-tasks-page.html',
   styleUrl:    './my-tasks-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
