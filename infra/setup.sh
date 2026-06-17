@@ -27,6 +27,14 @@ ENV="strydesuite-env"
 HOST_APP="strydesuite-host"
 BFF_APP="strydesuite-bff"
 
+# ── Azure SQL (already created manually) ────────────────────────────────────
+# Server:   stryde-suite-db-server.database.windows.net  (Central India)
+# Database: stryde-suite-db
+# User:     founder
+# DB_CONNECTION format:
+#   Server=tcp:stryde-suite-db-server.database.windows.net,1433;Database=stryde-suite-db;
+#   User Id=founder;Password=<pass>;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+
 # ── Validate required env vars ───────────────────────────────────────────────
 for var in DB_CONNECTION REDIS_CONNECTION JWT_SECRET GHCR_USERNAME GHCR_TOKEN; do
   [[ -z "${!var:-}" ]] && { echo "ERROR: \$$var is not set."; exit 1; }
