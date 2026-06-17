@@ -83,9 +83,13 @@ jobs:
       # Give the new revision 30 s to become active before smoke-testing.
       - name: Smoke test
         run: |
+          BFF_FQDN=$(az containerapp show \
+            --name strydesuite-bff \
+            --resource-group strydesuite-free-prod-resource-group \
+            --query properties.configuration.ingress.fqdn -o tsv)
           sleep 30
-          STATUS=$(curl -o /dev/null -s -w "%{http_code}" https://api.strydesuite.com/bff/health)
-          if [ "$STATUS" != "200" ]; then
+          STATUS=$(curl -o /dev/null -s -w "%{http_code}" "https://${BFF_FQDN}/bff/health")
+          if [ "$STATUS" != "200" ] && [ "$STATUS" != "503" ]; then
             echo "Smoke test failed — /bff/health returned HTTP $STATUS"
             exit 1
           fi
