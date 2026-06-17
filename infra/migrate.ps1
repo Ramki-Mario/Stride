@@ -1,23 +1,23 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# StrydeSuite — Apply all EF Core migrations to Azure SQL
+# -----------------------------------------------------------------------------
+# StrydeSuite -- Apply all EF Core migrations to Azure SQL
 #
 # Usage (run from repo root):
 #   $env:DB_PASSWORD = "your-founder-password"
-#   .\infra\migrate.ps1
+#   powershell -ExecutionPolicy Bypass -File .\infra\migrate.ps1
 #
 # Or pass the full connection string directly:
-#   .\infra\migrate.ps1 -ConnectionString "Server=tcp:stryde-suite-db-server..."
+#   powershell -ExecutionPolicy Bypass -File .\infra\migrate.ps1 -ConnectionString "Server=tcp:stryde-suite-db-server..."
 #
-# Prerequisite — install EF Core tools if not already:
+# Prerequisite -- install EF Core tools if not already:
 #   dotnet tool install --global dotnet-ef
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 param(
     [string]$ConnectionString = ""
 )
 
 $ErrorActionPreference = "Stop"
 
-# ── Build connection string ───────────────────────────────────────────────────
+# -- Build connection string --------------------------------------------------
 if (-not $ConnectionString) {
     $password = $env:DB_PASSWORD
     if (-not $password) {
@@ -35,7 +35,7 @@ Write-Host ""
 Write-Host "Target: stryde-suite-db-server.database.windows.net / stryde-suite-db" -ForegroundColor Cyan
 Write-Host ""
 
-# ── Modules to migrate (order matters — Identity first for FK deps) ───────────
+# -- Modules to migrate (order matters -- Identity first for FK deps) ---------
 $modules = @(
     "backend/src/Modules/Identity/STRIDE.Modules.Identity.Infrastructure",
     "backend/src/Modules/Administration/STRIDE.Modules.Administration.Infrastructure",
@@ -55,16 +55,16 @@ $failed = @()
 
 foreach ($project in $modules) {
     $name = Split-Path $project -Leaf
-    Write-Host "── $name" -NoNewline
+    Write-Host "-- $name" -NoNewline
 
     try {
         $output = dotnet ef database update --project $project 2>&1
         if ($LASTEXITCODE -ne 0) { throw $output }
-        Write-Host "  ✓" -ForegroundColor Green
+        Write-Host "  PASS" -ForegroundColor Green
         $passed++
     }
     catch {
-        Write-Host "  ✗" -ForegroundColor Red
+        Write-Host "  FAIL" -ForegroundColor Red
         Write-Host $_ -ForegroundColor Red
         $failed += $name
     }
