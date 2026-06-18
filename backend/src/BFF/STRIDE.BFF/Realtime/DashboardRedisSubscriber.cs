@@ -37,13 +37,21 @@ public sealed class DashboardRedisSubscriber : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await _redis.GetSubscriber().SubscribeAsync(
-            RedisChannel.Literal(DashboardUpdates.Channel),
-            (channel, value) => _ = ForwardAsync(value));
+        try
+        {
+            await _redis.GetSubscriber().SubscribeAsync(
+                RedisChannel.Literal(DashboardUpdates.Channel),
+                (channel, value) => _ = ForwardAsync(value));
 
-        _logger.LogInformation(
-            "Dashboard realtime bridge subscribed to Redis channel {Channel}.",
-            DashboardUpdates.Channel);
+            _logger.LogInformation(
+                "Dashboard realtime bridge subscribed to Redis channel {Channel}.",
+                DashboardUpdates.Channel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex,
+                "Dashboard realtime bridge could not subscribe to Redis — real-time dashboard updates will be unavailable.");
+        }
     }
 
     public Task StopAsync(CancellationToken cancellationToken) =>

@@ -299,7 +299,9 @@ public sealed class AuthController : ControllerBase
             permissions = permissionsTask.Result;
         }
 
-        return Ok(new MeResponse(userId, tenantId, email, displayName, roles, permissions, defaultPalette, tenantName, onboardingCompleted, enabledModules));
+        var isSuperAdmin = user.FindFirst("superadmin")?.Value == "true";
+
+        return Ok(new MeResponse(userId, tenantId, email, displayName, roles, permissions, defaultPalette, tenantName, onboardingCompleted, enabledModules, isSuperAdmin));
     }
 
     // ── helpers ────────────────────────────────────────────────────────────────
@@ -386,6 +388,9 @@ public sealed class AuthController : ControllerBase
         };
         claims.AddRange(response.Roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
+        if (response.IsSuperAdmin)
+            claims.Add(new Claim("superadmin", "true"));
+
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         return new ClaimsPrincipal(identity);
     }
@@ -395,7 +400,7 @@ public sealed class AuthController : ControllerBase
         string defaultPalette, string tenantName, bool onboardingCompleted,
         IReadOnlyList<string> enabledModules) =>
         new(r.UserId, r.TenantId, r.Email, r.DisplayName, r.Roles, permissions,
-            defaultPalette, tenantName, onboardingCompleted, enabledModules);
+            defaultPalette, tenantName, onboardingCompleted, enabledModules, r.IsSuperAdmin);
 
     private static bool TryParseGuidClaim(ClaimsPrincipal user, string claimType, out Guid value)
     {

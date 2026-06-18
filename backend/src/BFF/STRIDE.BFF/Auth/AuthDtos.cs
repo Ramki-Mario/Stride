@@ -25,7 +25,8 @@ public sealed record HostLoginResponse(
     string   AccessToken,
     DateTime AccessTokenExpiresAtUtc,
     string   RefreshToken,
-    DateTime RefreshTokenExpiresAtUtc);
+    DateTime RefreshTokenExpiresAtUtc,
+    bool     IsSuperAdmin = false);
 
 /// <summary>
 /// Response from the Host Identity API's token-refresh endpoint.
@@ -48,7 +49,8 @@ public sealed record MeResponse(
     string DefaultPalette                   = "purple",
     string TenantName                       = "",
     bool   OnboardingCompleted              = false,
-    IReadOnlyList<string>? EnabledModules   = null);
+    IReadOnlyList<string>? EnabledModules   = null,
+    bool   IsSuperAdmin                     = false);
 
 /// <summary>Response from the Host's invite-token validation endpoint.</summary>
 public sealed record HostInviteTokenInfoResponse(string Email, string DisplayName);

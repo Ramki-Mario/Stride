@@ -36,6 +36,8 @@ public static class IdentityInfrastructureExtensions
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IInviteTokenRepository, InviteTokenRepository>();
+        services.AddScoped<ISuperAdminRepository, SuperAdminRepository>();
+        services.AddScoped<IPlatformQueryService, PlatformQueryService>();
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddSingleton<IJwtTokenService, JwtTokenService>();

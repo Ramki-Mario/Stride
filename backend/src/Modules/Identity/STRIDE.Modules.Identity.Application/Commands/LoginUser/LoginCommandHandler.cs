@@ -19,6 +19,7 @@ internal sealed class LoginCommandHandler
     private readonly IJwtTokenService         _jwt;
     private readonly IRefreshTokenRepository  _refreshTokens;
     private readonly IRefreshTokenGenerator   _tokenGenerator;
+    private readonly ISuperAdminRepository    _superAdmins;
     private readonly ILogger<LoginCommandHandler> _logger;
 
     public LoginCommandHandler(
@@ -30,6 +31,7 @@ internal sealed class LoginCommandHandler
         IJwtTokenService         jwt,
         IRefreshTokenRepository  refreshTokens,
         IRefreshTokenGenerator   tokenGenerator,
+        ISuperAdminRepository    superAdmins,
         ILogger<LoginCommandHandler> logger)
     {
         _tenantResolver = tenantResolver;
@@ -40,6 +42,7 @@ internal sealed class LoginCommandHandler
         _jwt            = jwt;
         _refreshTokens  = refreshTokens;
         _tokenGenerator = tokenGenerator;
+        _superAdmins    = superAdmins;
         _logger         = logger;
     }
 
@@ -83,15 +86,19 @@ internal sealed class LoginCommandHandler
             .ToList()
             .AsReadOnly();
 
-        // ── 5. Mint access token ──────────────────────────────────────────
+        // ── 5. Check platform super-admin status ─────────────────────────
+        var isSuperAdmin = await _superAdmins.IsSuperAdminAsync(user.Email, cancellationToken);
+
+        // ── 6. Mint access token ──────────────────────────────────────────
         var jwtResult = _jwt.Generate(new JwtTokenRequest(
             UserId:      user.Id,
             TenantId:    tenantId.Value,
             Email:       user.Email,
             DisplayName: user.DisplayName,
-            Roles:       roleNames));
+            Roles:       roleNames,
+            IsSuperAdmin: isSuperAdmin));
 
-        // ── 6. Issue refresh token ────────────────────────────────────────
+        // ── 7. Issue refresh token ────────────────────────────────────────
         var (rawToken, expiresAt) = _tokenGenerator.Generate();
         var refreshToken = RefreshTokenEntity.Create(
             tenantId:  tenantId.Value,
@@ -114,6 +121,7 @@ internal sealed class LoginCommandHandler
             AccessToken:              jwtResult.AccessToken,
             AccessTokenExpiresAtUtc:  jwtResult.ExpiresAtUtc,
             RefreshToken:             rawToken,
-            RefreshTokenExpiresAtUtc: expiresAt));
+            RefreshTokenExpiresAtUtc: expiresAt,
+            IsSuperAdmin:             isSuperAdmin));
     }
 }

@@ -24,7 +24,7 @@ public sealed class LoginResultBuilder : ILoginResultBuilder
         _tokenGenerator = tokenGenerator;
     }
 
-    public async Task<LoginResult> BuildAsync(User user, Guid tenantId, CancellationToken ct = default)
+    public async Task<LoginResult> BuildAsync(User user, Guid tenantId, bool isSuperAdmin = false, CancellationToken ct = default)
     {
         var allRoles  = await _roles.GetAllAsync(ct);
         var roleIndex = allRoles.ToDictionary(r => r.Id, r => r.Name);
@@ -39,7 +39,8 @@ public sealed class LoginResultBuilder : ILoginResultBuilder
             TenantId:    tenantId,
             Email:       user.Email,
             DisplayName: user.DisplayName,
-            Roles:       roleNames));
+            Roles:       roleNames,
+            IsSuperAdmin: isSuperAdmin));
 
         var (rawRefresh, refreshExpiry) = _tokenGenerator.Generate();
         var refreshToken = RefreshTokenEntity.Create(
@@ -61,6 +62,7 @@ public sealed class LoginResultBuilder : ILoginResultBuilder
             AccessToken:              jwtResult.AccessToken,
             AccessTokenExpiresAtUtc:  jwtResult.ExpiresAtUtc,
             RefreshToken:             rawRefresh,
-            RefreshTokenExpiresAtUtc: refreshExpiry);
+            RefreshTokenExpiresAtUtc: refreshExpiry,
+            IsSuperAdmin:             isSuperAdmin);
     }
 }
