@@ -16,7 +16,8 @@ public sealed record JwtTokenRequest(
     Guid TenantId,
     string Email,
     string DisplayName,
-    IReadOnlyList<string> Roles);
+    IReadOnlyList<string> Roles,
+    bool IsSuperAdmin = false);
 
 public sealed record JwtTokenResult(
     string AccessToken,

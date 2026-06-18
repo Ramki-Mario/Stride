@@ -54,6 +54,9 @@ internal sealed class JwtTokenService : IJwtTokenService
 
         claims.AddRange(request.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
+        if (request.IsSuperAdmin)
+            claims.Add(new Claim("superadmin", "true"));
+
         var token = new JwtSecurityToken(
             issuer: _options.Issuer,
             audience: _options.Audience,

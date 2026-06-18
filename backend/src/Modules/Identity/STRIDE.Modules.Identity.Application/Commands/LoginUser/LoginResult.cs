@@ -14,4 +14,5 @@ public sealed record LoginResult(
     string   AccessToken,
     DateTime AccessTokenExpiresAtUtc,
     string   RefreshToken,
-    DateTime RefreshTokenExpiresAtUtc);
+    DateTime RefreshTokenExpiresAtUtc,
+    bool     IsSuperAdmin = false);

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { moduleGuard } from './core/guards/module.guard';
+import { superAdminGuard } from './core/guards/super-admin.guard';
 
 export const appRoutes: Routes = [
   {
@@ -125,6 +126,14 @@ export const appRoutes: Routes = [
         loadComponent: () =>
           import('./features/identity/pages/profile-page/profile-page').then(
             (m) => m.ProfilePageComponent
+          ),
+      },
+      {
+        path: 'platform-admin',
+        canActivate: [superAdminGuard],
+        loadChildren: () =>
+          import('./features/platform-admin/platform-admin.routes').then(
+            (m) => m.platformAdminRoutes
           ),
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },

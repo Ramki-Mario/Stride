@@ -13,6 +13,7 @@ export interface AuthUser {
   tenantName: string;
   onboardingCompleted: boolean;
   enabledModules: string[];
+  isSuperAdmin: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

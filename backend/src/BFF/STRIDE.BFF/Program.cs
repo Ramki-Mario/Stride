@@ -64,6 +64,9 @@ builder.Services.AddHttpClient<KitOpsApiClient>(client =>
 builder.Services.AddHttpClient<SchedulingApiClient>(client =>
     client.BaseAddress = new Uri(hostBaseUrl));
 
+builder.Services.AddHttpClient<PlatformApiClient>(client =>
+    client.BaseAddress = new Uri(hostBaseUrl));
+
 // ── Redis (session store) ──────────────────────────────────────────────────
 builder.Services.Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.SectionName));
 

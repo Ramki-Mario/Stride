@@ -28,7 +28,8 @@ interface NavItem {
 interface NavGroup {
   label: string;
   items: NavItem[];
-  module?: string;  // when set, the whole group is hidden if that module is disabled
+  module?: string;      // when set, the whole group is hidden if that module is disabled
+  superAdmin?: boolean; // when true, only shown to platform super-admins
 }
 
 @Component({
@@ -519,10 +520,18 @@ export class SidebarComponent {
         { label: 'System Health',   route: '/administration/health',     icon: 'pi-heart-fill' },
       ],
     },
+    {
+      label: 'Platform',
+      superAdmin: true,
+      items: [
+        { label: 'All Tenants', route: '/platform-admin', icon: 'pi-building', exact: true },
+      ],
+    },
   ];
 
-  /** A nav group is shown when it has no module gate, or that module is enabled for the tenant. */
+  /** A nav group is shown when it passes the module gate and the superAdmin gate. */
   protected canShowGroup(group: NavGroup): boolean {
+    if (group.superAdmin && !this.auth.user()?.isSuperAdmin) return false;
     return !group.module || this.modules.isEnabled(group.module);
   }
 

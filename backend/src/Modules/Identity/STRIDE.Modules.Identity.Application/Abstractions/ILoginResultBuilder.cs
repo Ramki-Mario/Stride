@@ -5,5 +5,5 @@ namespace STRIDE.Modules.Identity.Application.Abstractions;
 
 public interface ILoginResultBuilder
 {
-    Task<LoginResult> BuildAsync(User user, Guid tenantId, CancellationToken ct = default);
+    Task<LoginResult> BuildAsync(User user, Guid tenantId, bool isSuperAdmin = false, CancellationToken ct = default);
 }

@@ -17,6 +17,7 @@ public sealed class IdentityDbContext : DbContext
     public DbSet<UserTenantMapping> UserTenantMappings => Set<UserTenantMapping>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<InviteToken>  InviteTokens  => Set<InviteToken>();
+    public DbSet<SuperAdmin>   SuperAdmins   => Set<SuperAdmin>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

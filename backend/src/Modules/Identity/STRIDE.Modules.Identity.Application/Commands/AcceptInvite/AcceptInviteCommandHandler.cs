@@ -16,6 +16,7 @@ internal sealed class AcceptInviteCommandHandler
     private readonly IUserRepository                     _users;
     private readonly IPasswordHasher                     _hasher;
     private readonly ILoginResultBuilder                 _loginResultBuilder;
+    private readonly ISuperAdminRepository               _superAdmins;
     private readonly ITenantContextSetter                _tenantSetter;
     private readonly ILogger<AcceptInviteCommandHandler> _logger;
 
@@ -24,6 +25,7 @@ internal sealed class AcceptInviteCommandHandler
         IUserRepository                     users,
         IPasswordHasher                     hasher,
         ILoginResultBuilder                 loginResultBuilder,
+        ISuperAdminRepository               superAdmins,
         ITenantContextSetter                tenantSetter,
         ILogger<AcceptInviteCommandHandler> logger)
     {
@@ -31,6 +33,7 @@ internal sealed class AcceptInviteCommandHandler
         _users              = users;
         _hasher             = hasher;
         _loginResultBuilder = loginResultBuilder;
+        _superAdmins        = superAdmins;
         _tenantSetter       = tenantSetter;
         _logger             = logger;
     }
@@ -61,7 +64,8 @@ internal sealed class AcceptInviteCommandHandler
         invite.MarkUsed();
         await _inviteTokens.SaveChangesAsync(cancellationToken);
 
-        var loginResult = await _loginResultBuilder.BuildAsync(user, invite.TenantId, cancellationToken);
+        var isSuperAdmin = await _superAdmins.IsSuperAdminAsync(user.Email, cancellationToken);
+        var loginResult  = await _loginResultBuilder.BuildAsync(user, invite.TenantId, isSuperAdmin, cancellationToken);
 
         _logger.LogInformation("User {UserId} accepted invite and activated account.", user.Id);
 
